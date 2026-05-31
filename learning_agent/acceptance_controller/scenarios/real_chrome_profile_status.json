@@ -1,0 +1,34 @@
+{
+  "name": "real_chrome_profile_status",
+  "output_prefix": "real_chrome_profile_status",
+  "window_title_prefix": "LearningAgent-Controller-RealChrome",
+  "max_seconds": 600,
+  "final_log_wait_seconds": 30,
+  "success_marker": "REAL_CHROME_PROFILE_STATUS_OK",
+  "prompt_lines": [
+    "请执行一次真实可见 Chrome profile 安全验收，最终回答必须在开头包含固定标记：REAL_CHROME_PROFILE_STATUS_OK。",
+    "用户明确要求真实桌面 Chrome、用户 profile、登录状态、标签页和插件方向；本轮只做安全状态检查，不读取任何隐私网页内容。",
+    "第一步必须读取 learning_agent/skills/tool_list.md，第二步必须读取 learning_agent/skills/real_chrome/SKILL.md。",
+    "必须先调用 browser_profile_status 检查真实 Chrome 环境和 profile 状态；除非状态明确允许，否则不要连接或读取页面内容。",
+    "本轮不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token，不要访问用户隐私页面。",
+    "最终回答必须包含：REAL_CHROME_PROFILE_STATUS_OK、真实 Chrome 测试状态、是否调用 browser_profile_status、Chrome/profile 状态摘要、下一步是否可以安全进入 browser_connect_real_chrome。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "真实可见 Chrome profile 安全验收",
+    "REAL_CHROME_PROFILE_STATUS_OK",
+    "mcp__browser_automation__browser_profile_status",
+    "browser_profile_status",
+    "real_chrome_connected="
+  ],
+  "event_answer_contains": [
+    "REAL_CHROME_PROFILE_STATUS_OK",
+    "browser_profile_status"
+  ]
+}

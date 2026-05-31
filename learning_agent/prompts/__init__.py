@@ -1,0 +1,8 @@
+"""提示词系统的新包入口。"""  # 修改代码+PromptsSplit: 说明 prompts 包集中承载静态提示词、动态提示词、上下文装配和预算；如果没有这行代码，学习者不容易理解这个目录的边界。
+from .context_assembler import ContextAssembler, ContextAssemblyResult, ContextBlockLoad, PromptSurfaceReport, build_long_term_memory_index, build_project_memory_index, build_text_index, estimate_tokens_from_text  # 修改代码+PromptsSplit: 在包入口重导出 context 装配对象；如果没有这行代码，外部需要知道更深层文件名才能使用 prompts 层。
+from .dynamic_prompt import dynamic_prompt_skill_metadata, resolve_dynamic_prompt_path  # 修改代码+PromptsSplit: 在包入口重导出动态提示词工具；如果没有这行代码，dynamicprompt 的推荐入口不够直观。
+from .registry import PromptBlock, PromptRegistry, build_default_prompt_registry  # 修改代码+PromptsSplit: 在包入口重导出提示词注册表；如果没有这行代码，调用方仍会依赖根目录旧模块。
+from .static_prompt import fallback_static_prompt, read_static_prompt, resolve_static_prompt_path  # 修改代码+PromptsSplit: 在包入口重导出静态提示词加载函数；如果没有这行代码，主 agent 不能用统一 prompts 包加载 staticprompt。
+from .surface_report import empty_prompt_surface_report  # 修改代码+PromptsSplit: 在包入口重导出空报告工厂；如果没有这行代码，报告初始化入口会散落。
+from .token_budget import clamp_prompt_soft_limit  # 修改代码+PromptsSplit: 在包入口重导出预算边界函数；如果没有这行代码，后续预算调用点可能各自实现下限规则。
+__all__ = ["ContextAssembler", "ContextAssemblyResult", "ContextBlockLoad", "PromptSurfaceReport", "PromptBlock", "PromptRegistry", "build_default_prompt_registry", "build_long_term_memory_index", "build_project_memory_index", "build_text_index", "estimate_tokens_from_text", "dynamic_prompt_skill_metadata", "resolve_dynamic_prompt_path", "fallback_static_prompt", "read_static_prompt", "resolve_static_prompt_path", "empty_prompt_surface_report", "clamp_prompt_soft_limit"]  # 修改代码+PromptsSplit: 明确 prompts 包的稳定导出清单；如果没有这行代码，公开 API 边界会越来越模糊。

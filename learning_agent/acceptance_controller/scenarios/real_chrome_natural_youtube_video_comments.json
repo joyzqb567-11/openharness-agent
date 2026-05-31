@@ -1,0 +1,84 @@
+{
+  "name": "real_chrome_natural_youtube_video_comments",
+  "output_prefix": "real_chrome_natural_youtube_video_comments",
+  "window_title_prefix": "LearningAgent-Controller-NaturalYouTube",
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 20,
+  "max_permission_sent_count": 0,
+  "success_marker": "REAL_CHROME_NATURAL_YOUTUBE_VIDEO_OK",
+  "permission_policy": {
+    "default_response": "deny",
+    "allow_contains": [
+      "启动 MCP server"
+    ],
+    "deny_contains": [
+    ],
+    "allow_tool_names": [
+      "mcp__browser_automation__browser_profile_status",
+      "mcp__browser_automation__browser_connect_real_chrome",
+      "mcp__browser_automation__browser_open",
+      "mcp__browser_automation__browser_snapshot",
+      "mcp__browser_automation__browser_click",
+      "mcp__browser_automation__browser_type",
+      "mcp__browser_automation__browser_press_key",
+      "mcp__browser_automation__browser_wait",
+      "mcp__browser_automation__browser_screenshot"
+    ],
+    "deny_tool_names": [
+      "mcp__browser_automation__browser_evaluate",
+      "mcp__browser_automation__browser_tabs",
+      "mcp__browser_automation__browser_console",
+      "mcp__browser_automation__browser_network",
+      "mcp__browser_automation__browser_downloads",
+      "mcp__browser_automation__browser_upload_file"
+    ],
+    "allow_url_prefixes": [
+      "https://www.google.com",
+      "https://google.com"
+    ]
+  },
+  "prompt_lines": [
+    "请使用真实浏览器，youtube网站的视频关于ai agent介绍，评论最多的有哪些？",
+    "这是自然短 prompt 验收：不要在这里写工具步骤，请根据真实浏览器查询 harness 自己决定如何操作；最终回答开头请包含固定验收标记：REAL_CHROME_NATURAL_YOUTUBE_VIDEO_OK。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "请使用真实浏览器",
+    "REAL_CHROME_NATURAL_YOUTUBE_VIDEO_OK",
+    "mcp__browser_automation__browser_profile_status",
+    "mcp__browser_automation__browser_connect_real_chrome",
+    "browser_connect_real_chrome 成功",
+    "real_chrome_connected=true",
+    "mcp__browser_automation__browser_open",
+    "browser_open 成功",
+    "https://www.google.com",
+    "mcp__browser_automation__browser_click",
+    "browser_click 成功",
+    "mcp__browser_automation__browser_type",
+    "browser_type 成功",
+    "youtube",
+    "ai agent",
+    "评论",
+    "mcp__browser_automation__browser_press_key",
+    "browser_press_key 成功",
+    "mcp__browser_automation__browser_wait",
+    "browser_wait 成功",
+    "mcp__browser_automation__browser_screenshot",
+    "browser_screenshot 成功",
+    "mcp__browser_automation__browser_snapshot",
+    "browser_snapshot 成功"
+  ],
+  "event_answer_contains": [
+    "REAL_CHROME_NATURAL_YOUTUBE_VIDEO_OK",
+    "real_chrome_connected=true",
+    "browser_click",
+    "browser_type",
+    "browser_press_key",
+    "browser_screenshot"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "name": "real_chrome_google_human_search",
+  "output_prefix": "real_chrome_google_human_search",
+  "window_title_prefix": "LearningAgent-Controller-GoogleHuman",
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 20,
+  "success_marker": "REAL_CHROME_GOOGLE_HUMAN_SEARCH_OK",
+  "permission_policy": {
+    "default_response": "deny",
+    "allow_contains": [
+      "启动 MCP server"
+    ],
+    "deny_contains": [
+    ],
+    "allow_tool_names": [
+      "mcp__browser_automation__browser_profile_status",
+      "mcp__browser_automation__browser_connect_real_chrome",
+      "mcp__browser_automation__browser_open",
+      "mcp__browser_automation__browser_snapshot",
+      "mcp__browser_automation__browser_click",
+      "mcp__browser_automation__browser_type",
+      "mcp__browser_automation__browser_press_key",
+      "mcp__browser_automation__browser_wait",
+      "mcp__browser_automation__browser_screenshot"
+    ],
+    "deny_tool_names": [
+      "mcp__browser_automation__browser_evaluate",
+      "mcp__browser_automation__browser_tabs",
+      "mcp__browser_automation__browser_console",
+      "mcp__browser_automation__browser_network",
+      "mcp__browser_automation__browser_downloads",
+      "mcp__browser_automation__browser_upload_file"
+    ],
+    "allow_url_prefixes": [
+      "https://www.google.com"
+    ]
+  },
+  "prompt_lines": [
+    "请执行一次真实桌面 Chrome 的 Google 拟人可见搜索演示，最终回答必须在开头包含固定标记：REAL_CHROME_GOOGLE_HUMAN_SEARCH_OK。",
+    "本轮目标不是稳定天气回归，而是让用户肉眼看到真实 Chrome 打开 Google、点击搜索框、输入搜索词、按 Enter、保存截图；不允许直接打开 Google 搜索结果 URL 替代点击输入。",
+    "当前日期是 2026-05-28，3 天后是 2026-05-31；固定搜索词是：重庆 2026-05-31 天气 旅游攻略。",
+    "用户已明确同意本轮为了演示而连接真实日常 Chrome profile 的高风险边界；连接后只能打开 https://www.google.com/，不能打开登录网站或私人页面。",
+    "第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/real_chrome/SKILL.md。",
+    "读取规则后立刻调用 browser_profile_status；status 成功后的下一轮只调用 browser_connect_real_chrome，参数必须包含 confirm_real_profile=true。",
+    "browser_connect_real_chrome 成功后的下一轮只调用 browser_open 打开 https://www.google.com/；然后调用 browser_snapshot 查看页面。",
+    "如果 Google 出现同意/接受类弹窗，可以只点击同意按钮继续；如果出现 CAPTCHA 或异常流量验证，不要尝试绕过，必须截图并如实说明。",
+    "必须使用 browser_click 点击搜索框；必须使用 browser_type 输入固定搜索词：重庆 2026-05-31 天气 旅游攻略；必须使用 browser_press_key 按 Enter；必须使用 browser_wait 等待结果加载；必须使用 browser_screenshot 保存 Google 搜索结果页视觉证据；必须使用 browser_snapshot 读取结果页标题或摘要。",
+    "本轮不要调用 browser_evaluate，不要读取 cookies、localStorage、sessionStorage、token、Authorization header、密码、已有标签页内容、插件内容、network 或 console。",
+    "最终回答必须包含：REAL_CHROME_GOOGLE_HUMAN_SEARCH_OK、real_chrome_connected=true、browser_profile_status、browser_connect_real_chrome、browser_open、browser_click、browser_type、browser_press_key、browser_wait、browser_screenshot、browser_snapshot、搜索词、截图文件名、隐私边界说明。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "真实桌面 Chrome 的 Google 拟人可见搜索演示",
+    "REAL_CHROME_GOOGLE_HUMAN_SEARCH_OK",
+    "mcp__browser_automation__browser_profile_status",
+    "mcp__browser_automation__browser_connect_real_chrome",
+    "browser_connect_real_chrome 成功",
+    "real_chrome_connected=true",
+    "mcp__browser_automation__browser_open",
+    "browser_open 成功",
+    "https://www.google.com",
+    "mcp__browser_automation__browser_click",
+    "browser_click 成功",
+    "mcp__browser_automation__browser_type",
+    "browser_type 成功",
+    "重庆 2026-05-31 天气 旅游攻略",
+    "mcp__browser_automation__browser_press_key",
+    "browser_press_key 成功",
+    "mcp__browser_automation__browser_wait",
+    "browser_wait 成功",
+    "mcp__browser_automation__browser_screenshot",
+    "browser_screenshot 成功",
+    "mcp__browser_automation__browser_snapshot",
+    "browser_snapshot 成功"
+  ],
+  "event_answer_contains": [
+    "REAL_CHROME_GOOGLE_HUMAN_SEARCH_OK",
+    "real_chrome_connected=true",
+    "browser_click",
+    "browser_type",
+    "browser_press_key",
+    "browser_screenshot"
+  ]
+}

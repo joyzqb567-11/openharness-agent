@@ -1,0 +1,24 @@
+{
+  "name": "smoke",
+  "output_prefix": "smoke",
+  "window_title_prefix": "LearningAgent-Controller-Smoke",
+  "max_seconds": 240,
+  "final_log_wait_seconds": 20,
+  "success_marker": "ACCEPTANCE_HARNESS_OK",
+  "prompt_lines": [
+    "请只回复一行：ACCEPTANCE_HARNESS_OK。本轮用于测试真实可见终端 acceptance controller 状态事件。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "ACCEPTANCE_HARNESS_OK"
+  ],
+  "event_answer_contains": [
+    "ACCEPTANCE_HARNESS_OK"
+  ]
+}

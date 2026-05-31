@@ -1,0 +1,40 @@
+{
+  "name": "chongqing_weather_browser",
+  "output_prefix": "chongqing_weather",
+  "window_title_prefix": "LearningAgent-Controller-Weather",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 30,
+  "success_marker": "VISIBLE_WEATHER_ACCEPTANCE_OK",
+  "prompt_lines": [
+    "请执行一次重庆真实浏览器天气验收，最终回答必须包含固定标记：VISIBLE_WEATHER_ACCEPTANCE_OK。",
+    "当前日期是 2026-05-27，3 天后是 2026-05-30，城市是中国重庆。",
+    "第一步必须读取 learning_agent/skills/tool_list.md，第二步必须读取 learning_agent/skills/browser_automation/SKILL.md。",
+    "必须使用浏览器自动化 MCP 工具，不允许只凭记忆回答，不允许只用普通文字推测。",
+    "请用 browser_open 打开这个真实天气来源 URL：https://api.open-meteo.com/v1/forecast?latitude=29.5630&longitude=106.5516&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max,uv_index_max&timezone=Asia%2FShanghai&start_date=2026-05-30&end_date=2026-05-30",
+    "请用 browser_snapshot 读取页面内容，并根据页面 JSON 生成简体中文结果。",
+    "天气代码解释：0=晴，1=大部晴朗，2=局部多云，3=阴，45/48=雾，51/53/55=毛毛雨，61/63/65=雨，80/81/82=阵雨，95=雷暴。",
+    "最终回答必须包含：VISIBLE_WEATHER_ACCEPTANCE_OK、浏览器测试状态、实际使用的浏览器工具 browser_open 和 browser_snapshot、2026-05-30 重庆天气摘要、穿衣和携带建议、重庆一日旅游攻略、下雨或高温备选方案、来源 URL。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "重庆真实浏览器天气验收",
+    "VISIBLE_WEATHER_ACCEPTANCE_OK",
+    "browser_open 成功",
+    "browser_snapshot 成功",
+    "2026-05-30",
+    "重庆",
+    "api.open-meteo.com",
+    "旅游攻略"
+  ],
+  "event_answer_contains": [
+    "VISIBLE_WEATHER_ACCEPTANCE_OK",
+    "browser_open",
+    "browser_snapshot"
+  ]
+}

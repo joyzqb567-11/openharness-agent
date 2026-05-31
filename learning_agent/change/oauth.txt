@@ -1,0 +1,123 @@
+是的。OAuth 网页认证这条链路，我主要新增/修改了这些代码。
+
+1. 新增 OAuth 依赖导入
+
+在 learning_agent.py (line 5) 顶部新增了这些标准库：
+
+import base64
+import hashlib
+import http.server
+import secrets
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import webbrowser
+作用：生成 PKCE、打开浏览器、启动 localhost:1455 回调服务、请求 OAuth/token/API。
+
+2. 新增 token 数据结构和本地 token 存储
+
+在 learning_agent.py (line 335) 新增：
+
+@dataclass
+class CodexOAuthTokens:
+    access_token: str
+    refresh_token: str
+    expires_at: int
+    account_id: str | None = None
+    id_token: str = ""
+以及 CodexOAuthTokenStore (line 343)，负责把 token 保存到：
+
+%LOCALAPPDATA%\LearningAgent\codex_oauth_tokens.json
+这样你第一次网页登录成功后，后续不用重复登录。
+
+3. 新增 OAuth/API 模型适配器
+
+核心类在 learning_agent.py (line 384)：
+
+class CodexOAuthChatModel:
+    CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann"
+    ISSUER = "https://auth.openai.com"
+    CODEX_API_ENDPOINT = "https://chatgpt.com/backend-api/codex/responses"
+    OAUTH_PORT = 1455
+这几个值就是参考 D:\opencode2-main 的 Codex OAuth 插件写的。
+
+4. 新增浏览器 OAuth 登录流程
+
+网页登录入口在 learning_agent.py (line 448)：
+
+def _login_with_browser(self) -> CodexOAuthTokens:
+    pkce = self._generate_pkce()
+    state = self._generate_state()
+    redirect_uri = f"http://localhost:{self.OAUTH_PORT}/auth/callback"
+它会：
+
+生成 PKCE。
+生成 state。
+打开浏览器访问 auth.openai.com。
+本地启动 localhost:1455/auth/callback。
+收到授权 code。
+用 code 换 access_token 和 refresh_token。
+授权 URL 构造在 learning_agent.py (line 637)。
+
+5. 新增 token 自动刷新
+
+在 learning_agent.py (line 425)：
+
+def _get_valid_tokens(self) -> CodexOAuthTokens:
+    tokens = self._token_store.load()
+    if tokens is None or not tokens.refresh_token:
+        tokens = self._login_callback()
+        self._token_store.save(tokens)
+        return tokens
+    if tokens.expires_at <= self._now_ms() + 60000:
+        tokens = self._refresh_tokens(tokens)
+        self._token_store.save(tokens)
+    return tokens
+意思是：没 token 就登录，快过期就自动刷新。
+
+6. 新增 Codex API 请求体
+
+在 learning_agent.py (line 510)：
+
+return {
+    "model": self._model,
+    "store": False,
+    "stream": True,
+    "instructions": self._build_instructions(),
+    "input": self._build_responses_input(messages=messages, tools=tools),
+    "text": {
+        "format": {
+            "type": "json_schema",
+            "name": "learning_agent_model_message",
+            "schema": CodexCliChatModel._output_schema(),
+            "strict": True,
+        },
+    },
+}
+这里是后面调通的关键：Codex 后端要求 instructions、input 列表、store=false、stream=true。
+
+7. 新增一键启动脚本
+
+新增：
+
+start_oauth_agent.ps1 (line 1)
+start_oauth_agent.bat (line 1)
+关键配置在 PowerShell 脚本里：
+
+$env:LEARNING_AGENT_MODEL_PROVIDER = "codex-oauth"
+$env:CODEX_MODEL = "gpt-5.5"
+$env:CODEX_OAUTH_TIMEOUT_SECONDS = "300"
+8. 修改模型选择逻辑
+
+在 learning_agent.py (line 691)：
+
+if provider in {"codex-oauth", "codex_oauth", "oauth", "openai-oauth"}:
+    return CodexOAuthChatModel.from_env()
+这让 learning_agent 知道：当环境变量是 codex-oauth 时，就走 OAuth/API 直连链路。
+
+
+
+
+
+21:43

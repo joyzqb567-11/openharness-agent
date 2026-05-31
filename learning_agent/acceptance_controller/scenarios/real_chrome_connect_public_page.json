@@ -1,0 +1,63 @@
+{
+  "name": "real_chrome_connect_public_page",
+  "output_prefix": "real_chrome_connect_public_page",
+  "window_title_prefix": "LearningAgent-Controller-RealChromeConnect",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 40,
+  "success_marker": "REAL_CHROME_CONNECT_PUBLIC_PAGE_OK",
+  "permission_policy": {
+    "default_response": "deny",
+    "allow_contains": [
+      "启动 MCP server",
+      "mcp__browser_automation__browser_profile_status",
+      "mcp__browser_automation__browser_connect_real_chrome",
+      "mcp__browser_automation__browser_open",
+      "mcp__browser_automation__browser_snapshot"
+    ],
+    "deny_contains": [
+      "mcp__browser_automation__browser_evaluate",
+      "mcp__browser_automation__browser_tabs",
+      "mcp__browser_automation__browser_console",
+      "mcp__browser_automation__browser_network",
+      "mcp__browser_automation__browser_downloads"
+    ]
+  },
+  "prompt_lines": [
+    "请执行一次真实桌面 Chrome 连接公开页面验收，最终回答必须在开头包含固定标记：REAL_CHROME_CONNECT_PUBLIC_PAGE_OK。",
+    "用户已明确同意本轮为了验收而连接真实日常 Chrome profile 的高风险边界；本轮只能打开公开测试页面 https://example.com。",
+    "第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/real_chrome/SKILL.md。",
+    "读取规则后立刻调用 browser_profile_status；status 成功后的下一轮只调用 browser_connect_real_chrome，参数必须包含 confirm_real_profile=true。",
+    "browser_connect_real_chrome 成功后的下一轮只调用 browser_open 打开 https://example.com；browser_open 成功后的下一轮只调用 browser_snapshot 读取这个公开页面内容。",
+    "本轮不要调用 browser_evaluate，不要读取 cookies、localStorage、sessionStorage、token、Authorization header、密码、已有标签页内容或插件内容。",
+    "如果 browser_connect_real_chrome 明确失败并提示 Chrome 正在运行，请停止并如实说明失败，不要改用普通 browser_open 或独立 Chromium 冒充真实 Chrome。",
+    "最终回答必须包含：REAL_CHROME_CONNECT_PUBLIC_PAGE_OK、real_chrome_connected=true、browser_profile_status、browser_connect_real_chrome、browser_open、browser_snapshot、https://example.com、隐私边界说明。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "真实桌面 Chrome 连接公开页面验收",
+    "REAL_CHROME_CONNECT_PUBLIC_PAGE_OK",
+    "mcp__browser_automation__browser_profile_status",
+    "mcp__browser_automation__browser_connect_real_chrome",
+    "browser_connect_real_chrome 成功",
+    "real_chrome_connected=true",
+    "mcp__browser_automation__browser_open",
+    "browser_open 成功",
+    "https://example.com",
+    "mcp__browser_automation__browser_snapshot",
+    "browser_snapshot 成功",
+    "Example Domain"
+  ],
+  "event_answer_contains": [
+    "REAL_CHROME_CONNECT_PUBLIC_PAGE_OK",
+    "real_chrome_connected=true",
+    "browser_connect_real_chrome",
+    "browser_open",
+    "browser_snapshot"
+  ]
+}

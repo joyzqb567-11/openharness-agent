@@ -1,0 +1,27 @@
+{
+  "servers": [
+    {
+      "name": "browser_search",
+      "command": "C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "args": [
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_search_mcp_server.py"
+      ]
+    },
+    {
+      "name": "workspace_tools",
+      "command": "C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "args": [
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\workspace_tools_mcp_server.py",
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent"
+      ]
+    },
+    {
+      "name": "browser_automation",
+      "command": "C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "args": [
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_automation_mcp_server.py",
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent"
+      ]
+    }
+  ]
+}

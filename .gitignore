@@ -1,0 +1,20 @@
+# 忽略 Python 自动生成的缓存目录；没有这行会把本机运行后的 __pycache__ 目录提交进仓库，后续 diff 会被无关缓存刷屏。
+__pycache__/
+# 忽略 Python 字节码文件；没有这行会把不同 Python 版本生成的 .pyc 文件提交进仓库，其他电脑可能反复产生无意义变化。
+*.pyc
+# 忽略本项目本地 worktree 容器目录；没有这行会有误把隔离工作区内容递归提交到主仓库的风险。
+.worktrees
+# 忽略本项目本地 worktree 容器目录内的所有内容；没有这行会有误把隔离工作区文件提交到主仓库的风险。
+.worktrees/
+# 忽略备用 worktree 容器目录；没有这行会有误把 worktrees 目录里的隔离副本提交到主仓库的风险。
+worktrees
+# 忽略备用 worktree 容器目录内的所有内容；没有这行会有误把备用隔离副本文件提交到主仓库的风险。
+worktrees/
+# 忽略真实终端验收运行产物；没有这行会把截图、日志和每次运行结果都提交进仓库，仓库会快速膨胀。
+learning_agent/acceptance_controller/runs/
+# 忽略未来事件流 session 运行记录；没有这行会把每次 agent 对话 transcript 都提交进仓库，容易泄露用户输入和工具结果。
+learning_agent/memory/sessions/
+# 忽略临时调试日志目录；没有这行会把本机排查日志提交进仓库，后续 review 会混入大量无关内容。
+learning_agent/debug_logs/
+# 忽略浏览器截图和下载产物目录；没有这行会把真实浏览器运行时截图、网页产物提交进仓库，仓库体积和隐私风险都会变大。
+learning_agent/browser_artifacts/
