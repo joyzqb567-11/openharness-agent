@@ -594,3 +594,28 @@ Regression guard:
 
 Maintenance caution:
 - Avoid line-number bulk deletion in `core/agent.py`; use AST/function-boundary checks and small patches so wrapper cleanup does not damage neighboring method bodies.
+
+## 2026-05-31 Stage 15A baseline test blockers
+
+Status: resolved for this pass in worktree `stage15a-event-runtime`.
+
+Symptoms:
+- Initial `python -m unittest discover learning_agent` in the fresh worktree failed with 4 failures and 4 errors.
+- Playwright was missing from the default Python 3.13 environment, causing browser automation tests to fail.
+- Existing tests expected `.gitignore` to include `learning_agent/browser_profiles.json` and `learning_agent/browser_artifacts/real_chrome_audit.jsonl`, but the new baseline `.gitignore` did not include those exact sensitive local-file paths.
+- Existing parity checklist test expected `docs/superpowers/specs/claudecode_parity_checklist.md`, but the file was absent from the first git baseline.
+
+Confirmed evidence:
+- `python -m pip show playwright` reported package not found.
+- Focused tests reproduced the `.gitignore` and parity checklist failures.
+- After installing Playwright/Chromium and restoring the missing fixture/document entries, `python -m unittest discover learning_agent` passed with 368 tests OK, skipped=1.
+
+Resolution:
+- Installed Playwright with `python -m pip install playwright`.
+- Installed Chromium browser binaries with `python -m playwright install chromium`.
+- Added the missing `.gitignore` entries.
+- Added the missing parity checklist document.
+
+Residual risk:
+- The Playwright installation is an environment dependency, not a repository file. A different machine may still fail browser automation tests until Playwright and browser binaries are installed.
+- Future setup docs should eventually explain the exact Python environment and Playwright install command used for local baseline tests.

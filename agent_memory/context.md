@@ -269,3 +269,17 @@
 - Stage 14 validation passed: compileall, AST unreachable scan, compat cleanup tests, full unittest discovery, and real visible terminal Chrome acceptance.
 - Stage 14 acceptance evidence: `learning_agent/acceptance_controller/runs/real_chrome_natural_weather_travel-20260530_210431/result.json` with `completed=true`, `assertion.passed=true`, `permission_sent_count=0`.
 - Browser screenshot evidence from the fresh run was copied into `browser_artifacts_snapshot` inside that run directory before the source-tree `browser_artifacts/` directory was deleted again.
+
+## 2026-05-31 Stage 15A event runtime context
+
+- Stage 15A is being implemented in isolated worktree `.worktrees/stage15a-event-runtime`.
+- The branch name is `stage15a-event-runtime`.
+- Initial baseline commit on `main` is `3c657e5 chore: establish learning agent baseline`.
+- New event foundation files:
+  - `learning_agent/core/events.py`
+  - `learning_agent/observability/transcript.py`
+  - `learning_agent/tests/test_runtime_events.py`
+- Stage 15A currently only adds standalone event/transcript primitives and does not yet integrate `LearningAgent.run()` or `run_events()`.
+- `AgentEvent` is immutable and serializes to one JSONL line with `event_type`, `run_id`, `sequence`, `session_id`, `timestamp`, and `payload`.
+- `TranscriptWriter` writes to `<base_dir>/<session_id>/events.jsonl` in append mode.
+- New code backup for user learning is in `learning_agent/test/stage15a_event_runtime_20260531/`.

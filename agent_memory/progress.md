@@ -1021,3 +1021,38 @@ Plan summary:
 
 Verification:
 - Documentation-only change; no automated tests or visible terminal acceptance were required.
+
+## 2026-05-31 Stage 15A event runtime foundation
+
+Status: completed for Stage 15A foundation in isolated worktree `stage15a-event-runtime`.
+
+Baseline setup:
+- Created initial git baseline commit on `main`: `3c657e5 chore: establish learning agent baseline`.
+- Created isolated worktree: `.worktrees/stage15a-event-runtime`.
+- Installed missing local Python test dependency with `python -m pip install playwright`.
+- Installed Playwright Chromium with `python -m playwright install chromium`.
+- Restored baseline test fixtures required by existing tests:
+  - `.gitignore` now includes `learning_agent/browser_profiles.json`.
+  - `.gitignore` now includes `learning_agent/browser_artifacts/real_chrome_audit.jsonl`.
+  - Added `docs/superpowers/specs/claudecode_parity_checklist.md`.
+
+TDD record:
+- Red: `python -m unittest learning_agent.tests.test_runtime_events` failed with `ModuleNotFoundError: No module named 'learning_agent.core.events'`.
+- Green: after adding `learning_agent/core/events.py` and `learning_agent/observability/transcript.py`, the same command passed with 2 tests OK.
+
+Implemented:
+- Added `learning_agent/core/events.py` with immutable `AgentEvent`, UTC timestamp helper, event factory, and JSONL serializer.
+- Added `learning_agent/observability/transcript.py` with `TranscriptWriter` that appends events to `<base_dir>/<session_id>/events.jsonl`.
+- Added `learning_agent/tests/test_runtime_events.py` covering stable JSON event serialization and session-directory JSONL transcript writes.
+- Backed up new Stage 15A code into `learning_agent/test/stage15a_event_runtime_20260531/`.
+
+Verification:
+- Focused baseline repair tests passed: `python -m unittest learning_agent.tests.test_browser_harness.BrowserHarnessTests.test_gitignore_ignores_real_chrome_local_files learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_claudecode_parity_checklist_records_phase_7_status`.
+- Full baseline unittest passed after dependency and fixture repair: `python -m unittest discover learning_agent` -> 368 tests OK, skipped=1.
+- Focused Stage 15A test passed: `python -m unittest learning_agent.tests.test_runtime_events` -> 2 tests OK.
+- Final Stage 15A compile verification passed: `python -m compileall learning_agent`.
+- Final Stage 15A full unittest passed: `python -m unittest discover learning_agent` -> 370 tests OK, skipped=1.
+
+Acceptance note:
+- Real visible terminal acceptance was not run for Stage 15A because this stage only adds standalone event/transcript primitives and does not integrate runtime behavior into `LearningAgent.run()`.
+- Future stages that change the interactive run loop, tool execution behavior, or user-visible agent behavior must run `start_oauth_agent.bat` visible-terminal acceptance before claiming development complete.

@@ -18,3 +18,7 @@ learning_agent/memory/sessions/
 learning_agent/debug_logs/
 # 忽略浏览器截图和下载产物目录；没有这行会把真实浏览器运行时截图、网页产物提交进仓库，仓库体积和隐私风险都会变大。
 learning_agent/browser_artifacts/
+# 忽略真实 Chrome 本地 profile 配置；没有这行会把用户本机浏览器配置路径提交进仓库，可能暴露隐私路径。
+learning_agent/browser_profiles.json
+# 忽略真实 Chrome 审计日志文件；没有这行会把真实浏览器连接和操作审计提交进仓库，可能暴露用户浏览器行为。
+learning_agent/browser_artifacts/real_chrome_audit.jsonl
