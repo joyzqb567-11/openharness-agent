@@ -39,8 +39,10 @@ class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Pha
             store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，无法打开和停止 session。
             store.open_mode(mode="normal", reason="准备控制普通应用")  # 新增代码+Phase98UniversalComputerUseMode：先打开普通模式；如果没有这行代码，stop 无法证明从活动态变为停止态。
             stop = store.stop(reason="用户输入 /computer stop")  # 新增代码+Phase98UniversalComputerUseMode：执行停止；如果没有这行代码，后续动作不会被阻断。
+            status = store.status()  # 新增代码+Phase98UniversalComputerUseMode：读取停止后的持久化状态；如果没有这行代码，测试无法确认 current.json 真的变成 stopped 模式。
             decision = store.evaluate_action({"process_name": "notepad.exe"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：停止后再评估点击；如果没有这行代码，无法证明停止生效。
         self.assertTrue(stop["stopped"])  # 新增代码+Phase98UniversalComputerUseMode：断言 stop 已记录；如果没有这行代码，停止失败可能被忽略。
+        self.assertEqual(status["mode"], "stopped")  # 新增代码+Phase98UniversalComputerUseMode：断言 stop 会持久化 stopped 模式；如果没有这行代码，状态页可能仍误显示 normal。
         self.assertFalse(decision["allowed"])  # 新增代码+Phase98UniversalComputerUseMode：断言后续动作被拒绝；如果没有这行代码，stop 不能保护真实桌面。
         self.assertEqual(decision["decision"], "computer_use_stopped")  # 新增代码+Phase98UniversalComputerUseMode：断言稳定原因码；如果没有这行代码，用户不知道为什么被阻断。
         self.assertEqual(decision["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言没有低层事件；如果没有这行代码，急停可能只是事后报告。
@@ -57,6 +59,40 @@ class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Pha
         self.assertTrue(confirmed["opened"])  # 新增代码+Phase98UniversalComputerUseMode：断言确认后打开；如果没有这行代码，full 确认路径可能坏掉。
         self.assertTrue(after["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言 full 标志为真；如果没有这行代码，状态页无法显示风险模式。
         self.assertLessEqual(after["ttl_seconds"], 300)  # 新增代码+Phase98UniversalComputerUseMode：断言 full TTL 不超过 5 分钟；如果没有这行代码，长期全权限风险不可控。
+
+    def test_direct_open_full_mode_falls_back_to_normal(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 open_mode 不能绕过二次确认直接打开 full；如果没有这段测试，高风险模式可能被普通入口误激活。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，direct full 回退测试会污染真实 session。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法调用 open_mode。
+            result = store.open_mode(mode="full", reason="用户误输入直接打开 full mode")  # 新增代码+Phase98UniversalComputerUseMode：尝试直接打开 full；如果没有这行代码，无法覆盖 review 指出的绕过路径。
+            status = store.status()  # 新增代码+Phase98UniversalComputerUseMode：读取落盘状态；如果没有这行代码，测试只能看到返回值而看不到持久化结果。
+        self.assertEqual(result["mode"], "normal")  # 新增代码+Phase98UniversalComputerUseMode：断言直接 full 会回退 normal；如果没有这行代码，open_mode 可能继续绕过确认。
+        self.assertFalse(result["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言返回值没有 full 权限；如果没有这行代码，调用方可能误拿高权限。
+        self.assertEqual(status["mode"], "normal")  # 新增代码+Phase98UniversalComputerUseMode：断言落盘状态也是 normal；如果没有这行代码，current.json 可能暗中保存 full。
+        self.assertFalse(status["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言状态查询没有 full 权限；如果没有这行代码，状态页可能误报已提权。
+
+    def test_wrong_full_mode_confirmation_token_is_distinct_refusal(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证错误 token 有稳定拒绝码；如果没有这段测试，调用方无法区分输错和过期。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，pending token 会污染其它测试。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法请求 full token。
+            request = store.request_full_mode(reason="用户请求 full mode")  # 新增代码+Phase98UniversalComputerUseMode：先生成正确 token；如果没有这行代码，错误 token 没有对照对象。
+            decision = store.confirm_full_mode(f"{request['confirmation_token']}-BAD", reason="用户输错确认码")  # 新增代码+Phase98UniversalComputerUseMode：提交错误 token；如果没有这行代码，token mismatch 路径不会被覆盖。
+            status = store.status()  # 新增代码+Phase98UniversalComputerUseMode：读取确认失败后的状态；如果没有这行代码，测试无法确认 full 没有被打开。
+        self.assertFalse(decision["opened"])  # 新增代码+Phase98UniversalComputerUseMode：断言错误 token 不会打开模式；如果没有这行代码，确认绕过可能被忽略。
+        self.assertEqual(decision["decision"], "full_mode_confirmation_token_mismatch")  # 新增代码+Phase98UniversalComputerUseMode：断言 mismatch 使用独立原因码；如果没有这行代码，调用方无法给出准确提示。
+        self.assertEqual(decision["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言拒绝路径零低层事件；如果没有这行代码，安全拒绝可能仍触发真实输入。
+        self.assertFalse(status["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言错误确认后仍不是 full；如果没有这行代码，失败路径可能暗中提权。
+
+    def test_expired_full_mode_confirmation_token_is_distinct_refusal(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证过期 token 有稳定拒绝码；如果没有这段测试，TTL 安全边界可能退化。
+        clock = {"now": 1000.0}  # 新增代码+Phase98UniversalComputerUseMode：用可变时钟控制 now_func；如果没有这行代码，测试无法稳定模拟 token 过期。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，过期 token 测试会污染真实状态。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir), now_func=lambda: clock["now"])  # 新增代码+Phase98UniversalComputerUseMode：注入测试时钟；如果没有这行代码，无法不用等待就验证过期。
+            request = store.request_full_mode(reason="用户请求 full mode")  # 新增代码+Phase98UniversalComputerUseMode：生成待确认 token；如果没有这行代码，过期路径没有 pending 文件。
+            clock["now"] = 1401.0  # 新增代码+Phase98UniversalComputerUseMode：把时间推进到 300 秒 TTL 之后；如果没有这行代码，token 仍会被当成有效。
+            decision = store.confirm_full_mode(request["confirmation_token"], reason="用户太晚确认 full mode")  # 新增代码+Phase98UniversalComputerUseMode：提交已过期 token；如果没有这行代码，expired 路径不会被覆盖。
+            status = store.status()  # 新增代码+Phase98UniversalComputerUseMode：读取确认失败后的状态；如果没有这行代码，测试无法确认过期不会提权。
+        self.assertFalse(decision["opened"])  # 新增代码+Phase98UniversalComputerUseMode：断言过期 token 不会打开模式；如果没有这行代码，TTL 失效可能被忽略。
+        self.assertEqual(decision["decision"], "full_mode_confirmation_expired")  # 新增代码+Phase98UniversalComputerUseMode：断言 expired 使用独立原因码；如果没有这行代码，调用方无法提示用户重新申请。
+        self.assertEqual(decision["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言过期拒绝零低层事件；如果没有这行代码，拒绝过程可能不够安全。
+        self.assertFalse(status["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言过期确认后仍不是 full；如果没有这行代码，失败路径可能暗中提权。
 
     def test_state_hides_sensitive_reason_text(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证状态文件不写敏感原文；如果没有这段测试，用户 prompt 可能泄露进磁盘。
         with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，隐私测试会污染真实状态。
