@@ -25,6 +25,41 @@ class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Pha
         self.assertEqual(status["marker"], PHASE98_COMPUTER_USE_MODE_READY)  # 新增代码+Phase98UniversalComputerUseMode：断言 marker 稳定；如果没有这行代码，真实终端验收会漂移。
         self.assertEqual(status["ok_token"], PHASE98_COMPUTER_USE_MODE_OK)  # 新增代码+Phase98UniversalComputerUseMode：断言 OK token 稳定；如果没有这行代码，场景断言没有成功锚点。
 
+    def test_permissions_include_task3_rendering_fields(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 permissions 提供 Task3 渲染需要的字段；如果没有这段测试，终端渲染可能缺关键安全说明。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，权限摘要测试会污染真实 session。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法读取 permissions。
+            store.open_mode(mode="normal", reason="准备展示权限摘要")  # 新增代码+Phase98UniversalComputerUseMode：打开 normal 模式；如果没有这行代码，permissions 没有活动状态可摘要。
+            permissions = store.permissions()  # 新增代码+Phase98UniversalComputerUseMode：读取权限摘要；如果没有这行代码，测试无法锁定 Task3 API 字段。
+        self.assertTrue(permissions["high_risk_requires_confirmation"])  # 新增代码+Phase98UniversalComputerUseMode：断言高风险需要确认；如果没有这行代码，Task3 可能漏显示 full 安全边界。
+        self.assertFalse(permissions["per_app_allowlist_required"])  # 新增代码+Phase98UniversalComputerUseMode：断言不需要应用白名单；如果没有这行代码，渲染层可能误提示用户配置白名单。
+        self.assertTrue(permissions["dangerous_target_terms_hidden"])  # 新增代码+Phase98UniversalComputerUseMode：断言危险关键词不外泄；如果没有这行代码，渲染层可能暴露内部拦截词表。
+        self.assertEqual(permissions["mode"], "normal")  # 新增代码+Phase98UniversalComputerUseMode：断言权限摘要包含模式；如果没有这行代码，Task3 无法显示当前模式。
+        self.assertFalse(permissions["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言权限摘要包含 full 标记；如果没有这行代码，Task3 无法显示高风险是否开启。
+        self.assertIn("click", permissions["allowed_action_classes"])  # 新增代码+Phase98UniversalComputerUseMode：断言权限摘要包含允许动作；如果没有这行代码，Task3 无法列出可用动作。
+
+    def test_request_full_mode_returns_non_dispatching_confirmation_shape(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 request_full_mode 不派发也不打开；如果没有这段测试，请求阶段可能被误当成已授权。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，pending token 会污染其它测试。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法请求 full mode。
+            request = store.request_full_mode(reason="用户请求 full mode")  # 新增代码+Phase98UniversalComputerUseMode：请求 full mode token；如果没有这行代码，返回结构没有样本。
+        self.assertFalse(request["opened"])  # 新增代码+Phase98UniversalComputerUseMode：断言请求阶段没有打开模式；如果没有这行代码，Task3 可能误判已开启。
+        self.assertFalse(request["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言请求阶段没有 full 权限；如果没有这行代码，二次确认边界会变模糊。
+        self.assertEqual(request["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言请求阶段没有低层事件；如果没有这行代码，安全请求可能被误解为真实操作。
+        self.assertTrue(request["strong_confirmation_required"])  # 新增代码+Phase98UniversalComputerUseMode：断言需要强确认；如果没有这行代码，渲染层不会提示用户二次确认。
+        self.assertTrue(request["confirmation_token"].startswith("FULL-"))  # 新增代码+Phase98UniversalComputerUseMode：断言返回确认 token；如果没有这行代码，用户无法继续 confirm 流程。
+
+    def test_status_without_state_is_clear_off_state(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证无状态时是清晰 off 状态；如果没有这段测试，首次启动可能被误当成 stopped 或 expired。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建空目录；如果没有这行代码，测试无法模拟没有 current.json 的首次启动。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法读取 status。
+            status = store.status()  # 新增代码+Phase98UniversalComputerUseMode：读取无状态 status；如果没有这行代码，默认 off 合同没有样本。
+        self.assertEqual(status["mode"], "off")  # 新增代码+Phase98UniversalComputerUseMode：断言默认模式是 off；如果没有这行代码，首次启动语义可能不清楚。
+        self.assertFalse(status["opened"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认没有打开；如果没有这行代码，渲染层可能误显示可操作。
+        self.assertFalse(status["stopped"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认不是用户急停；如果没有这行代码，首次启动会和 stop 混淆。
+        self.assertFalse(status["expired"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认不是过期；如果没有这行代码，首次启动会和 TTL 到期混淆。
+        self.assertFalse(status["full_mode"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认没有 full 权限；如果没有这行代码，安全状态可能误报。
+        self.assertEqual(status["allowed_action_classes"], [])  # 新增代码+Phase98UniversalComputerUseMode：断言默认没有允许动作；如果没有这行代码，无状态可能被误放行动作。
+        self.assertFalse(status["per_app_allowlist_required"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认不要求应用白名单；如果没有这行代码，用户可能看到错误配置提示。
+        self.assertFalse(status["ordinary_apps_allowed_by_risk_policy"])  # 新增代码+Phase98UniversalComputerUseMode：断言默认不放行普通应用；如果没有这行代码，off 状态可能被误认为 normal。
+
     def test_observe_mode_blocks_write_actions(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证观察模式零写动作；如果没有这段测试，observe 可能误发送低层输入。
         with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，状态会污染其它测试。
             store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，无法打开 observe mode。
@@ -46,6 +81,19 @@ class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Pha
         self.assertFalse(decision["allowed"])  # 新增代码+Phase98UniversalComputerUseMode：断言后续动作被拒绝；如果没有这行代码，stop 不能保护真实桌面。
         self.assertEqual(decision["decision"], "computer_use_stopped")  # 新增代码+Phase98UniversalComputerUseMode：断言稳定原因码；如果没有这行代码，用户不知道为什么被阻断。
         self.assertEqual(decision["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言没有低层事件；如果没有这行代码，急停可能只是事后报告。
+
+    def test_evaluate_action_uses_stable_task3_decision_strings(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证动作评估原因码和计划一致；如果没有这段测试，Task3/99 可能出现原因码漂移。
+        clock = {"now": 2000.0}  # 新增代码+Phase98UniversalComputerUseMode：用可变时钟模拟 TTL；如果没有这行代码，过期原因码测试需要真实等待。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，动作评估状态会污染其它测试。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir), now_func=lambda: clock["now"])  # 新增代码+Phase98UniversalComputerUseMode：注入测试时钟；如果没有这行代码，无法稳定触发过期。
+            store.open_mode(mode="normal", reason="准备验证允许原因码", ttl_seconds=10)  # 新增代码+Phase98UniversalComputerUseMode：打开短 TTL normal；如果没有这行代码，动作评估没有活动模式。
+            allowed = store.evaluate_action({"process_name": "notepad.exe"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：评估普通允许动作；如果没有这行代码，allowed 原因码没有样本。
+            dangerous = store.evaluate_action({"process_name": "powershell.exe"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：评估危险目标动作；如果没有这行代码，危险目标原因码没有样本。
+            clock["now"] = 2011.0  # 新增代码+Phase98UniversalComputerUseMode：推进到 TTL 过期后；如果没有这行代码，过期路径不会触发。
+            expired = store.evaluate_action({"process_name": "notepad.exe"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：评估过期后的动作；如果没有这行代码，mode_expired 原因码没有样本。
+        self.assertEqual(allowed["decision"], "allowed_by_computer_use_mode")  # 新增代码+Phase98UniversalComputerUseMode：断言允许原因码稳定；如果没有这行代码，Task3 可能显示旧原因码。
+        self.assertEqual(dangerous["decision"], "dangerous_target_blocked")  # 新增代码+Phase98UniversalComputerUseMode：断言危险目标原因码稳定；如果没有这行代码，Task3 可能显示旧原因码。
+        self.assertEqual(expired["decision"], "mode_expired")  # 新增代码+Phase98UniversalComputerUseMode：断言过期原因码稳定；如果没有这行代码，Task3 可能显示旧原因码。
 
     def test_full_mode_requires_confirmation_before_activation(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 full 不能单命令裸开；如果没有这段测试，最高风险模式会变成默认绕过。
         with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，full token 会污染其它测试。

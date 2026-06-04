@@ -155,7 +155,7 @@ class ComputerUseModeSessionStore:  # 新增代码+Phase98UniversalComputerUseMo
         pending = {"schema_version": 1, "model": PHASE98_COMPUTER_USE_MODE_MODEL, "confirmation_token": token, "strong_confirmation_required": True, "created_at": now, "expires_at": now + DEFAULT_FULL_TTL_SECONDS}  # 新增代码+Phase98UniversalComputerUseMode：构建待确认状态；如果没有这行代码，confirm_full_mode 没有可信依据。
         pending.update(_phase98_reason_meta(reason))  # 新增代码+Phase98UniversalComputerUseMode：加入脱敏原因元数据；如果没有这行代码，pending 文件可能缺少可审计原因哈希。
         atomic_write_json(self.pending_full_path, pending)  # 新增代码+Phase98UniversalComputerUseMode：原子写入 pending_full.json；如果没有这行代码，二次确认 token 不会持久化。
-        return {"strong_confirmation_required": True, "confirmation_token": token, "full_mode": False, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回待确认结果且不激活 full；如果没有这行代码，测试无法确认 request 不直接提权。
+        return {"opened": False, "full_mode": False, "low_level_event_count": 0, "strong_confirmation_required": True, "confirmation_token": token, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 修改代码+Phase98UniversalComputerUseMode：返回待确认结果且明确不打开不派发；如果没有这行代码，Task3 可能误判 request 已经提权或触发真实输入。
     # 新增代码+Phase98UniversalComputerUseMode：函数段落结束，ComputerUseModeSessionStore.request_full_mode 到此结束；如果没有这个边界说明，初学者不容易看出 full 请求范围。
 
     def confirm_full_mode(self, confirmation_token: str, reason: str = "") -> dict[str, Any]:  # 新增代码+Phase98UniversalComputerUseMode：函数段落开始，用 token 确认 full mode；如果没有这段函数，二次确认流程无法完成。
@@ -193,7 +193,7 @@ class ComputerUseModeSessionStore:  # 新增代码+Phase98UniversalComputerUseMo
     def status(self) -> dict[str, Any]:  # 新增代码+Phase98UniversalComputerUseMode：函数段落开始，读取当前模式状态；如果没有这段函数，终端和测试无法确认权限模式。
         state = _phase98_read_json(self.current_path)  # 新增代码+Phase98UniversalComputerUseMode：读取 current.json；如果没有这行代码，status 无法反映持久化状态。
         if not state:  # 新增代码+Phase98UniversalComputerUseMode：判断是否没有当前状态；如果没有这行代码，首次查询会缺字段。
-            return {"opened": False, "stopped": True, "mode": "off", "full_mode": False, "ttl_seconds": 0, "expired": True, "per_app_allowlist_required": False, "ordinary_apps_allowed_by_risk_policy": False, "allowed_action_classes": [], "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK, "model": PHASE98_COMPUTER_USE_MODE_MODEL, "state_path": str(self.current_path)}  # 新增代码+Phase98UniversalComputerUseMode：返回安全默认 off 状态；如果没有这行代码，无状态时 evaluate_action 无法安全拒绝。
+            return {"opened": False, "stopped": False, "mode": "off", "full_mode": False, "ttl_seconds": 0, "expired": False, "per_app_allowlist_required": False, "ordinary_apps_allowed_by_risk_policy": False, "allowed_action_classes": [], "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK, "model": PHASE98_COMPUTER_USE_MODE_MODEL, "state_path": str(self.current_path)}  # 修改代码+Phase98UniversalComputerUseMode：返回清晰 off 状态而不是 stopped/expired；如果没有这行代码，首次启动会和急停或过期混淆。
         remaining = max(0, int(float(state.get("expires_at", 0) or 0) - self._now()))  # 新增代码+Phase98UniversalComputerUseMode：计算剩余 TTL 秒数；如果没有这行代码，调用方不知道授权是否快过期。
         expired = remaining <= 0  # 新增代码+Phase98UniversalComputerUseMode：计算是否过期；如果没有这行代码，过期模式可能继续被认为可用。
         mode = str(state.get("mode", "normal") or "normal")  # 新增代码+Phase98UniversalComputerUseMode：读取当前模式；如果没有这行代码，状态缺失时无法回退。
@@ -213,7 +213,7 @@ class ComputerUseModeSessionStore:  # 新增代码+Phase98UniversalComputerUseMo
 
     def permissions(self) -> dict[str, Any]:  # 新增代码+Phase98UniversalComputerUseMode：函数段落开始，返回权限摘要；如果没有这段函数，调用方只能自己从 status 拼权限信息。
         current = self.status()  # 新增代码+Phase98UniversalComputerUseMode：复用当前状态；如果没有这行代码，permissions 可能和 status 不一致。
-        return {"mode": current["mode"], "full_mode": current["full_mode"], "stopped": current["stopped"], "expired": current["expired"], "per_app_allowlist_required": current["per_app_allowlist_required"], "ordinary_apps_allowed_by_risk_policy": current["ordinary_apps_allowed_by_risk_policy"], "allowed_action_classes": current["allowed_action_classes"], "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回机器可读权限摘要；如果没有这行代码，外部工具无法快速展示权限边界。
+        return {"mode": current["mode"], "full_mode": current["full_mode"], "high_risk_requires_confirmation": True, "per_app_allowlist_required": False, "dangerous_target_terms_hidden": True, "allowed_action_classes": current["allowed_action_classes"], "stopped": current["stopped"], "expired": current["expired"], "ordinary_apps_allowed_by_risk_policy": current["ordinary_apps_allowed_by_risk_policy"], "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 修改代码+Phase98UniversalComputerUseMode：返回 Task3 渲染需要的权限摘要；如果没有这行代码，终端 UI 会缺少高风险确认、危险词隐藏和动作列表字段。
     # 新增代码+Phase98UniversalComputerUseMode：函数段落结束，ComputerUseModeSessionStore.permissions 到此结束；如果没有这个边界说明，初学者不容易看出权限摘要范围。
 
     def evaluate_action(self, window: dict[str, Any], action_class: str) -> dict[str, Any]:  # 新增代码+Phase98UniversalComputerUseMode：函数段落开始，评估动作是否允许；如果没有这段函数，动作层无法在发送输入前做模式拦截。
@@ -222,16 +222,16 @@ class ComputerUseModeSessionStore:  # 新增代码+Phase98UniversalComputerUseMo
         if bool(current.get("stopped")):  # 新增代码+Phase98UniversalComputerUseMode：优先检查是否已急停；如果没有这行代码，stop 后动作可能继续执行。
             return {"allowed": False, "decision": "computer_use_stopped", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回急停拒绝且零低层事件；如果没有这行代码，测试无法确认 stop 真阻断。
         if bool(current.get("expired")):  # 新增代码+Phase98UniversalComputerUseMode：检查授权是否过期；如果没有这行代码，过期模式可能继续放行动作。
-            return {"allowed": False, "decision": "mode_session_expired", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回过期拒绝且零低层事件；如果没有这行代码，过期原因不可审计。
+            return {"allowed": False, "decision": "mode_expired", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 修改代码+Phase98UniversalComputerUseMode：返回计划约定的过期拒绝原因码且零低层事件；如果没有这行代码，Task3/99 会和旧原因码漂移。
         target_text = _phase98_window_text(window)  # 新增代码+Phase98UniversalComputerUseMode：提取窗口风险文本；如果没有这行代码，危险目标扫描没有输入。
         if any(term in target_text for term in DANGEROUS_TARGET_TERMS):  # 新增代码+Phase98UniversalComputerUseMode：匹配危险关键词；如果没有这行代码，终端和安全窗口可能被误操作。
-            return {"allowed": False, "decision": "dangerous_target_blocked_by_risk_policy", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回危险目标拒绝且零低层事件；如果没有这行代码，高风险目标没有硬拦截。
+            return {"allowed": False, "decision": "dangerous_target_blocked", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 修改代码+Phase98UniversalComputerUseMode：返回计划约定的危险目标拒绝原因码且零低层事件；如果没有这行代码，Task3/99 会和旧原因码漂移。
         allowed_actions = list(current.get("allowed_action_classes", []))  # 新增代码+Phase98UniversalComputerUseMode：读取当前允许动作；如果没有这行代码，无法判断动作是否在模式范围内。
         if current.get("mode") == "observe" and action not in allowed_actions:  # 新增代码+Phase98UniversalComputerUseMode：观察模式下写动作专用拒绝；如果没有这行代码，测试要求的 observe_mode_blocks_write_action 不会出现。
             return {"allowed": False, "decision": "observe_mode_blocks_write_action", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回 observe 写动作拒绝且零低层事件；如果没有这行代码，observe 模式可能误发输入。
         if action not in allowed_actions:  # 新增代码+Phase98UniversalComputerUseMode：检查动作是否不在允许列表；如果没有这行代码，未知动作可能被误放行。
             return {"allowed": False, "decision": "action_class_not_allowed_by_mode", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回动作不允许且零低层事件；如果没有这行代码，拒绝原因不可审计。
-        return {"allowed": True, "decision": "action_allowed_by_mode", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 新增代码+Phase98UniversalComputerUseMode：返回允许但仍不发送真实输入；如果没有这行代码，调用方无法区分策略允许和实际派发。
+        return {"allowed": True, "decision": "allowed_by_computer_use_mode", "low_level_event_count": 0, "marker": PHASE98_COMPUTER_USE_MODE_READY, "ok_token": PHASE98_COMPUTER_USE_MODE_OK}  # 修改代码+Phase98UniversalComputerUseMode：返回计划约定的允许原因码且仍不发送真实输入；如果没有这行代码，Task3/99 会和旧原因码漂移。
     # 新增代码+Phase98UniversalComputerUseMode：函数段落结束，ComputerUseModeSessionStore.evaluate_action 到此结束；如果没有这个边界说明，初学者不容易看出动作评估范围。
 # 新增代码+Phase98UniversalComputerUseMode：类段落结束，ComputerUseModeSessionStore 到此结束；如果没有这个边界说明，初学者不容易看出 store 类范围。
 
