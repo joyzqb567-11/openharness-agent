@@ -7,7 +7,7 @@ from learning_agent.computer_use.mode_session import (  # 新增代码+Phase98Un
     PHASE98_COMPUTER_USE_MODE_READY,  # 新增代码+Phase98UniversalComputerUseMode：导入 ready marker；如果没有这行代码，终端验收没有稳定锚点。
     PHASE98_COMPUTER_USE_MODE_OK,  # 新增代码+Phase98UniversalComputerUseMode：导入 OK token；如果没有这行代码，测试无法确认合同输出。
     ComputerUseModeSessionStore,  # 新增代码+Phase98UniversalComputerUseMode：导入模式 session store；如果没有这行代码，测试无法创建模式状态。
-)
+)  # 新增代码+Phase98UniversalComputerUseMode：关闭模式 session API 导入代码块；如果没有这行代码，Python 无法正确结束多行导入，测试文件会在语法或接口边界上变得不清晰。
 
 
 class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Phase98UniversalComputerUseMode：类段开始，集中验证 /computer use 的权限模式状态；如果没有这个类，Phase98 的核心状态没有门禁。
