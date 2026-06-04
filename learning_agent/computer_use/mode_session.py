@@ -44,30 +44,40 @@ DANGEROUS_TARGET_TERMS = (  # 修改代码+Phase98UniversalComputerUseMode：函
     "pwsh.exe",  # 修改代码+Phase98UniversalComputerUseMode：拦截新版 PowerShell 进程名；如果没有这行代码，跨平台 PowerShell 入口会漏检。
     "cmd.exe",  # 修改代码+Phase98UniversalComputerUseMode：拦截明确 cmd 进程名而不是裸 cmd；如果没有这行代码，命令提示符可能被误操作。
     "command prompt",  # 修改代码+Phase98UniversalComputerUseMode：拦截命令提示符标题；如果没有这行代码，cmd 标题场景会漏检。
+    "terminal",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 terminal 概念；如果没有这行代码，通用终端身份字段会漏检。
     "windows terminal",  # 修改代码+Phase98UniversalComputerUseMode：拦截明确 Windows Terminal 标题；如果没有这行代码，终端窗口可能被误输入。
     "wt.exe",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Windows Terminal 进程名；如果没有这行代码，终端进程名场景会漏检。
+    "administrator",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 administrator 概念；如果没有这行代码，通用高权限身份字段会漏检。
     "administrator:",  # 修改代码+Phase98UniversalComputerUseMode：拦截标题中的管理员前缀；如果没有这行代码，高权限窗口风险不可控。
     "administrator -",  # 修改代码+Phase98UniversalComputerUseMode：拦截标题中的管理员连接格式；如果没有这行代码，高权限标题变体会漏检。
     "run as administrator",  # 修改代码+Phase98UniversalComputerUseMode：拦截以管理员运行窗口；如果没有这行代码，提权入口可能被误点。
     "user account control",  # 修改代码+Phase98UniversalComputerUseMode：拦截 UAC 全称窗口；如果没有这行代码，系统授权弹窗可能被误点。
     "uac",  # 修改代码+Phase98UniversalComputerUseMode：拦截明确 UAC 标识；如果没有这行代码，短标题授权弹窗可能漏检。
     "windows security",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Windows Security 窗口；如果没有这行代码，安全设置可能被误操作。
+    "defender",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 Defender 概念；如果没有这行代码，防护窗口简短身份字段会漏检。
     "windows defender",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Windows Defender 窗口；如果没有这行代码，防护设置可能被误改。
     "microsoft defender",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Microsoft Defender 窗口；如果没有这行代码，新标题防护窗口会漏检。
     "defender firewall",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Defender 防火墙窗口；如果没有这行代码，网络安全策略可能被误改。
+    "firewall",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 firewall 概念；如果没有这行代码，防火墙简短标题会漏检。
     "windows firewall",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Windows 防火墙窗口；如果没有这行代码，防火墙配置可能被误操作。
+    "registry",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 registry 概念；如果没有这行代码，注册表简短标题会漏检。
     "registry editor",  # 修改代码+Phase98UniversalComputerUseMode：拦截注册表编辑器标题；如果没有这行代码，注册表可能被误操作。
     "regedit.exe",  # 修改代码+Phase98UniversalComputerUseMode：拦截注册表编辑器进程；如果没有这行代码，注册表进程名场景会漏检。
+    "services",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 services 概念；如果没有这行代码，系统服务简短身份字段会漏检。
     "services.msc",  # 修改代码+Phase98UniversalComputerUseMode：拦截系统服务管理控制台文件名；如果没有这行代码，系统服务可能被误停。
     "windows services",  # 修改代码+Phase98UniversalComputerUseMode：拦截明确 Windows 服务标题；如果没有这行代码，服务管理窗口可能漏检。
+    "password",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 password 概念；如果没有这行代码，密码窗口简短标题会漏检。
     "password manager",  # 修改代码+Phase98UniversalComputerUseMode：拦截密码管理器窗口；如果没有这行代码，密码内容可能被误处理。
+    "credential",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 credential 概念；如果没有这行代码，凭据窗口简短标题会漏检。
     "credential manager",  # 修改代码+Phase98UniversalComputerUseMode：拦截凭据管理器窗口；如果没有这行代码，凭据窗口可能被误操作。
     "windows credentials",  # 修改代码+Phase98UniversalComputerUseMode：拦截 Windows 凭据窗口；如果没有这行代码，系统凭据页可能漏检。
     "captcha",  # 修改代码+Phase98UniversalComputerUseMode：拦截验证码窗口标题；如果没有这行代码，验证码场景边界不清楚。
+    "payment",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 payment 概念；如果没有这行代码，支付窗口简短标题会漏检。
     "payment method",  # 修改代码+Phase98UniversalComputerUseMode：拦截支付方式窗口；如果没有这行代码，支付场景可能被误操作。
     "payment checkout",  # 修改代码+Phase98UniversalComputerUseMode：拦截支付结账窗口；如果没有这行代码，结账付款场景可能漏检。
     "checkout payment",  # 修改代码+Phase98UniversalComputerUseMode：拦截另一种付款标题顺序；如果没有这行代码，付款标题变体会漏检。
     "api key",  # 修改代码+Phase98UniversalComputerUseMode：拦截 API key 标题；如果没有这行代码，密钥场景可能被误操作。
+    "token",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截 token 概念；如果没有这行代码，令牌窗口简短标题会漏检。
     "access token",  # 修改代码+Phase98UniversalComputerUseMode：拦截访问令牌标题；如果没有这行代码，令牌隐私可能被误处理。
     "auth token",  # 修改代码+Phase98UniversalComputerUseMode：拦截认证令牌标题；如果没有这行代码，认证令牌窗口会漏检。
     "secret token",  # 修改代码+Phase98UniversalComputerUseMode：拦截秘密令牌标题；如果没有这行代码，敏感 token 场景会漏检。
@@ -79,6 +89,7 @@ DANGEROUS_TARGET_TERMS = (  # 修改代码+Phase98UniversalComputerUseMode：函
     "令牌",  # 修改代码+Phase98UniversalComputerUseMode：拦截中文令牌标题；如果没有这行代码，中文 token 场景会漏检。
     "私钥",  # 修改代码+Phase98UniversalComputerUseMode：拦截中文私钥标题；如果没有这行代码，中文私钥场景会漏检。
     "管理员",  # 修改代码+Phase98UniversalComputerUseMode：拦截中文管理员标题；如果没有这行代码，中文高权限窗口会漏检。
+    "安全",  # 修改代码+Phase98UniversalComputerUseMode：按 Task2 要求拦截中文安全概念；如果没有这行代码，中文安全窗口身份字段会漏检。
 )  # 修改代码+Phase98UniversalComputerUseMode：函数段落结束，危险关键词列表到此结束；如果没有这行代码，Python 无法关闭元组。
 
 def _phase98_now() -> float:  # 新增代码+Phase98UniversalComputerUseMode：函数段落开始，提供可注入当前时间；如果没有这段函数，测试和 TTL 计算不易控制。

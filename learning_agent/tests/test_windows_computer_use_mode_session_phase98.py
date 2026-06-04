@@ -95,6 +95,23 @@ class ComputerUseModeSessionPhase98Tests(unittest.TestCase):  # 新增代码+Pha
         self.assertEqual(dangerous["decision"], "dangerous_target_blocked")  # 新增代码+Phase98UniversalComputerUseMode：断言危险目标原因码稳定；如果没有这行代码，Task3 可能显示旧原因码。
         self.assertEqual(expired["decision"], "mode_expired")  # 新增代码+Phase98UniversalComputerUseMode：断言过期原因码稳定；如果没有这行代码，Task3 可能显示旧原因码。
 
+    def test_required_dangerous_target_terms_block_identity_fields(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 Task2 要求的危险概念会拦截身份字段；如果没有这段测试，最终规格可能再次漏掉通用词。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，危险目标测试会污染真实 session。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，测试无法打开 normal 模式。
+            store.open_mode(mode="normal", reason="验证危险目标身份字段拦截")  # 新增代码+Phase98UniversalComputerUseMode：打开 normal 模式；如果没有这行代码，动作评估会处于 off 状态。
+            terminal = store.evaluate_action({"process_name": "terminal"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：用 process_name 覆盖 terminal；如果没有这行代码，终端通用词漏检不会被发现。
+            password = store.evaluate_action({"title_preview": "password"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：用 title_preview 覆盖 password；如果没有这行代码，密码通用词漏检不会被发现。
+            token = store.evaluate_action({"title_preview": "token"}, "click")  # 新增代码+Phase98UniversalComputerUseMode：用 title_preview 覆盖 token；如果没有这行代码，令牌通用词漏检不会被发现。
+        self.assertFalse(terminal["allowed"])  # 新增代码+Phase98UniversalComputerUseMode：断言 terminal 被拒绝；如果没有这行代码，终端窗口可能被 normal 模式误操作。
+        self.assertEqual(terminal["decision"], "dangerous_target_blocked")  # 新增代码+Phase98UniversalComputerUseMode：断言 terminal 使用稳定危险目标原因码；如果没有这行代码，Task3 显示会漂移。
+        self.assertEqual(terminal["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言 terminal 拒绝零低层事件；如果没有这行代码，拒绝后仍可能触发输入。
+        self.assertFalse(password["allowed"])  # 新增代码+Phase98UniversalComputerUseMode：断言 password 被拒绝；如果没有这行代码，密码窗口可能被 normal 模式误操作。
+        self.assertEqual(password["decision"], "dangerous_target_blocked")  # 新增代码+Phase98UniversalComputerUseMode：断言 password 使用稳定危险目标原因码；如果没有这行代码，Task3 显示会漂移。
+        self.assertEqual(password["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言 password 拒绝零低层事件；如果没有这行代码，拒绝后仍可能触发输入。
+        self.assertFalse(token["allowed"])  # 新增代码+Phase98UniversalComputerUseMode：断言 token 被拒绝；如果没有这行代码，令牌窗口可能被 normal 模式误操作。
+        self.assertEqual(token["decision"], "dangerous_target_blocked")  # 新增代码+Phase98UniversalComputerUseMode：断言 token 使用稳定危险目标原因码；如果没有这行代码，Task3 显示会漂移。
+        self.assertEqual(token["low_level_event_count"], 0)  # 新增代码+Phase98UniversalComputerUseMode：断言 token 拒绝零低层事件；如果没有这行代码，拒绝后仍可能触发输入。
+
     def test_full_mode_requires_confirmation_before_activation(self) -> None:  # 新增代码+Phase98UniversalComputerUseMode：函数段开始，验证 full 不能单命令裸开；如果没有这段测试，最高风险模式会变成默认绕过。
         with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase98UniversalComputerUseMode：创建隔离目录；如果没有这行代码，full token 会污染其它测试。
             store = ComputerUseModeSessionStore(base_dir=Path(temp_dir))  # 新增代码+Phase98UniversalComputerUseMode：创建模式 store；如果没有这行代码，无法请求 full mode。
