@@ -1,0 +1,69 @@
+{
+  "id": "agent_capability_phase104_controlled_notepad_launch_smoke",
+  "name": "agent_capability_phase104_controlled_notepad_launch_smoke",
+  "output_prefix": "agent_capability_phase104_controlled_notepad_launch_smoke",
+  "window_title_prefix": "LearningAgent-Phase104-ControlledNotepadLaunchSmoke",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+  "prompt": "Please run the Phase104 controlled Notepad launch smoke acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 104 controlled Windows Computer Use Notepad launch smoke acceptance. This scenario is allowed to briefly open one controlled Notepad window for a unique project test file and then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE104_RUN_REAL_NOTEPAD_LAUNCH_SMOKE='1'; $env:LEARNING_AGENT_PHASE104_ENABLE_REAL_NOTEPAD_LAUNCH_SMOKE='1'; python -c \"from learning_agent.computer_use.controlled_notepad_launch_smoke import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK, the final answer's last line must completely copy: PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK default_off_zero_events=true real_enable_gate_required=true real_notepad_launch_attempted=true process_ownership_verified=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false unsafe_launch_zero_events=true real_desktop_touched=true uncontrolled_actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+    "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK",
+    "default_off_zero_events=true",
+    "real_enable_gate_required=true",
+    "real_notepad_launch_attempted=true",
+    "process_ownership_verified=true",
+    "visible_window_verified=true",
+    "cleanup_completed=true",
+    "verified_window_cleanup_completed=true",
+    "residual_owned_process=false",
+    "unsafe_launch_zero_events=true",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+    "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK",
+    "default_off_zero_events=true",
+    "real_enable_gate_required=true",
+    "real_notepad_launch_attempted=true",
+    "process_ownership_verified=true",
+    "visible_window_verified=true",
+    "cleanup_completed=true",
+    "verified_window_cleanup_completed=true",
+    "residual_owned_process=false",
+    "unsafe_launch_zero_events=true",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+      "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK",
+      "default_off_zero_events=true",
+      "real_enable_gate_required=true",
+      "real_notepad_launch_attempted=true",
+      "process_ownership_verified=true",
+      "visible_window_verified=true",
+      "cleanup_completed=true",
+      "verified_window_cleanup_completed=true",
+      "residual_owned_process=false",
+      "unsafe_launch_zero_events=true",
+      "real_desktop_touched=true",
+      "uncontrolled_actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

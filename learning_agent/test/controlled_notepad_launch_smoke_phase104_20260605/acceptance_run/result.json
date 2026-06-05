@@ -1,0 +1,82 @@
+﻿{
+    "completed":  true,
+    "scenario":  "agent_capability_phase104_controlled_notepad_launch_smoke",
+    "scenario_path":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\scenarios\\agent_capability_phase104_controlled_notepad_launch_smoke.json",
+    "run_dir":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809",
+    "final_printed":  true,
+    "prompt_sent":  true,
+    "prompt_received":  true,
+    "prompt_send_attempts":  1,
+    "permission_sent_count":  0,
+    "max_permission_sent_count":  0,
+    "permission_policy_default_response":  "allow",
+    "permission_policy_decisions":  [
+
+                                    ],
+    "post_success_wait_seconds":  6,
+    "assertion":  {
+                      "passed":  true,
+                      "marker_passed":  true,
+                      "permission_count_passed":  true,
+                      "max_permission_sent_count":  0,
+                      "permission_sent_count":  0,
+                      "log_updated":  true,
+                      "state_checks":  {
+                                           "agent_ready_for_user_prompt":  true,
+                                           "user_prompt_received":  true,
+                                           "final_answer_printed":  true
+                                       },
+                      "event_answer_checks":  {
+                                                  "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY":  true,
+                                                  "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK":  true,
+                                                  "default_off_zero_events=true":  true,
+                                                  "real_enable_gate_required=true":  true,
+                                                  "real_notepad_launch_attempted=true":  true,
+                                                  "process_ownership_verified=true":  true,
+                                                  "visible_window_verified=true":  true,
+                                                  "cleanup_completed=true":  true,
+                                                  "verified_window_cleanup_completed=true":  true,
+                                                  "residual_owned_process=false":  true,
+                                                  "unsafe_launch_zero_events=true":  true,
+                                                  "real_desktop_touched=true":  true,
+                                                  "uncontrolled_actions_expanded=false":  true
+                                              },
+                      "event_payload_checks":  {
+
+                                               },
+                      "debug_log_checks":  {
+                                               "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY":  true,
+                                               "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK":  true,
+                                               "default_off_zero_events=true":  true,
+                                               "real_enable_gate_required=true":  true,
+                                               "real_notepad_launch_attempted=true":  true,
+                                               "process_ownership_verified=true":  true,
+                                               "visible_window_verified=true":  true,
+                                               "cleanup_completed=true":  true,
+                                               "verified_window_cleanup_completed=true":  true,
+                                               "residual_owned_process=false":  true,
+                                               "unsafe_launch_zero_events=true":  true,
+                                               "real_desktop_touched=true":  true,
+                                               "uncontrolled_actions_expanded=false":  true
+                                           },
+                      "final_answer_preview":  "Phase 104 controlled Windows Computer Use Notepad launch smoke acceptance passed.\n\nPHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK default_off_zero_events=true real_enable_gate_required=true real_notepad_launch_attempted=true process_ownership_verified=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false unsafe_launch_zero_events=true real_desktop_touched=true uncontrolled_actions_e",
+                      "final_answer_text_length":  513,
+                      "event_payload_text_length":  3138
+                  },
+    "event_count":  6,
+    "states":  [
+                   "permission_auto_approved",
+                   "agent_ready_for_user_prompt",
+                   "user_prompt_received",
+                   "permission_auto_approved",
+                   "final_answer_printed",
+                   "agent_ready_for_user_prompt"
+               ],
+    "event_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809\\events.jsonl",
+    "startup_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809\\01_startup.png",
+    "prompt_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809\\02_prompt_sent.png",
+    "final_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809\\03_final.png",
+    "copied_debug_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase104_controlled_notepad_launch_smoke-20260605_110809\\latest_run_readable.md",
+    "process_id":  5980,
+    "window_title":  "LearningAgent-Phase104-ControlledNotepadLaunchSmoke-110810"
+}
