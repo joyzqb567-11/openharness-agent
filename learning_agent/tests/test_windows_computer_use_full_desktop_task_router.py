@@ -120,6 +120,37 @@ class WindowsComputerUseFullDesktopTaskRouterTests(unittest.TestCase):  # 新增
                 self.assertFalse(intent.is_desktop_task)  # 新增代码+DesktopTaskRouter：断言开发类请求不是桌面任务；如果没有这一行，误报保护失效也不会被发现。
     # 新增代码+DesktopTaskRouter：函数段结束，test_git_test_docs_and_code_prompts_do_not_route_to_desktop_task 到此结束；如果没有这个边界说明，代码小白不容易看出误报保护测试范围。
 
+    def test_chinese_non_operational_paint_mentions_do_not_route(self) -> None:  # 新增代码+DesktopTaskRouter：函数段开始，验证中文只提到画图知识/介绍/技巧时不会进入桌面任务；如果没有这个测试，画图应用名里的单字“画”会继续制造误路由。
+        prompts = [  # 新增代码+DesktopTaskRouter：准备中文非操作性画图样本；如果没有这一行，审查指出的中文误报不会被系统覆盖。
+            "画图是什么软件",  # 新增代码+DesktopTaskRouter：覆盖询问软件是什么的知识问题；如果没有这一行，画图应用名可能被误当成打开或绘制动作。
+            "介绍一下 Windows 画图",  # 新增代码+DesktopTaskRouter：覆盖 Windows 画图介绍请求；如果没有这一行，介绍类请求可能被误送 GUI 路线。
+            "学习画图技巧",  # 新增代码+DesktopTaskRouter：覆盖学习技巧请求；如果没有这一行，学习类内容可能被误判为本地桌面操作。
+            "请教我画图技巧",  # 新增代码+DesktopTaskRouter：覆盖请教技巧请求；如果没有这一行，教学类内容可能被误判为真实桌面任务。
+        ]  # 新增代码+DesktopTaskRouter：结束中文非操作样本列表；如果没有这一行，测试数据结构不是合法 Python 列表。
+        for prompt in prompts:  # 新增代码+DesktopTaskRouter：逐个验证中文负例；如果没有这一行，样本列表不会被实际测试。
+            with self.subTest(prompt=prompt):  # 新增代码+DesktopTaskRouter：给每个中文负例单独标记子测试；如果没有这一行，失败时不容易定位具体误报句子。
+                intent = classify_desktop_task(prompt)  # 新增代码+DesktopTaskRouter：调用分类器处理当前中文负例；如果没有这一行，断言没有被测分类结果。
+                self.assertFalse(intent.is_desktop_task)  # 新增代码+DesktopTaskRouter：断言非操作性画图问题不是桌面任务；如果没有这一行，中文画图误报修复不会被锁住。
+    # 新增代码+DesktopTaskRouter：函数段结束，test_chinese_non_operational_paint_mentions_do_not_route 到此结束；如果没有这个边界说明，代码小白不容易看出中文画图负例范围。
+
+    def test_english_painting_and_script_mentions_do_not_route(self) -> None:  # 新增代码+DesktopTaskRouter：函数段开始，验证 painting/script 文字请求不会因为 paint 子串误入桌面任务；如果没有这个测试，英文 paint 裸子串误报会复发。
+        prompts = [  # 新增代码+DesktopTaskRouter：准备英文 paint 子串误报样本；如果没有这一行，painting 相关负例不会被覆盖。
+            "Tell me painting tips",  # 新增代码+DesktopTaskRouter：覆盖 painting 技巧请求；如果没有这一行，painting 里的 paint 子串可能继续触发 Paint 任务。
+            "Please generate a painting script",  # 新增代码+DesktopTaskRouter：覆盖生成 painting script 请求；如果没有这一行，脚本/内容生成请求可能被误判为 GUI 操作。
+        ]  # 新增代码+DesktopTaskRouter：结束英文 paint 子串负例列表；如果没有这一行，测试数据结构不是合法 Python 列表。
+        for prompt in prompts:  # 新增代码+DesktopTaskRouter：逐个验证英文负例；如果没有这一行，样本列表不会被实际测试。
+            with self.subTest(prompt=prompt):  # 新增代码+DesktopTaskRouter：给每个英文负例单独标记子测试；如果没有这一行，失败时不容易定位具体误报句子。
+                intent = classify_desktop_task(prompt)  # 新增代码+DesktopTaskRouter：调用分类器处理当前英文负例；如果没有这一行，断言没有被测分类结果。
+                self.assertFalse(intent.is_desktop_task)  # 新增代码+DesktopTaskRouter：断言 painting/script 内容请求不是桌面任务；如果没有这一行，英文 paint 子串误报修复不会被锁住。
+    # 新增代码+DesktopTaskRouter：函数段结束，test_english_painting_and_script_mentions_do_not_route 到此结束；如果没有这个边界说明，代码小白不容易看出英文 paint 子串负例范围。
+
+    def test_english_word_boundaries_avoid_contest_and_happy_substring_errors(self) -> None:  # 新增代码+DesktopTaskRouter：函数段开始，验证英文关键词按词边界匹配而不是裸子串；如果没有这个测试，test 命中 contest、app 命中 happy 的问题会复发。
+        contest_intent = classify_desktop_task("Open Contest Manager on my computer")  # 新增代码+DesktopTaskRouter：调用分类器处理 Contest Manager 本地打开请求；如果没有这一行，test 子串保护误拒无法被发现。
+        self.assertNotEqual(contest_intent.reason, "protected_non_desktop_development_request")  # 新增代码+DesktopTaskRouter：断言 Contest 不会被 test 子串当成开发类保护；如果没有这一行，审查指出的 Contest 阻塞问题可能继续存在。
+        happy_intent = classify_desktop_task("I am happy on my computer, start a timer")  # 新增代码+DesktopTaskRouter：调用分类器处理 happy 句子；如果没有这一行，app 子串误命中无法被发现。
+        self.assertFalse(happy_intent.is_desktop_task)  # 新增代码+DesktopTaskRouter：断言 happy 中的 app 不会导致桌面任务误判；如果没有这一行，普通情绪句可能被错误送去 GUI 路线。
+    # 新增代码+DesktopTaskRouter：函数段结束，test_english_word_boundaries_avoid_contest_and_happy_substring_errors 到此结束；如果没有这个边界说明，代码小白不容易看出英文词边界负例范围。
+
     def test_raw_prompt_is_not_exposed_in_public_router_summary(self) -> None:  # 新增代码+DesktopTaskRouter：函数段开始，验证公开字典和字符串摘要不包含完整原始 prompt；如果没有这个测试，分类结果可能把用户原话写进结构化结果。
         raw_prompt = "Use Paint on my local computer to draw a secret yellow mascot 12345."  # 新增代码+DesktopTaskRouter：准备带有独特敏感片段的原始 prompt；如果没有这一行，测试无法检查泄漏风险。
         intent = classify_desktop_task(raw_prompt)  # 新增代码+DesktopTaskRouter：调用分类器生成结构化意图；如果没有这一行，测试没有可检查的分类结果。
