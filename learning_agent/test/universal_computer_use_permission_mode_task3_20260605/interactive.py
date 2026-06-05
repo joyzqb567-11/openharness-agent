@@ -357,31 +357,40 @@ def _phase98_bool(value: Any) -> str:  # 新增代码+Phase98UniversalComputerUs
 # 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_phase98_bool 到此结束；如果没有这个边界说明，读者不容易看出布尔格式化范围。
 
 
+def _phase98_safe_int(value: Any, default: int = 0) -> int:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，把命令输出里的数字字段安全转成 int；如果没有这段函数，坏 store 结果可能让 `/computer use` formatter 崩溃。
+    try:  # 新增代码+Phase98UniversalComputerUseMode: 尝试按数字语义转换；如果没有这行代码，合法数字字符串无法被稳定显示。
+        return int(float(value))  # 新增代码+Phase98UniversalComputerUseMode: 兼容 int、float 和数字字符串；如果没有这行代码，ttl_seconds 或事件数可能因类型不同输出漂移。
+    except (TypeError, ValueError, OverflowError):  # 新增代码+Phase98UniversalComputerUseMode: 捕获 None、非数字字符串和无穷大；如果没有这行代码，异常会打断终端命令。
+        return int(default)  # 新增代码+Phase98UniversalComputerUseMode: 返回安全默认值；如果没有这行代码，坏数字字段没有降级路径。
+# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_phase98_safe_int 到此结束；如果没有这个边界说明，读者不容易看出命令数字容错范围。
+
+
 def _phase98_csv(value: Any) -> str:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，把动作列表转成人类可读逗号文本；如果没有这段函数，allowed_action_classes 会显示成难读的 Python 对象。
     items = value if isinstance(value, list) else []  # 新增代码+Phase98UniversalComputerUseMode: 只接受 list 输入；如果没有这行代码，坏状态可能让 join 崩溃。
     return ",".join(str(item) for item in items)  # 新增代码+Phase98UniversalComputerUseMode: 拼接动作类别；如果没有这行代码，permissions 和 mode 输出无法稳定展示动作面。
 # 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_phase98_csv 到此结束；如果没有这个边界说明，读者不容易看出列表格式化范围。
 
 
-def _format_computer_mode_result(result: dict[str, Any]) -> str:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer use` 模式结果；如果没有这段函数，normal/observe/full 输出会散落在命令分支里难维护。
-    return f"Computer Use Mode\n- mode={result.get('mode', '')}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- opened={_phase98_bool(result.get('opened', False))}\n- stopped={_phase98_bool(result.get('stopped', False))}\n- ttl_seconds={int(result.get('ttl_seconds', result.get('ttl_original_seconds', 0)) or 0)}\n- per_app_allowlist_required={_phase98_bool(result.get('per_app_allowlist_required', False))}\n- ordinary_apps_allowed_by_risk_policy={_phase98_bool(result.get('ordinary_apps_allowed_by_risk_policy', False))}\n- allowed_action_classes={_phase98_csv(result.get('allowed_action_classes', []))}\n- real_desktop_touched=false\n- low_level_event_count={int(result.get('low_level_event_count', 0) or 0)}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 新增代码+Phase98UniversalComputerUseMode: 返回稳定模式面板；如果没有这行代码，真实终端验收无法匹配 mode/full/ttl/零事件字段。
-# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_mode_result 到此结束；如果没有这个边界说明，读者不容易看出模式结果输出范围。
+def _format_computer_mode_result(result: dict[str, Any]) -> str:  # 修改代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer use` 模式结果并保留失败 decision；如果没有这段函数，full-confirm 错误只会显示空 mode 难排查。
+    decision_line = f"- decision={result.get('decision', '')}\n" if "decision" in result else ""  # 新增代码+Phase98UniversalComputerUseMode: 仅在 store 返回 decision 时追加原因码；如果没有这行代码，缺 token 或错 token 时终端看不到 mismatch 原因。
+    return f"Computer Use Mode\n- mode={result.get('mode', '')}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- opened={_phase98_bool(result.get('opened', False))}\n- stopped={_phase98_bool(result.get('stopped', False))}\n{decision_line}- ttl_seconds={_phase98_safe_int(result.get('ttl_seconds', result.get('ttl_original_seconds', 0)))}\n- per_app_allowlist_required={_phase98_bool(result.get('per_app_allowlist_required', False))}\n- ordinary_apps_allowed_by_risk_policy={_phase98_bool(result.get('ordinary_apps_allowed_by_risk_policy', False))}\n- allowed_action_classes={_phase98_csv(result.get('allowed_action_classes', []))}\n- real_desktop_touched=false\n- low_level_event_count={_phase98_safe_int(result.get('low_level_event_count', 0))}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 修改代码+Phase98UniversalComputerUseMode: 返回包含 decision 和安全数字转换的稳定模式面板；如果没有这行代码，真实终端验收无法匹配 full-confirm 失败原因和零事件字段。
+# 修改代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_mode_result 到此结束；如果没有这个边界说明，读者不容易看出模式结果输出和失败诊断范围。
 
 
-def _format_computer_full_request(result: dict[str, Any]) -> str:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer use --full` 强确认请求；如果没有这段函数，高风险 full 请求可能被用户误解成已经打开。
+def _format_computer_full_request(result: dict[str, Any]) -> str:  # 修改代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer use --full` 强确认请求并安全显示事件数；如果没有这段函数，高风险 full 请求可能被用户误解成已经打开。
     token = str(result.get("confirmation_token", "") or "")  # 新增代码+Phase98UniversalComputerUseMode: 读取确认 token；如果没有这行代码，输出无法告诉用户下一步命令。
-    return f"Computer Use Full Request\n- strong_confirmation_required={_phase98_bool(result.get('strong_confirmation_required', False))}\n- confirmation_token={token}\n- confirm_command=/computer use --full-confirm {token}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- opened={_phase98_bool(result.get('opened', False))}\n- real_desktop_touched=false\n- low_level_event_count={int(result.get('low_level_event_count', 0) or 0)}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 新增代码+Phase98UniversalComputerUseMode: 返回待确认面板；如果没有这行代码，full 请求会缺少 opened=false 和低层事件为零的安全证据。
-# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_full_request 到此结束；如果没有这个边界说明，读者不容易看出 full 请求输出范围。
+    return f"Computer Use Full Request\n- strong_confirmation_required={_phase98_bool(result.get('strong_confirmation_required', False))}\n- confirmation_token={token}\n- confirm_command=/computer use --full-confirm {token}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- opened={_phase98_bool(result.get('opened', False))}\n- real_desktop_touched=false\n- low_level_event_count={_phase98_safe_int(result.get('low_level_event_count', 0))}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 修改代码+Phase98UniversalComputerUseMode: 返回待确认面板并安全显示低层事件数；如果没有这行代码，full 请求会缺少 opened=false 和低层事件为零的安全证据。
+# 修改代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_full_request 到此结束；如果没有这个边界说明，读者不容易看出 full 请求输出范围。
 
 
-def _format_computer_permissions_result(result: dict[str, Any]) -> str:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer permissions` 权限摘要；如果没有这段函数，用户无法从终端快速查看本轮可做什么。
-    return f"Computer Use Permissions\n- mode={result.get('mode', '')}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- per_app_allowlist_required={_phase98_bool(result.get('per_app_allowlist_required', False))}\n- ordinary_apps_allowed_by_risk_policy={_phase98_bool(result.get('ordinary_apps_allowed_by_risk_policy', False))}\n- high_risk_requires_confirmation={_phase98_bool(result.get('high_risk_requires_confirmation', False))}\n- dangerous_target_terms_hidden={_phase98_bool(result.get('dangerous_target_terms_hidden', False))}\n- allowed_action_classes={_phase98_csv(result.get('allowed_action_classes', []))}\n- real_desktop_touched=false\n- low_level_event_count={int(result.get('low_level_event_count', 0) or 0)}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 新增代码+Phase98UniversalComputerUseMode: 返回稳定权限面板；如果没有这行代码，Task3 要求的安全字段会分散且容易漏。
-# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_permissions_result 到此结束；如果没有这个边界说明，读者不容易看出权限输出范围。
+def _format_computer_permissions_result(result: dict[str, Any]) -> str:  # 修改代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer permissions` 权限摘要并安全显示事件数；如果没有这段函数，用户无法从终端快速查看本轮可做什么。
+    return f"Computer Use Permissions\n- mode={result.get('mode', '')}\n- full_mode={_phase98_bool(result.get('full_mode', False))}\n- per_app_allowlist_required={_phase98_bool(result.get('per_app_allowlist_required', False))}\n- ordinary_apps_allowed_by_risk_policy={_phase98_bool(result.get('ordinary_apps_allowed_by_risk_policy', False))}\n- high_risk_requires_confirmation={_phase98_bool(result.get('high_risk_requires_confirmation', False))}\n- dangerous_target_terms_hidden={_phase98_bool(result.get('dangerous_target_terms_hidden', False))}\n- allowed_action_classes={_phase98_csv(result.get('allowed_action_classes', []))}\n- real_desktop_touched=false\n- low_level_event_count={_phase98_safe_int(result.get('low_level_event_count', 0))}\n- marker={result.get('marker', '')}\n- ok_token={result.get('ok_token', '')}\n"  # 修改代码+Phase98UniversalComputerUseMode: 返回稳定权限面板并安全显示低层事件数；如果没有这行代码，Task3 要求的安全字段会分散且容易漏。
+# 修改代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_permissions_result 到此结束；如果没有这个边界说明，读者不容易看出权限输出范围。
 
 
-def _format_computer_stop_result(stop_result: dict[str, Any]) -> str:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer stop` 模式停止结果；如果没有这段函数，用户看不到 mode session 是否真的 stopped。
-    return f"Computer Use Stop\n- stopped={_phase98_bool(stop_result.get('stopped', False))}\n- real_desktop_touched=false\n- low_level_event_count={int(stop_result.get('low_level_event_count', 0) or 0)}\n- marker={stop_result.get('marker', '')}\n- ok_token={stop_result.get('ok_token', '')}\n"  # 新增代码+Phase98UniversalComputerUseMode: 返回稳定停止面板；如果没有这行代码，stop 只靠旧 abort 输出无法证明模式已停止。
-# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_stop_result 到此结束；如果没有这个边界说明，读者不容易看出 stop 输出范围。
+def _format_computer_stop_result(stop_result: dict[str, Any]) -> str:  # 修改代码+Phase98UniversalComputerUseMode: 函数段开始，格式化 `/computer stop` 模式停止结果并安全显示事件数；如果没有这段函数，用户看不到 mode session 是否真的 stopped。
+    return f"Computer Use Stop\n- stopped={_phase98_bool(stop_result.get('stopped', False))}\n- real_desktop_touched=false\n- low_level_event_count={_phase98_safe_int(stop_result.get('low_level_event_count', 0))}\n- marker={stop_result.get('marker', '')}\n- ok_token={stop_result.get('ok_token', '')}\n"  # 修改代码+Phase98UniversalComputerUseMode: 返回稳定停止面板并安全显示低层事件数；如果没有这行代码，stop 只靠旧 abort 输出无法证明模式已停止。
+# 修改代码+Phase98UniversalComputerUseMode: 函数段结束，_format_computer_stop_result 到此结束；如果没有这个边界说明，读者不容易看出 stop 输出范围。
 
 
 def run_computer_terminal_command(workspace: Path, user_input: str) -> str:  # 新增代码+Phase31ComputerUseLockAbortEvidence: 函数段开始，执行 `/computer` 子命令；如果没有这段函数，真实用户无法在终端查看或触发桌面急停。

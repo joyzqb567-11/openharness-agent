@@ -24,6 +24,14 @@ def _bool_token(value: Any) -> str:  # 新增代码+Phase51ComputerStatusUI: 函
 # 新增代码+Phase51ComputerStatusUI: 函数段结束，_bool_token 到此结束；如果没有这个边界说明，读者不容易看出布尔格式范围。
 
 
+def _safe_int(value: Any, default: int = 0) -> int:  # 新增代码+Phase98UniversalComputerUseMode: 函数段开始，把坏状态里的数字安全转成 int；如果没有这段函数，旧 snapshot 的 ttl_seconds 字符串会让 `/computer status` 崩溃。
+    try:  # 新增代码+Phase98UniversalComputerUseMode: 尝试按数字语义转换；如果没有这行代码，合法的字符串数字也会被粗暴当成坏值。
+        return int(float(value))  # 新增代码+Phase98UniversalComputerUseMode: 先转 float 再转 int 兼容 `"12"` 和 `"12.0"`；如果没有这行代码，旧 JSON 中的数字字符串无法正常显示。
+    except (TypeError, ValueError, OverflowError):  # 新增代码+Phase98UniversalComputerUseMode: 捕获 None、非数字字符串和无穷大等坏值；如果没有这行代码，坏 TTL 会继续抛异常中断终端。
+        return int(default)  # 新增代码+Phase98UniversalComputerUseMode: 返回安全默认值；如果没有这行代码，坏状态无法降级成 ttl_seconds=0。
+# 新增代码+Phase98UniversalComputerUseMode: 函数段结束，_safe_int 到此结束；如果没有这个边界说明，读者不容易看出 Phase98 数字容错范围。
+
+
 def _short_text(value: Any, max_chars: int = 160) -> str:  # 新增代码+Phase51ComputerStatusUI: 函数段开始，把长 reason/path 压成单行；如果没有这段函数，状态面板会被长文本刷屏。
     text = str(value or "").replace("\r", "\\r").replace("\n", "\\n")  # 新增代码+Phase51ComputerStatusUI: 转义换行保持单行；如果没有这行代码，终端布局会被状态值打散。
     return text if len(text) <= max_chars else text[: max_chars - 3] + "..."  # 新增代码+Phase51ComputerStatusUI: 超长时截断；如果没有这行代码，真实终端截图不易读。
@@ -94,7 +102,7 @@ def render_computer_status(snapshot: dict[str, Any]) -> str:  # 修改代码+Pha
     lines.append(f"- state=locked:{_bool_token(lock.get('locked'))} stale:{_bool_token(lock.get('stale'))} abort:{_bool_token(lock.get('abort_requested'))} owner={_short_text(lock.get('owner_session_id', ''), 80)}")  # 新增代码+Phase51ComputerStatusUI: 一行显示锁和急停；如果没有这行代码，用户无法快速判断是否能继续。
     lines.append(f"- next={next_command} : first safe command for current Computer state")  # 新增代码+Phase51ComputerStatusUI: 输出下一步建议；如果没有这行代码，小白用户看完状态仍不知道输入什么。
     lines.append("Computer Use Mode")  # 新增代码+Phase98UniversalComputerUseMode: 输出 Phase98 模式摘要标题；如果没有这行代码，用户看不出下面几行是 `/computer use` 权限模式。
-    lines.append(f"- mode={mode_session.get('mode', '')} full_mode={_bool_token(mode_session.get('full_mode'))} ttl_seconds={int(mode_session.get('ttl_seconds', 0) or 0)}")  # 新增代码+Phase98UniversalComputerUseMode: 显示当前模式、full 标记和 TTL；如果没有这行代码，用户不知道当前是 normal/observe/full/stopped 还是多久过期。
+    lines.append(f"- mode={mode_session.get('mode', '')} full_mode={_bool_token(mode_session.get('full_mode'))} ttl_seconds={_safe_int(mode_session.get('ttl_seconds', 0))}")  # 修改代码+Phase98UniversalComputerUseMode: 用安全转换显示当前模式、full 标记和 TTL；如果没有这行代码，旧坏状态里的非数字 TTL 会让 `/computer status` 崩溃。
     lines.append(f"- per_app_allowlist_required={_bool_token(mode_session.get('per_app_allowlist_required'))} ordinary_apps_allowed_by_risk_policy={_bool_token(mode_session.get('ordinary_apps_allowed_by_risk_policy'))}")  # 新增代码+Phase98UniversalComputerUseMode: 显示不依赖应用白名单和普通应用风险策略；如果没有这行代码，状态页会继续让人误以为要按应用逐个授权。
     lines.append(f"- grants=approval_apps:{approval.get('approval_granted_app_count', 0)} terminal_granted_app_count={terminal_grants.get('granted_app_count', 0)} terminal_scope={terminal_grants.get('grant_scope', 'terminal_ui_only')}")  # 新增代码+Phase51ComputerStatusUI: 一行显示审批和终端授权草案数量；如果没有这行代码，grant/revoke 结果不可扫描。
     lines.append(f"- persistent_grants=active:{persistent_grants.get('active_count', 0)} revoked:{persistent_grants.get('revoked_count', 0)} expired:{persistent_grants.get('expired_count', 0)}")  # 新增代码+Phase60PersistentGrants: 一行显示持久授权摘要；如果没有这行代码，用户看不到当前真正可评估 grant 的生命周期状态。
