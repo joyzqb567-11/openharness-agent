@@ -5017,3 +5017,30 @@ Boundary:
 - Task 5 wires ordinary prompts into the recording-mode runtime only.
 - Task 5 still does not perform real Paint drawing on the desktop.
 - Final maturity remains blocked on Task 6-8: real GUI execution, strict visible-terminal acceptance, and final maturity matrix.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 6
+
+Status: implemented with focused and adjacent regression verification passed.
+
+Completed:
+- Added `learning_agent/computer_use/drawing_primitives.py`.
+- Added a reusable `build_pikachu_drag_plan` primitive that returns drag paths, colors, elements, and event counts without writing an image file.
+- Added `expand_drag_path_to_low_level_events` so a drawing path becomes mouse move/down/up events.
+- Wired `learning_agent/computer_use/generic_input_actions.py` to reuse the new drawing primitive expansion for `build_drag_path`.
+- Wired `learning_agent/computer_use/sendinput_dispatcher.py` so dispatcher can expand a `drag_path` event into low-level mouse events.
+- Added Task 6 regression tests proving the Pikachu plan is drag-path based, not a direct image cheat, and that drag paths still require verified window identity before action.
+- Backed up Task 6 code under `learning_agent/test/computer_use_full_desktop_task_router_task6_20260605/`.
+
+Verification:
+- Red test first failed with `ModuleNotFoundError: No module named 'learning_agent.computer_use.drawing_primitives'`.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` passed with 31 tests.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_generic_input_actions_phase71` passed with 5 tests.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_sendinput_dispatcher_phase47` passed with 4 tests.
+- `python -m py_compile learning_agent\computer_use\drawing_primitives.py learning_agent\computer_use\generic_input_actions.py learning_agent\computer_use\sendinput_dispatcher.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py` passed.
+
+Boundary:
+- Task 6 adds generic drawing primitive evidence and dispatcher expansion.
+- Task 6 still uses recording/fake sender paths in automated tests and does not touch the real desktop.
+- Final maturity remains blocked on Task 7 strict visible-terminal Paint/Pikachu acceptance and Task 8 final matrix.
