@@ -260,6 +260,7 @@ class LearningAgent:  # 作用: 教学版最小 agent 主类
         self.loaded_tool_names: set[str] = set()  # 新增代码+ToolArchitectureV2: 保存已经被加载进当前工具池的 deferred 工具名；若没有这行代码，agent 无法区分完整 catalog 和本轮可见工具池
         self.tool_policy = ToolPolicy()  # 新增代码+ToolPolicyV2: 保存工具策略入口供工具池、搜索和 select 复用；若没有这行代码，LearningAgent 各处会继续手写不一致的可见性规则
         self.tool_policy_context = ToolPolicyContext()  # 新增代码+ToolPolicyV2: 保存当前 agent 的策略上下文；若没有这行代码，deny/skill/workflow 状态无法在 LearningAgent 内长期维护
+        self.desktop_task_context: dict[str, Any] = {"active": False}  # ????+DesktopTaskPolicy????????????????????????????_bash_atom ?????????????????????
         self.prompt_registry = build_default_prompt_registry()  # 新增代码+PromptArchitectureV1: 保存默认提示词注册表供每轮 ContextAssembler 使用；若没有这行代码，LearningAgent 无法按 block priority 装配系统提示词
         self.last_prompt_surface_report = PromptSurfaceReport.empty()  # 新增代码+PromptArchitectureV1: 初始化空的提示词表面报告；若没有这行代码，测试或用户在首轮前读取报告会遇到属性缺失
         self.prompt_soft_token_limit = prompt_soft_token_limit  # 新增代码+PromptArchitectureV1: 保存本 agent 的提示词软预算；若没有这行代码，_build_initial_messages 无法把配置传给 ContextAssembler
@@ -388,6 +389,31 @@ class LearningAgent:  # 作用: 教学版最小 agent 主类
         self._write_debug_event(run_id=run_id, event="safety_stop", payload={"text": safety_message, "max_turns": max_turns})  # 新增代码: 记录因为达到最大循环次数而停止
         return safety_message  # 修改代码: 超过循环上限时返回安全提示
 
+    def _desktop_task_policy_context_from_prompt(self, user_input: str) -> dict[str, Any]:  # 新增代码+DesktopTaskPolicy：函数段开始，把用户自然语言 prompt 转成脱敏桌面任务策略上下文；如果没有这段函数，run_events 无法在真实模型工具循环前自动设置 active，作者意图是复用 Task 2 分类器而不保存原始 prompt，本函数与 run_events 和 _bash_atom 配合到 return 结束。
+        try:  # 新增代码+DesktopTaskPolicy：优先按包运行模式导入桌面任务分类器；如果没有这一行，unittest 和包启动路径无法复用 Task 2 分类逻辑。
+            from learning_agent.computer_use.desktop_task_router import classify_desktop_task  # 新增代码+DesktopTaskPolicy：导入自然语言桌面任务分类函数；如果没有这一行，策略上下文只能靠手动 monkeypatch。
+        except ModuleNotFoundError as error:  # 新增代码+DesktopTaskPolicy：兼容直接脚本运行时 learning_agent 包路径不可用的情况；如果没有这一行，bat 入口可能因包名前缀失败。
+            if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.desktop_task_router"}:  # 新增代码+DesktopTaskPolicy：只对目标包路径缺失做 fallback；如果没有这一行，分类器内部真实 bug 会被误吞。
+                raise  # 新增代码+DesktopTaskPolicy：重新抛出非目标导入错误；如果没有这一行，排查分类器内部问题会很困难。
+            from computer_use.desktop_task_router import classify_desktop_task  # 新增代码+DesktopTaskPolicy：脚本模式下从本地 computer_use 包导入分类函数；如果没有这一行，start_oauth_agent.bat 可能无法加载 Task 2 分类器。
+        intent = classify_desktop_task(user_input)  # 新增代码+DesktopTaskPolicy：用同一套桌面任务分类器判断当前 prompt；如果没有这一行，active 状态会和 Task 2 路由结果分裂。
+        return {  # 新增代码+DesktopTaskPolicy：返回脱敏上下文字典；如果没有这一行，_bash_atom 无法从统一字段读取 active 和目标信息。
+            "active": bool(intent.is_desktop_task),  # 新增代码+DesktopTaskPolicy：把是否桌面任务写入 active；如果没有这一项，bash 策略不会知道何时必须拦截脚本绕路。
+            "reason": intent.reason,  # 新增代码+DesktopTaskPolicy：保存分类原因而不是原始 prompt；如果没有这一项，日志难以解释为什么开启或关闭桌面任务门禁。
+            "target_app_hint": intent.target_app_hint,  # 新增代码+DesktopTaskPolicy：保存目标应用提示；如果没有这一项，后续 runtime 无法复用本次识别到的 Paint/mspaint 线索。
+            "task_goal": intent.task_goal,  # 新增代码+DesktopTaskPolicy：保存脱敏任务目标摘要；如果没有这一项，后续 GUI runtime 缺少稳定目标类型。
+            "requires_gui_actions": bool(intent.requires_gui_actions),  # 新增代码+DesktopTaskPolicy：保存是否需要 GUI 动作；如果没有这一项，策略无法区分本地应用观察和真正操作。
+            "raw_prompt_included": bool(intent.raw_prompt_included),  # 新增代码+DesktopTaskPolicy：明确记录没有保存原始 prompt；如果没有这一项，后续审计无法确认脱敏边界。
+        }  # 新增代码+DesktopTaskPolicy：上下文字典结束；如果没有这一行，Python 字典语法不完整。
+    # 新增代码+DesktopTaskPolicy：函数段结束，_desktop_task_policy_context_from_prompt 到此结束；如果没有这个边界说明，代码小白不容易看出上下文构造范围。
+
+    def _restore_desktop_task_policy_context(self, previous_context: dict[str, Any]) -> None:  # 新增代码+DesktopTaskPolicy：函数段开始，恢复 run_events 进入前的桌面任务上下文；如果没有这段函数，桌面任务 active 可能污染下一轮普通任务，作者意图是让上下文生命周期严格绑定单次 run_events，本函数与 run_events 的 finally 配合到赋值结束。
+        if isinstance(previous_context, dict):  # 新增代码+DesktopTaskPolicy：只在旧上下文确实是字典时原样恢复；如果没有这一行，异常形状可能再次污染 desktop_task_context。
+            self.desktop_task_context = copy.deepcopy(previous_context)  # 新增代码+DesktopTaskPolicy：深拷贝恢复旧上下文避免共享可变对象；如果没有这一行，后续修改可能影响保存的旧值。
+            return  # 新增代码+DesktopTaskPolicy：恢复完成后直接返回；如果没有这一行，下面的兜底 inactive 会覆盖合法旧上下文。
+        self.desktop_task_context = {"active": False}  # 新增代码+DesktopTaskPolicy：旧上下文不是字典时兜底恢复为 inactive；如果没有这一行，异常状态可能让下一轮 bash 策略崩溃。
+    # 新增代码+DesktopTaskPolicy：函数段结束，_restore_desktop_task_policy_context 到此结束；如果没有这个边界说明，代码小白不容易看出上下文恢复范围。
+
     def run_events(self, user_input: str, max_turns: int | None = None):  # 新增代码+Stage15C: 新增事件流主循环；若没有这行代码，UI、HTTP bridge 和 transcript 无法观察运行过程。
         if max_turns is not None and max_turns < 1:  # 新增代码+Stage15C: 保留旧 run 的非法轮次校验；若没有这行代码，0 或负数会产生难懂行为。
             raise ValueError("max_turns 必须是正整数，或使用 None 表示不按固定轮次主动停止。")  # 新增代码+Stage15C: 给出旧兼容错误；若没有这行代码，调用方不知道正确 max_turns 格式。
@@ -412,7 +438,9 @@ class LearningAgent:  # 作用: 教学版最小 agent 主类
             record = SessionRecord(session_id=session_id, run_id=run_id, user_input=user_input, messages=copy.deepcopy(session_messages), tool_calls=copy.deepcopy(session_tool_calls), tool_results=copy.deepcopy(session_tool_results), permission_decisions=copy.deepcopy(permission_decisions), final_answer=final_answer, artifacts=list(self.active_artifacts))  # 新增代码+Stage15G: 构造会话摘要对象；若没有这行代码，store 没有完整数据可写。
             return session_store.save_summary(record)  # 新增代码+Stage15G: 写入 summary.json 并返回路径；若没有这行代码，session 摘要不会落盘。
 
+        previous_desktop_task_context = copy.deepcopy(self.desktop_task_context) if isinstance(getattr(self, "desktop_task_context", {}), dict) else {"active": False}  # ????+DesktopTaskPolicy??????? run_events ??????????????????finally ??? active ??????
         try:  # 新增代码+Stage15C: 捕获主循环异常并转成 run_failed 事件；若没有这行代码，事件消费者会看到生成器直接崩溃。
+            self.desktop_task_context = self._desktop_task_policy_context_from_prompt(user_input)  # ????+DesktopTaskPolicy?????????????????? prompt ?? active???????????????? _bash_atom ??? inactive ???????
             yield emit("run_started", {"user_input": user_input})  # 新增代码+Stage15C: 发出运行开始事件；若没有这行代码，UI 无法知道任务何时开始。
             if self._stop_requested():  # 新增代码+Stage15C: 在构造上下文前检查取消信号；若没有这行代码，取消后的子 agent 仍会继续请求模型。
                 yield emit("run_completed", {"text": "任务已停止：收到取消请求。", "reason": "stop_requested"})  # 新增代码+Stage15C: 把取消作为完成事件返回；若没有这行代码，事件消费者拿不到取消提示。
@@ -497,6 +525,8 @@ class LearningAgent:  # 作用: 教学版最小 agent 主类
             failure_text = f"任务失败：{error}"  # 新增代码+Stage15C: 构造可读失败文本；若没有这行代码，事件消费者无法显示异常原因。
             yield emit("run_failed", {"text": failure_text, "error": str(error), "error_type": type(error).__name__})  # 新增代码+Stage15C: 发出失败事件并写 transcript；若没有这行代码，失败无法恢复和审计。
 
+        finally:  # ????+DesktopTaskPolicy?????????? return????????????????????????active ???????????????
+            self._restore_desktop_task_policy_context(previous_desktop_task_context)  # ????+DesktopTaskPolicy???? run_events ????????????????????????? bash ???????? active?
     def _final_answer_retry_message(self, user_input: str, answer_text: str) -> str | None:  # 新增代码+最终答案完整性: 生成“最终回答缺少用户指定 Markdown 标题”时的单次重写提示；若没有这行代码，run() 会调用不存在的方法并导致 HTTP bridge 真实测试 500
         required_headings: list[str] = []  # 新增代码+最终答案完整性: 保存用户原话里明确写出的 Markdown 标题；若没有这行代码，后续无法知道要检查哪些标题
         for raw_line in user_input.splitlines():  # 新增代码+最终答案完整性: 逐行扫描用户输入；若没有这行代码，无法从多行需求里提取“## 天气来源”这类标题
@@ -2709,10 +2739,23 @@ class LearningAgent:  # 作用: 教学版最小 agent 主类
         path.write_text(updated_text, encoding="utf-8")  # 新增代码+极简工具面: 把替换后的文本写回文件；若没有这行代码，修改只存在内存里
         return f"edit 成功：已更新 {path}，替换次数：{match_count if replace_all else 1}"  # 新增代码+极简工具面: 返回成功摘要；若没有这行代码，模型无法确认编辑结果
 
-    def _bash_atom(self, arguments: dict[str, Any]) -> str:  # 新增代码+极简工具面: 实现 bash 原子工具；若没有这行代码，首轮 bash schema 只能被看见但无法执行
+    def _bash_atom(self, arguments: dict[str, Any]) -> str:  # 修改代码+DesktopTaskPolicy：函数段开始，实现 bash 原子工具并在桌面任务 active 时先检查脚本制品策略；如果没有这段函数，首轮 bash schema 只能被看见但无法执行，作者意图是让命令执行前先经过 Task 3 GUI 路线门禁，本函数与 desktop_task_policy 配合到 return 结束。
         command = str(arguments.get("command", "")).strip()  # 新增代码+极简工具面: 从参数读取并清理命令文本；若没有这行代码，bash 不知道要执行什么命令
         if not command:  # 新增代码+极简工具面: 检查命令是否为空；若没有这行代码，空命令会产生模糊 shell 行为
             return "bash 失败：缺少 command 参数。"  # 新增代码+极简工具面: 返回清楚缺参错误；若没有这行代码，模型难以修正调用
+        desktop_task_context = getattr(self, "desktop_task_context", {})  # 新增代码+DesktopTaskPolicy：读取当前 agent 的桌面任务上下文；如果没有这一行，轻量测试对象或旧实例无法被安全识别为 active/inactive。
+        desktop_task_active = bool(desktop_task_context.get("active", False)) if isinstance(desktop_task_context, dict) else False  # 新增代码+DesktopTaskPolicy：只从字典上下文读取 active 布尔值；如果没有这一行，异常上下文形状可能让 bash 工具崩溃。
+        if desktop_task_active:  # 新增代码+DesktopTaskPolicy：只在桌面任务激活时启用命令策略；如果没有这一行，普通开发命令也会承担额外拦截逻辑。
+            try:  # 新增代码+DesktopTaskPolicy：优先按包运行模式导入策略函数；如果没有这一行，start_oauth_agent.bat 和 unittest 的导入环境无法兼容处理。
+                from learning_agent.computer_use.desktop_task_policy import evaluate_desktop_bash_command  # 新增代码+DesktopTaskPolicy：导入桌面任务 bash 策略函数；如果没有这一行，_bash_atom 无法在权限请求前识别脚本最终制品路线。
+            except ModuleNotFoundError as error:  # 新增代码+DesktopTaskPolicy：兼容直接脚本运行时 learning_agent 包路径不可用的情况；如果没有这一行，脚本模式可能因为包名前缀失败。
+                if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.desktop_task_policy"}:  # 新增代码+DesktopTaskPolicy：只对目标包路径缺失做 fallback；如果没有这一行，策略模块内部真实导入错误会被误吞。
+                    raise  # 新增代码+DesktopTaskPolicy：重新抛出非目标导入错误；如果没有这一行，排查策略模块内部 bug 会很困难。
+                from computer_use.desktop_task_policy import evaluate_desktop_bash_command  # 新增代码+DesktopTaskPolicy：脚本模式下从本地 computer_use 包导入策略函数；如果没有这一行，bat 入口可能无法加载 Task 3 策略。
+            desktop_policy_result = evaluate_desktop_bash_command(command=command, desktop_task_active=desktop_task_active)  # 新增代码+DesktopTaskPolicy：在 cwd 解析、权限请求和执行命令前评估策略；如果没有这一行，危险命令会继续走到真实 shell 流程。
+            if not bool(desktop_policy_result.get("allowed", False)):  # 新增代码+DesktopTaskPolicy：检查策略是否拒绝当前命令；如果没有这一行，命中禁止脚本制品路线也不会被拦住。
+                desktop_policy_text = json.dumps(desktop_policy_result, ensure_ascii=False, indent=2)  # 新增代码+DesktopTaskPolicy：把结构化策略结果转成中文友好的 JSON；如果没有这一行，拒绝文本缺少可复盘细节。
+                return f"bash 拒绝：{desktop_policy_result.get('decision', 'desktop_task_requires_gui_route')}\n原因：{desktop_policy_result.get('reason', '')}\n策略详情：{desktop_policy_text}"  # 新增代码+DesktopTaskPolicy：直接返回清晰拒绝，不请求权限也不执行命令；如果没有这一行，脚本生成最终图片制品路线仍可能进入真实终端。
         raw_cwd = str(arguments.get("cwd", "") or "").strip()  # 新增代码+极简工具面: 读取可选工作目录；若没有这行代码，模型无法指定子目录执行命令
         cwd_path = self._resolve_workspace_path(raw_cwd) if raw_cwd else self.workspace  # 新增代码+极简工具面: 将 cwd 限制在工作区内或默认根目录；若没有这行代码，命令可能在未知目录执行
         if cwd_path is None:  # 新增代码+极简工具面: 检查 cwd 是否越界；若没有这行代码，bash 可能在工作区外执行命令
