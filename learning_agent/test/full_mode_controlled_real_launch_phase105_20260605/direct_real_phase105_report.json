@@ -1,0 +1,1507 @@
+{
+  "marker": "PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY",
+  "ok_token": "PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK",
+  "model": "phase105_full_mode_controlled_real_launch",
+  "passed": true,
+  "default_off_zero_events": true,
+  "full_gate_passes_enable_real_launch": true,
+  "real_enable_gate_required": true,
+  "real_launch_requested": true,
+  "real_enable_gate_passed": true,
+  "real_full_launch_attempted": true,
+  "visible_window_verified": true,
+  "cleanup_completed": true,
+  "verified_window_cleanup_completed": true,
+  "residual_owned_process": false,
+  "real_desktop_touched": true,
+  "uncontrolled_actions_expanded": false,
+  "report_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\reports\\phase105_full_mode_controlled_real_launch_report.json",
+  "default_report": {
+    "ok": true,
+    "marker": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY",
+    "ok_token": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK",
+    "model": "phase93_universal_live_execution_gate",
+    "prompt_sha256_16": "366a0828750b19fb",
+    "prompt_text_included": false,
+    "prompt_length": 44,
+    "raw_prompt_hidden": true,
+    "phase92_model": "phase92_universal_windows_computer_use_mode",
+    "phase92_ok": true,
+    "phase92_prompt_digest": "366a0828750b19fb",
+    "loop": {
+      "model": "phase68_windows_closed_loop_executor",
+      "events": [
+        {
+          "state": "observed",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "observation": {
+            "observation_id": "phase93-observation-1",
+            "operation": "observe_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "action_result": {
+            "acted": false,
+            "operation": "observe_generic_target",
+            "action_kind": "observe",
+            "action_class": "observe_screen",
+            "decision": "observe_step_no_dispatch",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true,
+            "real_dispatch_allowed": false,
+            "real_dispatch_performed": false,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": false,
+            "full_mode_action": false,
+            "full_mode_action_ready": false,
+            "observation_id": "phase93-observation-1",
+            "write_action": false
+          },
+          "write_action": false
+        },
+        {
+          "state": "observed",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "observation": {
+            "observation_id": "phase93-observation-2",
+            "operation": "launch_app_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "action_result": {
+            "acted": true,
+            "operation": "launch_app_generic_target",
+            "action_kind": "write",
+            "action_class": "launch_app",
+            "decision": "authorized_recording_dispatch",
+            "safety_decision": {
+              "allowed": true,
+              "decision": "allowed_by_computer_use_mode",
+              "action": "launch_app",
+              "target_summary": {
+                "app": "generic_windows_app.exe",
+                "process": "generic_windows_app.exe",
+                "title_preview": "LearningAgent Phase93 Generic Windows App",
+                "window_id": "hwnd:9301",
+                "display_id": "DISPLAY1"
+              },
+              "mode_decision": {
+                "allowed": true,
+                "decision": "allowed_by_computer_use_mode",
+                "low_level_event_count": 0,
+                "marker": "PHASE98_COMPUTER_USE_MODE_READY",
+                "ok_token": "PHASE98_COMPUTER_USE_MODE_OK"
+              },
+              "session_id": "phase93-1780630520728",
+              "low_level_event_count": 0,
+              "ready_for_low_level_send": true,
+              "mode_session_used": true,
+              "per_app_allowlist_required": false,
+              "ordinary_apps_allowed_by_risk_policy": true,
+              "safety_boundary_model": "phase72_windows_real_app_safety_boundary",
+              "model": "phase72_windows_real_app_safety_boundary",
+              "marker": "PHASE72_REAL_APP_SAFETY_BOUNDARY_READY",
+              "controlled_actions_expansion": true,
+              "uncontrolled_actions_expanded": false
+            },
+            "launch_recording_result": {
+              "ok": true,
+              "operation": "launch_app",
+              "recording_only": true,
+              "real_dispatch_performed": false,
+              "low_level_event_count": 0,
+              "target_app": "notepad"
+            },
+            "controlled_launch_candidate_ready": true,
+            "controlled_launch_result": {
+              "ok": true,
+              "decision": "real_app_launch_disabled_by_default",
+              "controlled_launch_candidate_ready": true,
+              "safe_start_process_plan": true,
+              "real_app_launch_default_disabled": true,
+              "backend_launch_reaches_launcher": false,
+              "real_dispatch_performed": false,
+              "real_desktop_touched": false,
+              "low_level_event_count": 0,
+              "unsafe_launch_zero_events": false,
+              "uncontrolled_actions_expanded": false,
+              "plan": {
+                "app_name": "notepad",
+                "executable": "notepad.exe",
+                "arguments": [],
+                "launch_verb": "Start-Process",
+                "safe_to_launch": true,
+                "refusal_reason": "",
+                "changes_registry": false,
+                "changes_system_settings": false,
+                "requires_admin": false,
+                "uses_shell_string": false,
+                "actions_expanded": false
+              }
+            },
+            "real_app_launch_default_disabled": true,
+            "backend_launch_reaches_launcher": false,
+            "real_desktop_touched": false,
+            "high_level_event_count": 1,
+            "input_event_count": 0,
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true,
+            "real_dispatch_allowed": false,
+            "real_dispatch_performed": false,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": true,
+            "full_mode_action": true,
+            "full_mode_action_ready": true,
+            "observation_id": "phase93-observation-2",
+            "controlled_real_launch_requested": false,
+            "controlled_real_launch_target_allowed": true,
+            "controlled_real_launch_gate_passed": false,
+            "controlled_launch_test_file": "",
+            "write_action": true
+          },
+          "write_action": true
+        },
+        {
+          "state": "verified",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "verification": {
+            "passed": true,
+            "checked_operation": "launch_app_generic_target",
+            "observation_id": "phase93-observation-2",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true
+          },
+          "write_action": true,
+          "passed": true
+        },
+        {
+          "state": "observed",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "observation": {
+            "observation_id": "phase93-observation-3",
+            "operation": "verify_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "decision": "verify"
+        },
+        {
+          "state": "verified",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "verification": {
+            "passed": true,
+            "checked_operation": "verify_generic_target",
+            "observation_id": "phase93-observation-3",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true
+          },
+          "write_action": false,
+          "passed": true
+        },
+        {
+          "state": "stopped",
+          "reason": "completed"
+        }
+      ],
+      "event_states": [
+        "observed",
+        "decided",
+        "acted",
+        "observed",
+        "decided",
+        "acted",
+        "verified",
+        "observed",
+        "decided",
+        "verified",
+        "stopped"
+      ],
+      "closed_loop_execution": true,
+      "post_action_verification": true,
+      "failure_recovery": false,
+      "blind_coordinate_chain_blocked": true,
+      "actions_expanded": false,
+      "stopped_reason": "completed"
+    },
+    "loop_event_count": 11,
+    "real_actions_requested": true,
+    "real_action_decision": "authorized_recording_only",
+    "real_action_blocked_decision": "",
+    "authorized_recording_loop_ready": true,
+    "recording_dispatch_only": true,
+    "real_dispatch_performed": false,
+    "real_desktop_touched": false,
+    "low_level_event_count": 0,
+    "mode_session_used": true,
+    "full_mode_session_used": true,
+    "full_mode_action_ready": true,
+    "full_mode_action_classes": [
+      "launch_app"
+    ],
+    "per_app_allowlist_required": false,
+    "ordinary_apps_allowed_by_risk_policy": true,
+    "uses_phase92_universal_runtime": true,
+    "single_universal_live_loop": true,
+    "prompt_to_observe_plan_act_verify": true,
+    "no_per_app_controller": true,
+    "representative_apps_are_acceptance_only": true,
+    "uses_closed_loop_executor": true,
+    "uses_generic_action_layer": true,
+    "uses_real_app_safety_boundary": true,
+    "uses_mode_session_gate": true,
+    "uses_production_host_adapter": true,
+    "requires_explicit_user_authorization": true,
+    "real_actions_default_disabled": true,
+    "uncontrolled_actions_expanded": false,
+    "controlled_real_launch_default_disabled": true,
+    "controlled_real_launch_requested": false,
+    "controlled_real_launch_gate_passed": false,
+    "full_mode_controlled_real_launch_ready": false,
+    "real_dispatch_allowed": false
+  },
+  "enabled_report": {
+    "ok": true,
+    "marker": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY",
+    "ok_token": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK",
+    "model": "phase93_universal_live_execution_gate",
+    "prompt_sha256_16": "df6d856a64e04b4f",
+    "prompt_text_included": false,
+    "prompt_length": 42,
+    "raw_prompt_hidden": true,
+    "phase92_model": "phase92_universal_windows_computer_use_mode",
+    "phase92_ok": true,
+    "phase92_prompt_digest": "df6d856a64e04b4f",
+    "loop": {
+      "model": "phase68_windows_closed_loop_executor",
+      "events": [
+        {
+          "state": "observed",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "observation": {
+            "observation_id": "phase93-observation-1",
+            "operation": "observe_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "action_result": {
+            "acted": false,
+            "operation": "observe_generic_target",
+            "action_kind": "observe",
+            "action_class": "observe_screen",
+            "decision": "observe_step_no_dispatch",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true,
+            "real_dispatch_allowed": false,
+            "real_dispatch_performed": false,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": false,
+            "full_mode_action": false,
+            "full_mode_action_ready": false,
+            "observation_id": "phase93-observation-1",
+            "write_action": false
+          },
+          "write_action": false
+        },
+        {
+          "state": "observed",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "observation": {
+            "observation_id": "phase93-observation-2",
+            "operation": "launch_app_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "action_result": {
+            "acted": true,
+            "operation": "launch_app_generic_target",
+            "action_kind": "write",
+            "action_class": "launch_app",
+            "decision": "authorized_controlled_real_launch",
+            "safety_decision": {
+              "allowed": true,
+              "decision": "allowed_by_computer_use_mode",
+              "action": "launch_app",
+              "target_summary": {
+                "app": "generic_windows_app.exe",
+                "process": "generic_windows_app.exe",
+                "title_preview": "LearningAgent Phase93 Generic Windows App",
+                "window_id": "hwnd:9301",
+                "display_id": "DISPLAY1"
+              },
+              "mode_decision": {
+                "allowed": true,
+                "decision": "allowed_by_computer_use_mode",
+                "low_level_event_count": 0,
+                "marker": "PHASE98_COMPUTER_USE_MODE_READY",
+                "ok_token": "PHASE98_COMPUTER_USE_MODE_OK"
+              },
+              "session_id": "phase93-1780630520734",
+              "low_level_event_count": 0,
+              "ready_for_low_level_send": true,
+              "mode_session_used": true,
+              "per_app_allowlist_required": false,
+              "ordinary_apps_allowed_by_risk_policy": true,
+              "safety_boundary_model": "phase72_windows_real_app_safety_boundary",
+              "model": "phase72_windows_real_app_safety_boundary",
+              "marker": "PHASE72_REAL_APP_SAFETY_BOUNDARY_READY",
+              "controlled_actions_expansion": true,
+              "uncontrolled_actions_expanded": false
+            },
+            "launch_recording_result": {
+              "ok": true,
+              "operation": "launch_app",
+              "recording_only": false,
+              "real_dispatch_performed": false,
+              "low_level_event_count": 0,
+              "target_app": "notepad"
+            },
+            "controlled_launch_candidate_ready": true,
+            "controlled_launch_result": {
+              "ok": true,
+              "decision": "controlled_app_launch_sent_to_backend",
+              "controlled_launch_candidate_ready": true,
+              "safe_start_process_plan": true,
+              "real_app_launch_default_disabled": true,
+              "backend_launch_reaches_launcher": true,
+              "real_dispatch_performed": false,
+              "real_desktop_touched": false,
+              "low_level_event_count": 0,
+              "unsafe_launch_zero_events": false,
+              "uncontrolled_actions_expanded": false,
+              "plan": {
+                "app_name": "notepad",
+                "executable": "notepad.exe",
+                "arguments": [
+                  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\controlled_files\\phase105-full-mode-controlled-real-launch.txt"
+                ],
+                "launch_verb": "Start-Process",
+                "safe_to_launch": true,
+                "refusal_reason": "",
+                "changes_registry": false,
+                "changes_system_settings": false,
+                "requires_admin": false,
+                "uses_shell_string": false,
+                "actions_expanded": false
+              },
+              "backend_result": {
+                "ok": true,
+                "backend": "phase103_recording_launch_backend",
+                "backend_launch_performed": true,
+                "process_started": false,
+                "process_id": 0,
+                "real_desktop_touched": false,
+                "cleanup_registered": true,
+                "low_level_event_count": 0,
+                "plan": {
+                  "app_name": "notepad",
+                  "executable": "notepad.exe",
+                  "arguments": [
+                    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\controlled_files\\phase105-full-mode-controlled-real-launch.txt"
+                  ],
+                  "launch_verb": "Start-Process",
+                  "safe_to_launch": true,
+                  "refusal_reason": "",
+                  "changes_registry": false,
+                  "changes_system_settings": false,
+                  "requires_admin": false,
+                  "uses_shell_string": false,
+                  "actions_expanded": false
+                }
+              }
+            },
+            "real_app_launch_default_disabled": true,
+            "backend_launch_reaches_launcher": true,
+            "real_desktop_touched": false,
+            "high_level_event_count": 1,
+            "input_event_count": 0,
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false,
+            "real_dispatch_allowed": true,
+            "real_dispatch_performed": false,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": true,
+            "full_mode_action": true,
+            "full_mode_action_ready": true,
+            "observation_id": "phase93-observation-2",
+            "controlled_real_launch_requested": true,
+            "controlled_real_launch_target_allowed": true,
+            "controlled_real_launch_gate_passed": true,
+            "controlled_launch_test_file": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\controlled_files\\phase105-full-mode-controlled-real-launch.txt",
+            "write_action": true
+          },
+          "write_action": true
+        },
+        {
+          "state": "verified",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "verification": {
+            "passed": true,
+            "checked_operation": "launch_app_generic_target",
+            "observation_id": "phase93-observation-2",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false
+          },
+          "write_action": true,
+          "passed": true
+        },
+        {
+          "state": "observed",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "observation": {
+            "observation_id": "phase93-observation-3",
+            "operation": "verify_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "decision": "verify"
+        },
+        {
+          "state": "verified",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "verification": {
+            "passed": true,
+            "checked_operation": "verify_generic_target",
+            "observation_id": "phase93-observation-3",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false
+          },
+          "write_action": false,
+          "passed": true
+        },
+        {
+          "state": "stopped",
+          "reason": "completed"
+        }
+      ],
+      "event_states": [
+        "observed",
+        "decided",
+        "acted",
+        "observed",
+        "decided",
+        "acted",
+        "verified",
+        "observed",
+        "decided",
+        "verified",
+        "stopped"
+      ],
+      "closed_loop_execution": true,
+      "post_action_verification": true,
+      "failure_recovery": false,
+      "blind_coordinate_chain_blocked": true,
+      "actions_expanded": false,
+      "stopped_reason": "completed"
+    },
+    "loop_event_count": 11,
+    "real_actions_requested": true,
+    "real_action_decision": "authorized_controlled_real_launch",
+    "real_action_blocked_decision": "",
+    "authorized_recording_loop_ready": false,
+    "recording_dispatch_only": false,
+    "real_dispatch_performed": false,
+    "real_desktop_touched": false,
+    "low_level_event_count": 0,
+    "mode_session_used": true,
+    "full_mode_session_used": true,
+    "full_mode_action_ready": true,
+    "full_mode_action_classes": [
+      "launch_app"
+    ],
+    "per_app_allowlist_required": false,
+    "ordinary_apps_allowed_by_risk_policy": true,
+    "uses_phase92_universal_runtime": true,
+    "single_universal_live_loop": true,
+    "prompt_to_observe_plan_act_verify": true,
+    "no_per_app_controller": true,
+    "representative_apps_are_acceptance_only": true,
+    "uses_closed_loop_executor": true,
+    "uses_generic_action_layer": true,
+    "uses_real_app_safety_boundary": true,
+    "uses_mode_session_gate": true,
+    "uses_production_host_adapter": true,
+    "requires_explicit_user_authorization": true,
+    "real_actions_default_disabled": true,
+    "uncontrolled_actions_expanded": false,
+    "controlled_real_launch_default_disabled": false,
+    "controlled_real_launch_requested": true,
+    "controlled_real_launch_gate_passed": true,
+    "full_mode_controlled_real_launch_ready": true,
+    "real_dispatch_allowed": true
+  },
+  "real_gate_report": {
+    "ok": true,
+    "marker": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY",
+    "ok_token": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK",
+    "model": "phase93_universal_live_execution_gate",
+    "prompt_sha256_16": "16897eeb994edc0c",
+    "prompt_text_included": false,
+    "prompt_length": 53,
+    "raw_prompt_hidden": true,
+    "phase92_model": "phase92_universal_windows_computer_use_mode",
+    "phase92_ok": true,
+    "phase92_prompt_digest": "16897eeb994edc0c",
+    "loop": {
+      "model": "phase68_windows_closed_loop_executor",
+      "events": [
+        {
+          "state": "observed",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "observation": {
+            "observation_id": "phase93-observation-1",
+            "operation": "observe_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "observe_generic_target",
+          "action_kind": "observe",
+          "step_index": 0,
+          "action_result": {
+            "acted": false,
+            "operation": "observe_generic_target",
+            "action_kind": "observe",
+            "action_class": "observe_screen",
+            "decision": "observe_step_no_dispatch",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": true,
+            "real_dispatch_allowed": false,
+            "real_dispatch_performed": false,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": false,
+            "full_mode_action": false,
+            "full_mode_action_ready": false,
+            "observation_id": "phase93-observation-1",
+            "write_action": false
+          },
+          "write_action": false
+        },
+        {
+          "state": "observed",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "observation": {
+            "observation_id": "phase93-observation-2",
+            "operation": "launch_app_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "decision": "act"
+        },
+        {
+          "state": "acted",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "action_result": {
+            "acted": true,
+            "operation": "launch_app_generic_target",
+            "action_kind": "write",
+            "action_class": "launch_app",
+            "decision": "authorized_controlled_real_launch",
+            "safety_decision": {
+              "allowed": true,
+              "decision": "allowed_by_computer_use_mode",
+              "action": "launch_app",
+              "target_summary": {
+                "app": "generic_windows_app.exe",
+                "process": "generic_windows_app.exe",
+                "title_preview": "LearningAgent Phase93 Generic Windows App",
+                "window_id": "hwnd:9301",
+                "display_id": "DISPLAY1"
+              },
+              "mode_decision": {
+                "allowed": true,
+                "decision": "allowed_by_computer_use_mode",
+                "low_level_event_count": 0,
+                "marker": "PHASE98_COMPUTER_USE_MODE_READY",
+                "ok_token": "PHASE98_COMPUTER_USE_MODE_OK"
+              },
+              "session_id": "phase93-1780630520737",
+              "low_level_event_count": 0,
+              "ready_for_low_level_send": true,
+              "mode_session_used": true,
+              "per_app_allowlist_required": false,
+              "ordinary_apps_allowed_by_risk_policy": true,
+              "safety_boundary_model": "phase72_windows_real_app_safety_boundary",
+              "model": "phase72_windows_real_app_safety_boundary",
+              "marker": "PHASE72_REAL_APP_SAFETY_BOUNDARY_READY",
+              "controlled_actions_expansion": true,
+              "uncontrolled_actions_expanded": false
+            },
+            "launch_recording_result": {
+              "ok": true,
+              "operation": "launch_app",
+              "recording_only": false,
+              "real_dispatch_performed": true,
+              "low_level_event_count": 0,
+              "target_app": "notepad"
+            },
+            "controlled_launch_candidate_ready": true,
+            "controlled_launch_result": {
+              "ok": true,
+              "decision": "phase105_phase104_controlled_notepad_smoke_bridge_completed",
+              "controlled_launch_candidate_ready": true,
+              "safe_start_process_plan": true,
+              "real_app_launch_default_disabled": true,
+              "backend_launch_reaches_launcher": true,
+              "real_dispatch_performed": true,
+              "real_desktop_touched": true,
+              "low_level_event_count": 0,
+              "unsafe_launch_zero_events": true,
+              "uncontrolled_actions_expanded": false,
+              "target_app": "notepad",
+              "phase104_smoke_report": {
+                "marker": "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+                "ok_token": "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK",
+                "model": "phase104_controlled_notepad_launch_smoke",
+                "passed": true,
+                "real_smoke_requested": true,
+                "real_enable_gate_passed": true,
+                "real_enable_gate_required": true,
+                "default_off_zero_events": true,
+                "unsafe_launch_zero_events": true,
+                "real_notepad_launch_attempted": true,
+                "process_ownership_verified": true,
+                "visible_window_verified": true,
+                "cleanup_completed": true,
+                "residual_owned_process": false,
+                "verified_window_cleanup_completed": true,
+                "real_desktop_touched": true,
+                "uncontrolled_actions_expanded": false,
+                "report_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\reports\\phase104_controlled_notepad_launch_smoke_report.json",
+                "default_off_report": {
+                  "ok": true,
+                  "decision": "real_app_launch_disabled_by_default",
+                  "controlled_launch_candidate_ready": true,
+                  "safe_start_process_plan": true,
+                  "real_app_launch_default_disabled": true,
+                  "backend_launch_reaches_launcher": false,
+                  "real_dispatch_performed": false,
+                  "real_desktop_touched": false,
+                  "low_level_event_count": 0,
+                  "unsafe_launch_zero_events": false,
+                  "uncontrolled_actions_expanded": false,
+                  "plan": {
+                    "app_name": "notepad",
+                    "executable": "notepad.exe",
+                    "arguments": [],
+                    "launch_verb": "Start-Process",
+                    "safe_to_launch": true,
+                    "refusal_reason": "",
+                    "changes_registry": false,
+                    "changes_system_settings": false,
+                    "requires_admin": false,
+                    "uses_shell_string": false,
+                    "actions_expanded": false
+                  }
+                },
+                "unsafe_report": {
+                  "ok": false,
+                  "decision": "unsafe_launch_plan_rejected",
+                  "reason": "forbidden_app_name",
+                  "controlled_launch_candidate_ready": true,
+                  "safe_start_process_plan": false,
+                  "real_app_launch_default_disabled": true,
+                  "backend_launch_reaches_launcher": false,
+                  "real_dispatch_performed": false,
+                  "real_desktop_touched": false,
+                  "low_level_event_count": 0,
+                  "unsafe_launch_zero_events": true,
+                  "uncontrolled_actions_expanded": false,
+                  "plan": {
+                    "app_name": "powershell",
+                    "executable": "",
+                    "arguments": [],
+                    "launch_verb": "Start-Process",
+                    "safe_to_launch": false,
+                    "refusal_reason": "forbidden_app_name",
+                    "changes_registry": false,
+                    "changes_system_settings": false,
+                    "requires_admin": false,
+                    "uses_shell_string": false,
+                    "actions_expanded": false
+                  }
+                },
+                "real_smoke_report": {
+                  "real_notepad_launch_attempted": true,
+                  "process_ownership_verified": true,
+                  "visible_window_verified": true,
+                  "cleanup_completed": true,
+                  "residual_owned_process": false,
+                  "verified_window_cleanup_completed": true,
+                  "real_desktop_touched": true,
+                  "process_id": 28636,
+                  "target_file": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\controlled_notepad\\phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt",
+                  "title_hint": "phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt",
+                  "baseline_window_keys": [
+                    "hwnd:132158",
+                    "hwnd:132302",
+                    "hwnd:197268",
+                    "hwnd:19792810",
+                    "hwnd:262328",
+                    "hwnd:328354",
+                    "hwnd:65942",
+                    "hwnd:66110",
+                    "hwnd:66916",
+                    "hwnd:66974"
+                  ],
+                  "launch_result": {
+                    "ok": true,
+                    "decision": "controlled_app_launch_sent_to_backend",
+                    "controlled_launch_candidate_ready": true,
+                    "safe_start_process_plan": true,
+                    "real_app_launch_default_disabled": true,
+                    "backend_launch_reaches_launcher": true,
+                    "real_dispatch_performed": true,
+                    "real_desktop_touched": true,
+                    "low_level_event_count": 0,
+                    "unsafe_launch_zero_events": false,
+                    "uncontrolled_actions_expanded": false,
+                    "plan": {
+                      "app_name": "notepad",
+                      "executable": "notepad.exe",
+                      "arguments": [
+                        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\controlled_notepad\\phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt"
+                      ],
+                      "launch_verb": "Start-Process",
+                      "safe_to_launch": true,
+                      "refusal_reason": "",
+                      "changes_registry": false,
+                      "changes_system_settings": false,
+                      "requires_admin": false,
+                      "uses_shell_string": false,
+                      "actions_expanded": false
+                    },
+                    "backend_result": {
+                      "ok": true,
+                      "backend": "phase103_subprocess_launch_backend",
+                      "backend_launch_performed": true,
+                      "process_started": true,
+                      "process_id": 28636,
+                      "real_desktop_touched": true,
+                      "cleanup_registered": true,
+                      "low_level_event_count": 0,
+                      "command_shape": "argv_no_shell"
+                    }
+                  },
+                  "window_result": {
+                    "visible_window_verified": true,
+                    "window_identity": {
+                      "app_id": "notepad:pid:17176",
+                      "process_name": "",
+                      "class_name": "Notepad",
+                      "window_id": "hwnd:39192526",
+                      "hwnd": 39192526,
+                      "process_id": 17176,
+                      "title_preview": "phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt - Notepad",
+                      "visible": true,
+                      "window_pid_matches_launch_process": false,
+                      "new_window_after_launch": true
+                    }
+                  },
+                  "cleanup_result": {
+                    "cleanup_attempted": true,
+                    "processes_cleaned": 1
+                  },
+                  "window_cleanup_result": {
+                    "window_cleanup_attempted": true,
+                    "window_cleanup_completed": true,
+                    "owned_window_only": true
+                  }
+                }
+              },
+              "visible_window_verified": true,
+              "cleanup_completed": true,
+              "verified_window_cleanup_completed": true,
+              "residual_owned_process": false
+            },
+            "real_app_launch_default_disabled": true,
+            "backend_launch_reaches_launcher": true,
+            "real_desktop_touched": true,
+            "high_level_event_count": 1,
+            "input_event_count": 0,
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false,
+            "real_dispatch_allowed": true,
+            "real_dispatch_performed": true,
+            "mode_session_used": true,
+            "per_app_allowlist_required": false,
+            "ordinary_apps_allowed_by_risk_policy": true,
+            "full_mode_action": true,
+            "full_mode_action_ready": true,
+            "observation_id": "phase93-observation-2",
+            "controlled_real_launch_requested": true,
+            "controlled_real_launch_target_allowed": true,
+            "controlled_real_launch_gate_passed": true,
+            "controlled_launch_test_file": "",
+            "write_action": true
+          },
+          "write_action": true
+        },
+        {
+          "state": "verified",
+          "operation": "launch_app_generic_target",
+          "action_kind": "write",
+          "step_index": 1,
+          "verification": {
+            "passed": true,
+            "checked_operation": "launch_app_generic_target",
+            "observation_id": "phase93-observation-2",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false
+          },
+          "write_action": true,
+          "passed": true
+        },
+        {
+          "state": "observed",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "observation": {
+            "observation_id": "phase93-observation-3",
+            "operation": "verify_generic_target",
+            "window": {
+              "app_id": "generic_windows_app.exe",
+              "process_name": "generic_windows_app.exe",
+              "window_id": "hwnd:9301",
+              "title_preview": "LearningAgent Phase93 Generic Windows App",
+              "display_id": "DISPLAY1",
+              "safe_to_target": true,
+              "rect": {
+                "left": 100,
+                "top": 100,
+                "right": 900,
+                "bottom": 700
+              }
+            },
+            "stable": true,
+            "flat_nodes": [
+              {
+                "node_id": "phase93.0",
+                "name": "Generic target",
+                "role": "Pane",
+                "automation_id": "Phase93GenericTarget",
+                "bounds": {
+                  "left": 200,
+                  "top": 180,
+                  "right": 420,
+                  "bottom": 320,
+                  "width": 220,
+                  "height": 140
+                },
+                "enabled": true,
+                "clickable": true,
+                "editable": false
+              }
+            ]
+          }
+        },
+        {
+          "state": "decided",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "decision": "verify"
+        },
+        {
+          "state": "verified",
+          "operation": "verify_generic_target",
+          "action_kind": "verify",
+          "step_index": 2,
+          "verification": {
+            "passed": true,
+            "checked_operation": "verify_generic_target",
+            "observation_id": "phase93-observation-3",
+            "low_level_event_count": 0,
+            "recording_dispatch_only": false
+          },
+          "write_action": false,
+          "passed": true
+        },
+        {
+          "state": "stopped",
+          "reason": "completed"
+        }
+      ],
+      "event_states": [
+        "observed",
+        "decided",
+        "acted",
+        "observed",
+        "decided",
+        "acted",
+        "verified",
+        "observed",
+        "decided",
+        "verified",
+        "stopped"
+      ],
+      "closed_loop_execution": true,
+      "post_action_verification": true,
+      "failure_recovery": false,
+      "blind_coordinate_chain_blocked": true,
+      "actions_expanded": false,
+      "stopped_reason": "completed"
+    },
+    "loop_event_count": 11,
+    "real_actions_requested": true,
+    "real_action_decision": "authorized_controlled_real_launch",
+    "real_action_blocked_decision": "",
+    "authorized_recording_loop_ready": false,
+    "recording_dispatch_only": false,
+    "real_dispatch_performed": true,
+    "real_desktop_touched": true,
+    "low_level_event_count": 0,
+    "mode_session_used": true,
+    "full_mode_session_used": true,
+    "full_mode_action_ready": true,
+    "full_mode_action_classes": [
+      "launch_app"
+    ],
+    "per_app_allowlist_required": false,
+    "ordinary_apps_allowed_by_risk_policy": true,
+    "uses_phase92_universal_runtime": true,
+    "single_universal_live_loop": true,
+    "prompt_to_observe_plan_act_verify": true,
+    "no_per_app_controller": true,
+    "representative_apps_are_acceptance_only": true,
+    "uses_closed_loop_executor": true,
+    "uses_generic_action_layer": true,
+    "uses_real_app_safety_boundary": true,
+    "uses_mode_session_gate": true,
+    "uses_production_host_adapter": true,
+    "requires_explicit_user_authorization": true,
+    "real_actions_default_disabled": true,
+    "uncontrolled_actions_expanded": false,
+    "controlled_real_launch_default_disabled": false,
+    "controlled_real_launch_requested": true,
+    "controlled_real_launch_gate_passed": true,
+    "full_mode_controlled_real_launch_ready": true,
+    "real_dispatch_allowed": true
+  },
+  "phase104_smoke_report": {
+    "marker": "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_READY",
+    "ok_token": "PHASE104_CONTROLLED_NOTEPAD_LAUNCH_SMOKE_OK",
+    "model": "phase104_controlled_notepad_launch_smoke",
+    "passed": true,
+    "real_smoke_requested": true,
+    "real_enable_gate_passed": true,
+    "real_enable_gate_required": true,
+    "default_off_zero_events": true,
+    "unsafe_launch_zero_events": true,
+    "real_notepad_launch_attempted": true,
+    "process_ownership_verified": true,
+    "visible_window_verified": true,
+    "cleanup_completed": true,
+    "residual_owned_process": false,
+    "verified_window_cleanup_completed": true,
+    "real_desktop_touched": true,
+    "uncontrolled_actions_expanded": false,
+    "report_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\reports\\phase104_controlled_notepad_launch_smoke_report.json",
+    "default_off_report": {
+      "ok": true,
+      "decision": "real_app_launch_disabled_by_default",
+      "controlled_launch_candidate_ready": true,
+      "safe_start_process_plan": true,
+      "real_app_launch_default_disabled": true,
+      "backend_launch_reaches_launcher": false,
+      "real_dispatch_performed": false,
+      "real_desktop_touched": false,
+      "low_level_event_count": 0,
+      "unsafe_launch_zero_events": false,
+      "uncontrolled_actions_expanded": false,
+      "plan": {
+        "app_name": "notepad",
+        "executable": "notepad.exe",
+        "arguments": [],
+        "launch_verb": "Start-Process",
+        "safe_to_launch": true,
+        "refusal_reason": "",
+        "changes_registry": false,
+        "changes_system_settings": false,
+        "requires_admin": false,
+        "uses_shell_string": false,
+        "actions_expanded": false
+      }
+    },
+    "unsafe_report": {
+      "ok": false,
+      "decision": "unsafe_launch_plan_rejected",
+      "reason": "forbidden_app_name",
+      "controlled_launch_candidate_ready": true,
+      "safe_start_process_plan": false,
+      "real_app_launch_default_disabled": true,
+      "backend_launch_reaches_launcher": false,
+      "real_dispatch_performed": false,
+      "real_desktop_touched": false,
+      "low_level_event_count": 0,
+      "unsafe_launch_zero_events": true,
+      "uncontrolled_actions_expanded": false,
+      "plan": {
+        "app_name": "powershell",
+        "executable": "",
+        "arguments": [],
+        "launch_verb": "Start-Process",
+        "safe_to_launch": false,
+        "refusal_reason": "forbidden_app_name",
+        "changes_registry": false,
+        "changes_system_settings": false,
+        "requires_admin": false,
+        "uses_shell_string": false,
+        "actions_expanded": false
+      }
+    },
+    "real_smoke_report": {
+      "real_notepad_launch_attempted": true,
+      "process_ownership_verified": true,
+      "visible_window_verified": true,
+      "cleanup_completed": true,
+      "residual_owned_process": false,
+      "verified_window_cleanup_completed": true,
+      "real_desktop_touched": true,
+      "process_id": 28636,
+      "target_file": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\controlled_notepad\\phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt",
+      "title_hint": "phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt",
+      "baseline_window_keys": [
+        "hwnd:132158",
+        "hwnd:132302",
+        "hwnd:197268",
+        "hwnd:19792810",
+        "hwnd:262328",
+        "hwnd:328354",
+        "hwnd:65942",
+        "hwnd:66110",
+        "hwnd:66916",
+        "hwnd:66974"
+      ],
+      "launch_result": {
+        "ok": true,
+        "decision": "controlled_app_launch_sent_to_backend",
+        "controlled_launch_candidate_ready": true,
+        "safe_start_process_plan": true,
+        "real_app_launch_default_disabled": true,
+        "backend_launch_reaches_launcher": true,
+        "real_dispatch_performed": true,
+        "real_desktop_touched": true,
+        "low_level_event_count": 0,
+        "unsafe_launch_zero_events": false,
+        "uncontrolled_actions_expanded": false,
+        "plan": {
+          "app_name": "notepad",
+          "executable": "notepad.exe",
+          "arguments": [
+            "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\phase105_full_mode_controlled_real_launch\\contract-1780630520726\\real_smoke_bridge\\controlled_notepad\\phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt"
+          ],
+          "launch_verb": "Start-Process",
+          "safe_to_launch": true,
+          "refusal_reason": "",
+          "changes_registry": false,
+          "changes_system_settings": false,
+          "requires_admin": false,
+          "uses_shell_string": false,
+          "actions_expanded": false
+        },
+        "backend_result": {
+          "ok": true,
+          "backend": "phase103_subprocess_launch_backend",
+          "backend_launch_performed": true,
+          "process_started": true,
+          "process_id": 28636,
+          "real_desktop_touched": true,
+          "cleanup_registered": true,
+          "low_level_event_count": 0,
+          "command_shape": "argv_no_shell"
+        }
+      },
+      "window_result": {
+        "visible_window_verified": true,
+        "window_identity": {
+          "app_id": "notepad:pid:17176",
+          "process_name": "",
+          "class_name": "Notepad",
+          "window_id": "hwnd:39192526",
+          "hwnd": 39192526,
+          "process_id": 17176,
+          "title_preview": "phase104-1780630520742-Phase104 Controlled Notepad Launch Smoke.txt - Notepad",
+          "visible": true,
+          "window_pid_matches_launch_process": false,
+          "new_window_after_launch": true
+        }
+      },
+      "cleanup_result": {
+        "cleanup_attempted": true,
+        "processes_cleaned": 1
+      },
+      "window_cleanup_result": {
+        "window_cleanup_attempted": true,
+        "window_cleanup_completed": true,
+        "owned_window_only": true
+      }
+    }
+  }
+}
