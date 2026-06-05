@@ -42,6 +42,25 @@ class WindowsComputerUseModeGatePhase99Tests(unittest.TestCase):  # 新增代码
         self.assertTrue(decision["mode_session_used"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言拒绝也经过 mode session；如果没有这行代码，危险目标可能绕开 Phase98 策略。
     # 新增代码+Phase99UniversalComputerUseModeGate：函数段结束，test_boundary_normal_mode_blocks_terminal_target_with_zero_events 到此结束；如果没有这个边界说明，初学者不容易看出终端拒绝范围。
 
+    def test_boundary_normal_mode_preserves_phase72_high_risk_refusals_after_mode_allows(self) -> None:  # 新增代码+Phase99UniversalComputerUseModeGate：函数段开始，验证 normal mode 允许后仍复用 Phase72 高风险窗口拒绝；如果没有这段测试，taskmgr/login/credit card 可能被误放行。
+        risky_windows = ({"app_id": "taskmgr.exe", "process_name": "taskmgr.exe", "window_id": "hwnd:9903", "title_preview": "Task Manager", "display_id": "DISPLAY1", "safe_to_target": True}, {"app_id": "browser.exe", "process_name": "browser.exe", "window_id": "hwnd:9904", "title_preview": "Login page", "display_id": "DISPLAY1", "safe_to_target": True}, {"app_id": "browser.exe", "process_name": "browser.exe", "window_id": "hwnd:9905", "title_preview": "Credit card form", "display_id": "DISPLAY1", "safe_to_target": True})  # 新增代码+Phase99UniversalComputerUseModeGate：准备三个 Phase72 高风险窗口样本；如果没有这行代码，复审指出的 taskmgr/login/credit card 回归没有覆盖。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase99UniversalComputerUseModeGate：创建隔离目录；如果没有这行代码，高风险测试会污染真实 mode 状态。
+            store = ComputerUseModeSessionStore(base_dir=Path(temp_dir) / "mode_sessions")  # 新增代码+Phase99UniversalComputerUseModeGate：创建隔离 mode store；如果没有这行代码，无法证明这些目标是在 normal mode 已打开后被 Phase72 拦下。
+            store.open_mode(mode="normal", reason="Phase99 high risk windows must stay blocked")  # 新增代码+Phase99UniversalComputerUseModeGate：打开 normal 模式；如果没有这行代码，拒绝可能只是 off mode 导致而不是高风险分类导致。
+            boundary = WindowsRealAppSafetyBoundary()  # 新增代码+Phase99UniversalComputerUseModeGate：创建安全边界实例；如果没有这行代码，测试无法调用待修复的 mode-aware 方法。
+            decisions = [boundary.evaluate_with_mode_session(window, "click", store, f"phase99-risk-{index}") for index, window in enumerate(risky_windows)]  # 新增代码+Phase99UniversalComputerUseModeGate：逐个评估高风险窗口；如果没有这行代码，测试不能同时覆盖 taskmgr/login/credit card。
+        for decision in decisions:  # 新增代码+Phase99UniversalComputerUseModeGate：遍历每个高风险决策；如果没有这行代码，只检查一个样本会漏掉复审列出的其它窗口。
+            self.assertFalse(decision["allowed"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言高风险窗口不允许；如果没有这行代码，normal mode 误放行不会暴露。
+            self.assertEqual(decision["decision"], "high_risk_window_refused")  # 新增代码+Phase99UniversalComputerUseModeGate：断言原因码回到 Phase72 稳定高风险拒绝；如果没有这行代码，报告原因可能不利于调试。
+            self.assertEqual(decision["low_level_event_count"], 0)  # 新增代码+Phase99UniversalComputerUseModeGate：断言高风险拒绝零低层事件；如果没有这行代码，拒绝后仍可能触发真实输入。
+            self.assertFalse(decision["ready_for_low_level_send"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言高风险目标不能进入发送前就绪；如果没有这行代码，拒绝语义可能不够硬。
+            self.assertTrue(decision["mode_session_used"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言这些拒绝仍经过 mode session；如果没有这行代码，测试不能证明顺序是 mode 允许后 Phase72 再拒绝。
+            self.assertFalse(decision["per_app_allowlist_required"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言高风险拒绝不提示旧 app 白名单；如果没有这行代码，UI 可能给用户错误修复方向。
+            self.assertEqual(decision["mode_decision"]["decision"], "allowed_by_computer_use_mode")  # 新增代码+Phase99UniversalComputerUseModeGate：断言原始 mode 决策确实允许；如果没有这行代码，无法证明是 Phase72 高风险层二次拦截。
+            self.assertTrue(decision["risk_category"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言返回风险类别；如果没有这行代码，调试时不知道命中了哪类高风险。
+            self.assertTrue(decision["high_risk_default_refusal"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言标记高风险默认拒绝；如果没有这行代码，上层难以区分普通 mode 拒绝和 Phase72 红线。
+    # 新增代码+Phase99UniversalComputerUseModeGate：函数段结束，test_boundary_normal_mode_preserves_phase72_high_risk_refusals_after_mode_allows 到此结束；如果没有这个边界说明，初学者不容易看出 P1 复审覆盖范围。
+
     def test_boundary_observe_mode_normalizes_write_refusal_but_preserves_mode_decision(self) -> None:  # 新增代码+Phase99UniversalComputerUseModeGate：函数段开始，验证 observe 写动作拒绝被边界层规范化且保留原始 mode 决策；如果没有这段测试，调试信息和上层原因码会漂移。
         with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+Phase99UniversalComputerUseModeGate：创建隔离目录；如果没有这行代码，observe 状态会污染其它测试。
             store = ComputerUseModeSessionStore(base_dir=Path(temp_dir) / "mode_sessions")  # 新增代码+Phase99UniversalComputerUseModeGate：创建隔离 mode store；如果没有这行代码，无法打开 observe 模式。
@@ -82,6 +101,9 @@ class WindowsComputerUseModeGatePhase99Tests(unittest.TestCase):  # 新增代码
         acted_reports = [event["action_result"] for event in report["loop"]["events"] if event.get("state") == "acted"]  # 新增代码+Phase99UniversalComputerUseModeGate：提取动作报告；如果没有这行代码，无法确认没有假授权放行。
         self.assertTrue(report["mode_session_used"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言即使 off 也经过 mode session；如果没有这行代码，默认路径可能绕开 mode。
         self.assertFalse(report["authorized_recording_loop_ready"])  # 新增代码+Phase99UniversalComputerUseModeGate：断言没有打开 mode 时记录型闭环不就绪；如果没有这行代码，假授权会被误判为成功。
+        self.assertNotEqual(report["real_action_decision"], "authorized_recording_only")  # 新增代码+Phase99UniversalComputerUseModeGate：断言 off mode 总报告不能伪装成已授权记录；如果没有这行代码，P2 误导报告会再次出现。
+        self.assertEqual(report["real_action_decision"], "blocked_by_mode_session")  # 新增代码+Phase99UniversalComputerUseModeGate：断言总报告显示被 mode session 阻断；如果没有这行代码，调用方不知道真实动作为什么没进入记录闭环。
+        self.assertEqual(report["real_action_blocked_decision"], "action_class_not_allowed_by_mode")  # 新增代码+Phase99UniversalComputerUseModeGate：断言总报告保留底层 mode 决策；如果没有这行代码，调试 off mode 拒绝要翻动作事件。
         self.assertEqual(report["low_level_event_count"], 0)  # 新增代码+Phase99UniversalComputerUseModeGate：断言 off 拒绝零低层事件；如果没有这行代码，未授权请求可能产生输入。
         self.assertTrue(any(action.get("decision") == "action_class_not_allowed_by_mode" for action in acted_reports))  # 新增代码+Phase99UniversalComputerUseModeGate：断言 off 状态不会用 per-app grant 假放行；如果没有这行代码，拒绝原因可能被旧授权掩盖。
     # 新增代码+Phase99UniversalComputerUseModeGate：函数段结束，test_live_gate_without_open_mode_refuses_real_actions_without_fake_grant 到此结束；如果没有这个边界说明，初学者不容易看出 off 拒绝范围。
