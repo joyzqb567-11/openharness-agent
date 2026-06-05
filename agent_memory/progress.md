@@ -4993,3 +4993,27 @@ Completed:
 Boundary:
 - Task 4 is recording-mode evidence only and deliberately does not touch the real desktop.
 - Task 4 still cannot be called a mature real `/computer use --full` desktop task feature until Task 5-8 connect the normal agent route, real GUI drawing primitive, strict visible-terminal controller scenario, and final maturity matrix.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 5
+
+Status: implemented with focused verification passed.
+
+Completed:
+- Added pre-model desktop task routing to `LearningAgent.run`.
+- Natural-language local Paint/Pikachu prompts now enter `ComputerUseDesktopTaskRuntime` before the ordinary model/tool loop can choose bash or script artifact generation.
+- Slash commands such as `/computer use --full` remain handled by `learning_agent.app.interactive.run_computer_terminal_command`.
+- Added regression tests proving the fake `System.Drawing` model path is bypassed and `/computer use --full` still returns the full-mode confirmation command.
+- Backed up Task 5 code under `learning_agent/test/computer_use_full_desktop_task_router_task5_20260605/`.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` passed with 27 tests.
+- `python -m py_compile learning_agent\core\agent.py learning_agent\app\interactive.py learning_agent\computer_use\desktop_task_runtime.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py` passed.
+- Staged `learning_agent/core/agent.py` was separately extracted from the index and passed `py_compile`.
+- `git diff --cached --check` passed after normalizing the Task 5 backup file EOF.
+
+Boundary:
+- Task 5 wires ordinary prompts into the recording-mode runtime only.
+- Task 5 still does not perform real Paint drawing on the desktop.
+- Final maturity remains blocked on Task 6-8: real GUI execution, strict visible-terminal acceptance, and final maturity matrix.
