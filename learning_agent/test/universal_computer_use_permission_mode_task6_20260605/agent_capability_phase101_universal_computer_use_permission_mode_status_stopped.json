@@ -1,0 +1,31 @@
+{
+  "id": "agent_capability_phase101_universal_computer_use_permission_mode_status_stopped",
+  "name": "agent_capability_phase101_universal_computer_use_permission_mode_status_stopped",
+  "output_prefix": "agent_capability_phase101_universal_computer_use_permission_mode_status_stopped",
+  "window_title_prefix": "LearningAgent-Phase101-UniversalComputerUseStatusStopped",
+  "max_seconds": 120,
+  "final_log_wait_seconds": 5,
+  "success_marker": "",
+  "prompt": "Show stopped universal Computer Use status from the visible terminal.",
+  "prompt_lines": [
+    "/computer status"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [],
+  "event_payload_contains": [
+    "Computer Status",
+    "Computer Use Mode",
+    "mode=stopped",
+    "full_mode=false",
+    "per_app_allowlist_required=false",
+    "ordinary_apps_allowed_by_risk_policy=false",
+    "Computer Commands",
+    "/computer use",
+    "/computer permissions"
+  ],
+  "max_permission_sent_count": 0
+}
