@@ -1,0 +1,80 @@
+﻿{
+  "schema_version": 2,
+  "verifier": "learning_agent.acceptance.verifier",
+  "completed": true,
+  "scenario": "agent_capability_phase102_full_mode_execution_gate",
+  "scenario_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\scenarios\\agent_capability_phase102_full_mode_execution_gate.json",
+  "run_dir": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase102_full_mode_execution_gate-20260605_100829",
+  "event_count": 6,
+  "states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "permission_auto_approved",
+    "final_answer_printed",
+    "agent_ready_for_user_prompt"
+  ],
+  "event_log": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase102_full_mode_execution_gate-20260605_100829\\events.jsonl",
+  "result_json": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase102_full_mode_execution_gate-20260605_100829\\result.json",
+  "debug_log": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase102_full_mode_execution_gate-20260605_100829\\latest_run_readable.md",
+  "permission_policy_decisions": [],
+  "browser_assertions": {
+    "enabled": false,
+    "completed": true,
+    "assertions": []
+  },
+  "assertion": {
+    "passed": true,
+    "marker_passed": true,
+    "permission_count_passed": true,
+    "permission_sent_count": 0,
+    "max_permission_sent_count": 0,
+    "event_log_parse_passed": true,
+    "invalid_event_line_count": 0,
+    "state_checks": {
+      "agent_ready_for_user_prompt": true,
+      "user_prompt_received": true,
+      "final_answer_printed": true
+    },
+    "event_answer_checks": {
+      "PHASE102_FULL_MODE_EXECUTION_GATE_READY": true,
+      "PHASE102_FULL_MODE_EXECUTION_GATE_OK": true,
+      "normal_mode_blocks_launch_app=true": true,
+      "full_mode_session_used=true": true,
+      "full_mode_action_ready=true": true,
+      "full_launch_authorized_recording_only=true": true,
+      "full_launch_no_physical_dispatch=true": true,
+      "low_level_event_count_zero=true": true,
+      "real_desktop_touched=false": true,
+      "uncontrolled_actions_expanded=false": true
+    },
+    "event_payload_checks": {},
+    "event_payload_text_length": 2912,
+    "debug_log_checks": {
+      "PHASE102_FULL_MODE_EXECUTION_GATE_READY": true,
+      "PHASE102_FULL_MODE_EXECUTION_GATE_OK": true,
+      "normal_mode_blocks_launch_app=true": true,
+      "full_mode_session_used=true": true,
+      "full_mode_action_ready=true": true,
+      "full_launch_authorized_recording_only=true": true,
+      "full_launch_no_physical_dispatch=true": true,
+      "low_level_event_count_zero=true": true,
+      "real_desktop_touched=false": true,
+      "uncontrolled_actions_expanded=false": true
+    },
+    "artifact_checks": {
+      "result_json": true,
+      "event_log": true,
+      "debug_log": true,
+      "startup_screenshot": true,
+      "prompt_screenshot": true,
+      "final_screenshot": true
+    },
+    "required_artifact_glob_checks": {},
+    "required_artifact_globs_passed": true,
+    "browser_assertions_passed": true,
+    "final_answer_preview": "Phase 102 universal Computer Use full-mode execution gate acceptance passed.\n\nPHASE102_FULL_MODE_EXECUTION_GATE_READY PHASE102_FULL_MODE_EXECUTION_GATE_OK normal_mode_blocks_launch_app=true full_mode_session_used=true full_mode_action_ready=true full_launch_authorized_recording_only=true full_launch_no_physical_dispatch=true low_level_event_count_zero=true real_desktop_touched=false uncontrolled_actions_expanded=false",
+    "final_answer_text_length": 421
+  }
+}
+
