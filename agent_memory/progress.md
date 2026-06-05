@@ -4911,3 +4911,85 @@ Plan scope:
 
 Completion rule:
 - Do not call `/computer use --full` natural-language desktop task mode mature until the strict visible terminal scenario proves GUI route usage, forbidden script route blocking, owned Paint window identity, GUI action count, low-level event count, canvas change evidence, post-action screenshot evidence, and `/computer stop`.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 1
+
+Status: completed with subagent-driven implementation and reviews.
+
+Completed:
+- User selected option 1, the subagent-driven workflow.
+- Dispatched implementation subagent `Lagrange` for Task 1 only.
+- Task 1 scope is limited to freezing the previous `bash + System.Drawing + Start-Process mspaint` Paint route as a negative regression.
+- Implemented `learning_agent/computer_use/desktop_task_acceptance.py`.
+- Implemented `learning_agent/tests/test_windows_computer_use_full_desktop_task_router.py`.
+- Backed up Task 1 code under `learning_agent/test/computer_use_full_desktop_task_router_task1_20260605/`.
+- Focused unittest passed with 5 tests.
+- Bad evidence probes now reject malformed evidence without raising exceptions.
+- Spec review and quality review both passed after the hardening follow-up.
+- Task 1 commits: `7b3b9ff test: freeze desktop task script bypass regression` and `dfbecfe fix: harden desktop task acceptance evidence`.
+
+Boundary:
+- Task 1 must not implement the natural-language desktop router yet.
+- Task 1 must not run real visible desktop interaction; it is a focused acceptance-evaluator unit-test step.
+- Final project maturity cannot be claimed until later strict visible-terminal acceptance passes.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 2
+
+Status: completed with subagent-driven implementation and reviews.
+
+Completed:
+- Implemented `learning_agent/computer_use/desktop_task_router.py`.
+- Added Desktop Task Intent Router tests to `learning_agent/tests/test_windows_computer_use_full_desktop_task_router.py`.
+- Backed up Task 2 code under `learning_agent/test/computer_use_full_desktop_task_router_task2_20260605/`.
+- Focused unittest passed with 13 tests.
+- Boundary probes now keep non-operational drawing/painting requests out of the desktop route while routing the core local Paint prompt.
+- Spec review and quality review both passed after tightening keyword matching.
+- Task 2 commits: `58a8899 feat: classify natural language desktop tasks` and `ee0544e fix: tighten desktop task router matching`.
+
+Boundary:
+- Task 2 only classifies intent; it does not invoke tools, execute GUI actions, or modify the normal agent loop.
+- Final project maturity still requires Task 3-8, especially strict visible-terminal GUI-route acceptance.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 3
+
+Status: completed and committed.
+
+Completed:
+- Implemented `learning_agent/computer_use/desktop_task_policy.py`.
+- Wired desktop task context into `learning_agent/core/agent.py` without staging unrelated historical dirty edits.
+- Added policy and run_events lifecycle tests to `learning_agent/tests/test_windows_computer_use_full_desktop_task_router.py`.
+- Backed up Task 3 code under `learning_agent/test/computer_use_full_desktop_task_router_task3_20260605/`.
+- Focused unittest passed with 23 tests.
+- `py_compile` passed for the policy, agent, and focused test modules.
+- Quality review passed before commit.
+- Task 3 commit: `0cf4eb1 feat: block script artifact route for desktop tasks`.
+
+Boundary:
+- Task 3 blocks script-generated final artifacts during routed desktop tasks.
+- Task 3 does not yet execute a natural-language desktop task through a dedicated runtime.
+- Clean-index unittest remains affected by pre-existing untracked project dependencies, but worktree focused verification passed.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 4
+
+Status: implemented with focused verification passed.
+
+Completed:
+- Added `learning_agent/computer_use/desktop_task_runtime.py`.
+- Added runtime tests for full-mode gating and recording-mode GUI route evidence.
+- Runtime now reuses `ComputerUseModeSessionStore`, Phase108 generic app discovery, Phase109 recording launch/window identity, Phase74 Paint/Pikachu representative GUI action evidence, and Task 1 acceptance evaluation.
+- Backed up Task 4 code under `learning_agent/test/computer_use_full_desktop_task_router_task4_20260605/`.
+- Focused unittest passed with 25 tests.
+- `py_compile` passed for the runtime and focused test module.
+- Unicode-equivalent Chinese Paint/Pikachu prompt probe passed with `desktop_task_router=true`, `computer_use_gui_route_used=true`, `owned_window_verified=true`, `gui_action_count=13`, `low_level_event_count=81`, and `real_desktop_touched=false`.
+
+Boundary:
+- Task 4 is recording-mode evidence only and deliberately does not touch the real desktop.
+- Task 4 still cannot be called a mature real `/computer use --full` desktop task feature until Task 5-8 connect the normal agent route, real GUI drawing primitive, strict visible-terminal controller scenario, and final maturity matrix.
