@@ -84,6 +84,22 @@ def _desktop_task_acceptance_detect_script_routes(evidence: dict[str, Any]) -> t
 # 新增代码+DesktopTaskAcceptance：函数段结束，_desktop_task_acceptance_detect_script_routes 到此结束；如果没有这个边界说明，代码小白不容易看出脚本路线检测范围。
 
 
+def _desktop_task_acceptance_normalize_evidence(evidence: Any) -> dict[str, Any]:  # 新增代码+DesktopTaskAcceptance：函数段开始，把外部输入统一成安全字典；如果没有这段函数，列表、字符串等坏输入会让评估器崩溃。
+    if isinstance(evidence, dict):  # 新增代码+DesktopTaskAcceptance：只接受真正的字典证据；如果没有这一行，dict(list) 这类危险转换还会触发 ValueError。
+        return dict(evidence)  # 新增代码+DesktopTaskAcceptance：复制字典避免原地修改调用方数据；如果没有这一行，评估器可能污染上游运行时记录。
+    return {}  # 新增代码+DesktopTaskAcceptance：非字典输入按空证据稳定拒绝；如果没有这一行，坏 evidence 会中断 agent 而不是返回 missing_requirements。
+# 新增代码+DesktopTaskAcceptance：函数段结束，_desktop_task_acceptance_normalize_evidence 到此结束；如果没有这个边界说明，代码小白不容易看出 evidence 防线范围。
+
+
+def _desktop_task_acceptance_positive_int_missing(value: Any) -> bool:  # 新增代码+DesktopTaskAcceptance：函数段开始，安全判断正整数条件是否缺失；如果没有这段函数，非数字字符串、列表、字典会让 int() 崩溃。
+    try:  # 新增代码+DesktopTaskAcceptance：开始尝试把计数字段转换为整数；如果没有这一行，无法把合法数字字符串和坏字符串区分开。
+        numeric_value = int(value or 0)  # 新增代码+DesktopTaskAcceptance：把空值按 0 处理并转换数字；如果没有这一行，"2" 这类可用字符串数字会被误判缺失。
+    except (TypeError, ValueError):  # 新增代码+DesktopTaskAcceptance：捕获不能转换成整数的坏值；如果没有这一行，abc、dict、list 会继续抛异常。
+        return True  # 新增代码+DesktopTaskAcceptance：坏计数稳定视为缺失；如果没有这一行，异常输入不能被成熟条件列表解释。
+    return numeric_value <= 0  # 新增代码+DesktopTaskAcceptance：小于等于 0 视为缺失；如果没有这一行，零 GUI/零底层事件可能被误判通过。
+# 新增代码+DesktopTaskAcceptance：函数段结束，_desktop_task_acceptance_positive_int_missing 到此结束；如果没有这个边界说明，代码小白不容易看出正整数防线范围。
+
+
 def _desktop_task_acceptance_requirement_missing(evidence: dict[str, Any], key: str, rule: str) -> bool:  # 新增代码+DesktopTaskAcceptance：函数段开始，判断单个成熟条件是否缺失；如果没有这段函数，主函数会堆满重复 if。
     value = evidence.get(key)  # 新增代码+DesktopTaskAcceptance：读取当前条件字段值；如果没有这一行，规则判断没有对象。
     if rule == "is_true":  # 新增代码+DesktopTaskAcceptance：处理必须为 True 的条件；如果没有这一行，路由、GUI、窗口和截图要求无法统一判断。
@@ -91,13 +107,13 @@ def _desktop_task_acceptance_requirement_missing(evidence: dict[str, Any], key: 
     if rule == "is_false":  # 新增代码+DesktopTaskAcceptance：处理必须为 False 的条件；如果没有这一行，禁止路线字段无法统一判断。
         return bool(value)  # 新增代码+DesktopTaskAcceptance：为 True 就表示违反条件；如果没有这一行，脚本路线可能通过成熟验收。
     if rule == "positive_int":  # 新增代码+DesktopTaskAcceptance：处理必须大于 0 的计数字段；如果没有这一行，动作次数和事件次数无法统一判断。
-        return int(value or 0) <= 0  # 新增代码+DesktopTaskAcceptance：空值或零都算缺失；如果没有这一行，零 GUI/零事件可能被误判通过。
+        return _desktop_task_acceptance_positive_int_missing(value)  # 修改代码+DesktopTaskAcceptance：使用安全正整数判断避免坏值崩溃；如果没有这一行，abc、dict、list 会中断验收。
     return True  # 新增代码+DesktopTaskAcceptance：未知规则默认视为缺失；如果没有这一行，写错规则名时可能静默放行。
 # 新增代码+DesktopTaskAcceptance：函数段结束，_desktop_task_acceptance_requirement_missing 到此结束；如果没有这个边界说明，代码小白不容易看出单项条件判断范围。
 
 
-def evaluate_desktop_task_acceptance(evidence: dict[str, Any]) -> dict[str, Any]:  # 新增代码+DesktopTaskAcceptance：函数段开始，评估桌面任务是否满足 mature GUI 路线验收；如果没有这段函数，Task 1 的负向回归没有被测入口。
-    checked_evidence = dict(evidence or {})  # 新增代码+DesktopTaskAcceptance：复制输入证据避免原地修改调用方数据；如果没有这一行，评估器可能污染上游运行时记录。
+def evaluate_desktop_task_acceptance(evidence: Any) -> dict[str, Any]:  # 修改代码+DesktopTaskAcceptance：函数段开始，接收任意 evidence 并稳定评估桌面任务；如果没有这段函数，坏输入会让 Task 1 回归门禁崩溃。
+    checked_evidence = _desktop_task_acceptance_normalize_evidence(evidence)  # 修改代码+DesktopTaskAcceptance：先把输入归一化成安全字典；如果没有这一行，非 dict evidence 会在 dict() 转换处崩溃。
     forbidden_script_generation_used, bash_final_artifact_route_used = _desktop_task_acceptance_detect_script_routes(checked_evidence)  # 新增代码+DesktopTaskAcceptance：识别脚本生成最终作品和 bash 制品路线；如果没有这一行，之前失败路线不会被拦住。
     checked_evidence["forbidden_script_generation_used"] = forbidden_script_generation_used  # 新增代码+DesktopTaskAcceptance：把检测后的禁止脚本结果写回评估副本；如果没有这一行，后续成熟条件仍可能看到旧值。
     checked_evidence["bash_final_artifact_route_used"] = bash_final_artifact_route_used  # 新增代码+DesktopTaskAcceptance：把检测后的 bash 制品结果写回评估副本；如果没有这一行，missing_requirements 不会包含 bash 路线违规。
