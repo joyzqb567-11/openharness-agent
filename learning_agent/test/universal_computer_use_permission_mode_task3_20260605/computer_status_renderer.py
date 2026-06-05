@@ -174,7 +174,7 @@ def render_computer_status(snapshot: dict[str, Any]) -> str:  # 修改代码+Pha
     lines.append("- risk=medium command=/computer abort <reason> : request global abort flag")  # 新增代码+Phase51ComputerStatusUI: 展示 abort 命令；如果没有这行代码，急停入口不明显。
     lines.append("- risk=low command=/computer cleanup : release lock and clear abort for this session")  # 新增代码+Phase51ComputerStatusUI: 展示 cleanup 命令；如果没有这行代码，恢复入口不明显。
     lines.append(f"- actions_expanded={_bool_token(PHASE51_ACTIONS_EXPANDED)}")  # 新增代码+Phase51ComputerStatusUI: 输出动作面边界；如果没有这行代码，状态 UI 升级可能被误解成动作能力扩大。
-    return "\n".join(lines) + "\n"  # 新增代码+Phase51ComputerStatusUI: 返回完整状态文本并带末尾换行；如果没有这行代码，终端输出会和下一个 prompt 粘连。
+    return "\n".join(lines) + "\n"  # 修改代码+Phase98UniversalComputerUseMode: 返回包含 Phase98 Computer Use Mode 摘要的完整状态文本并带末尾换行；如果没有这行代码，/computer status 的 mode/full/ttl 输出不会真正回到终端。
 # 修改代码+Phase98UniversalComputerUseMode: 函数段结束，render_computer_status 到此结束；如果没有这个边界说明，读者不容易看出 Phase98 mode 摘要和原有状态区的范围。
 
 
