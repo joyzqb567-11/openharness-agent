@@ -1,0 +1,69 @@
+{
+  "id": "agent_capability_phase106_interactive_full_launch",
+  "name": "agent_capability_phase106_interactive_full_launch",
+  "output_prefix": "agent_capability_phase106_interactive_full_launch",
+  "window_title_prefix": "LearningAgent-Phase106-InteractiveFullLaunch",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE106_INTERACTIVE_FULL_LAUNCH_READY",
+  "prompt": "Please run the Phase106 interactive /computer launch notepad acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 106 interactive Windows Computer Use acceptance. This scenario is allowed to briefly open one controlled Notepad window through the user command path after /computer use --full and /computer use --full-confirm, then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE106_INTERACTIVE_FULL_LAUNCH_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE106_RUN_INTERACTIVE_FULL_LAUNCH='1'; $env:LEARNING_AGENT_PHASE106_ENABLE_INTERACTIVE_FULL_LAUNCH='1'; python -c \"from learning_agent.app.interactive import phase106_main; raise SystemExit(phase106_main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE106_INTERACTIVE_FULL_LAUNCH_OK, the final answer's last line must completely copy: PHASE106_INTERACTIVE_FULL_LAUNCH_READY PHASE106_INTERACTIVE_FULL_LAUNCH_OK target_app=notepad full_mode_session_used=true controlled_launch_candidate_ready=true controlled_real_launch_gate_passed=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE106_INTERACTIVE_FULL_LAUNCH_READY",
+    "PHASE106_INTERACTIVE_FULL_LAUNCH_OK",
+    "target_app=notepad",
+    "full_mode_session_used=true",
+    "controlled_launch_candidate_ready=true",
+    "controlled_real_launch_gate_passed=true",
+    "real_full_launch_attempted=true",
+    "visible_window_verified=true",
+    "cleanup_completed=true",
+    "verified_window_cleanup_completed=true",
+    "residual_owned_process=false",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE106_INTERACTIVE_FULL_LAUNCH_READY",
+    "PHASE106_INTERACTIVE_FULL_LAUNCH_OK",
+    "target_app=notepad",
+    "full_mode_session_used=true",
+    "controlled_launch_candidate_ready=true",
+    "controlled_real_launch_gate_passed=true",
+    "real_full_launch_attempted=true",
+    "visible_window_verified=true",
+    "cleanup_completed=true",
+    "verified_window_cleanup_completed=true",
+    "residual_owned_process=false",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE106_INTERACTIVE_FULL_LAUNCH_READY",
+      "PHASE106_INTERACTIVE_FULL_LAUNCH_OK",
+      "target_app=notepad",
+      "full_mode_session_used=true",
+      "controlled_launch_candidate_ready=true",
+      "controlled_real_launch_gate_passed=true",
+      "real_full_launch_attempted=true",
+      "visible_window_verified=true",
+      "cleanup_completed=true",
+      "verified_window_cleanup_completed=true",
+      "residual_owned_process=false",
+      "real_desktop_touched=true",
+      "uncontrolled_actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}
