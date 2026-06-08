@@ -1,0 +1,322 @@
+{"command_id": "cmd_2ea7434555629a77", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T00:26:12Z"}
+{"command_id": "cmd_2ea7434555629a77", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T00:26:12Z"}
+{"command_id": "cmd_2ea7434555629a77", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T00:26:15Z"}
+{"command_id": "cmd_2e1a7cfe2e8b9ba2", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T00:27:46Z"}
+{"command_id": "cmd_2e1a7cfe2e8b9ba2", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T00:27:46Z"}
+{"command_id": "cmd_2e1a7cfe2e8b9ba2", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T00:27:49Z"}
+{"command_id": "cmd_3c0e7401abe6f269", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T05:45:06Z"}
+{"command_id": "cmd_3c0e7401abe6f269", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T05:45:06Z"}
+{"command_id": "cmd_3c0e7401abe6f269", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T05:45:30Z"}
+{"command_id": "cmd_275aa16257f770f5", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T05:45:30Z"}
+{"command_id": "cmd_275aa16257f770f5", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T05:45:30Z"}
+{"command_id": "cmd_275aa16257f770f5", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T05:45:48Z"}
+{"command_id": "cmd_a3698741854bf227", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T05:52:15Z"}
+{"command_id": "cmd_a3698741854bf227", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T05:52:15Z"}
+{"command_id": "cmd_a3698741854bf227", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T05:52:28Z"}
+{"command_id": "cmd_97c5e66d564de9cc", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T05:52:29Z"}
+{"command_id": "cmd_97c5e66d564de9cc", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T05:52:29Z"}
+{"command_id": "cmd_97c5e66d564de9cc", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T05:52:55Z"}
+{"command_id": "cmd_af54dae596f0b9a6", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:15:53Z"}
+{"command_id": "cmd_af54dae596f0b9a6", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:15:53Z"}
+{"command_id": "cmd_af54dae596f0b9a6", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:16:04Z"}
+{"command_id": "cmd_8681b2e24de32608", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:17:37Z"}
+{"command_id": "cmd_8681b2e24de32608", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:17:37Z"}
+{"command_id": "cmd_8681b2e24de32608", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:19:09Z"}
+{"command_id": "cmd_4ca208518d99cb08", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:19:09Z"}
+{"command_id": "cmd_4ca208518d99cb08", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:19:09Z"}
+{"command_id": "cmd_4ca208518d99cb08", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:20:29Z"}
+{"command_id": "cmd_1ed9a3bd9003552e", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:20:29Z"}
+{"command_id": "cmd_1ed9a3bd9003552e", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:20:29Z"}
+{"command_id": "cmd_a4dd578ead0d1076", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:35:35Z"}
+{"command_id": "cmd_a4dd578ead0d1076", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:35:35Z"}
+{"command_id": "cmd_6ae60fd5c26d9009", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:48:28Z"}
+{"command_id": "cmd_6ae60fd5c26d9009", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:48:28Z"}
+{"command_id": "cmd_6ae60fd5c26d9009", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:49:46Z"}
+{"command_id": "cmd_5caf34025497171d", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:49:46Z"}
+{"command_id": "cmd_5caf34025497171d", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:49:46Z"}
+{"command_id": "cmd_1ed9a3bd9003552e", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:50:32Z"}
+{"command_id": "cmd_5caf34025497171d", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:50:44Z"}
+{"command_id": "cmd_dc72d9af253a67fa", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:50:44Z"}
+{"command_id": "cmd_dc72d9af253a67fa", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:50:44Z"}
+{"command_id": "cmd_dc72d9af253a67fa", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:51:16Z"}
+{"command_id": "cmd_7424f61cce4147ed", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:52:43Z"}
+{"command_id": "cmd_7424f61cce4147ed", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:52:43Z"}
+{"command_id": "cmd_7424f61cce4147ed", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T06:55:31Z"}
+{"command_id": "cmd_d9d292fc001f39a5", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T06:55:31Z"}
+{"command_id": "cmd_d9d292fc001f39a5", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T06:55:31Z"}
+{"command_id": "cmd_aa5ab00d0a17535b", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:24:52Z"}
+{"command_id": "cmd_aa5ab00d0a17535b", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:24:52Z"}
+{"command_id": "cmd_aa5ab00d0a17535b", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T07:25:05Z"}
+{"command_id": "cmd_62be4637e37296e0", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:25:05Z"}
+{"command_id": "cmd_62be4637e37296e0", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:25:05Z"}
+{"command_id": "cmd_62be4637e37296e0", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T07:25:19Z"}
+{"command_id": "cmd_87553b2418b884f8", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:26:46Z"}
+{"command_id": "cmd_87553b2418b884f8", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:26:46Z"}
+{"command_id": "cmd_87553b2418b884f8", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T07:27:03Z"}
+{"command_id": "cmd_fbfaa1b1da806b68", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:27:03Z"}
+{"command_id": "cmd_fbfaa1b1da806b68", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:27:03Z"}
+{"command_id": "cmd_0c4659047a078277", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:35:21Z"}
+{"command_id": "cmd_0c4659047a078277", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:35:21Z"}
+{"command_id": "cmd_fbfaa1b1da806b68", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T07:42:20Z"}
+{"command_id": "cmd_9561b11cbc461af9", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T07:46:23Z"}
+{"command_id": "cmd_9561b11cbc461af9", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T07:46:23Z"}
+{"command_id": "cmd_01117640c0ae454d", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:02:52Z"}
+{"command_id": "cmd_01117640c0ae454d", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:02:52Z"}
+{"command_id": "cmd_01117640c0ae454d", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:08:59Z"}
+{"command_id": "cmd_803452858ae2114a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:08:59Z"}
+{"command_id": "cmd_803452858ae2114a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:08:59Z"}
+{"command_id": "cmd_2af125f38c4e3744", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:19:19Z"}
+{"command_id": "cmd_2af125f38c4e3744", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:19:19Z"}
+{"command_id": "cmd_c7aa4baefc771499", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:26:23Z"}
+{"command_id": "cmd_c7aa4baefc771499", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:26:23Z"}
+{"command_id": "cmd_c7aa4baefc771499", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:29:25Z"}
+{"command_id": "cmd_97b3279495156b3a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:29:25Z"}
+{"command_id": "cmd_97b3279495156b3a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:29:25Z"}
+{"command_id": "cmd_d6625e5ba9fb94a1", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:31:12Z"}
+{"command_id": "cmd_d6625e5ba9fb94a1", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:31:12Z"}
+{"command_id": "cmd_803452858ae2114a", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:33:02Z"}
+{"command_id": "cmd_edf0f442f16de202", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:33:02Z"}
+{"command_id": "cmd_edf0f442f16de202", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:33:02Z"}
+{"command_id": "cmd_edf0f442f16de202", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:36:05Z"}
+{"command_id": "cmd_028b40ce6ba0266a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:38:40Z"}
+{"command_id": "cmd_028b40ce6ba0266a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:38:40Z"}
+{"command_id": "cmd_028b40ce6ba0266a", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:46:41Z"}
+{"command_id": "cmd_d720fda1c2ee3103", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:46:41Z"}
+{"command_id": "cmd_d720fda1c2ee3103", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:46:41Z"}
+{"command_id": "cmd_bc3e4b38e73b3bca", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:50:39Z"}
+{"command_id": "cmd_bc3e4b38e73b3bca", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:50:39Z"}
+{"command_id": "cmd_bc3e4b38e73b3bca", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T08:58:47Z"}
+{"command_id": "cmd_c98d0f5ce24ccfd3", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T08:58:47Z"}
+{"command_id": "cmd_c98d0f5ce24ccfd3", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T08:58:47Z"}
+{"command_id": "cmd_c817afddac4698ab", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:01:27Z"}
+{"command_id": "cmd_c817afddac4698ab", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:01:27Z"}
+{"command_id": "cmd_c817afddac4698ab", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T09:06:30Z"}
+{"command_id": "cmd_9e8499c869d8689f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:06:30Z"}
+{"command_id": "cmd_9e8499c869d8689f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:06:30Z"}
+{"command_id": "cmd_7fe02e08cffdfc64", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:09:03Z"}
+{"command_id": "cmd_7fe02e08cffdfc64", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:09:03Z"}
+{"command_id": "cmd_9f6bfd590cdde7c1", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:13:02Z"}
+{"command_id": "cmd_9f6bfd590cdde7c1", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:13:02Z"}
+{"command_id": "cmd_4f754cb68cd90daa", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:46:58Z"}
+{"command_id": "cmd_4f754cb68cd90daa", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:46:58Z"}
+{"command_id": "cmd_4f754cb68cd90daa", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T09:56:25Z"}
+{"command_id": "cmd_767982275551788b", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T09:56:25Z"}
+{"command_id": "cmd_767982275551788b", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T09:56:25Z"}
+{"command_id": "cmd_767982275551788b", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:04:29Z"}
+{"command_id": "cmd_627ea17047ad15b9", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:04:29Z"}
+{"command_id": "cmd_627ea17047ad15b9", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:04:29Z"}
+{"command_id": "cmd_1a4e8458d6cc2d26", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:07:07Z"}
+{"command_id": "cmd_1a4e8458d6cc2d26", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:07:07Z"}
+{"command_id": "cmd_1a4e8458d6cc2d26", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:07:10Z"}
+{"command_id": "cmd_29e6f49ecd2cb406", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:08:13Z"}
+{"command_id": "cmd_29e6f49ecd2cb406", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:08:13Z"}
+{"command_id": "cmd_29e6f49ecd2cb406", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:08:16Z"}
+{"command_id": "cmd_632b9e23fdef0d56", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:09:25Z"}
+{"command_id": "cmd_632b9e23fdef0d56", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:09:25Z"}
+{"command_id": "cmd_632b9e23fdef0d56", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:09:30Z"}
+{"command_id": "cmd_fdbacccf98e637fb", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:10:54Z"}
+{"command_id": "cmd_fdbacccf98e637fb", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:10:54Z"}
+{"command_id": "cmd_fdbacccf98e637fb", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:15:12Z"}
+{"command_id": "cmd_b66d40355c7a8a0d", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:15:12Z"}
+{"command_id": "cmd_b66d40355c7a8a0d", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:15:12Z"}
+{"command_id": "cmd_b66d40355c7a8a0d", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:15:35Z"}
+{"command_id": "cmd_b527cdfc28155355", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:15:35Z"}
+{"command_id": "cmd_b527cdfc28155355", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:15:35Z"}
+{"command_id": "cmd_ceb0d675e3f44235", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:18:34Z"}
+{"command_id": "cmd_ceb0d675e3f44235", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:18:34Z"}
+{"command_id": "cmd_f8534d2a4302fc0e", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:23:20Z"}
+{"command_id": "cmd_f8534d2a4302fc0e", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:23:20Z"}
+{"command_id": "cmd_f8534d2a4302fc0e", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:23:31Z"}
+{"command_id": "cmd_b527cdfc28155355", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:23:38Z"}
+{"command_id": "cmd_d84cb4ccaacd036e", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:24:28Z"}
+{"command_id": "cmd_d84cb4ccaacd036e", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:24:28Z"}
+{"command_id": "cmd_d84cb4ccaacd036e", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:26:31Z"}
+{"command_id": "cmd_67b08f0eb6ad225a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:26:31Z"}
+{"command_id": "cmd_67b08f0eb6ad225a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:26:31Z"}
+{"command_id": "cmd_67b08f0eb6ad225a", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:29:38Z"}
+{"command_id": "cmd_e84505270369979f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:29:38Z"}
+{"command_id": "cmd_e84505270369979f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:29:38Z"}
+{"command_id": "cmd_e7bb3968f9063629", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:31:14Z"}
+{"command_id": "cmd_e7bb3968f9063629", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:31:14Z"}
+{"command_id": "cmd_e84505270369979f", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:31:40Z"}
+{"command_id": "cmd_e7bb3968f9063629", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:35:16Z"}
+{"command_id": "cmd_9981ba4e32aafac5", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:35:16Z"}
+{"command_id": "cmd_9981ba4e32aafac5", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:35:16Z"}
+{"command_id": "cmd_9981ba4e32aafac5", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:39:19Z"}
+{"command_id": "cmd_831261a125f6ef5d", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:39:19Z"}
+{"command_id": "cmd_831261a125f6ef5d", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:39:19Z"}
+{"command_id": "cmd_57846bc66cce4693", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:40:28Z"}
+{"command_id": "cmd_57846bc66cce4693", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:40:28Z"}
+{"command_id": "cmd_57846bc66cce4693", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:43:03Z"}
+{"command_id": "cmd_37babf4a4625d023", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:43:03Z"}
+{"command_id": "cmd_37babf4a4625d023", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:43:03Z"}
+{"command_id": "cmd_37babf4a4625d023", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:43:42Z"}
+{"command_id": "cmd_afcc1fa74be85900", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:43:42Z"}
+{"command_id": "cmd_afcc1fa74be85900", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:43:42Z"}
+{"command_id": "cmd_16414a8adc6a6ae1", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:46:01Z"}
+{"command_id": "cmd_16414a8adc6a6ae1", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:46:01Z"}
+{"command_id": "cmd_16414a8adc6a6ae1", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:52:16Z"}
+{"command_id": "cmd_eaebab94fb0ba367", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:52:16Z"}
+{"command_id": "cmd_eaebab94fb0ba367", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:52:16Z"}
+{"command_id": "cmd_eaebab94fb0ba367", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T10:56:18Z"}
+{"command_id": "cmd_0085fba28a78fbaf", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:56:18Z"}
+{"command_id": "cmd_0085fba28a78fbaf", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:56:18Z"}
+{"command_id": "cmd_a1f29d0c4ef13b34", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T10:57:19Z"}
+{"command_id": "cmd_a1f29d0c4ef13b34", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T10:57:19Z"}
+{"command_id": "cmd_548f2d3dda92ab46", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:10:26Z"}
+{"command_id": "cmd_548f2d3dda92ab46", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:10:26Z"}
+{"command_id": "cmd_548f2d3dda92ab46", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T11:11:43Z"}
+{"command_id": "cmd_3d737faadec5c161", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:11:43Z"}
+{"command_id": "cmd_3d737faadec5c161", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:11:43Z"}
+{"command_id": "cmd_535b4bdee43f12e1", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:15:59Z"}
+{"command_id": "cmd_535b4bdee43f12e1", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:15:59Z"}
+{"command_id": "cmd_6f841d8087849a72", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:27:07Z"}
+{"command_id": "cmd_6f841d8087849a72", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:27:07Z"}
+{"command_id": "cmd_ddf77da947233c1c", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:39:08Z"}
+{"command_id": "cmd_ddf77da947233c1c", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:39:08Z"}
+{"command_id": "cmd_ddf77da947233c1c", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T11:40:24Z"}
+{"command_id": "cmd_f18d0632023b38b4", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T11:46:32Z"}
+{"command_id": "cmd_f18d0632023b38b4", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T11:46:32Z"}
+{"command_id": "cmd_a46da98162819bb7", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:05:01Z"}
+{"command_id": "cmd_a46da98162819bb7", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:05:01Z"}
+{"command_id": "cmd_a46da98162819bb7", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T12:06:13Z"}
+{"command_id": "cmd_719339da474f5101", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:07:51Z"}
+{"command_id": "cmd_719339da474f5101", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:07:51Z"}
+{"command_id": "cmd_1d5d75b31a7e304b", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:25:59Z"}
+{"command_id": "cmd_1d5d75b31a7e304b", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:25:59Z"}
+{"command_id": "cmd_1d5d75b31a7e304b", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T12:26:03Z"}
+{"command_id": "cmd_6f8871a08edde000", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:41:49Z"}
+{"command_id": "cmd_6f8871a08edde000", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:41:49Z"}
+{"command_id": "cmd_6f8871a08edde000", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T12:41:53Z"}
+{"command_id": "cmd_ec119c2492c602f6", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:55:07Z"}
+{"command_id": "cmd_ec119c2492c602f6", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:55:07Z"}
+{"command_id": "cmd_ec119c2492c602f6", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T12:55:11Z"}
+{"command_id": "cmd_fcd89be5772083df", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T12:56:54Z"}
+{"command_id": "cmd_fcd89be5772083df", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T12:56:54Z"}
+{"command_id": "cmd_41098843e33e1265", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T13:22:09Z"}
+{"command_id": "cmd_41098843e33e1265", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T13:22:09Z"}
+{"command_id": "cmd_41098843e33e1265", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T13:23:18Z"}
+{"command_id": "cmd_b6c064dd9fa466fe", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T13:28:30Z"}
+{"command_id": "cmd_b6c064dd9fa466fe", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T13:28:30Z"}
+{"command_id": "cmd_b6c064dd9fa466fe", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T13:30:11Z"}
+{"command_id": "cmd_30b5a3891a2d692f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T13:31:23Z"}
+{"command_id": "cmd_30b5a3891a2d692f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T13:31:23Z"}
+{"command_id": "cmd_30b5a3891a2d692f", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T13:31:25Z"}
+{"command_id": "cmd_34ad1b0922f982f6", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T13:51:49Z"}
+{"command_id": "cmd_34ad1b0922f982f6", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T13:51:49Z"}
+{"command_id": "cmd_34ad1b0922f982f6", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T13:54:54Z"}
+{"command_id": "cmd_522a4c02b2572cd0", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:09:21Z"}
+{"command_id": "cmd_522a4c02b2572cd0", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:09:21Z"}
+{"command_id": "cmd_540e823e975206ba", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:23:21Z"}
+{"command_id": "cmd_540e823e975206ba", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:23:21Z"}
+{"command_id": "cmd_540e823e975206ba", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T14:24:09Z"}
+{"command_id": "cmd_23720dee74412495", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:44:37Z"}
+{"command_id": "cmd_23720dee74412495", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:44:37Z"}
+{"command_id": "cmd_23720dee74412495", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T14:44:40Z"}
+{"command_id": "cmd_8339c8119427e0e0", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:46:16Z"}
+{"command_id": "cmd_8339c8119427e0e0", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:46:16Z"}
+{"command_id": "cmd_8339c8119427e0e0", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T14:47:26Z"}
+{"command_id": "cmd_28a7237784f4fefe", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:48:12Z"}
+{"command_id": "cmd_28a7237784f4fefe", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:48:12Z"}
+{"command_id": "cmd_28a7237784f4fefe", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T14:48:17Z"}
+{"command_id": "cmd_47034491276f11fb", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T14:49:44Z"}
+{"command_id": "cmd_47034491276f11fb", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T14:49:44Z"}
+{"command_id": "cmd_47034491276f11fb", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T15:08:47Z"}
+{"command_id": "cmd_e2da651f7159283a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T15:33:52Z"}
+{"command_id": "cmd_e2da651f7159283a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T15:33:52Z"}
+{"command_id": "cmd_e2da651f7159283a", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T15:38:35Z"}
+{"command_id": "cmd_1629039dea8eeacd", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T15:41:09Z"}
+{"command_id": "cmd_1629039dea8eeacd", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T15:41:09Z"}
+{"command_id": "cmd_1629039dea8eeacd", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T15:41:48Z"}
+{"command_id": "cmd_bcb118813fdb03a4", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T15:43:46Z"}
+{"command_id": "cmd_bcb118813fdb03a4", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T15:43:46Z"}
+{"command_id": "cmd_bcb118813fdb03a4", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T15:44:40Z"}
+{"command_id": "cmd_2c4acc54e682b13a", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T15:46:30Z"}
+{"command_id": "cmd_2c4acc54e682b13a", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T15:46:30Z"}
+{"command_id": "cmd_2c4acc54e682b13a", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T15:48:11Z"}
+{"command_id": "cmd_b7bccda38bca913f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T22:32:35Z"}
+{"command_id": "cmd_b7bccda38bca913f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T22:32:35Z"}
+{"command_id": "cmd_b7bccda38bca913f", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T22:34:15Z"}
+{"command_id": "cmd_af74228885906ac3", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T22:37:12Z"}
+{"command_id": "cmd_af74228885906ac3", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T22:37:12Z"}
+{"command_id": "cmd_af74228885906ac3", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T22:43:14Z"}
+{"command_id": "cmd_68bdc76b51cc1a7e", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T22:57:46Z"}
+{"command_id": "cmd_68bdc76b51cc1a7e", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T22:57:46Z"}
+{"command_id": "cmd_68bdc76b51cc1a7e", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T22:58:40Z"}
+{"command_id": "cmd_1e46e0b5cca01c69", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T23:15:54Z"}
+{"command_id": "cmd_1e46e0b5cca01c69", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T23:15:54Z"}
+{"command_id": "cmd_1e46e0b5cca01c69", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T23:15:58Z"}
+{"command_id": "cmd_6cf8c2b5d6f676de", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T23:19:35Z"}
+{"command_id": "cmd_6cf8c2b5d6f676de", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T23:19:35Z"}
+{"command_id": "cmd_6cf8c2b5d6f676de", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T23:19:44Z"}
+{"command_id": "cmd_14867067007b76ca", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-06T23:20:57Z"}
+{"command_id": "cmd_14867067007b76ca", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-06T23:20:57Z"}
+{"command_id": "cmd_14867067007b76ca", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-06T23:21:08Z"}
+{"command_id": "cmd_36ad8c5bcbd8a079", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T02:29:40Z"}
+{"command_id": "cmd_36ad8c5bcbd8a079", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T02:29:40Z"}
+{"command_id": "cmd_36ad8c5bcbd8a079", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T02:29:52Z"}
+{"command_id": "cmd_a0c9861dc0a5ee88", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T02:30:46Z"}
+{"command_id": "cmd_a0c9861dc0a5ee88", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T02:30:46Z"}
+{"command_id": "cmd_1215f31d615eab64", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T05:57:11Z"}
+{"command_id": "cmd_1215f31d615eab64", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T05:57:11Z"}
+{"command_id": "cmd_1215f31d615eab64", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T05:57:17Z"}
+{"command_id": "cmd_6a0e2eff28ceffd0", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T05:57:56Z"}
+{"command_id": "cmd_6a0e2eff28ceffd0", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T05:57:56Z"}
+{"command_id": "cmd_6a0e2eff28ceffd0", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T05:59:11Z"}
+{"command_id": "cmd_2886ebca984e664b", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T05:59:46Z"}
+{"command_id": "cmd_2886ebca984e664b", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T05:59:46Z"}
+{"command_id": "cmd_2886ebca984e664b", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T05:59:53Z"}
+{"command_id": "cmd_71bac9a5e1875887", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T06:00:27Z"}
+{"command_id": "cmd_71bac9a5e1875887", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T06:00:27Z"}
+{"command_id": "cmd_61a90d3bbe929826", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T06:01:22Z"}
+{"command_id": "cmd_61a90d3bbe929826", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T06:01:22Z"}
+{"command_id": "cmd_61a90d3bbe929826", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T06:01:29Z"}
+{"command_id": "cmd_1d8d74fd1d975dc6", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T06:02:19Z"}
+{"command_id": "cmd_1d8d74fd1d975dc6", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T06:02:19Z"}
+{"command_id": "cmd_1d8d74fd1d975dc6", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T06:06:44Z"}
+{"command_id": "cmd_63c650c519835275", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T06:13:41Z"}
+{"command_id": "cmd_63c650c519835275", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T06:13:41Z"}
+{"command_id": "cmd_63c650c519835275", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T06:32:18Z"}
+{"command_id": "cmd_63bd1e3485aac3f2", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:03:58Z"}
+{"command_id": "cmd_63bd1e3485aac3f2", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:03:58Z"}
+{"command_id": "cmd_63bd1e3485aac3f2", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:04:02Z"}
+{"command_id": "cmd_b3b26bf0b0a7729f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:05:08Z"}
+{"command_id": "cmd_b3b26bf0b0a7729f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:05:08Z"}
+{"command_id": "cmd_17063bf1bd38ba1b", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:08:38Z"}
+{"command_id": "cmd_17063bf1bd38ba1b", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:08:38Z"}
+{"command_id": "cmd_17063bf1bd38ba1b", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:08:40Z"}
+{"command_id": "cmd_4c2eb5f136a63776", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:09:10Z"}
+{"command_id": "cmd_4c2eb5f136a63776", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:09:10Z"}
+{"command_id": "cmd_2762b536dd88028d", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:11:34Z"}
+{"command_id": "cmd_2762b536dd88028d", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:11:34Z"}
+{"command_id": "cmd_2762b536dd88028d", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:11:37Z"}
+{"command_id": "cmd_539fe53c23f19e82", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:11:55Z"}
+{"command_id": "cmd_539fe53c23f19e82", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:11:55Z"}
+{"command_id": "cmd_5b0a95819a6f9b57", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:20:10Z"}
+{"command_id": "cmd_5b0a95819a6f9b57", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:20:10Z"}
+{"command_id": "cmd_5b0a95819a6f9b57", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:20:33Z"}
+{"command_id": "cmd_411de03f5fa4c3eb", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:21:23Z"}
+{"command_id": "cmd_411de03f5fa4c3eb", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:21:23Z"}
+{"command_id": "cmd_411de03f5fa4c3eb", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:23:29Z"}
+{"command_id": "cmd_05b8a9118554b0f3", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:28:08Z"}
+{"command_id": "cmd_05b8a9118554b0f3", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:28:08Z"}
+{"command_id": "cmd_05b8a9118554b0f3", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:28:26Z"}
+{"command_id": "cmd_cd0889fa4c0f3ffe", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:29:45Z"}
+{"command_id": "cmd_cd0889fa4c0f3ffe", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:29:45Z"}
+{"command_id": "cmd_cd0889fa4c0f3ffe", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:30:14Z"}
+{"command_id": "cmd_03e21481fcf165dc", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:30:50Z"}
+{"command_id": "cmd_03e21481fcf165dc", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:30:50Z"}
+{"command_id": "cmd_0fe985f3d88e4845", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:36:23Z"}
+{"command_id": "cmd_0fe985f3d88e4845", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:36:23Z"}
+{"command_id": "cmd_0fe985f3d88e4845", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:41:21Z"}
+{"command_id": "cmd_97b60b7d26b05224", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:47:10Z"}
+{"command_id": "cmd_97b60b7d26b05224", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:47:10Z"}
+{"command_id": "cmd_97b60b7d26b05224", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:54:11Z"}
+{"command_id": "cmd_c4f299fe47b49c38", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T07:55:48Z"}
+{"command_id": "cmd_c4f299fe47b49c38", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T07:55:48Z"}
+{"command_id": "cmd_c4f299fe47b49c38", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T07:56:09Z"}
+{"command_id": "cmd_815c2728e09e923f", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T08:01:24Z"}
+{"command_id": "cmd_815c2728e09e923f", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T08:01:24Z"}
+{"command_id": "cmd_a34f70cdc32b17fc", "event_type": "command_queued", "mode": "prompt", "payload": {"merged": false, "priority": "next"}, "priority": "next", "status": "queued", "timestamp": "2026-06-07T08:10:12Z"}
+{"command_id": "cmd_a34f70cdc32b17fc", "event_type": "command_started", "mode": "prompt", "payload": {}, "priority": "next", "status": "started", "timestamp": "2026-06-07T08:10:12Z"}
+{"command_id": "cmd_a34f70cdc32b17fc", "event_type": "command_completed", "mode": "prompt", "payload": {}, "priority": "next", "status": "completed", "timestamp": "2026-06-07T08:10:36Z"}

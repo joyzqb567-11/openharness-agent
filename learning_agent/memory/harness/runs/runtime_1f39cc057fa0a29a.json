@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_1f39cc057fa0a29a",
+  "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "根据中国天气网和国家气象中心 2026-05-31 20:00 左右发布的预报，3天后即 2026年6月3日（周三）武汉天气为：中雨，约 23～29℃，微风；白天到夜间都有降雨，午后和晚间雨量可能较明显。\n\n## 出行建议\n- 必带：雨伞或轻便雨衣、防滑鞋、防水袋/密封袋。\n- 穿搭：短袖 + 薄外套即可，雨天体感会闷湿，建议透气速干。\n- 交通：优先地铁/打车，减少长距离步行和骑行。\n- 景点选择：当天不太适合长时间户外登高、江边骑行、东湖深度徒步；更适合“室内文化 + 短距离城市打卡 + 美食”。\n\n## 雨天版武汉一日旅游攻略\n\n### 上午：湖北省博物馆 + 东湖短线\n**09:00—11:30 湖北省博物馆**  \n雨天首选室内景点，重点看曾侯乙编钟、越王勾践剑等馆藏。建议提前预约。\n\n**11:30—12:30 午餐**  \n可在省博/东湖附近吃湖北菜或简餐。推荐尝试：武昌鱼、藕汤、排骨藕汤、豆皮。\n\n> 如果雨不大，可顺路到东湖听涛景区附近短暂停留拍照；如果雨大，直接转室内行程。\n\n### 下午：黄鹤楼/辛亥革命纪念馆二选一\n**方案 A：雨小可去黄鹤楼**  \n13:3",
+      "started_at": "2026-05-31T13:30:01Z",
+      "completed_at": "2026-05-31T13:30:58Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T13:30:01Z",
+  "updated_at": "2026-05-31T13:30:58Z"
+}

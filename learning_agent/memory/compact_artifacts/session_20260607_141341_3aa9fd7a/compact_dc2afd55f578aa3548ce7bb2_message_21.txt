@@ -1,0 +1,267 @@
+工具结果过长，已保存完整输出。
+Full output saved to: H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\debug_logs\tool_results\20260607_143002_bash_7d58209b8e67.txt
+原始字符数=15327，上下文内摘要字符数约=6031。
+上下文摘要：
+bash 成功：exit_code=0
+stdout:
+--- line 923
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 927
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 930
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 935
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 943
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 951
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 960
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  }
+}
+--- line 969
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "Ӧ��������Ŀ�괰�ڰ�ʧ�ܡ�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "qq"
+  }
+}
+--- line 970
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "desktop control abort flag �Ѵ������Ѿܾ�����Ӧ�á�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "app": "qq WebCatalog ",
+    "app_name": "qq WebCatalog ",
+    "confirm_desktop_control": true,
+    "target": "qq WebCatalog ",
+    "target_app": "qq WebCatalog "
+  }
+}
+--- line 971
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "audit_id": "computer-audit-1",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "qq"
+  }
+}
+--- line 972
+{
+  "action": "observe:get_window_state",
+  "allowed": true,
+  "reason": "Windows ֻ������״̬�ѷ��ء�",
+  "audit_id": "computer-audit-2",
+  "argument_summary": {
+    "action": "observe:get_window_state",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:13:55Z",
+      "process_path_hash": "",
+      "title_preview": "QQ",
+      "window_id": "hwnd:382280282"
+    }
+  }
+}
+--- line 973
+{
+  "action": "click",
+  "allowed": true,
+  "reason": "SendInput ִ������ͨ��ע��ʵ�ִ���������",
+  "audit_id": "computer-audit-3",
+  "argument_summary": {
+    "action": "click",
+    "app": "qq",
+    "app_name": "qq",
+    "confirm_desktop_control": true,
+    "target": "qq",
+    "target_app": "qq",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:14:00Z",
+      "process_path_hash": "",
+      "rect": {
+        "bottom": 746,
+        "left": 800,
+        "right": 1120,
+        "top": 286
+      },
+      "title_preview": "QQ",
+      "window_id": "hwnd:382280282"
+    },
+    "window_relative_x": 125,
+    "window_relative_y": 423,
+    "x": 925,
+    "y": 709
+  }
+}
+--- line 974
+{
+  "action": "click",
+  "allowed": true,
+  "reason": "SendInput ִ������ͨ��ע��ʵ�ִ���������",
+  "audit_id": "computer-audit-4",
+  "argument_summary": {
+    "action": "click",
+    "app": "qq",
+    "app_name": "qq",
+    "confirm_desktop_control": true,
+    "target": "qq",
+    "target_app": "qq",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:14:00Z",
+      "process_path_hash": "",
+      "rect": {
+        "bottom": 746,
+        "left": 800,
+    
+
+...[中间内容已保存到文件，未塞入模型上下文]...
+
+": "hwnd:60496974"
+    }
+  }
+}
+--- line 993
+{
+  "action": "observe:get_window_state",
+  "allowed": false,
+  "reason": "δ֪���ڣ����ȵ��� computer_observe/list_windows ��ȡ���� window ���á�",
+  "audit_id": "computer-audit-23",
+  "argument_summary": {
+    "action": "observe:get_window_state",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:13:55Z",
+      "process_path_hash": "",
+      "title_preview": "QQ",
+      "window_id": "hwnd:382280282"
+    }
+  }
+}
+--- line 995
+{
+  "action": "observe:get_window_state",
+  "allowed": false,
+  "reason": "��⵽Ŀ�괰��Ư�ƣ��Ѿܾ������ǵ�ǰ launch_app ������ agent-owned ���ڡ������ launch_app ���ص� target_window��",
+  "audit_id": "computer-audit-25",
+  "argument_summary": {
+    "action": "observe:get_window_state",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:27:06Z",
+      "process_path_hash": "",
+      "title_preview": "QQ",
+      "window_id": "hwnd:89268842"
+    }
+  }
+}
+--- line 996
+{
+  "action": "observe:get_window_state",
+  "allowed": false,
+  "reason": "δ֪���ڣ����ȵ��� computer_observe/list_windows ��ȡ���� window ���á�",
+  "audit_id": "computer-audit-26",
+  "argument_summary": {
+    "action": "observe:get_window_state",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:13:55Z",
+      "process_path_hash": "",
+      "title_preview": "QQ",
+      "window_id": "hwnd:382280282"
+    }
+  }
+}
+--- line 998
+{
+  "action": "observe:get_window_state",
+  "allowed": false,
+  "reason": "��⵽Ŀ�괰��Ư�ƣ��Ѿܾ������ǵ�ǰ launch_app ������ agent-owned ���ڡ������ launch_app ���ص� target_window��",
+  "audit_id": "computer-audit-28",
+  "argument_summary": {
+    "action": "observe:get_window_state",
+    "window": {
+      "app_id": "chrome_widgetwin_1:pid:41504",
+      "captured_at": "2026-06-07T06:28:15Z",
+      "process_path_hash": "",
+      "title_preview": "QQ",
+      "window_id": "hwnd:89268842"
+    }
+  }
+}
+
+stderr:

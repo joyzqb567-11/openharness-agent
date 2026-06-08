@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_100bb71f8a16e551",
+  "prompt": "请执行一次 Phase 40 Windows Computer Use 全局 abort、turn cleanup 和通知运行时合同验收：这次只允许运行项目内 session_runtime 模块自检，必须证明 abort、cleanup、notifications、terminal_status 都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE40_WINDOWS_ABORT_CLEANUP_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.session_runtime import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE40_WINDOWS_ABORT_CLEANUP_OK 后，最终回答最后一行必须完整复制：PHASE40_WINDOWS_ABORT_CLEANUP_READY PHASE40_WINDOWS_ABORT_CLEANUP_OK abort=true cleanup=true notifications=true terminal_status=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 40 Windows Computer Use 全局 abort、turn cleanup 和通知运行时合同验收：这次只允许运行项目内 session_runtime 模块自检，必须证明 abort、cleanup、notifications、terminal_status 都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE40_WINDOWS_ABORT_CLEANUP_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.session_runtime import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE40_WINDOWS_ABORT_CLEANUP_OK 后，最终回答最后一行必须完整复制：PHASE40_WINDOWS_ABORT_CLEANUP_READY PHASE40_WINDOWS_ABORT_CLEANUP_OK abort=true cleanup=true notifications=true terminal_status=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已完成 Phase 40 Windows Computer Use 全局 abort、turn cleanup 和通知运行时合同验收；仅运行了项目内 session_runtime 模块自检，未点击真实桌面、未移动鼠标、未向真实窗口输入。\n\n验证输出确认：abort、cleanup、notifications、terminal_status 均成立，actions_expanded=false。\n\nPHASE40_WINDOWS_ABORT_CLEANUP_READY PHASE40_WINDOWS_ABORT_CLEANUP_OK abort=true cleanup=true notifications=true terminal_status=true actions_expanded=false",
+      "started_at": "2026-06-03T03:27:37Z",
+      "completed_at": "2026-06-03T03:27:58Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T03:27:37Z",
+  "updated_at": "2026-06-03T03:27:58Z"
+}

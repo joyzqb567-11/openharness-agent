@@ -1,0 +1,27 @@
+{
+  "name": "harness_runtime_resume",
+  "output_prefix": "harness_runtime_resume",
+  "window_title_prefix": "LearningAgent-Controller-HarnessResume",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 30,
+  "success_marker": "HARNESS_RUNTIME_RESUME_READY",
+  "prompt_lines": [
+    "请执行真实终端 harness resume_interrupted 消费验收。",
+    "请不要调用 harness CLI、bash、task_output 或 read_background_command。请直接读取本轮模型输入开头自动注入的 resume-interrupted 内容。",
+    "如果你看到了 run_id 为 visible_resume_gate 的恢复上下文，请在最终回答中包含：HARNESS_RUNTIME_RESUME_READY、visible_resume_gate、resume-interrupted、继续执行。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "visible_resume_gate"
+  ],
+  "event_answer_contains": [
+    "HARNESS_RUNTIME_RESUME_READY",
+    "visible_resume_gate",
+    "resume-interrupted",
+    "继续执行"
+  ]
+}

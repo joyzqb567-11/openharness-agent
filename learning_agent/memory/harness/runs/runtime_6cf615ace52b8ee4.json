@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_6cf615ace52b8ee4",
+  "prompt": "Please run one Phase 54 Windows Computer Use native dependency and permission reality gate acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY. You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.native_reality_gate import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK, the final answer's last line must completely copy: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK dependency_count=9 report_written=true install_attempted=false system_settings_changed=false actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 54 Windows Computer Use native dependency and permission reality gate acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY. You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.native_reality_gate import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK, the final answer's last line must completely copy: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK dependency_count=9 report_written=true install_attempted=false system_settings_changed=false actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 54 Windows Computer Use native dependency and permission reality gate acceptance completed successfully.\n\nPHASE54_WINDOWS_NATIVE_REALITY_GATE_READY PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK dependency_count=9 report_written=true install_attempted=false system_settings_changed=false actions_expanded=false",
+      "started_at": "2026-06-03T08:43:07Z",
+      "completed_at": "2026-06-03T08:43:17Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T08:43:07Z",
+  "updated_at": "2026-06-03T08:43:17Z"
+}

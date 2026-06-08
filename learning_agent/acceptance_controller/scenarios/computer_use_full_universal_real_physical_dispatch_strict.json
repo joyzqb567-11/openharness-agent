@@ -1,0 +1,61 @@
+{
+  "id": "computer_use_full_universal_real_physical_dispatch_strict",
+  "name": "computer_use_full_universal_real_physical_dispatch_strict",
+  "output_prefix": "computer_use_full_universal_real_physical_dispatch_strict",
+  "window_title_prefix": "LearningAgent-FullUniversalRealPhysicalDispatchStrict",
+  "max_seconds": 120,
+  "final_log_wait_seconds": 5,
+  "post_success_wait_seconds": 3,
+  "success_marker": "",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, ask a normal Paint drawing task, and verify the production route performs controlled physical dispatch through the universal loop.",
+  "capture_event_payload_regex": {},
+  "prompt_lines": [
+    "/computer use --full",
+    "\u8bf7\u4f7f\u7528\u672c\u5730\u7535\u8111\u7684\u753b\u56fe\u8f6f\u4ef6\u753b\u4e00\u6761\u7ebf\u3002",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [
+    "COMPUTER_USE_FULL_DESKTOP_TASK_ROUTER_READY",
+    "COMPUTER_USE_FULL_DESKTOP_TASK_ROUTER_OK",
+    "desktop_task_router=true",
+    "natural_language_desktop_tasks_route_to_computer_use=true",
+    "computer_use_gui_route_used=true",
+    "universal_desktop_execution_loop_real_dispatch_finished",
+    "universal_desktop_execution_loop_used",
+    "observe_plan_act_verify_loop",
+    "real_observation_runtime_used",
+    "real_observation_frame_used",
+    "phase116_universal_real_gui_observation_frame",
+    "\"real_actions_supported\": true",
+    "\"controlled_physical_sender_configured\": true",
+    "\"controlled_physical_sender_used\": true",
+    "\"controlled_physical_backend_reached\": true",
+    "\"controlled_physical_sender_real_desktop_touched\": true",
+    "\"real_dispatch_performed\": true",
+    "\"real_desktop_touched\": true",
+    "\"subject_specific_planning\": false"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "COMPUTER_USE_FULL_DESKTOP_TASK_ROUTER_READY",
+    "COMPUTER_USE_FULL_DESKTOP_TASK_ROUTER_OK",
+    "computer_use_gui_route_used=true",
+    "real_desktop_touched=true",
+    "Computer Use Stop",
+    "stopped=true"
+  ],
+  "event_payload_regex": [
+    "gui_action_count=[1-9][0-9]*",
+    "low_level_event_count=[1-9][0-9]*"
+  ],
+  "max_permission_sent_count": 0
+}

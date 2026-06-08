@@ -1,0 +1,17 @@
+{
+  "action_id": "browser_run_f5d913d34dd32880-action-1",
+  "run_id": "browser_run_f5d913d34dd32880",
+  "stage_id": "browser_snapshot",
+  "tool_name": "browser_snapshot",
+  "arguments_redacted": {
+    "page_id": "page-1",
+    "max_text_chars": 4000,
+    "max_elements": 20
+  },
+  "status": "completed",
+  "started_at_ms": 1780285697647,
+  "finished_at_ms": 1780285697676,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": "browser_observation_2ed4db3d60c132f8"
+}

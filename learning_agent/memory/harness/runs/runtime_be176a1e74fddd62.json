@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_be176a1e74fddd62",
+  "prompt": "请执行真实终端 harness task notification 种子验收。你必须调用 start_background_command 工具启动一个很短的后台命令，命令内容请使用当前 Python 执行：python -c \"print('TASK_NOTIFICATION_REAL_OK', flush=True)\"。 请设置 label 为 harness-task-notification-real，不要调用 read_background_command，不要调用 task_output。 后台命令启动成功后，最终回答必须包含：HARNESS_TASK_NOTIFICATION_SEEDED、start_background_command、harness-task-notification-real。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行真实终端 harness task notification 种子验收。你必须调用 start_background_command 工具启动一个很短的后台命令，命令内容请使用当前 Python 执行：python -c \"print('TASK_NOTIFICATION_REAL_OK', flush=True)\"。 请设置 label 为 harness-task-notification-real，不要调用 read_background_command，不要调用 task_output。 后台命令启动成功后，最终回答必须包含：HARNESS_TASK_NOTIFICATION_SEEDED、start_background_command、harness-task-notification-real。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "无法完成该验收：当前可用工具中没有 start_background_command，因此我不能调用它，也不能声称已启动后台命令。\n\n本轮可用工具只有：read、write、edit、bash、mcp__browser_automation__browser_profile_status。",
+      "started_at": "2026-05-31T09:49:08Z",
+      "completed_at": "2026-05-31T09:49:15Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T09:49:08Z",
+  "updated_at": "2026-05-31T09:49:15Z"
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_cbb83dc3ec4845e8",
+  "prompt": "Please run the URG-6 Universal Real GUI Computer Use final maturity matrix. Use only the project terminal self-check command. Do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: UNIVERSAL_REAL_GUI_COMPUTER_USE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_final_maturity_matrix import main; raise SystemExit(main([]))\" Do not write the final answer early. Only after the terminal command prints UNIVERSAL_REAL_GUI_COMPUTER_USE_READY, the final answer's last line must completely copy: UNIVERSAL_REAL_GUI_COMPUTER_USE_READY single_universal_real_gui_loop=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true real_window_observation=true real_uia_or_vision_targeting=true real_sendinput_dispatch=true target_identity_rechecked_before_each_action=true observe_plan_act_verify_loop=true paint_pikachu_real_acceptance=true notepad_real_acceptance=true calculator_real_acceptance=true browser_real_acceptance=true script_artifact_route_blocked=true real_desktop_execution_mature=true uncontrolled_high_risk_actions_allowed=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run the URG-6 Universal Real GUI Computer Use final maturity matrix. Use only the project terminal self-check command. Do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: UNIVERSAL_REAL_GUI_COMPUTER_USE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_final_maturity_matrix import main; raise SystemExit(main([]))\" Do not write the final answer early. Only after the terminal command prints UNIVERSAL_REAL_GUI_COMPUTER_USE_READY, the final answer's last line must completely copy: UNIVERSAL_REAL_GUI_COMPUTER_USE_READY single_universal_real_gui_loop=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true real_window_observation=true real_uia_or_vision_targeting=true real_sendinput_dispatch=true target_identity_rechecked_before_each_action=true observe_plan_act_verify_loop=true paint_pikachu_real_acceptance=true notepad_real_acceptance=true calculator_real_acceptance=true browser_real_acceptance=true script_artifact_route_blocked=true real_desktop_execution_mature=true uncontrolled_high_risk_actions_allowed=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "验证命令已成功完成，URG-6 Universal Real GUI Computer Use final maturity matrix 通过。\n\nUNIVERSAL_REAL_GUI_COMPUTER_USE_READY single_universal_real_gui_loop=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true real_window_observation=true real_uia_or_vision_targeting=true real_sendinput_dispatch=true target_identity_rechecked_before_each_action=true observe_plan_act_verify_loop=true paint_pi",
+      "started_at": "2026-06-05T14:38:19Z",
+      "completed_at": "2026-06-05T14:38:32Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T14:38:19Z",
+  "updated_at": "2026-06-05T14:38:32Z"
+}

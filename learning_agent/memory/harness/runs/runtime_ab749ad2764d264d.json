@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ab749ad2764d264d",
+  "prompt": "Please run one Phase 106 interactive Windows Computer Use acceptance. This scenario is allowed to briefly open one controlled Notepad window through the user command path after /computer use --full and /computer use --full-confirm, then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE106_INTERACTIVE_FULL_LAUNCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE106_RUN_INTERACTIVE_FULL_LAUNCH='1'; $env:LEARNING_AGENT_PHASE106_ENABLE_INTERACTIVE_FULL_LAUNCH='1'; python -c \"from learning_agent.app.interactive import phase106_main; raise SystemExit(phase106_main())\" Do not write the final answer early. Only after the terminal command prints PHASE106_INTERACTIVE_FULL_LAUNCH_OK, the final answer's last line must completely copy: PHASE106_INTERACTIVE_FULL_LAUNCH_READY PHASE106_INTERACTIVE_FULL_LAUNCH_OK target_app=notepad full_mode_session_used=true controlled_launch_candidate_ready=true controlled_real_launch_gate_passed=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 106 interactive Windows Computer Use acceptance. This scenario is allowed to briefly open one controlled Notepad window through the user command path after /computer use --full and /computer use --full-confirm, then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE106_INTERACTIVE_FULL_LAUNCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE106_RUN_INTERACTIVE_FULL_LAUNCH='1'; $env:LEARNING_AGENT_PHASE106_ENABLE_INTERACTIVE_FULL_LAUNCH='1'; python -c \"from learning_agent.app.interactive import phase106_main; raise SystemExit(phase106_main())\" Do not write the final answer early. Only after the terminal command prints PHASE106_INTERACTIVE_FULL_LAUNCH_OK, the final answer's last line must completely copy: PHASE106_INTERACTIVE_FULL_LAUNCH_READY PHASE106_INTERACTIVE_FULL_LAUNCH_OK target_app=notepad full_mode_session_used=true controlled_launch_candidate_ready=true controlled_real_launch_gate_passed=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 106 interactive Windows Computer Use acceptance completed successfully.\n\nPHASE106_INTERACTIVE_FULL_LAUNCH_READY PHASE106_INTERACTIVE_FULL_LAUNCH_OK target_app=notepad full_mode_session_used=true controlled_launch_candidate_ready=true controlled_real_launch_gate_passed=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+      "started_at": "2026-06-05T04:03:40Z",
+      "completed_at": "2026-06-05T04:03:50Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T04:03:40Z",
+  "updated_at": "2026-06-05T04:03:50Z"
+}

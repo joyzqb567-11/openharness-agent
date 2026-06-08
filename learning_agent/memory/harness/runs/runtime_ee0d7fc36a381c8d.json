@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ee0d7fc36a381c8d",
+  "prompt": "请执行 Browser Dual Track Stage 12 总验收，最终回答只能输出一行固定标记：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK。 第一步必须调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认返回 visible_browser=true 和 headless=false。 第二步必须在这个可见 Chromium 窗口里调用 browser_open 打开 https://example.com/，再调用 browser_snapshot，确认结果里有 observation_id。 第三步必须调用 browser_screenshot 保存当前页面截图，确认结果里有 observation_id。 第四步必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，参数可用 milliseconds=250 或 text=Example Domain，用来验证 flow checkpoint。 第五步必须调用 browser_plugin_status，确认 capabilities 包含 observation_engine、flow_checkpoint、status_browser_runtime。 不要提前最终回答；上述浏览器工具都成功后，最终回答只能输出一行：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行 Browser Dual Track Stage 12 总验收，最终回答只能输出一行固定标记：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK。 第一步必须调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认返回 visible_browser=true 和 headless=false。 第二步必须在这个可见 Chromium 窗口里调用 browser_open 打开 https://example.com/，再调用 browser_snapshot，确认结果里有 observation_id。 第三步必须调用 browser_screenshot 保存当前页面截图，确认结果里有 observation_id。 第四步必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，参数可用 milliseconds=250 或 text=Example Domain，用来验证 flow checkpoint。 第五步必须调用 browser_plugin_status，确认 capabilities 包含 observation_engine、flow_checkpoint、status_browser_runtime。 不要提前最终回答；上述浏览器工具都成功后，最终回答只能输出一行：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK",
+      "started_at": "2026-06-01T11:42:44Z",
+      "completed_at": "2026-06-01T11:43:29Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T11:42:44Z",
+  "updated_at": "2026-06-01T11:43:29Z"
+}

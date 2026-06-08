@@ -1,0 +1,80 @@
+﻿{
+    "completed":  true,
+    "scenario":  "agent_capability_phase63_controller_takeover",
+    "scenario_path":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\scenarios\\agent_capability_phase63_controller_takeover.json",
+    "run_dir":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537",
+    "final_printed":  true,
+    "prompt_sent":  true,
+    "prompt_received":  true,
+    "prompt_send_attempts":  1,
+    "permission_sent_count":  0,
+    "max_permission_sent_count":  0,
+    "permission_policy_default_response":  "allow",
+    "permission_policy_decisions":  [
+
+                                    ],
+    "post_success_wait_seconds":  6,
+    "assertion":  {
+                      "passed":  true,
+                      "marker_passed":  true,
+                      "permission_count_passed":  true,
+                      "max_permission_sent_count":  0,
+                      "permission_sent_count":  0,
+                      "log_updated":  true,
+                      "state_checks":  {
+                                           "agent_ready_for_user_prompt":  true,
+                                           "user_prompt_received":  true,
+                                           "final_answer_printed":  true
+                                       },
+                      "event_answer_checks":  {
+                                                  "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY":  true,
+                                                  "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK":  true,
+                                                  "controller_surface=true":  true,
+                                                  "launches_visible_terminal=true":  true,
+                                                  "reads_acceptance_run=true":  true,
+                                                  "evidence_package=true":  true,
+                                                  "can_abort=true":  true,
+                                                  "http_loopback_only=true":  true,
+                                                  "token_required=true":  true,
+                                                  "approval_bypass_blocked=true":  true,
+                                                  "visible_terminal_required=true":  true,
+                                                  "actions_expanded=false":  true
+                                              },
+                      "event_payload_checks":  {
+
+                                               },
+                      "debug_log_checks":  {
+                                               "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY":  true,
+                                               "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK":  true,
+                                               "controller_surface=true":  true,
+                                               "launches_visible_terminal=true":  true,
+                                               "reads_acceptance_run=true":  true,
+                                               "evidence_package=true":  true,
+                                               "can_abort=true":  true,
+                                               "http_loopback_only=true":  true,
+                                               "token_required=true":  true,
+                                               "approval_bypass_blocked=true":  true,
+                                               "visible_terminal_required=true":  true,
+                                               "actions_expanded=false":  true
+                                           },
+                      "final_answer_preview":  "Phase 63 Windows Computer Use external agent controller takeover and debug surface acceptance passed.\n\nPHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK controller_surface=true launches_visible_terminal=true reads_acceptance_run=true evidence_package=true can_abort=true http_loopback_only=true token_required=true approval_bypass_blocked=true visible_terminal_required=true actions_expanded=false",
+                      "final_answer_text_length":  428,
+                      "event_payload_text_length":  2818
+                  },
+    "event_count":  6,
+    "states":  [
+                   "permission_auto_approved",
+                   "agent_ready_for_user_prompt",
+                   "user_prompt_received",
+                   "permission_auto_approved",
+                   "final_answer_printed",
+                   "agent_ready_for_user_prompt"
+               ],
+    "event_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537\\events.jsonl",
+    "startup_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537\\01_startup.png",
+    "prompt_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537\\02_prompt_sent.png",
+    "final_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537\\03_final.png",
+    "copied_debug_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase63_controller_takeover-20260603_190537\\latest_run_readable.md",
+    "process_id":  1964,
+    "window_title":  "LearningAgent-Phase63-ControllerTakeover-190537"
+}

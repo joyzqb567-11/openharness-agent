@@ -1,0 +1,51 @@
+{
+  "id": "agent_capability_phase59_session_context_appstate",
+  "name": "agent_capability_phase59_session_context_appstate",
+  "output_prefix": "agent_capability_phase59_session_context_appstate",
+  "window_title_prefix": "LearningAgent-Phase59-SessionContext",
+  "max_seconds": 700,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY",
+  "prompt": "Please run the Phase59 Windows Computer Use session context AppState acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 59 Windows Computer Use session context and AppState acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click or type into the desktop, and do not run real SendInput. The final answer must include the fixed marker: PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.session_context import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_OK, the final answer's last line must completely copy: PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_OK context_persisted=true multi_session_isolated=true cleanup_state=true status_readable=true actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY",
+    "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_OK",
+    "context_persisted=true",
+    "multi_session_isolated=true",
+    "cleanup_state=true",
+    "status_readable=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY",
+    "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_OK",
+    "context_persisted=true",
+    "multi_session_isolated=true",
+    "cleanup_state=true",
+    "status_readable=true",
+    "actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_READY",
+      "PHASE59_WINDOWS_SESSION_CONTEXT_APPSTATE_OK",
+      "context_persisted=true",
+      "multi_session_isolated=true",
+      "cleanup_state=true",
+      "status_readable=true",
+      "actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

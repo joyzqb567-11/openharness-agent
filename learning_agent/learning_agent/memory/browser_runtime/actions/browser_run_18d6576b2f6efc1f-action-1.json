@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_18d6576b2f6efc1f-action-1",
+  "run_id": "browser_run_18d6576b2f6efc1f",
+  "stage_id": "browser_click",
+  "tool_name": "browser_click",
+  "arguments_redacted": {
+    "selector": "#apply"
+  },
+  "status": "completed",
+  "started_at_ms": 1780325520005,
+  "finished_at_ms": 1780325520044,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

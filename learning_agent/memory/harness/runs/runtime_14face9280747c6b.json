@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_14face9280747c6b",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已使用 Computer Use 在真实本机 Microsoft Paint 应用中完成任务。\n\n证据：\n- 最终截图显示 Paint 画布上已绘制完成：黑色树干/花茎轮廓，上方有绿色花冠/树冠轮廓。\n- 多次 `computer_action` 均返回成功，后端为 `windows_sendinput`，说明动作通过真实桌面输入注入执行。\n- 工具完成门禁显示 `successful_real_action_count: 6`，已达到阈值 `threshold: 6`。\n- 动作日志中包含真实低层事件计数，例如点击动作 `low_level_event_count: 5`，拖拽动作 `low_level_event_count: 21`、`23` 等。\n- 最后一条工具结果明确给出 `computer_use_full_completion_ready`，并提示不要继续调用鼠标键盘动作。\nComputer Use 真实执行摘要：\n- tool_path=computer_use; target_app=mspaint; app_id=mspaintapp:pid:3380; wind",
+      "started_at": "2026-06-06T22:37:12Z",
+      "completed_at": "2026-06-06T22:43:14Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T22:37:12Z",
+  "updated_at": "2026-06-06T22:43:14Z"
+}

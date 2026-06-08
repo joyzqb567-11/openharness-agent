@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f53b04de7b568a45",
+  "prompt": "Please run one Phase 107 interactive Windows Computer Use target resolver acceptance. This scenario must use the real visible start_oauth_agent.bat terminal. It must confirm /computer use --full, prove /computer launch calc is recognized but does not open Calculator, prove /computer launch powershell is refused as high risk with zero real desktop side effects, then stop Computer Use. Do not open any new real app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE107_INTERACTIVE_LAUNCH_TARGET_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.app.interactive import phase107_main; raise SystemExit(phase107_main())\" Do not write the final answer early. Only after the terminal command prints PHASE107_INTERACTIVE_LAUNCH_TARGET_OK, the final answer's last line must completely copy: PHASE107_INTERACTIVE_LAUNCH_TARGET_READY PHASE107_INTERACTIVE_LAUNCH_TARGET_OK calc_recognized_default_off=true high_risk_refused=true powershell_zero_side_effect=true real_desktop_touched=false uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 107 interactive Windows Computer Use target resolver acceptance. This scenario must use the real visible start_oauth_agent.bat terminal. It must confirm /computer use --full, prove /computer launch calc is recognized but does not open Calculator, prove /computer launch powershell is refused as high risk with zero real desktop side effects, then stop Computer Use. Do not open any new real app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE107_INTERACTIVE_LAUNCH_TARGET_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.app.interactive import phase107_main; raise SystemExit(phase107_main())\" Do not write the final answer early. Only after the terminal command prints PHASE107_INTERACTIVE_LAUNCH_TARGET_OK, the final answer's last line must completely copy: PHASE107_INTERACTIVE_LAUNCH_TARGET_READY PHASE107_INTERACTIVE_LAUNCH_TARGET_OK calc_recognized_default_off=true high_risk_refused=true powershell_zero_side_effect=true real_desktop_touched=false uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 107 interactive Windows Computer Use target resolver acceptance completed successfully.\n\nPHASE107_INTERACTIVE_LAUNCH_TARGET_READY PHASE107_INTERACTIVE_LAUNCH_TARGET_OK calc_recognized_default_off=true high_risk_refused=true powershell_zero_side_effect=true real_desktop_touched=false uncontrolled_actions_expanded=false",
+      "started_at": "2026-06-05T04:38:48Z",
+      "completed_at": "2026-06-05T04:39:05Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T04:38:48Z",
+  "updated_at": "2026-06-05T04:39:05Z"
+}

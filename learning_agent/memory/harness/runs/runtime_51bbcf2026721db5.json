@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_51bbcf2026721db5",
+  "prompt": "只回答 OK，不要调用工具。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "只回答 OK，不要调用工具。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Codex CLI 调用失败：Command '['codex', 'exec', '--skip-git-repo-check', '--sandbox', 'read-only', '--model', 'gpt-5.5', '--output-schema', 'C:\\\\Users\\\\joyzq\\\\AppData\\\\Local\\\\Temp\\\\learning_agent_codex_48ykam95\\\\output_schema.json', '--output-last-message', 'C:\\\\Users\\\\joyzq\\\\AppData\\\\Local\\\\Temp\\\\learning_agent_codex_48ykam95\\\\last_message.json', '-']' timed out after 120 seconds",
+      "started_at": "2026-06-04T12:29:12Z",
+      "completed_at": "2026-06-04T12:31:12Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T12:29:12Z",
+  "updated_at": "2026-06-04T12:31:12Z"
+}

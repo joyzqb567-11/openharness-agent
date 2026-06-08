@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_7cf2c92d05d23d86",
+  "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "我查到的天气源目前只提供到 2026-06-02，未覆盖严格意义上的 3 天后 2026-06-03；下面先按最接近日期 6 月 2 日的预报来做攻略参考，出发前建议再复查一次。\n\n武汉天气参考：\n- 日期：2026-06-02\n- 天气：晴到少云，降雨概率 0%\n- 气温：25–35℃，平均约 30℃\n- 体感：中午到下午可达 35–36℃\n- 紫外线：中午 UV 指数约 10，较强\n- 日出/日落：约 05:21 / 19:21\n\n出行建议：\n- 武汉当天偏热，建议避开 12:00–16:00 的强晒时段。\n- 必备：遮阳伞/帽子、防晒霜、墨镜、轻薄透气衣物、充足饮水。\n- 行程适合“上午户外 + 中午室内/休息 + 傍晚江边/夜景”。\n\n一日游推荐路线：\n\n上午：黄鹤楼 + 户部巷/粮道街\n- 08:30–10:30 黄鹤楼\n  - 武汉代表性地标，适合拍照、俯瞰长江和武汉长江大桥。\n  - 建议早去，避开高温和人流。\n- 10:40–12:00 户部巷或粮道街\n  - 想吃小吃可去户部巷；想更本地、更生活化一点，推荐粮道街。\n  - 可尝试：热干面、豆皮、面窝、糊汤粉、蛋酒。\n",
+      "started_at": "2026-05-31T13:28:08Z",
+      "completed_at": "2026-05-31T13:29:33Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T13:28:08Z",
+  "updated_at": "2026-05-31T13:29:33Z"
+}

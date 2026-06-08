@@ -1,0 +1,39 @@
+{
+  "run_id": "runtime_30c92f6b4ffa0291",
+  "prompt": "请执行一次 harness runtime 真实终端验收，最终回答必须包含固定标记：HARNESS_RUNTIME_ALIGNMENT_READY。 第一步使用 read 工具读取 learning_agent/runtime/session_runtime.py、learning_agent/runtime/command_queue.py、learning_agent/runtime/task_registry.py、learning_agent/harness/cli.py，确认当前 agent.run 已经接入 session runtime、RuntimeCommandQueue、TaskRegistry 和 harness CLI。 第二步使用 bash 工具在当前工作区执行以下三条只读命令：python -m learning_agent.harness queue --store learning_agent/memory/harness --runtime learning_agent/memory/runtime；python -m learning_agent.harness tasks --tasks learning_agent/memory/tasks；python -m learning_agent.harness events --store learning_agent/memory/harness --limit 5。 最终回答请简短说明你看到的结果，并必须包含：HARNESS_RUNTIME_ALIGNMENT_READY、run_agent_with_harness_session、RuntimeCommandQueue、TaskRegistry、queue、tasks、events。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 harness runtime 真实终端验收，最终回答必须包含固定标记：HARNESS_RUNTIME_ALIGNMENT_READY。 第一步使用 read 工具读取 learning_agent/runtime/session_runtime.py、learning_agent/runtime/command_queue.py、learning_agent/runtime/task_registry.py、learning_agent/harness/cli.py，确认当前 agent.run 已经接入 session runtime、RuntimeCommandQueue、TaskRegistry 和 harness CLI。 第二步使用 bash 工具在当前工作区执行以下三条只读命令：python -m learning_agent.harness queue --store learning_agent/memory/harness --runtime learning_agent/memory/runtime；python -m learning_agent.harness tasks --tasks learning_agent/memory/tasks；python -m learning_agent.harness events --store learning_agent/memory/harness --limit 5。 最终回答请简短说明你看到的结果，并必须包含：HARNESS_RUNTIME_ALIGNMENT_READY、run_agent_with_harness_session、RuntimeCommandQueue、TaskRegistry、queue、tasks、events。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "pending",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "",
+      "completed_at": ""
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T08:51:53Z",
+  "updated_at": "2026-05-31T08:52:20Z"
+}

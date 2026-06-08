@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_1186c8b1b2d044ca",
+  "prompt": "在打开的opencode软件的消息口输入：hello",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "在打开的opencode软件的消息口输入：hello",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "视频已下载完成。\n\n文件路径：`C:\\Users\\joyzq\\Downloads\\douyin_video.mp4`\n文件大小：2.85 MB\n视频 ID：7627447946413427983",
+      "started_at": "2026-06-07T07:21:23Z",
+      "completed_at": "2026-06-07T07:23:29Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:21:23Z",
+  "updated_at": "2026-06-07T07:23:29Z"
+}

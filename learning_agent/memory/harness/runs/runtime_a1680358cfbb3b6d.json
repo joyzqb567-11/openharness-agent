@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a1680358cfbb3b6d",
+  "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已打开本机微信，并已看到微信窗口。我不会登录，也不会输入账号密码。",
+      "started_at": "2026-06-07T07:28:08Z",
+      "completed_at": "2026-06-07T07:28:26Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:28:08Z",
+  "updated_at": "2026-06-07T07:28:26Z"
+}

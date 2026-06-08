@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_6b4339f2cab39493",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "抱歉，我现在无法在本地画图软件中实际绘制这棵树。\n\n原因是：Computer Use 后端虽然可用，但当前桌面控制锁里存在 `abort_requested=true`，真实鼠标/键盘动作被控制器门禁阻止，所以我不能继续打开或操作画图软件。\n\n如果你解除/清理该桌面控制 abort 状态后再让我继续，我可以再尝试使用本地画图软件绘制一棵树。",
+      "started_at": "2026-06-06T05:45:30Z",
+      "completed_at": "2026-06-06T05:45:48Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T05:45:30Z",
+  "updated_at": "2026-06-06T05:45:48Z"
+}

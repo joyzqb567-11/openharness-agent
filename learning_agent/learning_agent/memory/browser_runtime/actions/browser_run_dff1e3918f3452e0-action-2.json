@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_dff1e3918f3452e0-action-2",
+  "run_id": "browser_run_dff1e3918f3452e0",
+  "stage_id": "browser_open",
+  "tool_name": "browser_open",
+  "arguments_redacted": {},
+  "status": "failed",
+  "started_at_ms": 1780313729338,
+  "finished_at_ms": 1780313729344,
+  "error_type": "unknown",
+  "error_message": "browser_open 只支持 http:// 或 https:// URL。",
+  "observation_id": ""
+}

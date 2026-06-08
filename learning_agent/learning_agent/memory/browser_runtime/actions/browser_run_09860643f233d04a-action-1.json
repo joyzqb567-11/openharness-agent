@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_09860643f233d04a-action-1",
+  "run_id": "browser_run_09860643f233d04a",
+  "stage_id": "browser_profile_status",
+  "tool_name": "browser_profile_status",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780458269378,
+  "finished_at_ms": 1780458269386,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

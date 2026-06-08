@@ -1,0 +1,27 @@
+{
+  "name": "chrome_extension_readonly_stage5_acceptance",
+  "output_prefix": "chrome_extension_readonly_stage5_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-ChromeExtensionReadonly",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "CHROME_EXTENSION_STAGE5_READY",
+  "prompt_lines": [
+    "请执行一次 Chrome Extension Readonly Stage 5 的真实可见终端验收，最终回答必须包含固定标记：CHROME_EXTENSION_STAGE5_READY。",
+    "你必须调用 bash 执行这个命令验证 Chrome 插件只读文件、native host 协议、ChromeExtensionProvider 和 browser_extension_status：python -m unittest learning_agent.tests.test_chrome_extension_readonly_stage5",
+    "不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：CHROME_EXTENSION_STAGE5_READY STAGE5_CHROME_EXTENSION_READONLY_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent.tests.test_chrome_extension_readonly_stage5",
+    "OK"
+  ],
+  "event_answer_contains": [
+    "CHROME_EXTENSION_STAGE5_READY",
+    "STAGE5_CHROME_EXTENSION_READONLY_OK"
+  ]
+}

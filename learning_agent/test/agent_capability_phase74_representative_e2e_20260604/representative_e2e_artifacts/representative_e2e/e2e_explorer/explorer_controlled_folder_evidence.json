@@ -1,0 +1,33 @@
+{
+  "scenario_id": "explorer_controlled_folder",
+  "target_process": "explorer.exe",
+  "launch_plan": {
+    "app_name": "explorer",
+    "executable": "explorer.exe",
+    "arguments": [
+      "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_explorer"
+    ],
+    "launch_verb": "Start-Process",
+    "safe_to_launch": true,
+    "refusal_reason": "",
+    "changes_registry": false,
+    "changes_system_settings": false,
+    "requires_admin": false,
+    "uses_shell_string": false,
+    "actions_expanded": false
+  },
+  "controlled_folder": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_explorer",
+  "operations": [
+    "launch_app",
+    "focus_window",
+    "open_controlled_folder",
+    "select_controlled_file",
+    "verify_path_inside_root"
+  ],
+  "real_smoke_requested": false,
+  "real_visible_app_invoked": false,
+  "scenario_passed": true,
+  "marker": "PHASE74_REPRESENTATIVE_E2E_READY",
+  "model": "phase74_windows_representative_e2e_matrix",
+  "created_at": "2026-06-03T22:28:58Z"
+}

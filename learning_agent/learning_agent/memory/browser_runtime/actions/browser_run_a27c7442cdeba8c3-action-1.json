@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_a27c7442cdeba8c3-action-1",
+  "run_id": "browser_run_a27c7442cdeba8c3",
+  "stage_id": "browser_disconnect_real_chrome",
+  "tool_name": "browser_disconnect_real_chrome",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780324892744,
+  "finished_at_ms": 1780324892752,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

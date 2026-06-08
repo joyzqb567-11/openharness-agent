@@ -1,0 +1,39 @@
+{
+  "run_id": "runtime_2967305bb2413ceb",
+  "prompt": "你能帮我打开本机的记事本吗",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "你能帮我打开本机的记事本吗",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "running",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "2026-06-05T13:11:02Z",
+      "completed_at": ""
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "running",
+  "current_stage_index": 0,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T13:11:02Z",
+  "updated_at": "2026-06-05T13:11:02Z"
+}

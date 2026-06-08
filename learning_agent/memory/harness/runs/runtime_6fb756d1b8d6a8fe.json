@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_6fb756d1b8d6a8fe",
+  "prompt": "请执行真实终端 harness task notification 回灌验收。 请不要调用 task_output、read_background_command 或 bash。请直接读取本轮模型输入开头自动注入的 task-notification 内容。 如果你看到了后台任务通知中的 TASK_NOTIFICATION_REAL_OK，请在最终回答中包含：HARNESS_TASK_NOTIFICATION_READY、TASK_NOTIFICATION_REAL_OK、task-notification、completed。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行真实终端 harness task notification 回灌验收。 请不要调用 task_output、read_background_command 或 bash。请直接读取本轮模型输入开头自动注入的 task-notification 内容。 如果你看到了后台任务通知中的 TASK_NOTIFICATION_REAL_OK，请在最终回答中包含：HARNESS_TASK_NOTIFICATION_READY、TASK_NOTIFICATION_REAL_OK、task-notification、completed。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "HARNESS_TASK_NOTIFICATION_READY\nTASK_NOTIFICATION_REAL_OK\ntask-notification\ncompleted",
+      "started_at": "2026-05-31T10:00:50Z",
+      "completed_at": "2026-05-31T10:00:52Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T10:00:50Z",
+  "updated_at": "2026-05-31T10:00:52Z"
+}

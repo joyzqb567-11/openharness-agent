@@ -1,0 +1,35 @@
+{
+  "name": "agent_capability_phase21_terminal_status_ui",
+  "output_prefix": "agent_capability_phase21_terminal_status_ui",
+  "window_title_prefix": "LearningAgent-Phase21-TerminalStatus",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE21_TERMINAL_STATUS_UI_READY",
+  "prompt_lines": [
+    "请执行一次 Phase 21 终端状态 UI 验收：验证 /status 和 /chrome 的状态渲染都包含紧凑摘要、下一步命令和最近问题，最终回答必须包含固定标记：PHASE21_TERMINAL_STATUS_UI_READY。",
+    "你必须调用终端工具执行这个只读命令：python -c \"from learning_agent.app.status_renderer import render_status_snapshot; from learning_agent.app.chrome_status_renderer import render_chrome_status; status_snapshot={'workspace':'H:/demo','counts':{'runs':1,'tasks':0,'commands':0,'sessions':1,'status_events':1},'health':{'ok':False,'warnings':['bridge offline']},'browser':{'provider_status':{'chrome_extension':{'connected':False,'paired':False,'pending_command_count':0},'native_host':{'connected':False,'installer_state':'registry_registered'}}},'status_events':[{'sequence':1,'event_type':'error','payload':{'message':'native bridge timeout'}}]}; chrome_snapshot={'browser':{'provider_status':{'providers':{'chrome_extension':{'available':False,'reason':'chrome_extension_not_paired'}},'chrome_extension':{'connected':True,'paired':False,'pending_command_count':0,'pending_pairing_request_status':''},'native_host':{'connected':True,'installer_state':'registry_registered','bridge_state_file':'bridge.json'}},'events':[{'event_type':'provider_error','run_id':'run-1'}]}}; a=render_status_snapshot(status_snapshot); b=render_chrome_status(chrome_snapshot); assert 'Status Summary' in a and 'next=/chrome pairing-diagnose' in a and 'recent_error=' in a; assert 'Chrome Summary' in b and 'next=/chrome pairing-diagnose' in b and 'recent_issue=' in b; assert max([len(x) for x in (a+'\\n'+b).splitlines()]) <= 220; print('PHASE21_STATUS_UI_OK status_summary=true chrome_summary=true next=/chrome_pairing_diagnose max_line_ok=true')\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE21_STATUS_UI_OK 后，最终回答最后一行必须完整复制：PHASE21_TERMINAL_STATUS_UI_READY PHASE21_STATUS_UI_OK status_summary=true chrome_summary=true next=/chrome_pairing_diagnose max_line_ok=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE21_STATUS_UI_OK",
+    "status_summary=true",
+    "chrome_summary=true",
+    "next=/chrome_pairing_diagnose",
+    "max_line_ok=true"
+  ],
+  "event_answer_contains": [
+    "PHASE21_TERMINAL_STATUS_UI_READY",
+    "PHASE21_STATUS_UI_OK",
+    "status_summary=true",
+    "chrome_summary=true",
+    "next=/chrome_pairing_diagnose",
+    "max_line_ok=true"
+  ],
+  "max_permission_sent_count": 0
+}

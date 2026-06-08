@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_8378cc57c95f2a30",
+  "prompt": "请执行一次 Browser Tabs Context Stage 4 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_TABS_CONTEXT_STAGE4_READY。 你必须调用 bash 执行这个命令验证 browser_tabs_context 工具、真实 Chrome 写动作门禁、active tab 变化失效和 provider 支持：python -m unittest learning_agent.tests.test_browser_tabs_context_stage4 不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_TABS_CONTEXT_STAGE4_READY STAGE4_TABS_CONTEXT_OK",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Browser Tabs Context Stage 4 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_TABS_CONTEXT_STAGE4_READY。 你必须调用 bash 执行这个命令验证 browser_tabs_context 工具、真实 Chrome 写动作门禁、active tab 变化失效和 provider 支持：python -m unittest learning_agent.tests.test_browser_tabs_context_stage4 不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_TABS_CONTEXT_STAGE4_READY STAGE4_TABS_CONTEXT_OK",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Browser Tabs Context Stage 4 真实可见终端验收已通过：\n- 已执行：python -m unittest learning_agent.tests.test_browser_tabs_context_stage4\n- 结果：Ran 5 tests，OK\n\nBROWSER_TABS_CONTEXT_STAGE4_READY STAGE4_TABS_CONTEXT_OK",
+      "started_at": "2026-06-01T09:42:09Z",
+      "completed_at": "2026-06-01T09:42:23Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T09:42:09Z",
+  "updated_at": "2026-06-01T09:42:23Z"
+}

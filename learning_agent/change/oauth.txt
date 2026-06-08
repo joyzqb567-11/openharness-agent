@@ -40,7 +40,7 @@ class CodexOAuthChatModel:
     ISSUER = "https://auth.openai.com"
     CODEX_API_ENDPOINT = "https://chatgpt.com/backend-api/codex/responses"
     OAUTH_PORT = 1455
-这几个值就是参考 D:\opencode2-main 的 Codex OAuth 插件写的。
+这几个值就是参考 opencode2-main 项目的 Codex OAuth 插件写的。
 
 4. 新增浏览器 OAuth 登录流程
 

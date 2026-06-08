@@ -1,0 +1,23 @@
+{
+  "run_id": "browser_run_d7012f4ca6e733ef",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_network",
+  "status": "completed",
+  "current_stage_id": "browser_network",
+  "completed_stage_ids": [
+    "browser_network"
+  ],
+  "action_ids": [
+    "browser_run_d7012f4ca6e733ef-action-1"
+  ],
+  "observation_ids": [],
+  "summary": "browser_network 最近 1 条摘要\npage_id=page-1\n说明：仅包含 method/url/resource_type/status，不包含请求体或敏感 header。\n- [page-1] response GET 200 document http://127.0.0.1:64171/index.html",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780455381395,
+  "updated_at_ms": 1780455381416
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_588d0ca19119c8c1",
+  "prompt": "Please run one Phase 74 Windows Computer Use representative real-app E2E matrix acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE74_REPRESENTATIVE_E2E_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.representative_e2e_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE74_REPRESENTATIVE_E2E_OK, the final answer's last line must completely copy: PHASE74_REPRESENTATIVE_E2E_READY PHASE74_REPRESENTATIVE_E2E_OK notepad_scenario=true explorer_scenario=true browser_scenario=true window_style_scenario=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false paint_canvas_not_blank=true pikachu_visual_elements=true representative_real_apps_passed=true",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 74 Windows Computer Use representative real-app E2E matrix acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE74_REPRESENTATIVE_E2E_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.representative_e2e_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE74_REPRESENTATIVE_E2E_OK, the final answer's last line must completely copy: PHASE74_REPRESENTATIVE_E2E_READY PHASE74_REPRESENTATIVE_E2E_OK notepad_scenario=true explorer_scenario=true browser_scenario=true window_style_scenario=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false paint_canvas_not_blank=true pikachu_visual_elements=true representative_real_apps_passed=true",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 74 Windows Computer Use representative real-app E2E matrix acceptance completed successfully in safe contract mode.\n\nPHASE74_REPRESENTATIVE_E2E_READY PHASE74_REPRESENTATIVE_E2E_OK notepad_scenario=true explorer_scenario=true browser_scenario=true window_style_scenario=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false paint_canvas_not_blank=true pikachu_visual_elements=true representative_real_apps_passed=true",
+      "started_at": "2026-06-03T22:28:48Z",
+      "completed_at": "2026-06-03T22:29:03Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T22:28:48Z",
+  "updated_at": "2026-06-03T22:29:03Z"
+}

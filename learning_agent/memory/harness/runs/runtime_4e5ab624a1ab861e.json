@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_4e5ab624a1ab861e",
+  "prompt": "请帮我打开本机电脑QQ软件，然后输入账户：6892392，查看是否能成功。不要输入密码，不要点击登录。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请帮我打开本机电脑QQ软件，然后输入账户：6892392，查看是否能成功。不要输入密码，不要点击登录。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "无法继续打开 QQ 或输入账号：桌面控制已被停止（abort reason: terminal /computer stop），启动应用请求被拒绝。若你希望继续，需要先恢复/重新允许 Computer Use 桌面控制后再让我操作。",
+      "started_at": "2026-06-07T06:13:41Z",
+      "completed_at": "2026-06-07T06:32:18Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T06:13:41Z",
+  "updated_at": "2026-06-07T06:32:18Z"
+}

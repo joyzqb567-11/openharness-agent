@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f413674098517492",
+  "prompt": "Please run one Phase 97 controlled Windows Notepad live edit acceptance. This is a narrow gated real Notepad test only. Do not interact with terminals, browsers, login windows, passwords, system settings, registry, installers, or any user document. The final answer must include the fixed marker: PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_READY. You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE97_RUN_REAL_NOTEPAD_EDIT='1'; $env:LEARNING_AGENT_PHASE97_ENABLE_REAL_NOTEPAD_EDIT='1'; python -c \"from learning_agent.computer_use.controlled_notepad_live_edit import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK, the final answer's last line must completely copy: PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_READY PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK default_off_zero_physical_events=true unsafe_target_zero_physical_events=true real_enable_gate_required=true real_notepad_edit_executed=true notepad_process_verified=true target_rechecked_before_input=true target_rechecked_before_save=true saved_file_verified=true raw_text_hidden=true real_desktop_touched=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 97 controlled Windows Notepad live edit acceptance. This is a narrow gated real Notepad test only. Do not interact with terminals, browsers, login windows, passwords, system settings, registry, installers, or any user document. The final answer must include the fixed marker: PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_READY. You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE97_RUN_REAL_NOTEPAD_EDIT='1'; $env:LEARNING_AGENT_PHASE97_ENABLE_REAL_NOTEPAD_EDIT='1'; python -c \"from learning_agent.computer_use.controlled_notepad_live_edit import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK, the final answer's last line must completely copy: PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_READY PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK default_off_zero_physical_events=true unsafe_target_zero_physical_events=true real_enable_gate_required=true real_notepad_edit_executed=true notepad_process_verified=true target_rechecked_before_input=true target_rechecked_before_save=true saved_file_verified=true raw_text_hidden=true real_desktop_touched=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 97 controlled Windows Notepad live edit acceptance did not pass.\n\nThe required command exited with code 1 and did not print PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK. The report indicates:\n- real_notepad_edit_executed=false\n- target_rechecked_before_input=false\n- target_rechecked_before_save=false\n- saved_file_verified=false\n- real_desktop_touched=false\n- driver_reason=target_recheck_before_input_failed\n\nBecause the OK token was not printed, I cannot copy the requested success line as the fi",
+      "started_at": "2026-06-04T16:12:13Z",
+      "completed_at": "2026-06-04T16:12:40Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T16:12:13Z",
+  "updated_at": "2026-06-04T16:12:40Z"
+}

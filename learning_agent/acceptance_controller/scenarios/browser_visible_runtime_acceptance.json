@@ -1,0 +1,60 @@
+{
+  "name": "browser_visible_runtime_acceptance",
+  "output_prefix": "browser_visible_runtime_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-BrowserVisible",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 12,
+  "success_marker": "BROWSER_VISIBLE_RUNTIME_READY",
+  "prompt_lines": [
+    "请执行一次肉眼可见真实浏览器窗口验收，最终回答必须包含固定标记：BROWSER_VISIBLE_RUNTIME_READY。",
+    "第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。",
+    "不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。",
+    "必须先调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认可见独立 Chromium 已经启动，结果里必须出现 visible_browser=true 和 headless=false。",
+    "然后必须在这个可见浏览器窗口中调用 browser_open 打开 https://example.com/，再调用 browser_snapshot 读取页面快照，并确认工具结果里出现 observation_id。",
+    "接着必须调用 browser_screenshot 保存一张当前页面截图，并确认工具结果里出现 observation_id。",
+    "接着必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，browser_wait 参数请使用 text=Example Domain 或 milliseconds=250，用来证明复杂流程 checkpoint 运行时可用。",
+    "最后必须调用 browser_plugin_status，并确认 capabilities 中包含 visible_browser、page_recovery、visual_locate、flow_run、flow_checkpoint、observation_engine、action_log、replay、site_grant、retry、status_browser_runtime。",
+    "不要提前最终回答；只有上述工具全部完成后，最终回答最后一行必须完整复制以下验收行：BROWSER_VISIBLE_RUNTIME_READY browser_launch_visible visible_browser=true headless=false browser_open browser_snapshot observation_id browser_screenshot observation_id browser_flow_run browser_plugin_status observation_engine flow_checkpoint status_browser_runtime。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/skills/browser_automation/SKILL.md",
+    "mcp__browser_automation__browser_launch_visible",
+    "browser_launch_visible 成功",
+    "visible_browser=true",
+    "headless=false",
+    "mcp__browser_automation__browser_open",
+    "mcp__browser_automation__browser_snapshot",
+    "observation_id=",
+    "mcp__browser_automation__browser_screenshot",
+    "mcp__browser_automation__browser_flow_run",
+    "mcp__browser_automation__browser_plugin_status",
+    "observation_engine",
+    "flow_checkpoint",
+    "status_browser_runtime",
+    "browser_runtime_store=",
+    "visible_browser",
+    "compatible=true"
+  ],
+  "event_answer_contains": [
+    "BROWSER_VISIBLE_RUNTIME_READY",
+    "browser_launch_visible",
+    "visible_browser=true",
+    "headless=false",
+    "browser_open",
+    "browser_snapshot",
+    "observation_id",
+    "browser_screenshot",
+    "browser_flow_run",
+    "browser_plugin_status",
+    "observation_engine",
+    "flow_checkpoint",
+    "status_browser_runtime"
+  ]
+}

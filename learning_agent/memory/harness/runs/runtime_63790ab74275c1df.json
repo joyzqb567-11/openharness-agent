@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_63790ab74275c1df",
+  "prompt": "请执行 Phase 23 最终端到端验收矩阵检查：验证 Phase 14 到 Phase 22 的测试、场景、报告、备份、真实终端 run 和截图都完整通过，最终回答必须包含固定标记：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY。 你必须调用终端工具执行这个命令：python -m unittest learning_agent.tests.test_final_acceptance_matrix_phase23 && python -c \"import json; from pathlib import Path; p=Path('learning_agent/acceptance_controller/final_acceptance_matrix_phase23.json'); data=json.loads(p.read_text(encoding='utf-8')); print('PHASE23_MATRIX_OK phases='+str(len(data['phases']))+' first_phase='+str(data['phases'][0]['phase'])+' last_phase='+str(data['phases'][-1]['phase'])+' matrix_path='+str(p))\" 不要提前最终回答；只有终端命令成功输出 PHASE23_MATRIX_OK 后，最终回答最后一行必须完整复制：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY PHASE23_MATRIX_OK phases=9 first_phase=14 last_phase=22 matrix_path=learning_agent\\acceptance_controller\\final_acceptance_matrix_phase23.json",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行 Phase 23 最终端到端验收矩阵检查：验证 Phase 14 到 Phase 22 的测试、场景、报告、备份、真实终端 run 和截图都完整通过，最终回答必须包含固定标记：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY。 你必须调用终端工具执行这个命令：python -m unittest learning_agent.tests.test_final_acceptance_matrix_phase23 && python -c \"import json; from pathlib import Path; p=Path('learning_agent/acceptance_controller/final_acceptance_matrix_phase23.json'); data=json.loads(p.read_text(encoding='utf-8')); print('PHASE23_MATRIX_OK phases='+str(len(data['phases']))+' first_phase='+str(data['phases'][0]['phase'])+' last_phase='+str(data['phases'][-1]['phase'])+' matrix_path='+str(p))\" 不要提前最终回答；只有终端命令成功输出 PHASE23_MATRIX_OK 后，最终回答最后一行必须完整复制：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY PHASE23_MATRIX_OK phases=9 first_phase=14 last_phase=22 matrix_path=learning_agent\\acceptance_controller\\final_acceptance_matrix_phase23.json",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 23 最终端到端验收矩阵检查已通过。\n\n已验证 Phase 14 到 Phase 22 的最终验收矩阵覆盖 9 个阶段，测试执行成功，矩阵文件可读取并输出确认信息。\n\nPHASE23_FINAL_ACCEPTANCE_MATRIX_READY PHASE23_MATRIX_OK phases=9 first_phase=14 last_phase=22 matrix_path=learning_agent\\acceptance_controller\\final_acceptance_matrix_phase23.json",
+      "started_at": "2026-06-02T13:23:08Z",
+      "completed_at": "2026-06-02T13:24:08Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T13:23:08Z",
+  "updated_at": "2026-06-02T13:24:08Z"
+}

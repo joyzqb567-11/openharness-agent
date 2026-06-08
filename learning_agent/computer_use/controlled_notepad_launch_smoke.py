@@ -9,14 +9,14 @@ from pathlib import Path  # 新增代码+Phase104ControlledNotepadLaunchSmoke：
 from typing import Any  # 新增代码+Phase104ControlledNotepadLaunchSmoke：导入 Any 描述动态报告字段；如果没有这行代码，公开接口边界不清楚。
 
 try:  # 新增代码+Phase104ControlledNotepadLaunchSmoke：优先按包路径导入项目组件；如果没有这段代码，单元测试和真实终端入口不能共享实现。
-    from learning_agent.computer_use.controlled_app_launch import Phase103RecordingLaunchBackend, Phase103SubprocessLaunchBackend, WindowsControlledAppLaunchCandidate  # 新增代码+Phase104ControlledNotepadLaunchSmoke：复用 Phase103 安全启动候选；如果没有这行代码，Phase104 可能绕开安全计划。
+    from learning_agent.computer_use.generic_launch_backend import Phase103RecordingLaunchBackend, Phase103SubprocessLaunchBackend, WindowsControlledAppLaunchCandidate  # 修改代码+CompatSlimming：改为从统一通用启动后端复用 Phase103 启动候选；如果没有这一行，删除旧 controlled_app_launch.py 后 Phase104 真实 Notepad smoke 会导入失败。
     from learning_agent.computer_use.persistent_grants import DEFAULT_PERSISTENT_GRANTS_ROOT  # 新增代码+Phase104ControlledNotepadLaunchSmoke：复用 Computer Use memory 根；如果没有这行代码，报告证据会散落。
     from learning_agent.computer_use.windows_backend import WindowsWindowInventoryProbe  # 新增代码+Phase104ControlledNotepadLaunchSmoke：复用只读窗口枚举探测真实 Notepad 窗口；如果没有这行代码，真实窗口可见性无法验证。
     from learning_agent.runtime.files import atomic_write_json  # 新增代码+Phase104ControlledNotepadLaunchSmoke：复用原子 JSON 写入；如果没有这行代码，验收报告可能半写损坏。
 except ModuleNotFoundError as error:  # 新增代码+Phase104ControlledNotepadLaunchSmoke：兼容 start_oauth_agent.bat 从 learning_agent 目录直接运行；如果没有这段代码，可见终端可能导入失败。
-    if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.controlled_app_launch", "learning_agent.computer_use.persistent_grants", "learning_agent.computer_use.windows_backend", "learning_agent.runtime", "learning_agent.runtime.files"}:  # 新增代码+Phase104ControlledNotepadLaunchSmoke：只对包路径缺失做 fallback；如果没有这行代码，内部真实 bug 可能被误吞。
+    if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.generic_launch_backend", "learning_agent.computer_use.persistent_grants", "learning_agent.computer_use.windows_backend", "learning_agent.runtime", "learning_agent.runtime.files"}:  # 修改代码+CompatSlimming：fallback 白名单跟随统一通用启动后端；如果没有这一行，删除旧 controlled_app_launch.py 后脚本模式会把正常路径差异误报成内部错误。
         raise  # 新增代码+Phase104ControlledNotepadLaunchSmoke：重新抛出非路径类导入错误；如果没有这行代码，底层问题会被隐藏。
-    from computer_use.controlled_app_launch import Phase103RecordingLaunchBackend, Phase103SubprocessLaunchBackend, WindowsControlledAppLaunchCandidate  # type: ignore  # 新增代码+Phase104ControlledNotepadLaunchSmoke：脚本模式复用 Phase103 候选；如果没有这行代码，bat 入口无法运行 Phase104。
+    from computer_use.generic_launch_backend import Phase103RecordingLaunchBackend, Phase103SubprocessLaunchBackend, WindowsControlledAppLaunchCandidate  # type: ignore  # 修改代码+CompatSlimming：脚本模式从统一启动后端导入 Phase103 候选；如果没有这一行，bat 入口删除旧文件后无法运行 Phase104。
     from computer_use.persistent_grants import DEFAULT_PERSISTENT_GRANTS_ROOT  # type: ignore  # 新增代码+Phase104ControlledNotepadLaunchSmoke：脚本模式复用默认 memory 根；如果没有这行代码，报告目录无法稳定定位。
     from computer_use.windows_backend import WindowsWindowInventoryProbe  # type: ignore  # 新增代码+Phase104ControlledNotepadLaunchSmoke：脚本模式复用窗口枚举；如果没有这行代码，真实窗口验证无法运行。
     from runtime.files import atomic_write_json  # type: ignore  # 新增代码+Phase104ControlledNotepadLaunchSmoke：脚本模式复用原子写入；如果没有这行代码，报告可能写坏。

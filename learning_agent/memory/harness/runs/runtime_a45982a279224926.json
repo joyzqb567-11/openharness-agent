@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a45982a279224926",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "我尝试使用本地 Paint 窗口完成绘图，但当前环境的真实鼠标/键盘输入执行器未启用，点击等 Computer Use 动作没有实际触碰鼠标键盘；同时用脚本生成图片再打开到画图的路线也被桌面任务策略禁止。\n\n因此我现在无法真正操作本地画图软件完成“一棵树”的绘制。若你启用真实输入执行器/允许桌面控制实现后，我可以继续用 Paint 的 GUI 工具一步步绘制树。",
+      "started_at": "2026-06-06T06:19:09Z",
+      "completed_at": "2026-06-06T06:20:29Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T06:19:09Z",
+  "updated_at": "2026-06-06T06:20:29Z"
+}

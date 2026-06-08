@@ -1,0 +1,47 @@
+{
+  "id": "computer_use_full_model_loop_paint_tree_real",
+  "name": "computer_use_full_model_loop_paint_tree_real",
+  "output_prefix": "computer_use_full_model_loop_paint_tree_real",
+  "window_title_prefix": "LearningAgent-FullModelLoopPaintTreeReal",
+  "max_seconds": 300,
+  "final_log_wait_seconds": 15,
+  "post_success_wait_seconds": 5,
+  "success_marker": "",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, then ask the model-loop Computer Use tool surface to use real local Paint to draw a tree.",
+  "capture_event_payload_regex": {},
+  "prompt_lines": [
+    "/computer clear-abort",
+    "/computer use --full",
+    "\u8bf7\u4f7f\u7528\u672c\u5730\u7535\u8111\u7684\u753b\u56fe\u8f6f\u4ef6\u753b\u4e00\u68f5\u6811\u3002"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [
+    "computer_use",
+    "mspaint",
+    "screenshot",
+    "real_desktop_touched",
+    "low_level_event_count"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "clear-abort",
+    "full_mode=true",
+    "model_loop_tools_loaded=true",
+    "computer_use",
+    "mspaint",
+    "screenshot",
+    "real_desktop_touched",
+    "low_level_event_count"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[^0-9]*[1-9][0-9]*"
+  ],
+  "max_permission_sent_count": 0
+}

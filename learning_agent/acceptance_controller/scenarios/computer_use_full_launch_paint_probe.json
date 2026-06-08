@@ -1,0 +1,39 @@
+{
+  "id": "computer_use_full_launch_paint_probe",
+  "name": "computer_use_full_launch_paint_probe",
+  "output_prefix": "computer_use_full_launch_paint_probe",
+  "window_title_prefix": "LearningAgent-FullLaunchPaintProbe",
+  "max_seconds": 240,
+  "final_log_wait_seconds": 15,
+  "post_success_wait_seconds": 3,
+  "success_marker": "ACCEPTANCE_FULL_LAUNCH_PAINT_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, then verify the visible terminal model loop can launch local Paint through computer_action.",
+  "prompt_lines": [
+    "/computer clear-abort",
+    "/computer use --full",
+    "请调用 computer_action 的 launch_app 打开本地画图软件，app_name 使用 mspaint。不要画图，不要点击画布。启动后只回复一行：ACCEPTANCE_FULL_LAUNCH_PAINT_OK。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "computer_action",
+    "launch_app",
+    "mspaint",
+    "ACCEPTANCE_FULL_LAUNCH_PAINT_OK"
+  ],
+  "event_answer_contains": [
+    "ACCEPTANCE_FULL_LAUNCH_PAINT_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "clear-abort",
+    "full_mode=true",
+    "model_loop_tools_loaded=true"
+  ],
+  "max_permission_sent_count": 0
+}

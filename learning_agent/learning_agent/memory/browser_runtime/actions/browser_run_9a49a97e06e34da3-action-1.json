@@ -1,0 +1,17 @@
+{
+  "action_id": "browser_run_9a49a97e06e34da3-action-1",
+  "run_id": "browser_run_9a49a97e06e34da3",
+  "stage_id": "browser_open",
+  "tool_name": "browser_open",
+  "arguments_redacted": {
+    "url": "https://example.com/",
+    "new_tab": true,
+    "timeout_ms": 30000
+  },
+  "status": "completed",
+  "started_at_ms": 1780282750300,
+  "finished_at_ms": 1780282750712,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

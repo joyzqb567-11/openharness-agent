@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_db495a764dfbe66f",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "我已找到本地画图窗口并准备绘制树，但实际拖拽绘图动作被桌面控制后端拒绝：当前存在 `terminal /computer stop` 触发的 abort flag。\n\n因此我现在不能继续控制画图软件绘制。请先恢复/重新开启 Computer Use 桌面控制权限后，再让我继续，我会在 Paint 里用拖拽线条画出树干、树冠和地面。",
+      "started_at": "2026-06-06T06:50:44Z",
+      "completed_at": "2026-06-06T06:51:16Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T06:50:44Z",
+  "updated_at": "2026-06-06T06:51:16Z"
+}

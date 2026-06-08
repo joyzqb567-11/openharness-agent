@@ -1,0 +1,23 @@
+{
+  "run_id": "browser_run_9798a0273e94ffdc",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_disconnect_real_chrome",
+  "status": "completed",
+  "current_stage_id": "browser_disconnect_real_chrome",
+  "completed_stage_ids": [
+    "browser_disconnect_real_chrome"
+  ],
+  "action_ids": [
+    "browser_run_9798a0273e94ffdc-action-1"
+  ],
+  "observation_ids": [],
+  "summary": "browser_disconnect_real_chrome\nreal_chrome_connected=false\nmode=independent_chromium\nclosed_browser=false\npages=0",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780457214819,
+  "updated_at_ms": 1780457214841
+}

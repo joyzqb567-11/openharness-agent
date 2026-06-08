@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_08588fc00189dbe8",
+  "prompt": "请执行一次 Phase 35 Windows Computer Use 真实 UIAutomation 安全窗口 smoke 验收：这次只允许运行项目内 real_uia_smoke 模块；它会先诚实报告 uiautomation 依赖状态，只有依赖存在时才创建自己控制的安全 Notepad 窗口尝试真实 UIA；不要移动鼠标，不要点击真实桌面，不要读取任意用户窗口。最终回答必须包含固定标记：PHASE35_WINDOWS_REAL_UIA_SMOKE_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_uia_smoke import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE35_WINDOWS_REAL_UIA_SMOKE_OK 后，最终回答最后一行必须完整复制：PHASE35_WINDOWS_REAL_UIA_SMOKE_READY PHASE35_WINDOWS_REAL_UIA_SMOKE_OK dependency_reported=true fake_provider_used=false actions_expanded=false safe_window_only=true",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 35 Windows Computer Use 真实 UIAutomation 安全窗口 smoke 验收：这次只允许运行项目内 real_uia_smoke 模块；它会先诚实报告 uiautomation 依赖状态，只有依赖存在时才创建自己控制的安全 Notepad 窗口尝试真实 UIA；不要移动鼠标，不要点击真实桌面，不要读取任意用户窗口。最终回答必须包含固定标记：PHASE35_WINDOWS_REAL_UIA_SMOKE_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_uia_smoke import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE35_WINDOWS_REAL_UIA_SMOKE_OK 后，最终回答最后一行必须完整复制：PHASE35_WINDOWS_REAL_UIA_SMOKE_READY PHASE35_WINDOWS_REAL_UIA_SMOKE_OK dependency_reported=true fake_provider_used=false actions_expanded=false safe_window_only=true",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 35 Windows Computer Use 真实 UIAutomation 安全窗口 smoke 验收已完成。\n\n命令成功退出（exit_code=0），并输出：\nPHASE35_WINDOWS_REAL_UIA_SMOKE_OK dependency_reported=true fake_provider_used=false actions_expanded=false safe_window_only=true\n\n依赖状态已诚实报告：dependency_available=false，因此未尝试真实 UIA、未创建/操作真实 UIA 窗口，且未使用 fake provider。\n\nPHASE35_WINDOWS_REAL_UIA_SMOKE_READY PHASE35_WINDOWS_REAL_UIA_SMOKE_OK dependency_reported=true fake_provider_used=false actions_expanded=false safe_window_only=true",
+      "started_at": "2026-06-03T02:14:28Z",
+      "completed_at": "2026-06-03T02:14:41Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T02:14:28Z",
+  "updated_at": "2026-06-03T02:14:41Z"
+}

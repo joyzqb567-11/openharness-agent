@@ -1,0 +1,70 @@
+﻿{
+    "completed":  true,
+    "scenario":  "agent_capability_phase68_closed_loop_executor",
+    "scenario_path":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\scenarios\\agent_capability_phase68_closed_loop_executor.json",
+    "run_dir":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434",
+    "final_printed":  true,
+    "prompt_sent":  true,
+    "prompt_received":  true,
+    "prompt_send_attempts":  1,
+    "permission_sent_count":  0,
+    "max_permission_sent_count":  0,
+    "permission_policy_default_response":  "allow",
+    "permission_policy_decisions":  [
+
+                                    ],
+    "post_success_wait_seconds":  6,
+    "assertion":  {
+                      "passed":  true,
+                      "marker_passed":  true,
+                      "permission_count_passed":  true,
+                      "max_permission_sent_count":  0,
+                      "permission_sent_count":  0,
+                      "log_updated":  true,
+                      "state_checks":  {
+                                           "agent_ready_for_user_prompt":  true,
+                                           "user_prompt_received":  true,
+                                           "final_answer_printed":  true
+                                       },
+                      "event_answer_checks":  {
+                                                  "PHASE68_CLOSED_LOOP_EXECUTOR_READY":  true,
+                                                  "PHASE68_CLOSED_LOOP_EXECUTOR_OK":  true,
+                                                  "closed_loop_execution=true":  true,
+                                                  "post_action_verification=true":  true,
+                                                  "failure_recovery=true":  true,
+                                                  "blind_coordinate_chain_blocked=true":  true,
+                                                  "actions_expanded=false":  true
+                                              },
+                      "event_payload_checks":  {
+
+                                               },
+                      "debug_log_checks":  {
+                                               "PHASE68_CLOSED_LOOP_EXECUTOR_READY":  true,
+                                               "PHASE68_CLOSED_LOOP_EXECUTOR_OK":  true,
+                                               "closed_loop_execution=true":  true,
+                                               "post_action_verification=true":  true,
+                                               "failure_recovery=true":  true,
+                                               "blind_coordinate_chain_blocked=true":  true,
+                                               "actions_expanded=false":  true
+                                           },
+                      "final_answer_preview":  "Phase 68 Windows Computer Use closed-loop executor acceptance completed successfully.\n\nPHASE68_CLOSED_LOOP_EXECUTOR_READY PHASE68_CLOSED_LOOP_EXECUTOR_OK closed_loop_execution=true post_action_verification=true failure_recovery=true blind_coordinate_chain_blocked=true actions_expanded=false",
+                      "final_answer_text_length":  291,
+                      "event_payload_text_length":  2544
+                  },
+    "event_count":  6,
+    "states":  [
+                   "permission_auto_approved",
+                   "agent_ready_for_user_prompt",
+                   "user_prompt_received",
+                   "permission_auto_approved",
+                   "final_answer_printed",
+                   "agent_ready_for_user_prompt"
+               ],
+    "event_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434\\events.jsonl",
+    "startup_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434\\01_startup.png",
+    "prompt_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434\\02_prompt_sent.png",
+    "final_screenshot":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434\\03_final.png",
+    "copied_debug_log":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\acceptance_controller\\runs\\agent_capability_phase68_closed_loop_executor-20260603_221434\\latest_run_readable.md",
+    "process_id":  51912,
+    "window_title":  "LearningAgent-Phase68-ClosedLoopExecutor-221434"
+}

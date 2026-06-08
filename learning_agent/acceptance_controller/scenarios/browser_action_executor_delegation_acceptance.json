@@ -1,0 +1,44 @@
+{
+  "name": "browser_action_executor_delegation_acceptance",
+  "output_prefix": "browser_action_executor_delegation_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-BrowserActionExecutor",
+  "max_seconds": 600,
+  "final_log_wait_seconds": 30,
+  "post_success_wait_seconds": 8,
+  "success_marker": "ACTION_EXECUTOR_DELEGATION_READY",
+  "prompt_lines": [
+    "请执行一次 BrowserActionExecutor 接管浏览器动作生命周期的真实可见终端验收，最终回答必须包含固定标记：ACTION_EXECUTOR_DELEGATION_READY。",
+    "第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md。",
+    "第三步调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认结果里有 visible_browser=true 和 headless=false。",
+    "第四步调用 browser_open 打开 https://example.com/，第五步调用 browser_wait，并传入 milliseconds=10。",
+    "第六步必须调用 bash 执行这个命令检查 browser runtime 事件：python -c \"from pathlib import Path; roots=[Path('learning_agent/memory/browser_runtime/events'), Path('memory/browser_runtime/events')]; files=[]; [files.extend(sorted(root.glob('*.jsonl'), key=lambda p:p.stat().st_mtime)[-5:]) for root in roots if root.exists()]; text='\\n'.join(path.read_text(encoding='utf-8', errors='ignore') for path in files); print('ACTION_EXECUTOR_STORE_OK started=' + str('browser_action_started' in text) + ' completed=' + str('browser_action_completed' in text))\"",
+    "不要提前最终回答；只有上面工具全部完成后，最终回答最后一行必须完整复制：ACTION_EXECUTOR_DELEGATION_READY browser_launch_visible browser_open browser_wait ACTION_EXECUTOR_STORE_OK started=True completed=True"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/skills/browser_automation/SKILL.md",
+    "mcp__browser_automation__browser_launch_visible",
+    "browser_launch_visible 成功",
+    "visible_browser=true",
+    "headless=false",
+    "mcp__browser_automation__browser_open",
+    "mcp__browser_automation__browser_wait",
+    "ACTION_EXECUTOR_STORE_OK",
+    "started=True",
+    "completed=True"
+  ],
+  "event_answer_contains": [
+    "ACTION_EXECUTOR_DELEGATION_READY",
+    "browser_launch_visible",
+    "browser_open",
+    "browser_wait",
+    "ACTION_EXECUTOR_STORE_OK",
+    "started=True",
+    "completed=True"
+  ]
+}

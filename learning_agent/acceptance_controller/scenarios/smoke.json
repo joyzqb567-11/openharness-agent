@@ -9,8 +9,7 @@
     "请只回复一行：ACCEPTANCE_HARNESS_OK。本轮用于测试真实可见终端 acceptance controller 状态事件。"
   ],
   "required_event_states": [
-    "permission_required",
-    "permission_answered",
+    "permission_auto_approved",
     "agent_ready_for_user_prompt",
     "user_prompt_received",
     "final_answer_printed"

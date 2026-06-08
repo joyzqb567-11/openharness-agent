@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_0521d7755c74b4ec-action-1",
+  "run_id": "browser_run_0521d7755c74b4ec",
+  "stage_id": "browser_snapshot",
+  "tool_name": "browser_snapshot",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780324893648,
+  "finished_at_ms": 1780324893825,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": "browser_observation_65371bad3c1b818f"
+}

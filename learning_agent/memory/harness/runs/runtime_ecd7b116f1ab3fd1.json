@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ecd7b116f1ab3fd1",
+  "prompt": "请执行一次肉眼可见真实浏览器窗口验收，最终回答必须包含固定标记：BROWSER_VISIBLE_RUNTIME_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 必须先调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认可见独立 Chromium 已经启动，结果里必须出现 visible_browser=true 和 headless=false。 然后必须在这个可见浏览器窗口中调用 browser_open 打开 https://example.com/，再调用 browser_snapshot 读取页面快照，并确认工具结果里出现 observation_id。 接着必须调用 browser_screenshot 保存一张当前页面截图，并确认工具结果里出现 observation_id。 接着必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，browser_wait 参数请使用 text=Example Domain 或 milliseconds=250，用来证明复杂流程 checkpoint 运行时可用。 最后必须调用 browser_plugin_status，并确认 capabilities 中包含 visible_browser、page_recovery、visual_locate、flow_run、flow_checkpoint、observation_engine、action_log、replay、site_grant、retry、status_browser_runtime。 不要提前最终回答；只有上述工具全部完成后，最终回答最后一行必须完整复制以下验收行：BROWSER_VISIBLE_RUNTIME_READY browser_launch_visible visible_browser=true headless=false browser_open browser_snapshot observation_id browser_screenshot observation_id browser_flow_run browser_plugin_status observation_engine flow_checkpoint status_browser_runtime。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次肉眼可见真实浏览器窗口验收，最终回答必须包含固定标记：BROWSER_VISIBLE_RUNTIME_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 必须先调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认可见独立 Chromium 已经启动，结果里必须出现 visible_browser=true 和 headless=false。 然后必须在这个可见浏览器窗口中调用 browser_open 打开 https://example.com/，再调用 browser_snapshot 读取页面快照，并确认工具结果里出现 observation_id。 接着必须调用 browser_screenshot 保存一张当前页面截图，并确认工具结果里出现 observation_id。 接着必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，browser_wait 参数请使用 text=Example Domain 或 milliseconds=250，用来证明复杂流程 checkpoint 运行时可用。 最后必须调用 browser_plugin_status，并确认 capabilities 中包含 visible_browser、page_recovery、visual_locate、flow_run、flow_checkpoint、observation_engine、action_log、replay、site_grant、retry、status_browser_runtime。 不要提前最终回答；只有上述工具全部完成后，最终回答最后一行必须完整复制以下验收行：BROWSER_VISIBLE_RUNTIME_READY browser_launch_visible visible_browser=true headless=false browser_open browser_snapshot observation_id browser_screenshot observation_id browser_flow_run browser_plugin_status observation_engine flow_checkpoint status_browser_runtime。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "肉眼可见独立 Chromium 浏览器窗口验收完成。\n\n关键结果：\n- 已按顺序读取：learning_agent/skills/tool_list.md、learning_agent/skills/browser_automation/SKILL.md、learning_agent/skills/real_chrome/SKILL.md。\n- 已调用 browser_launch_visible，结果包含 visible_browser=true 与 headless=false，模式为 independent_chromium。\n- 未连接真实 Chrome，未打开登录网站，未读取 cookies、localStorage、sessionStorage、token、password，未执行 browser_evaluate。\n- 已在可见浏览器窗口中调用 browser_open 打开 https://example.com/，页面标题为 Example Domain。\n- 已调用 browser_snapshot，结果包含 observation_id=browser_obser",
+      "started_at": "2026-06-01T03:47:53Z",
+      "completed_at": "2026-06-01T03:48:39Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T03:47:53Z",
+  "updated_at": "2026-06-01T03:48:39Z"
+}

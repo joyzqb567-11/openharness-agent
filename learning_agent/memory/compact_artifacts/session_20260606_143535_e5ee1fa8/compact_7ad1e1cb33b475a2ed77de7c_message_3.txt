@@ -1,0 +1,162 @@
+工具结果过长，已保存完整输出。
+Full output saved to: H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\debug_logs\tool_results\20260606_143541_computer_status_2bf3a58bb9b6.txt
+原始字符数=11888，上下文内摘要字符数约=6031。
+上下文摘要：
+{
+  "tool": "computer_use",
+  "actions": [
+    "click",
+    "double_click",
+    "move_mouse",
+    "press_key",
+    "screenshot",
+    "scroll",
+    "type_text"
+  ],
+  "observe_actions": [
+    "get_active_window",
+    "get_window_state",
+    "list_apps",
+    "list_windows"
+  ],
+  "backend": {
+    "available": true,
+    "backend": "windows_ctypes",
+    "reason": "Windows 后端已启用只读窗口 inventory 和窗口状态证据落盘；真实鼠标键盘动作现在通过 Phase37 SendInput 执行器合同控制。",
+    "real_actions_enabled": true,
+    "read_only_inventory_enabled": true,
+    "opt_in_env_var": "LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE",
+    "observe_opt_in_env_var": "LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE",
+    "opt_in_enabled": true,
+    "platform": "win32",
+    "evidence_mode": "window_state_artifact",
+    "evidence_root": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\evidence",
+    "inventory_source": "windows_ctypes",
+    "observation_helper": "windows_native_observation",
+    "observation_helper_available": true,
+    "observation_helper_reason": "Phase33 Windows native 只读 diagnostics 已接入；当前仍以 GDI/Win32 fallback 观察，WGC/UIA 作为首选缺口明确报告。",
+    "native_observation_diagnostics": {
+      "diagnostics_version": "phase33_windows_native_diagnostics",
+      "platform": "win32",
+      "safe_observe_only": true,
+      "real_input_actions_expanded": false,
+      "native_observe_opt_in_env_var": "LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_NATIVE_OBSERVE",
+      "capture": {
+        "preferred_provider": "windows_graphics_capture",
+        "active_provider": "win32_gdi_printwindow",
+        "providers": [
+          {
+            "name": "windows_graphics_capture",
+            "backend": "windows_graphics_capture",
+            "role": "capture",
+            "preferred": true,
+            "active": false,
+            "available": false,
+            "contract": "phase36_windows_graphics_capture_provider",
+            "contract_ready": true,
+            "dependency_reported": true,
+            "dependency_available": false,
+            "implementation_available": false,
+            "fallback_required": true,
+            "priority": 10,
+            "dependency": "winrt.windows.graphics.capture|winsdk.windows.graphics.capture",
+            "available_bindings": [],
+            "reason": "WGC provider contract ready, but fallback is still required until dependency and capture implementation are available.",
+            "next_step": "Install or wire a real WGC helper only after explicit user approval; keep GDI fallback until then."
+          },
+          {
+            "name": "win32_gdi_printwindow",
+            "role": "capture",
+            "preferred": false,
+            "active": false,
+            "available": true,
+            "priority": 90,
+            "dependency": "Windows Win32 API",
+            "reason": "当前 Phase32/Phase33 保底截图能力，使用 PrintWindow/BitBlt，遮挡和特殊窗口可能失败。",
+            "next_step": "作为安全 fallback 保留；当首选 provider 接入后仍用于降级。"
+          }
+        ]
+      },
+      "text": {
+        "preferred_provider": "uiautomation_client",
+        "active_provider": "uiautomation_client_with_win32_fallback",
+        "providers": [
+          {
+            "name": "uiautomation_client",
+            "role": "text",
+            "preferred": true,
+            "active": false,
+            "available": false,
+            "priority": 10,
+            "dependency": "uiautomation 或 comtypes",
+            "reason": "未发现可用 UIAutomation Python 依赖，当前仍依赖 Win32 标题/子控件文本 fallback。",
+            "next_step": "后续阶段接入 UIAutomationClient provider 后，可读取更完整控件树、焦点控件和文档文本。"
+          },
+          {
+            "name": "win32_window_text",
+            "role": "text",
+            "preferred": false,
+            "active": false,
+            "available": true,
+            "priority": 90,
+            "dependency": "Windows Win32 API",
+            "reason": "当前 Phase32/Phase33 保底文本能力，只读取窗口标题和部分子控件文本。",
+            "next_step": "作为安全 fallback 保留；当首选 provider 接入后仍用于降级。"
+          },
+      
+
+...[中间内容已保存到文件，未塞入模型上下文]...
+
+rue,
+          "reason": "SendInput executor is enabled with an injected implementation.",
+          "next_step": "只有 implementation_available、enabled、allowlist、lock、abort 和审批同时满足时才允许真实动作。",
+          "source": "action_executor"
+        },
+        {
+          "name": "evidence_store",
+          "category": "evidence",
+          "available": true,
+          "enabled": true,
+          "reason": "evidence_mode=window_state_artifact",
+          "next_step": "继续把截图、metadata、action journal 写入 evidence store。",
+          "source": "evidence"
+        }
+      ]
+    }
+  },
+  "audit": {
+    "event_count": 0,
+    "last_event": null,
+    "store": {
+      "enabled": true,
+      "base_dir": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\audit",
+      "events_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\audit\\events.jsonl",
+      "chains_dir": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\audit\\chains"
+    }
+  },
+  "lock": {
+    "enabled": true,
+    "locked": true,
+    "stale": true,
+    "stale_after_seconds": 900.0,
+    "lock_age_seconds": 1021.4928004741669,
+    "owner_session_id": "learning-agent-default-session",
+    "owner_label": "learning_agent_controller",
+    "owner_pid": 28808,
+    "acquired_at": "2026-06-06T06:18:40Z",
+    "recovered_stale_owner_session_id": "",
+    "recovered_stale_acquired_at": "",
+    "recovered_at": "",
+    "abort_requested": false,
+    "abort_reason": "",
+    "abort_requested_at": "",
+    "state_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\locks\\desktop_control_lock.json",
+    "abort_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\locks\\abort_flag.json"
+  },
+  "approval": {
+    "enabled": false,
+    "reason": "未配置 Phase38 approval 模型。"
+  },
+  "owner_session_id": "learning-agent-default-session",
+  "auto_acquire_lock": true
+}

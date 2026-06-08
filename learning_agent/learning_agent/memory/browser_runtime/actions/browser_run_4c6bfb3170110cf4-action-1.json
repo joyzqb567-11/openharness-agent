@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_4c6bfb3170110cf4-action-1",
+  "run_id": "browser_run_4c6bfb3170110cf4",
+  "stage_id": "browser_network",
+  "tool_name": "browser_network",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780285216352,
+  "finished_at_ms": 1780285216355,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

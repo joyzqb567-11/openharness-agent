@@ -1,0 +1,44 @@
+{
+  "run_id": "browser_run_bd2355473c8088f9",
+  "prompt": "MCP browser tool call: browser_evaluate",
+  "stages": [
+    {
+      "name": "browser_evaluate",
+      "prompt": "Browser tool: browser_evaluate",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser runtime verifier passed"
+      },
+      "checkpoint": "browser_evaluate 成功\npage_id=page-1\n标题：Browser Automation Demo\nURL：http://127.0.0.1:63353/index.html\n耗时毫秒：6\n结果截断：未截断\n结果文本：{\"value\": 42, \"status\": \"Hello Codex\"}",
+      "started_at": "2026-06-02T12:57:49Z",
+      "completed_at": "2026-06-02T12:57:50Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T12:57:49Z",
+  "updated_at": "2026-06-02T12:57:50Z"
+}

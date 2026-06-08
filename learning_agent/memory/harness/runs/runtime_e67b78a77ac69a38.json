@@ -1,0 +1,39 @@
+{
+  "run_id": "runtime_e67b78a77ac69a38",
+  "prompt": "请打开本机电脑qq软件，然后输入账户：6892392",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请打开本机电脑qq软件，然后输入账户：6892392",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "running",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "2026-06-07T06:00:27Z",
+      "completed_at": ""
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "running",
+  "current_stage_index": 0,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T06:00:27Z",
+  "updated_at": "2026-06-07T06:00:27Z"
+}

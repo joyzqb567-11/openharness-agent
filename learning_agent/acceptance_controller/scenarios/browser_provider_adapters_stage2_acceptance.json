@@ -1,0 +1,32 @@
+{
+  "name": "browser_provider_adapters_stage2_acceptance",
+  "output_prefix": "browser_provider_adapters_stage2_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-ProviderAdapters",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "BROWSER_PROVIDER_ADAPTERS_STAGE2_READY",
+  "prompt_lines": [
+    "请执行一次 Browser Provider Adapters Stage 2 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY。",
+    "你必须调用 bash 执行这个命令验证统一 browser 工具已经经过 provider adapter 并写入 provider decision 事件：python -c \"from pathlib import Path; import tempfile; from learning_agent.browser_automation_mcp_server import BrowserAutomationServer; root=Path(tempfile.mkdtemp()); server=BrowserAutomationServer(root); server.browser_wait=lambda arguments: 'browser_wait 成功\\\\nprovider_adapter=true'; result=server.call('browser_wait', {'milliseconds': 1}); run_id=server.browser_runtime_store.list_run_ids()[-1]; events=server.browser_runtime_store.tail_events(run_id, limit=0); provider_events=[event for event in events if event['event_type']=='browser_provider_decision']; assert provider_events; payload=provider_events[-1]['payload']; assert payload['provider']=='visible_chromium'; assert 'browser_wait 成功' in result; print('PROVIDER_ADAPTERS_STAGE2_OK provider='+payload['provider']+' decision_event='+str(bool(provider_events))+' result_has_wait='+str('browser_wait 成功' in result))\"",
+    "不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ADAPTERS_STAGE2_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY PROVIDER_ADAPTERS_STAGE2_OK provider=visible_chromium decision_event=True result_has_wait=True"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PROVIDER_ADAPTERS_STAGE2_OK",
+    "provider=visible_chromium",
+    "decision_event=True",
+    "result_has_wait=True"
+  ],
+  "event_answer_contains": [
+    "BROWSER_PROVIDER_ADAPTERS_STAGE2_READY",
+    "PROVIDER_ADAPTERS_STAGE2_OK",
+    "provider=visible_chromium",
+    "decision_event=True",
+    "result_has_wait=True"
+  ]
+}

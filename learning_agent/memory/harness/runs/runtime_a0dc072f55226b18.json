@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a0dc072f55226b18",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已完成。",
+      "started_at": "2026-06-06T13:28:30Z",
+      "completed_at": "2026-06-06T13:30:11Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T13:28:30Z",
+  "updated_at": "2026-06-06T13:30:11Z"
+}

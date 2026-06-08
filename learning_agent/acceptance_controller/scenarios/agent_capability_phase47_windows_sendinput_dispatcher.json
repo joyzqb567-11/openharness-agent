@@ -1,0 +1,52 @@
+{
+  "name": "agent_capability_phase47_windows_sendinput_dispatcher",
+  "output_prefix": "agent_capability_phase47_windows_sendinput_dispatcher",
+  "window_title_prefix": "LearningAgent-Phase47-WindowsSendInputDispatcher",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY",
+  "prompt_lines": [
+    "请执行一次 Phase 47 Windows Computer Use SendInput dispatcher 验收：这次只允许运行项目内 sendinput_dispatcher 模块自检，必须证明 dispatch=true、all_actions=true、target_check=true、host_action=true、raw_text_hidden=true、actions_expanded=true；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY。",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.sendinput_dispatcher import main; raise SystemExit(main())\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE47_WINDOWS_SENDINPUT_DISPATCHER_OK 后，最终回答最后一行必须完整复制：PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY PHASE47_WINDOWS_SENDINPUT_DISPATCHER_OK dispatch=true all_actions=true target_check=true host_action=true raw_text_hidden=true actions_expanded=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY",
+    "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_OK",
+    "dispatch=true",
+    "all_actions=true",
+    "target_check=true",
+    "host_action=true",
+    "raw_text_hidden=true",
+    "actions_expanded=true"
+  ],
+  "event_answer_contains": [
+    "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY",
+    "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_OK",
+    "dispatch=true",
+    "all_actions=true",
+    "target_check=true",
+    "host_action=true",
+    "raw_text_hidden=true",
+    "actions_expanded=true"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_READY",
+      "PHASE47_WINDOWS_SENDINPUT_DISPATCHER_OK",
+      "dispatch=true",
+      "all_actions=true",
+      "target_check=true",
+      "host_action=true",
+      "raw_text_hidden=true",
+      "actions_expanded=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

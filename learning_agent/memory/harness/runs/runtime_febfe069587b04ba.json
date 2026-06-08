@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_febfe069587b04ba",
+  "prompt": "请执行一次 Phase 37 Windows Computer Use SendInput executor 合同验收：这次只允许运行项目内 sendinput_executor 模块；必须证明 SendInput 执行器合同已建立，真实输入默认关闭，fake 注入实现被安全调用，原始 type_text 文本没有进入可见日志；不要移动鼠标，不要点击真实桌面，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.sendinput_executor import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK 后，最终回答最后一行必须完整复制：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK contract_ready=true real_input_default=false fake_impl_exercised=true raw_text_hidden=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 37 Windows Computer Use SendInput executor 合同验收：这次只允许运行项目内 sendinput_executor 模块；必须证明 SendInput 执行器合同已建立，真实输入默认关闭，fake 注入实现被安全调用，原始 type_text 文本没有进入可见日志；不要移动鼠标，不要点击真实桌面，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.sendinput_executor import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK 后，最终回答最后一行必须完整复制：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK contract_ready=true real_input_default=false fake_impl_exercised=true raw_text_hidden=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 37 Windows Computer Use SendInput executor 合同验收通过。\n\n已通过指定安全命令验证：\n- SendInput 执行器合同已建立：contract_ready=true\n- 真实输入默认关闭：real_input_default=false\n- fake 注入实现被安全调用：fake_impl_exercised=true\n- 原始 type_text 文本未进入可见日志：raw_text_hidden=true\n- 未扩展为真实动作：actions_expanded=false\n- 未移动鼠标、未点击真实桌面、未向真实窗口输入。\n\nPHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK contract_ready=true real_input_default=false fake_impl_exercised=true raw_text_hidden=true actions_expanded=false",
+      "started_at": "2026-06-03T02:42:28Z",
+      "completed_at": "2026-06-03T02:42:40Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T02:42:28Z",
+  "updated_at": "2026-06-03T02:42:40Z"
+}

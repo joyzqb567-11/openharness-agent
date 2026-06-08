@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_88ce21fdfca61109",
+  "prompt": "请使用本地电脑的画图软件画一个皮卡丘。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一个皮卡丘。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已生成一张皮卡丘图片，并用本地电脑的画图软件打开了。\n\n文件位置：`H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\pikachu_for_paint.png`",
+      "started_at": "2026-06-05T09:05:05Z",
+      "completed_at": "2026-06-05T09:05:52Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T09:05:05Z",
+  "updated_at": "2026-06-05T09:05:52Z"
+}

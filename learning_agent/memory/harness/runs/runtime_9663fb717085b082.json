@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_9663fb717085b082",
+  "prompt": "Please run one Phase 67 Windows Computer Use prompt task planner acceptance. Use only the project terminal self-check command. Do not call an LLM for planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE67_PROMPT_TASK_PLANNER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.prompt_task_planner import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE67_PROMPT_TASK_PLANNER_OK, the final answer's last line must completely copy: PHASE67_PROMPT_TASK_PLANNER_READY PHASE67_PROMPT_TASK_PLANNER_OK prompt_task_plan=true expected_result_per_step=true risk_level_per_step=true checkpoint_per_step=true paint_pikachu_prompt=true high_risk_confirmation=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 67 Windows Computer Use prompt task planner acceptance. Use only the project terminal self-check command. Do not call an LLM for planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE67_PROMPT_TASK_PLANNER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.prompt_task_planner import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE67_PROMPT_TASK_PLANNER_OK, the final answer's last line must completely copy: PHASE67_PROMPT_TASK_PLANNER_READY PHASE67_PROMPT_TASK_PLANNER_OK prompt_task_plan=true expected_result_per_step=true risk_level_per_step=true checkpoint_per_step=true paint_pikachu_prompt=true high_risk_confirmation=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 67 Windows Computer Use prompt task planner acceptance passed.\n\nPHASE67_PROMPT_TASK_PLANNER_READY PHASE67_PROMPT_TASK_PLANNER_OK prompt_task_plan=true expected_result_per_step=true risk_level_per_step=true checkpoint_per_step=true paint_pikachu_prompt=true high_risk_confirmation=true actions_expanded=false",
+      "started_at": "2026-06-03T13:22:09Z",
+      "completed_at": "2026-06-03T13:22:19Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T13:22:09Z",
+  "updated_at": "2026-06-03T13:22:19Z"
+}

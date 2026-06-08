@@ -1,0 +1,10 @@
+{
+  "flow_id": "browser_flow_1780313741041",
+  "completed_stage_names": [
+    "wait_checkpoint"
+  ],
+  "outputs": {
+    "wait_checkpoint": "browser_wait 成功\npage_id=page-1\nURL：https://example.com/\n文本检查：固定等待 250 毫秒"
+  },
+  "status": "completed"
+}

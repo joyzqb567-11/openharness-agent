@@ -1,0 +1,16 @@
+{
+  "action_id": "browser_run_e688c0dcaabc2f36-action-1",
+  "run_id": "browser_run_e688c0dcaabc2f36",
+  "stage_id": "browser_snapshot",
+  "tool_name": "browser_snapshot",
+  "arguments_redacted": {
+    "max_text_chars": 4000,
+    "max_elements": 50
+  },
+  "status": "failed",
+  "started_at_ms": 1780313729369,
+  "finished_at_ms": 1780313729375,
+  "error_type": "unknown",
+  "error_message": "找不到可用页面，请先调用 browser_open 打开页面，或调用 browser_tabs 查看并切换页面。",
+  "observation_id": ""
+}

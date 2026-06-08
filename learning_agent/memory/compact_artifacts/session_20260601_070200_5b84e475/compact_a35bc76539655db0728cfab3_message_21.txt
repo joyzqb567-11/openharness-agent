@@ -1,0 +1,90 @@
+bash 成功：exit_code=0
+stdout:
+# Real Chrome Leishen Login Flow
+
+Read this file immediately before calling `browser_flow_run`.
+
+Use this exact `browser_flow_run` arguments object. Do not remove or rename any key.
+
+```json
+{
+  "stages": [
+    {
+      "name": "save_initial_login_modal",
+      "tool": "browser_screenshot",
+      "arguments": {
+        "filename": "leishen_login_initial_v6.png",
+        "full_page": false
+      }
+    },
+    {
+      "name": "type_account_from_secret_env",
+      "tool": "browser_type_secret",
+      "arguments": {
+        "secret_env_var": "LEARNING_AGENT_TEST_LOGIN_ACCOUNT",
+        "selector": "input#usernameval",
+        "clear": true
+      }
+    },
+    {
+      "name": "type_password_from_secret_env",
+      "tool": "browser_type_secret",
+      "arguments": {
+        "secret_env_var": "LEARNING_AGENT_TEST_LOGIN_PASSWORD",
+        "selector": "input#passwordval",
+        "clear": true
+      }
+    },
+    {
+      "name": "submit_login_button",
+      "tool": "browser_click",
+      "arguments": {
+        "selector": "body:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > form:nth-of-type(1) > ul:nth-of-type(1) > input:nth-of-type(1)"
+      }
+    },
+    {
+      "name": "wait_for_login_result",
+      "tool": "browser_wait",
+      "arguments": {
+        "milliseconds": 7000
+      }
+    },
+    {
+      "name": "save_after_login_attempt",
+      "tool": "browser_screenshot",
+      "arguments": {
+        "filename": "leishen_after_account_login_v6.png",
+        "full_page": false
+      }
+    },
+    {
+      "name": "read_after_login_snapshot",
+      "tool": "browser_snapshot",
+      "arguments": {
+        "max_text_chars": 12000,
+        "max_elements": 200
+      }
+    }
+  ],
+  "continue_on_error": false
+}
+```
+
+Never click Quick Trial, Quick Register, or Forgot Password.
+
+If the final snapshot shows guest login, visitor login, bind phone, captcha, SMS verification, slider verification, real-name verification, device risk, wrong password, login failure, or network blocking, report that visible result exactly and do not call account login successful.
+
+After `browser_flow_run` returns, do not call `bash`, do not read memory files, and do not search transcripts.
+
+Write the final answer immediately using this template. Do not print the account or password value.
+
+```text
+REAL_CHROME_LEISHEN_LOGIN_CONTENT_OK
+real_chrome_connected=true
+tools=browser_connect_real_chrome,browser_open,browser_snapshot,browser_flow_run,browser_click,browser_type_secret,browser_wait,browser_screenshot
+visible_result=<describe the visible browser result with any account text replaced by [redacted]>
+secret_boundary=account/password were entered through browser_type_secret and are not printed
+```
+
+
+stderr:

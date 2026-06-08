@@ -1,0 +1,28 @@
+{
+  "name": "browser_fallback_recovery_stage10_acceptance",
+  "output_prefix": "browser_fallback_recovery_stage10_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-BrowserFallbackRecovery",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "BROWSER_FALLBACK_RECOVERY_STAGE10_READY",
+  "prompt_lines": [
+    "请执行 Browser Fallback Recovery Stage 10 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_FALLBACK_RECOVERY_STAGE10_READY。",
+    "你必须调用 bash 执行这个命令，验证真实 Chrome 登录态任务不会静默降级、CDP 兜底必须显式授权、不可用 provider 会被阻断、tab context 会要求刷新、连续失败会停止：python -m unittest learning_agent.tests.test_browser_fallback_recovery_stage10",
+    "不要提前最终回答；只有命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_FALLBACK_RECOVERY_STAGE10_READY STAGE10_FALLBACK_RECOVERY_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent.tests.test_browser_fallback_recovery_stage10",
+    "Ran 5 tests",
+    "OK"
+  ],
+  "event_answer_contains": [
+    "BROWSER_FALLBACK_RECOVERY_STAGE10_READY",
+    "STAGE10_FALLBACK_RECOVERY_OK"
+  ]
+}

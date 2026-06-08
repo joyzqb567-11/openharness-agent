@@ -1,0 +1,81 @@
+{
+  "scenario_id": "notepad_text_edit",
+  "target_process": "notepad.exe",
+  "launch_plan": {
+    "app_name": "notepad",
+    "executable": "notepad.exe",
+    "arguments": [
+      "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_notepad\\phase74_notepad_note.txt"
+    ],
+    "launch_verb": "Start-Process",
+    "safe_to_launch": true,
+    "refusal_reason": "",
+    "changes_registry": false,
+    "changes_system_settings": false,
+    "requires_admin": false,
+    "uses_shell_string": false,
+    "actions_expanded": false
+  },
+  "controlled_text_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_notepad\\phase74_notepad_note.txt",
+  "operations": [
+    "launch_app",
+    "focus_window",
+    "type_text",
+    "save_to_controlled_file",
+    "verify_saved_text"
+  ],
+  "menu_events": [
+    {
+      "type": "menu_open",
+      "real_dispatch_allowed": false,
+      "path_length": 2,
+      "root": "File"
+    },
+    {
+      "type": "menu_item",
+      "real_dispatch_allowed": false,
+      "index": 0,
+      "label": "File"
+    },
+    {
+      "type": "menu_item",
+      "real_dispatch_allowed": false,
+      "index": 1,
+      "label": "Save As"
+    },
+    {
+      "type": "menu_commit",
+      "real_dispatch_allowed": false,
+      "label": "Save As",
+      "path": "File > Save As"
+    }
+  ],
+  "hotkey_events": [
+    {
+      "type": "key_down",
+      "real_dispatch_allowed": false,
+      "key": "ctrl"
+    },
+    {
+      "type": "key_down",
+      "real_dispatch_allowed": false,
+      "key": "s"
+    },
+    {
+      "type": "key_up",
+      "real_dispatch_allowed": false,
+      "key": "s"
+    },
+    {
+      "type": "key_up",
+      "real_dispatch_allowed": false,
+      "key": "ctrl"
+    }
+  ],
+  "real_smoke_requested": false,
+  "real_visible_app_invoked": false,
+  "scenario_passed": true,
+  "marker": "PHASE74_REPRESENTATIVE_E2E_READY",
+  "model": "phase74_windows_representative_e2e_matrix",
+  "created_at": "2026-06-03T22:28:58Z"
+}

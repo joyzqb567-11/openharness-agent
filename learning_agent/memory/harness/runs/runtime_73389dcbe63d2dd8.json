@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_73389dcbe63d2dd8",
+  "prompt": "请调用 computer_status 查看当前 Computer Use 状态。不要打开任何软件，不要点击或输入桌面。拿到工具结果后，只回复一行：ACCEPTANCE_FULL_STATUS_TOOL_OK。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请调用 computer_status 查看当前 Computer Use 状态。不要打开任何软件，不要点击或输入桌面。拿到工具结果后，只回复一行：ACCEPTANCE_FULL_STATUS_TOOL_OK。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "ACCEPTANCE_FULL_STATUS_TOOL_OK",
+      "started_at": "2026-06-06T10:09:25Z",
+      "completed_at": "2026-06-06T10:09:30Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T10:09:25Z",
+  "updated_at": "2026-06-06T10:09:30Z"
+}

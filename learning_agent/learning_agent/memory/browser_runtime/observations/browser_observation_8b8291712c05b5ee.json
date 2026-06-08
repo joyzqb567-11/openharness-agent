@@ -1,0 +1,38 @@
+{
+  "observation_id": "browser_observation_8b8291712c05b5ee",
+  "run_id": "browser_run_fd0742dccaa88117",
+  "stage_id": "browser_run_fd0742dccaa88117-action-1",
+  "action_id": "browser_run_fd0742dccaa88117-action-1",
+  "url": "https://example.com/",
+  "title": "Example Domain",
+  "visible_text": "",
+  "screenshot_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\stage12_example.png",
+  "artifact_paths": [],
+  "console_summary": "error: Failed to load resource: the server responded with a status of 404 ()",
+  "network_summary": "GET 200 https://example.com/",
+  "elements": [
+    {
+      "element_id": "1",
+      "role": "a",
+      "tag": "a",
+      "label": "Learn more",
+      "text": "Learn more",
+      "placeholder": "",
+      "selector": "body:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > a:nth-of-type(1)",
+      "visible": true,
+      "x": 256,
+      "y": 210,
+      "width": 87,
+      "height": 20,
+      "center_x": 299,
+      "center_y": 220,
+      "box": {
+        "x": 256,
+        "y": 210,
+        "width": 87,
+        "height": 20
+      }
+    }
+  ],
+  "created_at_ms": 1780313890067
+}

@@ -1,0 +1,22 @@
+{
+  "id": "agent_capability_phase49_windows_tool_surface",
+  "prompt": "请运行 Phase49 Windows Computer Use 兼容工具面自检，确认 computer_use 和 computer-use 都能通过同一个 controller 转发。",
+  "debug_log_contains": [
+    "PHASE49_COMPUTER_USE_TOOL_SURFACE_READY",
+    "PHASE49_COMPUTER_USE_TOOL_SURFACE_OK",
+    "legacy_tools=true",
+    "compat_tools=true",
+    "same_controller=true",
+    "catalog=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE49_COMPUTER_USE_TOOL_SURFACE_READY",
+    "PHASE49_COMPUTER_USE_TOOL_SURFACE_OK",
+    "legacy_tools=true",
+    "compat_tools=true",
+    "same_controller=true",
+    "catalog=true",
+    "actions_expanded=false"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_daa3f6fd310664f3",
+  "prompt": "请执行一次 Browser Provider Adapters Stage 2 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY。 你必须调用 bash 执行这个命令验证统一 browser 工具已经经过 provider adapter 并写入 provider decision 事件：python -c \"from pathlib import Path; import tempfile; from learning_agent.browser_automation_mcp_server import BrowserAutomationServer; root=Path(tempfile.mkdtemp()); server=BrowserAutomationServer(root); server.browser_wait=lambda arguments: 'browser_wait 成功\\\\nprovider_adapter=true'; result=server.call('browser_wait', {'milliseconds': 1}); run_id=server.browser_runtime_store.list_run_ids()[-1]; events=server.browser_runtime_store.tail_events(run_id, limit=0); provider_events=[event for event in events if event['event_type']=='browser_provider_decision']; assert provider_events; payload=provider_events[-1]['payload']; assert payload['provider']=='visible_chromium'; assert 'browser_wait 成功' in result; print('PROVIDER_ADAPTERS_STAGE2_OK provider='+payload['provider']+' decision_event='+str(bool(provider_events))+' result_has_wait='+str('browser_wait 成功' in result))\" 不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ADAPTERS_STAGE2_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY PROVIDER_ADAPTERS_STAGE2_OK provider=visible_chromium decision_event=True result_has_wait=True",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Browser Provider Adapters Stage 2 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY。 你必须调用 bash 执行这个命令验证统一 browser 工具已经经过 provider adapter 并写入 provider decision 事件：python -c \"from pathlib import Path; import tempfile; from learning_agent.browser_automation_mcp_server import BrowserAutomationServer; root=Path(tempfile.mkdtemp()); server=BrowserAutomationServer(root); server.browser_wait=lambda arguments: 'browser_wait 成功\\\\nprovider_adapter=true'; result=server.call('browser_wait', {'milliseconds': 1}); run_id=server.browser_runtime_store.list_run_ids()[-1]; events=server.browser_runtime_store.tail_events(run_id, limit=0); provider_events=[event for event in events if event['event_type']=='browser_provider_decision']; assert provider_events; payload=provider_events[-1]['payload']; assert payload['provider']=='visible_chromium'; assert 'browser_wait 成功' in result; print('PROVIDER_ADAPTERS_STAGE2_OK provider='+payload['provider']+' decision_event='+str(bool(provider_events))+' result_has_wait='+str('browser_wait 成功' in result))\" 不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ADAPTERS_STAGE2_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ADAPTERS_STAGE2_READY PROVIDER_ADAPTERS_STAGE2_OK provider=visible_chromium decision_event=True result_has_wait=True",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "真实可见终端验收已通过：统一 browser 工具已经过 provider adapter，并写入 provider decision 事件。\n\nBROWSER_PROVIDER_ADAPTERS_STAGE2_READY PROVIDER_ADAPTERS_STAGE2_OK provider=visible_chromium decision_event=True result_has_wait=True",
+      "started_at": "2026-06-01T09:14:52Z",
+      "completed_at": "2026-06-01T09:15:05Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T09:14:52Z",
+  "updated_at": "2026-06-01T09:15:05Z"
+}

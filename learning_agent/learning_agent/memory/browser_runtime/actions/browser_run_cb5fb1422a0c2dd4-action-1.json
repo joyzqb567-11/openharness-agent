@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_cb5fb1422a0c2dd4-action-1",
+  "run_id": "browser_run_cb5fb1422a0c2dd4",
+  "stage_id": "browser_launch_visible",
+  "tool_name": "browser_launch_visible",
+  "arguments_redacted": {
+    "confirm_visible_browser": true
+  },
+  "status": "completed",
+  "started_at_ms": 1780289040194,
+  "finished_at_ms": 1780289040590,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

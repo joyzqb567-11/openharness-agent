@@ -1,0 +1,38 @@
+{
+  "id": "computer_use_full_status_tool_probe",
+  "name": "computer_use_full_status_tool_probe",
+  "output_prefix": "computer_use_full_status_tool_probe",
+  "window_title_prefix": "LearningAgent-FullStatusToolProbe",
+  "max_seconds": 180,
+  "final_log_wait_seconds": 10,
+  "post_success_wait_seconds": 2,
+  "success_marker": "ACCEPTANCE_FULL_STATUS_TOOL_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, then verify the visible terminal model loop can call the safe computer_status tool once.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请调用 computer_status 查看当前 Computer Use 状态。不要打开任何软件，不要点击或输入桌面。拿到工具结果后，只回复一行：ACCEPTANCE_FULL_STATUS_TOOL_OK。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "tool_call_started",
+    "tool_call_finished",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "computer_status",
+    "ACCEPTANCE_FULL_STATUS_TOOL_OK"
+  ],
+  "event_answer_contains": [
+    "ACCEPTANCE_FULL_STATUS_TOOL_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "model_loop_tools_loaded=true",
+    "computer_status"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -1,0 +1,42 @@
+{
+  "name": "browser_runtime_alignment",
+  "output_prefix": "browser_runtime_alignment",
+  "window_title_prefix": "LearningAgent-Controller-BrowserRuntime",
+  "max_seconds": 600,
+  "final_log_wait_seconds": 30,
+  "success_marker": "BROWSER_RUNTIME_ALIGNMENT_READY",
+  "prompt_lines": [
+    "请执行一次真实可见终端里的浏览器运行层验收，最终回答必须包含固定标记：BROWSER_RUNTIME_ALIGNMENT_READY。",
+    "第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。",
+    "然后必须调用 browser_profile_status 和 browser_plugin_status，确认页面失败恢复、视觉定位、坐标点击、复杂流程、动作日志、任务回放、站点级授权和异常重试能力已经出现在真实运行工具状态里。",
+    "本轮不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。",
+    "最终回答必须简短，并包含：BROWSER_RUNTIME_ALIGNMENT_READY、browser_profile_status、browser_plugin_status、page_recovery、visual_locate、coordinate_click、flow_run、action_log、replay、site_grant、retry。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/skills/browser_automation/SKILL.md",
+    "learning_agent/skills/real_chrome/SKILL.md",
+    "mcp__browser_automation__browser_profile_status",
+    "mcp__browser_automation__browser_plugin_status",
+    "browser_plugin_status",
+    "compatible=true"
+  ],
+  "event_answer_contains": [
+    "BROWSER_RUNTIME_ALIGNMENT_READY",
+    "browser_profile_status",
+    "browser_plugin_status",
+    "page_recovery",
+    "visual_locate",
+    "coordinate_click",
+    "flow_run",
+    "action_log",
+    "replay",
+    "site_grant",
+    "retry"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_af0737a50ecb4817",
+  "prompt": "Please run one Phase 91 Windows Computer Use controlled Notepad live-smoke acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open real Notepad, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.notepad_live_smoke import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_OK, the final answer's last line must completely copy: PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_READY PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_OK notepad_live_smoke_ready=true controlled_notepad_file_plan=true dedicated_notepad_window_identity=true phase90_dispatcher_integrated=true authorized_notepad_dispatch_contract=true dangerous_window_zero_events=true unauthorized_window_zero_events=true raw_text_hidden=true default_real_notepad_smoke_enabled=false requires_explicit_notepad_env_gate=true real_notepad_smoke_optional=true real_notepad_smoke_executed=false cleanup_plan_ready=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 91 Windows Computer Use controlled Notepad live-smoke acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open real Notepad, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.notepad_live_smoke import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_OK, the final answer's last line must completely copy: PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_READY PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_OK notepad_live_smoke_ready=true controlled_notepad_file_plan=true dedicated_notepad_window_identity=true phase90_dispatcher_integrated=true authorized_notepad_dispatch_contract=true dangerous_window_zero_events=true unauthorized_window_zero_events=true raw_text_hidden=true default_real_notepad_smoke_enabled=false requires_explicit_notepad_env_gate=true real_notepad_smoke_optional=true real_notepad_smoke_executed=false cleanup_plan_ready=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 91 Windows Computer Use controlled Notepad live-smoke acceptance passed.\n\nPHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_READY PHASE91_WINDOWS_NOTEPAD_LIVE_SMOKE_OK notepad_live_smoke_ready=true controlled_notepad_file_plan=true dedicated_notepad_window_identity=true phase90_dispatcher_integrated=true authorized_notepad_dispatch_contract=true dangerous_window_zero_events=true unauthorized_window_zero_events=true raw_text_hidden=true default_real_notepad_smoke_enabled=false requires_explicit_notepad_en",
+      "started_at": "2026-06-04T02:07:36Z",
+      "completed_at": "2026-06-04T02:07:47Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T02:07:36Z",
+  "updated_at": "2026-06-04T02:07:47Z"
+}

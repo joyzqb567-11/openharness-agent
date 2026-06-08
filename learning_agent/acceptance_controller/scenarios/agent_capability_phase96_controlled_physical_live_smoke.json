@@ -1,0 +1,69 @@
+{
+  "id": "agent_capability_phase96_controlled_physical_live_smoke",
+  "name": "agent_capability_phase96_controlled_physical_live_smoke",
+  "output_prefix": "agent_capability_phase96_controlled_physical_live_smoke",
+  "window_title_prefix": "LearningAgent-Phase96-ControlledPhysicalLiveSmoke",
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY",
+  "prompt": "Please run the Phase96 controlled physical live smoke acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 96 controlled physical Windows SendInput live smoke acceptance. This acceptance may open only the dedicated LearningAgent Phase96 safe window created by the project itself, may use only the explicit Phase96 env gates, must not interact with user windows, must not install dependencies, must not change registry, and must not change Windows settings. The final answer must include the fixed marker: PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE96_RUN_REAL_SMOKE='1'; $env:LEARNING_AGENT_PHASE96_ENABLE_REAL_SENDINPUT_LIVE_SMOKE='1'; python -c \"from learning_agent.computer_use.controlled_physical_live_smoke import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_OK, the final answer's last line must completely copy: PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_OK default_off_zero_physical_events=true unsafe_target_zero_physical_events=true phase95_controlled_sender_reused=true phase95_physical_mouse_bridge=true phase58_keyboard_guard_reused=true real_enable_gate_required=true real_smoke_executed=true safe_window_only=true raw_text_hidden=true real_desktop_touched=true uncontrolled_actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY",
+    "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_OK",
+    "default_off_zero_physical_events=true",
+    "unsafe_target_zero_physical_events=true",
+    "phase95_controlled_sender_reused=true",
+    "phase95_physical_mouse_bridge=true",
+    "phase58_keyboard_guard_reused=true",
+    "real_enable_gate_required=true",
+    "real_smoke_executed=true",
+    "safe_window_only=true",
+    "raw_text_hidden=true",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY",
+    "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_OK",
+    "default_off_zero_physical_events=true",
+    "unsafe_target_zero_physical_events=true",
+    "phase95_controlled_sender_reused=true",
+    "phase95_physical_mouse_bridge=true",
+    "phase58_keyboard_guard_reused=true",
+    "real_enable_gate_required=true",
+    "real_smoke_executed=true",
+    "safe_window_only=true",
+    "raw_text_hidden=true",
+    "real_desktop_touched=true",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_READY",
+      "PHASE96_CONTROLLED_PHYSICAL_LIVE_SMOKE_OK",
+      "default_off_zero_physical_events=true",
+      "unsafe_target_zero_physical_events=true",
+      "phase95_controlled_sender_reused=true",
+      "phase95_physical_mouse_bridge=true",
+      "phase58_keyboard_guard_reused=true",
+      "real_enable_gate_required=true",
+      "real_smoke_executed=true",
+      "safe_window_only=true",
+      "raw_text_hidden=true",
+      "real_desktop_touched=true",
+      "uncontrolled_actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

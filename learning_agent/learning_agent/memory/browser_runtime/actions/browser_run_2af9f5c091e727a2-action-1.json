@@ -1,0 +1,16 @@
+{
+  "action_id": "browser_run_2af9f5c091e727a2-action-1",
+  "run_id": "browser_run_2af9f5c091e727a2",
+  "stage_id": "browser_wait",
+  "tool_name": "browser_wait",
+  "arguments_redacted": {
+    "text": "Hello Codex",
+    "timeout_ms": 3000
+  },
+  "status": "completed",
+  "started_at_ms": 1780308703844,
+  "finished_at_ms": 1780308703856,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

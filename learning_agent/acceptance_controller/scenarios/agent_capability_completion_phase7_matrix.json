@@ -1,0 +1,67 @@
+{
+  "name": "agent_capability_completion_phase7_matrix",
+  "created_at": "2026-06-01",
+  "visible_terminal_required": true,
+  "visible_terminal_scenarios": [
+    "agent_capability_completion_phase7_chrome_status.json"
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Chrome extension install/native host registry",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_chrome_extension_installer_stage13"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase1"
+    },
+    {
+      "phase": 2,
+      "name": "Chrome extension pairing/session sync",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_chrome_extension_pairing_stage14"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase2"
+    },
+    {
+      "phase": 3,
+      "name": "High-level browser tools",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_browser_high_level_tools_stage15"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase3"
+    },
+    {
+      "phase": 4,
+      "name": "Global StreamingToolExecutor",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_streaming_tool_executor_stage16"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase4"
+    },
+    {
+      "phase": 5,
+      "name": "OS-level Computer Use",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_os_computer_use_stage17"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase5"
+    },
+    {
+      "phase": 6,
+      "name": "/chrome terminal status UI",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_chrome_terminal_status_ui_stage18"
+      ],
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase6"
+    },
+    {
+      "phase": 7,
+      "name": "Real E2E acceptance",
+      "automated_tests": [
+        "python -m unittest learning_agent.tests.test_agent_capability_acceptance_matrix_stage19"
+      ],
+      "visible_terminal_scenario": "agent_capability_completion_phase7_chrome_status.json",
+      "backup_dir": "learning_agent/test/agent_capability_completion_20260601/phase7"
+    }
+  ]
+}

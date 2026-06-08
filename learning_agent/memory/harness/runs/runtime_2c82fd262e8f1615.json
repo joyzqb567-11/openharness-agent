@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_2c82fd262e8f1615",
+  "prompt": "Please run one Phase 76-89 Windows Computer Use production live-control acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE76_89_WINDOWS_LIVE_CONTROL_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.production_live_control import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE76_89_WINDOWS_LIVE_CONTROL_OK, the final answer's last line must completely copy: PHASE76_89_WINDOWS_LIVE_CONTROL_READY PHASE76_89_WINDOWS_LIVE_CONTROL_OK passed=true phase_count=14 claudecode_gap_closed=true unified_host_adapter=true live_observation_fusion=true display_coordinate_model=true sendinput_production_gate=true clipboard_save_verify_restore=true app_launch_focus_plan=true allowlist_sentinel_permissions=true global_abort_cleanup_hooks=true high_level_tool_surface=true observe_act_verify_loop=true representative_e2e_matrix=true mspaint_pikachu_scenario=true humanlike_drawing_actions=true direct_image_file_cheat=false security_window_denial=true real_visible_terminal_gate=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 76-89 Windows Computer Use production live-control acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE76_89_WINDOWS_LIVE_CONTROL_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.production_live_control import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE76_89_WINDOWS_LIVE_CONTROL_OK, the final answer's last line must completely copy: PHASE76_89_WINDOWS_LIVE_CONTROL_READY PHASE76_89_WINDOWS_LIVE_CONTROL_OK passed=true phase_count=14 claudecode_gap_closed=true unified_host_adapter=true live_observation_fusion=true display_coordinate_model=true sendinput_production_gate=true clipboard_save_verify_restore=true app_launch_focus_plan=true allowlist_sentinel_permissions=true global_abort_cleanup_hooks=true high_level_tool_surface=true observe_act_verify_loop=true representative_e2e_matrix=true mspaint_pikachu_scenario=true humanlike_drawing_actions=true direct_image_file_cheat=false security_window_denial=true real_visible_terminal_gate=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "PHASE76_89_WINDOWS_LIVE_CONTROL_READY\nPHASE76_89_WINDOWS_LIVE_CONTROL_READY PHASE76_89_WINDOWS_LIVE_CONTROL_OK passed=true phase_count=14 claudecode_gap_closed=true unified_host_adapter=true live_observation_fusion=true display_coordinate_model=true sendinput_production_gate=true clipboard_save_verify_restore=true app_launch_focus_plan=true allowlist_sentinel_permissions=true global_abort_cleanup_hooks=true high_level_tool_surface=true observe_act_verify_loop=true representative_e2e_matrix=true ",
+      "started_at": "2026-06-04T01:21:55Z",
+      "completed_at": "2026-06-04T01:22:07Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T01:21:55Z",
+  "updated_at": "2026-06-04T01:22:07Z"
+}

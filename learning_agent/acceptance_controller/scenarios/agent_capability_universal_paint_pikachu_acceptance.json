@@ -1,0 +1,66 @@
+{
+  "id": "agent_capability_universal_paint_pikachu_acceptance",
+  "name": "agent_capability_universal_paint_pikachu_acceptance",
+  "output_prefix": "agent_capability_universal_paint_pikachu_acceptance",
+  "window_title_prefix": "LearningAgent-URG5-PaintPikachu",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY",
+  "prompt": "Please run the URG-5 Paint/Pikachu representative acceptance.",
+  "prompt_lines": [
+    "Please run the URG-5 Universal Real GUI Computer Use Paint/Pikachu representative acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_paint_pikachu_acceptance import main; raise SystemExit(main([]))\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_OK, the final answer's last line must completely copy: PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_OK paint_is_acceptance_only=true per_app_controller_required=false real_paint_window_verified=true real_canvas_region_detected=true real_drag_path_dispatched=true canvas_changed_after_real_actions=true script_artifact_route_blocked=true generated_image_file_used=false real_desktop_execution_mature=true low_level_event_count=81"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY",
+    "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_OK",
+    "paint_is_acceptance_only=true",
+    "per_app_controller_required=false",
+    "real_paint_window_verified=true",
+    "real_canvas_region_detected=true",
+    "real_drag_path_dispatched=true",
+    "canvas_changed_after_real_actions=true",
+    "script_artifact_route_blocked=true",
+    "generated_image_file_used=false",
+    "real_desktop_execution_mature=true",
+    "low_level_event_count=81"
+  ],
+  "event_answer_contains": [
+    "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY",
+    "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_OK",
+    "paint_is_acceptance_only=true",
+    "per_app_controller_required=false",
+    "real_paint_window_verified=true",
+    "real_canvas_region_detected=true",
+    "real_drag_path_dispatched=true",
+    "canvas_changed_after_real_actions=true",
+    "script_artifact_route_blocked=true",
+    "generated_image_file_used=false",
+    "real_desktop_execution_mature=true",
+    "low_level_event_count=81"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_READY",
+      "PHASE120_UNIVERSAL_PAINT_PIKACHU_ACCEPTANCE_OK",
+      "paint_is_acceptance_only=true",
+      "per_app_controller_required=false",
+      "real_paint_window_verified=true",
+      "real_canvas_region_detected=true",
+      "real_drag_path_dispatched=true",
+      "canvas_changed_after_real_actions=true",
+      "script_artifact_route_blocked=true",
+      "generated_image_file_used=false",
+      "real_desktop_execution_mature=true",
+      "low_level_event_count=81"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

@@ -25,11 +25,11 @@ learning_agent 已经完成了最小可用的工具循环、MCP stdio 接入、M
 
 ## 主要源码依据
 
-- Claude Code 基础工具注册：`D:\codexworkplace\software\ClaudeCode-main\tools.ts`
-- Claude Code agent/subagent 工具权限分组：`D:\codexworkplace\software\ClaudeCode-main\constants\tools.ts`
-- Claude Code MCP 工具发现和调用：`D:\codexworkplace\software\ClaudeCode-main\services\mcp\client.ts`
-- Claude Code MCP 工具命名：`D:\codexworkplace\software\ClaudeCode-main\services\mcp\mcpStringUtils.ts`
-- Claude Code MCP 配置类型：`D:\codexworkplace\software\ClaudeCode-main\services\mcp\types.ts`
+- Claude Code 基础工具注册：`D:\ClaudeCode-main\ClaudeCode-main\tools.ts`
+- Claude Code agent/subagent 工具权限分组：`D:\ClaudeCode-main\ClaudeCode-main\constants\tools.ts`
+- Claude Code MCP 工具发现和调用：`D:\ClaudeCode-main\ClaudeCode-main\services\mcp\client.ts`
+- Claude Code MCP 工具命名：`D:\ClaudeCode-main\ClaudeCode-main\services\mcp\mcpStringUtils.ts`
+- Claude Code MCP 配置类型：`D:\ClaudeCode-main\ClaudeCode-main\services\mcp\types.ts`
 - learning_agent 主体：`<repo-root>\learning_agent\learning_agent.py`
 - learning_agent browser/search MCP：`<repo-root>\learning_agent\browser_search_mcp_server.py`
 - learning_agent workspace MCP：`<repo-root>\learning_agent\workspace_tools_mcp_server.py`

@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_061d3c25972353fc-action-1",
+  "run_id": "browser_run_061d3c25972353fc",
+  "stage_id": "browser_evaluate",
+  "tool_name": "browser_evaluate",
+  "arguments_redacted": {
+    "script": "() => ({value: window.testValue, status: document.querySelector('#status').textContent})"
+  },
+  "status": "completed",
+  "started_at_ms": 1780308703864,
+  "finished_at_ms": 1780308703878,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

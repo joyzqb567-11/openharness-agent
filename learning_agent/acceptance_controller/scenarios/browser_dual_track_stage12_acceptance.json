@@ -1,0 +1,45 @@
+{
+  "name": "browser_dual_track_stage12_acceptance",
+  "output_prefix": "browser_dual_track_stage12_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-BrowserStage12",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 12,
+  "success_marker": "BROWSER_DUAL_TRACK_STAGE12_READY",
+  "prompt_lines": [
+    "请执行 Browser Dual Track Stage 12 总验收，最终回答只能输出一行固定标记：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK。",
+    "第一步必须调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认返回 visible_browser=true 和 headless=false。",
+    "第二步必须在这个可见 Chromium 窗口里调用 browser_open 打开 https://example.com/，再调用 browser_snapshot，确认结果里有 observation_id。",
+    "第三步必须调用 browser_screenshot 保存当前页面截图，确认结果里有 observation_id。",
+    "第四步必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，参数可用 milliseconds=250 或 text=Example Domain，用来验证 flow checkpoint。",
+    "第五步必须调用 browser_plugin_status，确认 capabilities 包含 observation_engine、flow_checkpoint、status_browser_runtime。",
+    "不要提前最终回答；上述浏览器工具都成功后，最终回答只能输出一行：BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "mcp__browser_automation__browser_launch_visible",
+    "browser_launch_visible 成功",
+    "visible_browser=true",
+    "headless=false",
+    "mcp__browser_automation__browser_open",
+    "mcp__browser_automation__browser_snapshot",
+    "observation_id=",
+    "mcp__browser_automation__browser_screenshot",
+    "mcp__browser_automation__browser_flow_run",
+    "mcp__browser_automation__browser_plugin_status",
+    "observation_engine",
+    "flow_checkpoint",
+    "status_browser_runtime",
+    "browser_runtime_store=",
+    "compatible=true"
+  ],
+  "event_answer_contains": [
+    "BROWSER_DUAL_TRACK_STAGE12_READY",
+    "STAGE12_VISIBLE_BROWSER_OK"
+  ]
+}

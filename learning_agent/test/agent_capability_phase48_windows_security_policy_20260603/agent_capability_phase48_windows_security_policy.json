@@ -1,0 +1,24 @@
+{
+  "id": "agent_capability_phase48_windows_security_policy",
+  "prompt": "请自检 Windows Computer Use 的 Phase48 安全策略，确认 observe/action/system_key/clipboard 授权、未授权应用拒绝和高风险默认拒绝都能在终端看懂。",
+  "debug_log_contains": [
+    "PHASE48_WINDOWS_SECURITY_POLICY_READY",
+    "PHASE48_WINDOWS_SECURITY_POLICY_OK",
+    "grant_classes=true",
+    "high_risk_default=true",
+    "clipboard=true",
+    "controller_policy=true",
+    "terminal_status=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE48_WINDOWS_SECURITY_POLICY_READY",
+    "PHASE48_WINDOWS_SECURITY_POLICY_OK",
+    "grant_classes=true",
+    "high_risk_default=true",
+    "clipboard=true",
+    "controller_policy=true",
+    "terminal_status=true",
+    "actions_expanded=false"
+  ]
+}

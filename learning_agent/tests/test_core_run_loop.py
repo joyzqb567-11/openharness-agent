@@ -1,9 +1,191 @@
-﻿"Core run loop, config, tasks, and fallback tests."  # Stage14: this file owns the core_run_loop test group.
+"Core run loop, config, tasks, and fallback tests."  # Stage14: this file owns the core_run_loop test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.
 
 class CoreRunLoopTests(LearningAgentTestBase):  # Stage14: unittest discovers this concrete modular test class.
+    def test_desktop_natural_language_reaches_model_loop_instead_of_preloop_runtime(self) -> None:  # 新增代码+ModelLoopComputerUse：函数段开始，验证自然语言桌面任务必须进入模型主循环；如果没有这个测试，Python 抢跑分类器可能再次替模型规划桌面任务。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ModelLoopComputerUse：创建临时 workspace 隔离 harness 和 debug 日志；如果没有这一行，测试会污染真实项目 memory。
+            workspace = Path(raw_dir)  # 新增代码+ModelLoopComputerUse：把临时目录转成 Path；如果没有这一行，LearningAgent 构造参数会退回不清晰的字符串路径。
+            model = RecordingToolNameFakeModel(ModelMessage(text="模型主循环收到桌面任务。"))  # 新增代码+ModelLoopComputerUse：构造会记录工具 schema 的假模型；如果没有这一行，测试无法证明 agent.run 真的调用了模型。
+            agent = LearningAgent(model=model, workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ModelLoopComputerUse：创建真实 agent 并注入假模型；如果没有这一行，被测主循环入口不存在。
+            answer = agent.run("请使用本地电脑的画图软件画一个房子。", max_turns=1)  # 新增代码+ModelLoopComputerUse：用真实用户习惯的桌面任务 prompt 运行 agent；如果没有这一行，模型前抢跑缺陷不会被触发。
+            self.assertIn("模型主循环收到桌面任务", answer)  # 新增代码+ModelLoopComputerUse：断言最终回答来自模型主循环；如果没有这一行，旧 Computer Use runtime 抢跑也可能被误判通过。
+            self.assertTrue(model.received_tool_names)  # 新增代码+ModelLoopComputerUse：断言假模型确实收到过工具列表；如果没有这一行，只看文本无法排除旁路返回。
+            self.assertNotIn("Computer Use Desktop Task", answer)  # 新增代码+ModelLoopComputerUse：断言旧桌面任务 runtime 标题没有出现在答案中；如果没有这一行，旧抢跑路由可能继续混入。
+    # 新增代码+ModelLoopComputerUse：函数段结束，test_desktop_natural_language_reaches_model_loop_instead_of_preloop_runtime 到此结束；如果没有这个边界说明，代码小白不容易看出模型主循环门禁范围。
+
+    def test_computer_use_full_terminal_command_loads_tool_pack_for_next_model_turn(self) -> None:  # 新增代码+ModelLoopComputerUse：函数段开始，验证 `/computer use --full` 会把桌面工具 schema 挂到当前 agent；如果没有这个测试，用户下一句自然语言仍可能没有 computer_use 工具。
+        from learning_agent.app.interactive import _activate_computer_use_tool_pack_for_agent  # 新增代码+ModelLoopComputerUse：导入交互层接线 helper；如果没有这一行，测试无法覆盖真实终端命令到工具池的桥。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ModelLoopComputerUse：创建临时 workspace；如果没有这一行，测试可能写入真实项目调试目录。
+            workspace = Path(raw_dir)  # 新增代码+ModelLoopComputerUse：把临时目录转成 Path；如果没有这一行，agent 构造路径不够明确。
+            agent = LearningAgent(model=RecordingToolNameFakeModel(ModelMessage(text="ok")), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ModelLoopComputerUse：创建真实 agent 来使用正式 capability pack 逻辑；如果没有这一行，测试只能验证孤立字符串。
+            output = _activate_computer_use_tool_pack_for_agent(agent, "/computer use --full", "Computer Use Mode\n- mode=full\n- full_mode=true\n")  # 新增代码+ModelLoopComputerUse：模拟终端 full 模式成功输出并触发工具包加载；如果没有这一行，用户真实命令路径没有自动化门禁。
+            self.assertIn("model_loop_tools_loaded=true", output)  # 新增代码+ModelLoopComputerUse：断言 helper 报告工具包已进入模型主循环；如果没有这一行，失败输出可能被忽略。
+            self.assertIn("computer_use", agent.loaded_tool_names)  # 新增代码+ModelLoopComputerUse：断言兼容 computer_use 入口进入当前工具池；如果没有这一行，模型无法用统一工具发 observe/action。
+            self.assertIn("computer_observe", agent.loaded_tool_names)  # 新增代码+ModelLoopComputerUse：断言观察工具进入当前工具池；如果没有这一行，模型无法先看屏幕状态。
+            self.assertIn("computer_action", agent.loaded_tool_names)  # 新增代码+ModelLoopComputerUse：断言动作工具进入当前工具池；如果没有这一行，模型无法通过工具层点击、输入或执行桌面动作。
+    # 新增代码+ModelLoopComputerUse：函数段结束，test_computer_use_full_terminal_command_loads_tool_pack_for_next_model_turn 到此结束；如果没有这个边界说明，代码小白不容易看出 full 命令接线门禁范围。
+
+    def test_computer_use_full_terminal_command_starts_clean_computer_use_session(self) -> None:  # 新增代码+ComputerUseSessionTargetGuard：函数段开始，验证每次 `/computer use --full` 会清理旧 Computer Use 观察上下文；如果没有这个测试，上一轮旧窗口截图会继续污染新任务模型主循环。
+        from learning_agent.app.interactive import _activate_computer_use_tool_pack_for_agent  # 新增代码+ComputerUseSessionTargetGuard：导入真实终端命令接线 helper；如果没有这一行，测试无法覆盖用户实际输入 `/computer use --full` 的路径。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ComputerUseSessionTargetGuard：创建临时 workspace 隔离测试 agent；如果没有这一行，测试会污染真实项目 memory。
+            workspace = Path(raw_dir)  # 新增代码+ComputerUseSessionTargetGuard：把临时目录转成 Path；如果没有这一行，LearningAgent 构造路径不够明确。
+            agent = LearningAgent(model=RecordingToolNameFakeModel(ModelMessage(text="ok")), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ComputerUseSessionTargetGuard：创建真实 agent；如果没有这一行，无法检查 observation_events 和 active_artifacts 的真实字段。
+            agent._record_observation("computer_use_observe", {"old_window": "hwnd:old", "image_result_count": 1})  # 新增代码+ComputerUseSessionTargetGuard：写入上一轮旧窗口观察；如果没有这一行，测试无法证明 full 新会话会清理旧截图上下文。
+            agent._record_observation("tool_result_offloaded", {"artifact_path": "keep.txt"})  # 新增代码+ComputerUseSessionTargetGuard：写入非 Computer Use 事件；如果没有这一行，测试无法证明清理范围不会误删普通开发证据。
+            agent.active_artifacts.append("H:/old/computer-window-old.png")  # 新增代码+ComputerUseSessionTargetGuard：模拟旧 Computer Use 截图产物；如果没有这一行，新会话 artifact 清理没有被覆盖。
+            agent.active_artifacts.append("H:/project/keep.txt")  # 新增代码+ComputerUseSessionTargetGuard：模拟普通非截图产物；如果没有这一行，测试无法确认普通产物会保留。
+            output = _activate_computer_use_tool_pack_for_agent(agent, "/computer use --full", "Computer Use Mode\n- mode=full\n- full_mode=true\n")  # 新增代码+ComputerUseSessionTargetGuard：模拟用户打开 full 模式；如果没有这一行，清理逻辑不会触发。
+            event_kinds = [str(event.get("kind", "")) for event in agent.observation_events]  # 新增代码+ComputerUseSessionTargetGuard：提取清理后的事件类型；如果没有这一行，断言会重复写读取逻辑。
+            self.assertIn("model_loop_tools_loaded=true", output)  # 新增代码+ComputerUseSessionTargetGuard：确认 full 工具包仍正常加载；如果没有这一行，测试可能因为工具包失败而误判清理逻辑。
+            self.assertNotIn("computer_use_observe", event_kinds)  # 新增代码+ComputerUseSessionTargetGuard：断言旧 Computer Use 观察被清理；如果没有这一行，旧窗口截图仍会进入新任务上下文。
+            self.assertIn("tool_result_offloaded", event_kinds)  # 新增代码+ComputerUseSessionTargetGuard：断言非 Computer Use 事件保留；如果没有这一行，清理可能破坏普通任务证据。
+            self.assertNotIn("H:/old/computer-window-old.png", agent.active_artifacts)  # 新增代码+ComputerUseSessionTargetGuard：断言旧 Computer Use 截图产物不再活跃；如果没有这一行，旧 PNG 仍可能被后续摘要引用。
+            self.assertIn("H:/project/keep.txt", agent.active_artifacts)  # 新增代码+ComputerUseSessionTargetGuard：断言普通产物仍保留；如果没有这一行，清理范围可能过宽。
+    # 新增代码+ComputerUseSessionTargetGuard：函数段结束，test_computer_use_full_terminal_command_starts_clean_computer_use_session 到此结束；如果没有这个边界说明，用户不容易看出 full 会话隔离测试范围。
+
+    def test_computer_use_full_desktop_prompt_adds_model_loop_harness_and_uses_tools(self) -> None:  # 新增代码+ModelLoopSemanticPlanner：函数段开始，验证 full 模式后的自然语言桌面任务在模型主循环里规划；如果没有这个测试，语义任务可能再次被 Python runtime 抢跑。
+        from learning_agent.app.interactive import _activate_computer_use_tool_pack_for_agent  # 新增代码+ModelLoopSemanticPlanner：导入真实交互 helper 来模拟用户输入 /computer use --full；如果没有这一行，测试无法覆盖真实终端命令接线。
+        class RecordingDesktopLoopModel:  # 新增代码+ModelLoopSemanticPlanner：类段开始，用假模型记录消息和工具并主动选择 observe；如果没有这个类，测试无法证明模型拿到了语义规划上下文。
+            def __init__(self) -> None:  # 新增代码+ModelLoopSemanticPlanner：初始化 fake 模型状态；如果没有这一行，后续无法记录 chat 调用。
+                self.received_messages: list[list[dict[str, object]]] = []  # 新增代码+ModelLoopSemanticPlanner：保存每轮模型看到的 messages；如果没有这一行，测试无法检查系统提示是否包含模型循环 harness。
+                self.received_tool_names: list[list[str]] = []  # 新增代码+ModelLoopSemanticPlanner：保存每轮模型看到的工具名；如果没有这一行，测试无法证明 computer_use 工具真的暴露给模型。
+                self.index = 0  # 新增代码+ModelLoopSemanticPlanner：保存当前 fake 模型返回轮次；如果没有这一行，fake 模型无法先调用工具再最终回答。
+            # 新增代码+ModelLoopSemanticPlanner：函数段结束，RecordingDesktopLoopModel.__init__ 到此结束；如果没有这个边界说明，初学者不容易看出初始化范围。
+            def chat(self, messages: list[dict[str, object]], tools: list[dict[str, object]]) -> ModelMessage:  # 新增代码+ModelLoopSemanticPlanner：实现模型 chat 接口；如果没有这一行，LearningAgent.run 无法驱动 fake 模型。
+                self.received_messages.append(messages)  # 新增代码+ModelLoopSemanticPlanner：记录本轮完整消息；如果没有这一行，系统 harness 是否进入模型不可验证。
+                tool_names = [str(schema.get("function", {}).get("name", "")) for schema in tools if isinstance(schema.get("function", {}), dict)]  # 新增代码+ModelLoopSemanticPlanner：从真实 schema 提取工具名；如果没有这一行，测试只能猜测工具池状态。
+                self.received_tool_names.append(tool_names)  # 新增代码+ModelLoopSemanticPlanner：记录模型可见工具名；如果没有这一行，工具 schema 暴露失败不会被发现。
+                if self.index == 0:  # 修改代码+ModelLoopFirstStepLaunch：第一轮模拟模型按收窄工具面选择 launch_app；如果没有这一行，测试无法覆盖真实终端第 0 轮先打开目标应用的修复点。
+                    self.index += 1  # 新增代码+ModelLoopSemanticPlanner：推进到下一轮最终回答；如果没有这一行，fake 模型会无限调用同一个工具。
+                    return ModelMessage(text="", tool_calls=[ToolCall(name="computer_action", arguments={"action": "launch_app", "app_name": "mspaint", "target_app": "mspaint", "confirm_desktop_control": True})])  # 修改代码+ModelLoopFirstStepLaunch：让模型自己调用 computer_action launch_app；如果没有这一行，测试不能证明语义规划仍在模型主循环里完成启动绑定。
+                return ModelMessage(text="模型主循环已根据自然语言任务选择 Computer Use 工具继续执行。")  # 新增代码+ModelLoopSemanticPlanner：第二轮返回最终说明；如果没有这一行，agent.run 无法正常结束。
+            # 新增代码+ModelLoopSemanticPlanner：函数段结束，RecordingDesktopLoopModel.chat 到此结束；如果没有这个边界说明，初学者不容易看出 fake 模型行为范围。
+        # 新增代码+ModelLoopSemanticPlanner：类段结束，RecordingDesktopLoopModel 到此结束；如果没有这个边界说明，初学者不容易看出测试模型范围。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ModelLoopSemanticPlanner：创建临时 workspace 隔离 memory/debug；如果没有这一行，测试会污染真实项目运行目录。
+            workspace = Path(raw_dir)  # 新增代码+ModelLoopSemanticPlanner：把临时目录转成 Path；如果没有这一行，LearningAgent 构造路径会不清楚。
+            model = RecordingDesktopLoopModel()  # 新增代码+ModelLoopSemanticPlanner：创建会记录首轮上下文的假模型；如果没有这一行，测试没有可观察模型。
+            agent = LearningAgent(model=model, workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ModelLoopSemanticPlanner：创建真实 agent 并允许安全 fake 工具调用；如果没有这一行，主循环行为没有被测对象。
+            def fake_computer_action(arguments: dict[str, object]) -> str:  # 新增代码+ModelLoopFirstStepLaunch：函数段开始，用假动作替代真实桌面启动；如果没有这段函数，单元测试会真的打开 Paint 而污染用户桌面。
+                agent._record_observation("fake_computer_action", {"action": arguments.get("action"), "app_name": arguments.get("app_name")})  # 新增代码+ModelLoopFirstStepLaunch：记录模型确实请求了 launch_app；如果没有这一行，测试只能看到最终文本而无法证明工具执行路径。
+                return "computer_action 成功：fake launch_app 已绑定 agent-owned target_window=mspaint。"  # 新增代码+ModelLoopFirstStepLaunch：返回可读工具结果给下一轮模型；如果没有这一行，工具循环没有可回灌的结果。
+            # 新增代码+ModelLoopFirstStepLaunch：函数段结束，fake_computer_action 到此结束；如果没有这个边界说明，代码小白不容易看出这里没有真实打开软件。
+            agent._computer_action = fake_computer_action  # 新增代码+ModelLoopFirstStepLaunch：把真实桌面动作替换为测试假动作；如果没有这一行，测试会触碰用户真实桌面。
+            output = _activate_computer_use_tool_pack_for_agent(agent, "/computer use --full", "Computer Use Mode\n- mode=full\n- full_mode=true\n")  # 新增代码+ModelLoopSemanticPlanner：模拟用户先输入 /computer use --full；如果没有这一行，模型第一轮看不到 Computer Use 工具包。
+            self.assertIn("model_loop_tools_loaded=true", output)  # 新增代码+ModelLoopSemanticPlanner：确认 full 命令确实加载工具包；如果没有这一行，后续失败原因不清楚。
+            answer = agent.run("请使用本地电脑的画图软件画一棵树。", max_turns=2)  # 新增代码+ModelLoopSemanticPlanner：用真实用户自然语言任务进入主循环；如果没有这一行，无法验证树任务是否仍被外置 planner 抢跑。
+            first_system_message = str(model.received_messages[0][0].get("content", ""))  # 新增代码+ModelLoopSemanticPlanner：读取首轮 system prompt；如果没有这一行，无法断言模型拿到 Computer Use full harness。
+            self.assertIn("Computer Use full 模式", first_system_message)  # 新增代码+ModelLoopSemanticPlanner：断言 full 模式提示进入模型主循环；如果没有这一行，模型可能不知道要走 observe-plan-act。
+            self.assertIn("launch_app", first_system_message)  # 新增代码+ModelLoopLaunchAppTool: 断言 full 模式提示模型先启动目标应用；如果没有这一行，模型可能在没打开软件时继续盲动鼠标键盘。
+            self.assertIn("target_window", first_system_message)  # 新增代码+ModelLoopLaunchAppTool: 断言提示模型观察启动后返回的目标窗口；如果没有这一行，打开软件后模型可能不知道该观察哪个窗口。
+            self.assertIn("第 0 轮只做第一步", first_system_message)  # 新增代码+ModelLoopFirstStepLaunch：断言自然语言本机应用任务会把首轮动作收窄为启动绑定；如果没有这一行，真实终端可能再次卡在模型第 0 轮长时间规划整张图。
+            self.assertIn("action=launch_app", first_system_message)  # 新增代码+ModelLoopFirstStepLaunch：断言首轮策略点名 launch_app 动作；如果没有这一行，模型可能先盲目观察或盲目点击而不是打开目标软件。
+            self.assertIn("agent-owned 新窗口", first_system_message)  # 新增代码+ModelLoopLaunchAppTool: 断言提示模型优先创建自有窗口；如果没有这一行，真实验收可能复用用户旧窗口造成误判。
+            self.assertIn("本轮目标必须始终以用户原始自然语言为准", first_system_message)  # 新增代码+ComputerUseGoalAnchor: 断言 full 模式提示会固定本轮目标；如果没有这一行，模型可能观察旧画布后把画树漂移成补旧图。
+            self.assertIn("旧画布或旧图形", first_system_message)  # 新增代码+ComputerUseGoalAnchor: 断言提示明确处理旧画布残留；如果没有这一行，真实 Paint 窗口里的历史图形会继续污染任务。
+            self.assertIn("不要主动添加用户未要求的对象", first_system_message)  # 新增代码+ComputerUseGoalLock: 断言提示明确禁止主动改题或加无关装饰；如果没有这一行，模型可能把画树任务继续漂移成火箭、星星或月亮。
+            self.assertIn("观察到当前画面与用户本轮目标不一致", first_system_message)  # 新增代码+ComputerUseSessionTargetGuard：断言 full harness 要求观察后先做目标一致性纠偏；如果没有这一行，模型可能把旧窗口旧内容当成继续创作上下文。
+            self.assertEqual(model.received_tool_names[0], ["computer_discover", "computer_action"])  # 修改代码+ComputerDiscoverTool：断言首轮工具面保留发现工具和启动动作入口；如果没有这一行，测试会错误要求模型跳过 ClaudeCode 风格的发现层。
+            self.assertIn("模型主循环已根据自然语言任务选择 Computer Use 工具", answer)  # 新增代码+ModelLoopSemanticPlanner：断言最终结果来自模型循环而不是 runtime 报告；如果没有这一行，旧黑盒 runtime 可能伪装成功。
+            self.assertTrue(any(event.get("kind") == "fake_computer_action" for event in agent.observation_events))  # 修改代码+ModelLoopFirstStepLaunch：断言模型选择的 launch_app 工具真的经过工具执行层；如果没有这一行，只看回答无法证明模型主循环跑过首步工具。
+            self.assertFalse(any(event.get("kind") == "computer_use_full_desktop_runtime" for event in agent.observation_events))  # 新增代码+ModelLoopSemanticPlanner：断言没有进入旧 run_prompt 黑盒 runtime；如果没有这一行，语义规划可能仍在 Python 层抢跑。
+    # 新增代码+ModelLoopSemanticPlanner：函数段结束，test_computer_use_full_desktop_prompt_adds_model_loop_harness_and_uses_tools 到此结束；如果没有这个边界说明，代码小白不容易看出主循环语义规划测试范围。
+
+    def test_computer_use_full_completion_gate_stops_repeated_real_drawing_actions(self) -> None:  # 新增代码+ComputerUseCompletionGate：函数段开始，验证 full 桌面任务已经多次真实绘图后会给模型收敛信号；如果没有这个测试，模型可能无限继续加笔不输出最终回答。
+        class FailingController:  # 新增代码+ComputerUseCompletionGate：类段开始，定义不应被调用的假 controller；如果没有这个类，测试无法证明完成门在真实动作前拦住重复绘图。
+            def __init__(self) -> None:  # 新增代码+ComputerUseCompletionGate：函数段开始，初始化假 controller 状态；如果没有这段函数，测试无法保存是否被调用。
+                self.called = False  # 新增代码+ComputerUseCompletionGate：记录 execute 是否被调用；如果没有这行代码，测试不能证明没有继续触碰桌面后端。
+                self.active_agent_owned_target_window = {"app_id": "mspaintapp:pid:1", "window_id": "hwnd:123"}  # 新增代码+ComputerUseCompletionGate：提供已启动并绑定的目标窗口；如果没有这行代码，测试会被 launch_app 门禁提前拦住。
+            # 新增代码+ComputerUseCompletionGate：函数段结束，FailingController.__init__ 到此结束；如果没有这个边界说明，读者不容易看出初始化范围。
+            def execute(self, arguments: dict[str, object]) -> object:  # 新增代码+ComputerUseCompletionGate：函数段开始，若完成门失效就暴露错误；如果没有这段函数，测试无法发现 controller 被误调用。
+                self.called = True  # 新增代码+ComputerUseCompletionGate：记录后端被调用；如果没有这行代码，断言没有数据来源。
+                raise AssertionError("completion gate should stop before controller.execute")  # 新增代码+ComputerUseCompletionGate：用异常阻止测试悄悄触碰后端；如果没有这行代码，完成门失效可能仍被假成功掩盖。
+            # 新增代码+ComputerUseCompletionGate：函数段结束，FailingController.execute 到此结束；如果没有这个边界说明，读者不容易看出假执行范围。
+        # 新增代码+ComputerUseCompletionGate：类段结束，FailingController 到此结束；如果没有这个边界说明，读者不容易看出测试假对象范围。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ComputerUseCompletionGate：创建临时 workspace；如果没有这一行，测试会污染真实 debug 和 memory。
+            workspace = Path(raw_dir)  # 新增代码+ComputerUseCompletionGate：把临时目录转成 Path；如果没有这一行，agent 构造路径不够明确。
+            agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="unused")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ComputerUseCompletionGate：创建真实 agent 并自动授权；如果没有这一行，无法调用真实 _computer_action 门禁链。
+            controller = FailingController()  # 新增代码+ComputerUseCompletionGate：创建不应被调用的 controller；如果没有这一行，无法观察完成门是否提前返回。
+            agent.computer_use_controller = controller  # 新增代码+ComputerUseCompletionGate：把假 controller 注入 agent；如果没有这一行，测试可能触碰真实 Computer Use 控制器。
+            agent.desktop_task_context = {"active": True, "requires_gui_actions": True, "target_app_hint": "mspaint", "task_goal": "draw_with_local_paint"}  # 新增代码+ComputerUseCompletionGate：模拟 /computer use --full 绘图任务上下文；如果没有这一行，完成门不会启用。
+            agent._record_observation("computer_use_observe", {"action": "get_window_state", "ok": True, "data": {"image_result_count": 1, "screenshot_captured": True}})  # 新增代码+ComputerUseCompletionGate：写入一次模型可见截图观察；如果没有这一行，动作门会认为模型还没看过屏幕。
+            for index in range(12):  # 新增代码+ComputerUseCompletionGate：模拟已经成功执行十二次真实绘图动作；如果没有这一行，无法复现真实验收里无限加笔的问题。
+                agent._record_observation("computer_use_action", {"action": "drag_path", "ok": True, "message": "ok", "data": {"dispatch": {"low_level_event_count": 8}, "real_input_enabled": True, "image_result_count": 1, "action_index": index}})  # 新增代码+ComputerUseCompletionGate：写入带低层输入数量的成功动作记录；如果没有这一行，完成门没有可审计动作数量。
+            output = agent._computer_action({"action": "drag_path", "points": [{"x": 1, "y": 1}, {"x": 2, "y": 2}], "window": {"window_id": "hwnd:123"}})  # 新增代码+ComputerUseCompletionGate：再次请求拖拽绘图以触发完成门；如果没有这一行，测试不会覆盖 _computer_action 入口。
+            self.assertFalse(controller.called)  # 新增代码+ComputerUseCompletionGate：断言没有继续调用桌面后端；如果没有这一行，完成门可能只返回文字但仍触碰真实动作。
+            self.assertIn("computer_use_full_completion_ready", output)  # 新增代码+ComputerUseCompletionGate：断言工具结果给模型稳定完成原因码；如果没有这一行，模型不容易知道该最终回答。
+            self.assertIn("请直接输出最终回答", output)  # 新增代码+ComputerUseCompletionGate：断言返回文本明确要求模型收敛；如果没有这一行，模型可能继续调用绘图动作。
+    # 新增代码+ComputerUseCompletionGate：函数段结束，test_computer_use_full_completion_gate_stops_repeated_real_drawing_actions 到此结束；如果没有这个边界说明，读者不容易看出完成门测试范围。
+
+    def test_simple_paint_drawing_completion_gate_stops_after_six_real_drawing_actions(self) -> None:  # 新增代码+ComputerUseGoalLock：函数段开始，验证简单 Paint 绘图达到六次真实绘制动作后会收束；如果没有这段测试，模型可能像真实验收一样把树继续漂移成火箭和星空。
+        class FailingController:  # 新增代码+ComputerUseGoalLock：类段开始，定义不应继续触碰桌面的假 controller；如果没有这个类，测试无法证明完成门挡在真实动作前。
+            def __init__(self) -> None:  # 新增代码+ComputerUseGoalLock：函数段开始，初始化假 controller；如果没有这段函数，测试无法记录是否被调用。
+                self.called = False  # 新增代码+ComputerUseGoalLock：记录 execute 是否被错误调用；如果没有这行代码，完成门失效没有断言依据。
+                self.active_agent_owned_target_window = {"app_id": "mspaintapp:pid:1", "window_id": "hwnd:123"}  # 新增代码+ComputerUseGoalLock：模拟已经由 agent 打开并绑定 Paint；如果没有这行代码，启动门禁会先拦截而不是测试完成门。
+            # 新增代码+ComputerUseGoalLock：函数段结束，FailingController.__init__ 到此结束；如果没有这个边界说明，代码小白不容易看出初始化范围。
+            def execute(self, arguments: dict[str, object]) -> object:  # 新增代码+ComputerUseGoalLock：函数段开始，如果完成门没触发就暴露错误；如果没有这段函数，测试可能悄悄继续执行后端。
+                self.called = True  # 新增代码+ComputerUseGoalLock：记录后端被调用；如果没有这行代码，断言无法知道是否真的挡住。
+                raise AssertionError("simple paint completion gate should stop before controller.execute")  # 新增代码+ComputerUseGoalLock：用异常证明不能继续动作；如果没有这行代码，完成门失效可能被假返回掩盖。
+            # 新增代码+ComputerUseGoalLock：函数段结束，FailingController.execute 到此结束；如果没有这个边界说明，代码小白不容易看出假执行范围。
+        # 新增代码+ComputerUseGoalLock：类段结束，FailingController 到此结束；如果没有这个边界说明，代码小白不容易看出测试假对象范围。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ComputerUseGoalLock：创建临时 workspace；如果没有这一行，测试会污染真实 debug 和 memory。
+            workspace = Path(raw_dir)  # 新增代码+ComputerUseGoalLock：把临时目录转成 Path；如果没有这一行，agent 构造路径不够清楚。
+            agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="unused")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ComputerUseGoalLock：创建真实 agent 并自动授权；如果没有这一行，无法覆盖真实 _computer_action 门禁链。
+            controller = FailingController()  # 新增代码+ComputerUseGoalLock：创建不应被调用的 controller；如果没有这一行，无法观察完成门是否提前返回。
+            agent.computer_use_controller = controller  # 新增代码+ComputerUseGoalLock：注入假 controller；如果没有这一行，测试可能触碰真实桌面后端。
+            agent.desktop_task_context = {"active": True, "requires_gui_actions": True, "target_app_hint": "mspaint", "task_goal": "draw_with_local_paint"}  # 新增代码+ComputerUseGoalLock：模拟简单 Paint 绘图 full 任务；如果没有这一行，动态完成阈值不会启用。
+            agent._record_observation("computer_use_observe", {"action": "get_window_state", "ok": True, "data": {"image_result_count": 1, "screenshot_captured": True}})  # 新增代码+ComputerUseGoalLock：写入模型可见截图观察；如果没有这一行，完成门会因缺少视觉证据而不收束。
+            for index in range(6):  # 新增代码+ComputerUseGoalLock：模拟六次已经成功落到 Paint 的绘制动作；如果没有这一行，无法复现简单绘图已经足够但模型仍继续加笔的场景。
+                agent._record_observation("computer_use_action", {"action": "drag_path", "ok": True, "message": "ok", "data": {"dispatch": {"low_level_event_count": 8}, "real_input_enabled": True, "image_result_count": 1, "action_index": index}})  # 新增代码+ComputerUseGoalLock：记录真实低层输入和截图证据；如果没有这一行，完成门没有可审计动作数量。
+            output = agent._computer_action({"action": "drag_path", "points": [{"x": 1, "y": 1}, {"x": 2, "y": 2}], "window": {"window_id": "hwnd:123"}})  # 新增代码+ComputerUseGoalLock：再次请求绘制动作以触发简单绘图完成门；如果没有这一行，测试不会覆盖真实入口。
+            self.assertFalse(controller.called)  # 新增代码+ComputerUseGoalLock：断言没有继续触碰桌面后端；如果没有这一行，完成门可能只返回文字但仍执行动作。
+            self.assertIn("computer_use_full_completion_ready", output)  # 新增代码+ComputerUseGoalLock：断言返回稳定完成原因码；如果没有这一行，模型不容易知道该最终回答。
+            self.assertIn("threshold", output)  # 新增代码+ComputerUseGoalLock：断言返回文本包含触发阈值，方便真实终端复盘；如果没有这一行，后续排查不知道为什么收束。
+    # 新增代码+ComputerUseGoalLock：函数段结束，test_simple_paint_drawing_completion_gate_stops_after_six_real_drawing_actions 到此结束；如果没有这个边界说明，读者不容易看出简单绘图收束范围。
+
+    def test_computer_use_full_completion_gate_accepts_action_embedded_visual_evidence(self) -> None:  # 新增代码+ComputerUseActionVisualEvidence：函数段开始，验证真实动作结果自带截图证据时也能触发完成门；如果没有这个测试，真实终端里动作截图会被忽略导致模型无限加笔。
+        class FailingController:  # 新增代码+ComputerUseActionVisualEvidence：类段开始，定义不应被继续调用的假 controller；如果没有这个类，测试无法证明完成门真的拦在后端之前。
+            def __init__(self) -> None:  # 新增代码+ComputerUseActionVisualEvidence：函数段开始，初始化假 controller；如果没有这段函数，测试无法保存后端调用状态。
+                self.called = False  # 新增代码+ComputerUseActionVisualEvidence：记录 execute 是否被调用；如果没有这行代码，完成门失效时测试看不出来。
+                self.active_agent_owned_target_window = {"app_id": "mspaintapp:pid:1", "window_id": "hwnd:123"}  # 新增代码+ComputerUseActionVisualEvidence：模拟已经由 agent 打开并绑定 Paint 窗口；如果没有这行代码，启动门禁会先拦截而无法测试完成门。
+            # 新增代码+ComputerUseActionVisualEvidence：函数段结束，FailingController.__init__ 到此结束；如果没有这个边界说明，读者不容易看出初始化范围。
+            def execute(self, arguments: dict[str, object]) -> object:  # 新增代码+ComputerUseActionVisualEvidence：函数段开始，若完成门没有触发就暴露错误；如果没有这段函数，测试可能悄悄继续触碰后端。
+                self.called = True  # 新增代码+ComputerUseActionVisualEvidence：记录后端已经被错误调用；如果没有这行代码，断言没有证据。
+                raise AssertionError("completion gate should stop before controller.execute")  # 新增代码+ComputerUseActionVisualEvidence：用异常证明不能继续动作；如果没有这行代码，完成门失效可能被后续假返回掩盖。
+            # 新增代码+ComputerUseActionVisualEvidence：函数段结束，FailingController.execute 到此结束；如果没有这个边界说明，读者不容易看出假执行范围。
+        # 新增代码+ComputerUseActionVisualEvidence：类段结束，FailingController 到此结束；如果没有这个边界说明，读者不容易看出测试假对象范围。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ComputerUseActionVisualEvidence：创建临时 workspace；如果没有这一行，测试会污染真实 debug 和 memory。
+            workspace = Path(raw_dir)  # 新增代码+ComputerUseActionVisualEvidence：把临时目录转成 Path；如果没有这一行，agent 构造路径不够明确。
+            agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="unused")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ComputerUseActionVisualEvidence：创建真实 agent 并自动授权；如果没有这一行，无法覆盖真实 _computer_action 门禁链。
+            controller = FailingController()  # 新增代码+ComputerUseActionVisualEvidence：创建不应被调用的 controller；如果没有这一行，无法观察完成门是否提前返回。
+            agent.computer_use_controller = controller  # 新增代码+ComputerUseActionVisualEvidence：把假 controller 注入 agent；如果没有这一行，测试可能触碰真实 Computer Use 控制器。
+            agent.desktop_task_context = {"active": True, "requires_gui_actions": True, "target_app_hint": "mspaint", "task_goal": "draw_with_local_paint"}  # 新增代码+ComputerUseActionVisualEvidence：模拟 /computer use --full 绘图任务上下文；如果没有这一行，完成门不会启用。
+            for index in range(12):  # 新增代码+ComputerUseActionVisualEvidence：模拟真实终端已经完成十二次带截图证据的动作；如果没有这一行，无法复现长绘图不收束问题。
+                agent._record_observation("computer_use_action", {"action": "drag_path", "ok": True, "message": "ok", "data": {"dispatch": {"low_level_event_count": 8}, "real_input_enabled": True, "before_evidence": {"captured": True, "state": {"screenshot_captured": True, "image_result_count": 1}}, "image_result_count": 1, "action_index": index}})  # 新增代码+ComputerUseActionVisualEvidence：写入动作自带截图和低层输入计数；如果没有这一行，测试不能代表真实日志里的 before_evidence 形状。
+            output = agent._computer_action({"action": "drag_path", "points": [{"x": 1, "y": 1}, {"x": 2, "y": 2}], "window": {"window_id": "hwnd:123"}})  # 新增代码+ComputerUseActionVisualEvidence：再次请求绘图动作以触发完成门；如果没有这一行，测试不会覆盖真实入口。
+            self.assertFalse(controller.called)  # 新增代码+ComputerUseActionVisualEvidence：断言没有继续调用桌面后端；如果没有这一行，完成门可能没拦住真实鼠标键盘。
+            self.assertIn("computer_use_full_completion_ready", output)  # 新增代码+ComputerUseActionVisualEvidence：断言工具结果给模型明确收束信号；如果没有这一行，模型可能继续重复动作。
+    # 新增代码+ComputerUseActionVisualEvidence：函数段结束，test_computer_use_full_completion_gate_accepts_action_embedded_visual_evidence 到此结束；如果没有这个边界说明，读者不容易看出动作内嵌视觉证据测试范围。
+
+    def test_computer_use_full_final_answer_adds_real_desktop_evidence_when_model_is_too_short(self) -> None:  # 新增代码+ComputerUseFinalEvidenceSummary：函数段开始，验证模型短答会被真实桌面证据摘要补强；如果没有这个测试，真实终端会继续只打印“已完成。”导致验收误失败。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ComputerUseFinalEvidenceSummary：创建临时 workspace 隔离 session/debug 文件；如果没有这一行，测试会污染用户真实项目目录。
+            workspace = Path(raw_dir)  # 新增代码+ComputerUseFinalEvidenceSummary：把临时目录转成 Path 对象；如果没有这一行，LearningAgent 构造路径不够明确。
+            model = RecordingToolNameFakeModel(ModelMessage(text="已完成。"))  # 新增代码+ComputerUseFinalEvidenceSummary：模拟真实模型最后只给很短最终回答；如果没有这一行，无法复现用户截图里的收束失败。
+            agent = LearningAgent(model=model, workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+ComputerUseFinalEvidenceSummary：创建真实主循环 agent；如果没有这一行，测试无法覆盖 run_events 最终回答出口。
+            agent._record_observation("computer_use_mode", {"ok": True, "real_actions_requested": True})  # 新增代码+ComputerUseFinalEvidenceSummary：写入 full mode 会话边界；如果没有这一行，测试不能模拟用户先输入 `/computer use --full`。
+            agent._record_observation("computer_use_action", {"action": "launch_app", "ok": True, "message": "ok", "data": {"action": "launch_app", "target_app": "mspaint", "target_window": {"app_id": "mspaintapp:pid:123", "window_id": "hwnd:456", "title_preview": "Untitled - Paint"}, "real_desktop_touched": True}})  # 新增代码+ComputerUseFinalEvidenceSummary：写入 Paint 启动和 agent-owned 窗口证据；如果没有这一行，最终摘要不知道真实操作的是哪个应用。
+            agent._record_observation("computer_use_action", {"action": "drag_path", "ok": True, "message": "ok", "data": {"target_app": "mspaint", "target_window": {"app_id": "mspaintapp:pid:123", "window_id": "hwnd:456", "title_preview": "Untitled - Paint"}, "dispatch": {"low_level_event_count": 42}, "real_input_enabled": True, "before_evidence": {"captured": True, "state": {"screenshot_captured": True, "image_result_count": 1}, "image_results": [{"artifact_path": "H:/tmp/paint-before.png", "mime_type": "image/png"}]}, "after_evidence": {"captured": True, "state": {"screenshot_captured": True, "image_result_count": 1}, "image_results": [{"artifact_path": "H:/tmp/paint-after.png", "mime_type": "image/png"}]}}})  # 新增代码+ComputerUseFinalEvidenceSummary：写入真实拖拽、截图和低层事件证据；如果没有这一行，测试不能代表 Paint 绘图后模型短答的真实场景。
+            agent._record_observation("computer_use_observe", {"action": "get_window_state", "ok": True, "message": "ok", "data": {"target_app": "mspaint", "target_window": {"app_id": "mspaintapp:pid:123", "window_id": "hwnd:456", "title_preview": "Untitled - Paint"}, "screenshot_captured": True, "image_result_count": 1, "screenshot_path": "H:/tmp/paint-final.png"}})  # 新增代码+ComputerUseFinalEvidenceSummary：写入最终观察截图路径；如果没有这一行，最终摘要缺少 screenshot 字段来源。
+            answer = agent.run("请使用本地电脑的画图软件画一棵树。", max_turns=1)  # 新增代码+ComputerUseFinalEvidenceSummary：用真实用户自然语言 prompt 触发 full 桌面任务上下文；如果没有这一行，最终回答出口不会被执行。
+            self.assertIn("已完成。", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：保留模型原始短答；如果没有这一行，补强逻辑可能粗暴覆盖模型回答。
+            self.assertIn("computer_use", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：断言最终回答包含验收需要的 computer_use 证据词；如果没有这一行，真实控制器仍会判定缺少工具路径。
+            self.assertIn("mspaint", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：断言最终回答包含实际 Paint 应用线索；如果没有这一行，用户无法确认不是旧窗口或假任务。
+            self.assertIn("screenshot", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：断言最终回答包含截图证据字段；如果没有这一行，视觉观察链路仍可能被最终回答丢掉。
+            self.assertIn("real_desktop_touched=true", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：断言最终回答明确真实触碰桌面；如果没有这一行，验收无法区分模拟和真实动作。
+            self.assertIn("low_level_event_count=42", answer)  # 新增代码+ComputerUseFinalEvidenceSummary：断言最终回答明确低层输入数量；如果没有这一行，鼠标键盘真实执行证据会丢失。
+    # 新增代码+ComputerUseFinalEvidenceSummary：函数段结束，test_computer_use_full_final_answer_adds_real_desktop_evidence_when_model_is_too_short 到此结束；如果没有这个边界说明，读者不容易看出最终回答证据补强测试范围。
+
     def test_core_config_exports_runtime_parsers(self) -> None:  # 新增代码+CoreSplit: 验证运行配置解析已从主文件迁移到 core.config；若没有这行代码，配置层拆分可能只停留在文件存在。
         from learning_agent.core.config import AgentRuntimeConfig as CoreAgentRuntimeConfig, parse_max_turns_value as core_parse_max_turns_value  # 新增代码+CoreSplit: 直接导入新模块配置类和解析器；若没有这行代码，测试无法证明 core.config 可独立工作。
         from learning_agent.core.config import parse_max_turns_value as entry_parse_max_turns_value  # 修改代码+LegacyEntryCut: 从正式配置层导入解析函数作为入口对照；若没有这行代码，测试会继续依赖旧脚本入口。
@@ -239,6 +421,31 @@ class CoreRunLoopTests(LearningAgentTestBase):  # Stage14: unittest discovers th
             self.assertIn("stop_background_command 成功", stop_output)  # 新增代码+后台命令: 断言停止工具成功回收进程；若省略: 进程泄漏风险不被测试捕获
             self.assertIn("启动后台命令", permission_requests[0])  # 新增代码+后台命令: 断言启动命令需要权限确认；若省略: 高风险命令可能绕过用户确认
             self.assertIn("停止后台命令", permission_requests[1])  # 新增代码+后台命令: 断言停止命令也经过权限确认；若省略: agent 可能擅自停止用户关心的任务
+    def test_background_command_completion_updates_registry_without_read_command(self) -> None:  # 新增代码+BackgroundAutoNotify: 验证后台命令结束后不依赖 read 工具也会自动写入持久状态；若没有这行代码，后台任务可能完成了但主 agent 永远不知道
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+BackgroundAutoNotify: 创建临时工作区隔离后台命令状态文件；若没有这行代码，测试会污染真实项目 memory
+            workspace = Path(raw_dir)  # 新增代码+BackgroundAutoNotify: 把临时路径转成 Path 方便传给 agent；若没有这行代码，后续路径拼接和断言不够清楚
+            agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="不会调用模型。")]), workspace=workspace, ask_permission=lambda action: True)  # 新增代码+BackgroundAutoNotify: 创建自动授权 agent 来启动真实短后台命令；若没有这行代码，无法覆盖生产后台命令路径
+            command = f'"{sys.executable}" -c "print(\'BG_DONE\', flush=True)"'  # 新增代码+BackgroundAutoNotify: 构造会快速输出并退出的后台命令；若没有这行代码，测试无法稳定等待自动完成
+            start_output = agent._execute_tool(ToolCall(name="start_background_command", arguments={"command": command, "label": "auto-notify-test"}))  # 新增代码+BackgroundAutoNotify: 通过真实工具启动后台命令；若没有这行代码，持久任务表和通知队列不会被创建
+            self.assertIn("start_background_command 成功", start_output)  # 新增代码+BackgroundAutoNotify: 先确认命令确实启动成功；若没有这行代码，后续等待可能掩盖启动失败
+            command_id = start_output.split("command_id=")[1].splitlines()[0].strip()  # 新增代码+BackgroundAutoNotify: 从工具输出提取后台命令 id；若没有这行代码，无法查询对应持久任务
+            completed_record = None  # 新增代码+BackgroundAutoNotify: 准备保存自动完成后的任务记录；若没有这行代码，循环结束后没有可断言对象
+            for _ in range(50):  # 新增代码+BackgroundAutoNotify: 最多等待约 5 秒让后台监控线程收束命令；若没有这行代码，异步完成会产生偶发测试失败
+                current_record = agent.task_registry.get_task(command_id)  # 新增代码+BackgroundAutoNotify: 读取持久任务状态而不是内存状态；若没有这行代码，无法证明状态真正落盘
+                if current_record.status == "completed":  # 新增代码+BackgroundAutoNotify: 如果后台命令已自动标记完成；若没有这行代码，循环无法提前结束
+                    completed_record = current_record  # 新增代码+BackgroundAutoNotify: 保存完成记录供后续断言；若没有这行代码，完成状态会丢在循环局部
+                    break  # 新增代码+BackgroundAutoNotify: 已经观察到完成就停止等待；若没有这行代码，测试会无意义等待满时长
+                time.sleep(0.1)  # 新增代码+BackgroundAutoNotify: 给后台进程和监控线程一点运行时间；若没有这行代码，紧密轮询会增加竞态和 CPU 浪费
+            self.assertIsNotNone(completed_record)  # 新增代码+BackgroundAutoNotify: 断言不用 read_background_command 也能自动完成；若没有这行代码，缺口会被后续通知断言掩盖
+            assert completed_record is not None  # 新增代码+BackgroundAutoNotify: 告诉类型检查和读者后续记录一定存在；若没有这行代码，后续访问 output 时语义不够明确
+            self.assertIn("BG_DONE", completed_record.output)  # 新增代码+BackgroundAutoNotify: 断言后台输出被自动保存进任务摘要；若没有这行代码，模型收到通知也缺少结果上下文
+            queued_command = agent.runtime_command_queue.dequeue_next()  # 新增代码+BackgroundAutoNotify: 读取自动回灌给主循环的下一条命令；若没有这行代码，无法证明通知真的进入 durable queue
+            self.assertIsNotNone(queued_command)  # 新增代码+BackgroundAutoNotify: 断言完成事件必须产生队列通知；若没有这行代码，后台完成仍可能只写状态不回灌模型
+            assert queued_command is not None  # 新增代码+BackgroundAutoNotify: 明确后续可以访问命令字段；若没有这行代码，后续断言可读性差
+            self.assertEqual(queued_command.mode, "task_notification")  # 新增代码+BackgroundAutoNotify: 断言队列项类型是任务通知；若没有这行代码，prompt 或其他命令可能误混入
+            self.assertEqual(queued_command.payload.get("task_id"), command_id)  # 新增代码+BackgroundAutoNotify: 断言通知指向刚完成的后台命令；若没有这行代码，主循环可能回灌错任务
+            self.assertEqual(queued_command.payload.get("status"), "completed")  # 新增代码+BackgroundAutoNotify: 断言通知状态是 completed；若没有这行代码，模型无法判断后台命令成功结束
+            self.assertIn("BG_DONE", str(queued_command.payload.get("summary", "")))  # 新增代码+BackgroundAutoNotify: 断言通知摘要包含真实输出；若没有这行代码，下一轮模型仍要手动查询 task_output
     def test_background_command_rejects_workspace_escape_cwd(self) -> None:  # 新增代码+后台命令: 验证后台命令 cwd 不能逃出工作区；若省略: 模型可能在用户工作区外运行命令
         with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+后台命令: 创建临时工作区隔离路径校验；若省略: 测试路径可能碰到真实文件
             workspace = Path(raw_dir)  # 新增代码+后台命令: 转成 Path 传给 agent；若省略: 路径处理不够清楚

@@ -1,0 +1,124 @@
+工具结果过长，已保存完整输出。
+Full output saved to: H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\debug_logs\tool_results\20260606_144354_bash_1bafac458242.txt
+原始字符数=11518，上下文内摘要字符数约=6031。
+上下文摘要：
+bash 成功：exit_code=0
+stdout:
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+ConvertFrom-Json : ������δ��ֹ���ַ����� (154): {"schema_version":1,"timestamp":"2026-06-06 14:35:35","state":"user_prompt_received","payload":{"length":17,"prompt_preview":"请使用本地电脑的画图�
+�件画一棵树�?}}
+����λ�� ��:1 �ַ�: 181
++ ... ct -Last 80 | ForEach-Object { try { $j=$_ | ConvertFrom-Json; $paylo ...
++                                                  ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [ConvertFrom-Json], ArgumentException
+    + FullyQualifiedErrorId : System.ArgumentException,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $me
+
+...[中间内容已保存到文件，未塞入模型上下文]...
+
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+�޷����Ǳ��� Error����Ϊ�ñ���Ϊֻ������������
+����λ�� ��:1 �ַ�: 294
++ ... ce "`r?`n",' '); $error=($payload.error -replace "`r?`n",' '); $messa ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (Error:String) [], SessionStateUnauthorizedAccessException
+    + FullyQualifiedErrorId : VariableNotWritable
+ 
+
+stderr:

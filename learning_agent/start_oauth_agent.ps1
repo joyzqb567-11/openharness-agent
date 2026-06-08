@@ -44,9 +44,27 @@ if ($SelfTest) {  # 新增代码: 如果用户选择自检模式
     exit $LASTEXITCODE  # 新增代码: 把测试退出码返回给调用方，方便 bat 或终端判断是否成功
 }  # 新增代码: 自检模式结束
 
+if (-not $env:LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS) {  # 新增代码+危险调试权限: 普通启动默认进入本地危险调试放行模式；若没有这行代码，真实浏览器调试仍会被 y/N 权限确认打断
+    $env:LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS = "1"  # 新增代码+危险调试权限: 设置类似 ClaudeCode dangerously-skip-permissions 的开关；若没有这行代码，Python 权限层无法知道要自动允许
+}  # 新增代码+危险调试权限: 结束默认危险模式设置，并允许用户提前设置 0/false/off 来覆盖；若没有这行代码，PowerShell 语法不完整
+if (-not $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE) {  # 新增代码+真实ComputerUse入口: 普通 OAuth 可见终端默认启用真实 Windows 鼠标键盘动作；若没有这行代码，/computer use --full 只会开启模式但真实动作后端仍关闭
+    $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE = "1"  # 新增代码+真实ComputerUse入口: 设置真实动作开关；若没有这行代码，模型调用 click/drag/type/launch 后会被 Windows 后端拒绝
+}  # 新增代码+真实ComputerUse入口: 结束真实动作默认设置，并允许用户提前设置 0/false/off 覆盖；若没有这行代码，PowerShell 语法不完整
+if (-not $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE) {  # 新增代码+真实ComputerUse入口: 普通 OAuth 可见终端默认启用 Windows 窗口枚举观察；若没有这行代码，模型启动应用后无法获取可信窗口目录
+    $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE = "1"  # 新增代码+真实ComputerUse入口: 设置只读观察开关；若没有这行代码，computer_observe/list_windows 会继续返回后端未启用
+}  # 新增代码+真实ComputerUse入口: 结束只读观察默认设置，并允许用户提前覆盖；若没有这行代码，PowerShell 语法不完整
+if (-not $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_NATIVE_OBSERVE) {  # 新增代码+真实ComputerUse入口: 普通 OAuth 可见终端默认启用 native 截图/文本观察；若没有这行代码，模型无法收到真实屏幕截图回灌
+    $env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_NATIVE_OBSERVE = "1"  # 新增代码+真实ComputerUse入口: 设置 native 观察开关；若没有这行代码，Computer Use Image Results 不会稳定产生 image/png 截图
+}  # 新增代码+真实ComputerUse入口: 结束 native 观察默认设置，并允许用户提前覆盖；若没有这行代码，PowerShell 语法不完整
+if (-not $env:LEARNING_AGENT_PHASE105_ENABLE_FULL_MODE_CONTROLLED_REAL_LAUNCH) {  # 新增代码+真实ComputerUse入口: 普通 OAuth 可见终端默认启用 launch_app 真实启动门；若没有这行代码，/computer use --full 会生成占位窗口而不真正打开本机软件
+    $env:LEARNING_AGENT_PHASE105_ENABLE_FULL_MODE_CONTROLLED_REAL_LAUNCH = "1"  # 新增代码+真实ComputerUse入口: 设置 Phase105 受控真实启动开关；若没有这行代码，controller 的 UniversalTargetSessionRuntime 会停留在 recording 模式
+}  # 新增代码+真实ComputerUse入口: 结束真实启动门默认设置，并允许用户提前覆盖；若没有这行代码，PowerShell 语法不完整
+
 Write-Host "Learning Agent OAuth/API 模式已启动。"  # 新增代码: 打印启动提示，让用户知道这是 OAuth 直连入口
 Write-Host "说明：此模式参考 opencode2，通过 OpenAI 网页 OAuth 登录，不需要 OPENAI_API_KEY，也不再调用 codex exec。"  # 新增代码: 说明认证方式和区别
 Write-Host "首次运行会自动打开浏览器登录；后续会复用本机 token，并在过期时自动刷新。"  # 新增代码: 说明 token 复用和刷新行为
+Write-Host "危险调试权限：默认已开启 LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1，会自动允许权限请求。"  # 新增代码+危险调试权限: 启动时清楚提示当前处于全放开调试模式；若没有这行代码，用户可能不知道权限已被跳过
+Write-Host "真实 Computer Use：默认已开启 Windows 真实动作、窗口观察、native 截图观察和 launch_app 真实启动。"  # 修改代码+真实ComputerUse入口: 启动时明确提示真实应用启动也已放开；若没有这行代码，用户会误以为 launch_app 已真实接通但实际可能仍是占位 session
 Write-Host "输入 exit 或 quit 退出。"  # 新增代码: 告诉用户退出方式
 
 & $Python $Launcher  # 新增代码: 启动 learning_agent.py，进入交互式 OAuth/API agent

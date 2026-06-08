@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_39a627c3003dd448",
+  "prompt": "请帮我打开本机电脑的OpenCode软件",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请帮我打开本机电脑的OpenCode软件",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已帮你打开本机电脑的 OpenCode 软件。\n\n摘要：computer_use/computer_action 已启动 OpenCode Dev；实际窗口 app_id 为 `chrome_widgetwin_1:pid:13996`，标题为 `OpenCode`；已通过 screenshot 观察确认窗口可见；real_desktop_touched=true；low_level_event_count=0。\nComputer Use 真实执行摘要：\n- tool_path=computer_use; target_app=opencodedev; app_id=chrome_widgetwin_1:pid:13996; window_id=hwnd:1447334\n- screenshot=true; screenshot_path=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\evidence\\computer-window-20260607T072028Z-44c0",
+      "started_at": "2026-06-07T07:20:10Z",
+      "completed_at": "2026-06-07T07:20:33Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:20:10Z",
+  "updated_at": "2026-06-07T07:20:33Z"
+}

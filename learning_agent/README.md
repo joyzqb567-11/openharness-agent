@@ -28,6 +28,22 @@
 
 这一步的意义是：agent 不再只是“模型说完 -> 逐个工具执行 -> 最终回答”，而是开始拥有可观察、可恢复、可审计、可并发扩展的运行时骨架。
 
+## Long-Task Harness v1
+
+截至 2026-05-31，`learning_agent` 新增独立 `learning_agent/harness/` 模块，用来补上长任务最基础的“不断点、不跑丢、可验收、可查看”能力。
+
+- `harness/models.py` 定义可落盘的 `HarnessRun`、`HarnessStage`、`HarnessAttempt` 和 `VerificationResult`。
+- `harness/store.py` 使用 JSON 保存 run 状态，使用 JSONL 追加审计事件。
+- `harness/queue.py` 支持任务排队、租约领取、心跳续约、完成和失败持久化。
+- `harness/verifier.py` 支持成功标记和 artifact 文件两类确定性阶段验收。
+- `harness/recovery.py` 支持 timeout、endpoint、rate limit、connection 等临时错误的自动恢复判断。
+- `harness/runner.py` 可以从 checkpoint 继续执行，失败阶段可重试，已完成阶段不会重复跑。
+- `harness/status.py` 和 `python -m learning_agent.harness status` 提供可读状态输出，方便 Codex 或其他 agent 检查当前任务跑到哪里。
+- `harness/cli.py` 已提供 `enqueue` 和 `run`，外部 agent 可以直接用命令创建任务并执行队列。
+- `harness/agent_executor.py` 提供 `AgentStageExecutor`，可以把 harness 阶段交给真实 `LearningAgent.run(stage.prompt)` 执行。
+
+这一步还没有把现有交互式主循环强制改造成 harness 驱动；它先提供一个独立、可测试、可审计的长任务底座。后续如果要让 `LearningAgent.run_events()` 真正跑超长开发任务，可以把主循环按阶段接入这个 harness。
+
 ## Prompt Architecture v1
 
 Prompt Architecture v1 是当前 Tool parity 之后的 beyond-parity control layer。Tool parity 已经在公开可复现的 core 层完成：Tool Catalog、Tool Pool、ToolPolicy、四原子首轮工具面、per-tool output protocol、MCP lifecycle、Real Chrome workflow gate、Plan mode guard、Observation 和长工具结果落盘都已经有可运行实现和回归测试。
@@ -55,6 +71,7 @@ Prompt compact 的生产软预算默认约为 60,000 tokens。只允许 `cache_p
 
 - `learning_agent.py`：脚本启动入口，只负责路径兜底并调用 `app.cli.main()`；如果这里重新堆业务逻辑，后续排查会再次变回巨型文件模式。
 - `core/agent.py`：主 agent 类、tool loop、兼容导出和终端权限入口的核心实现；如果要看 `LearningAgent.run()`、`TOOL_SCHEMAS` 或工具路由，优先从这里进入。
+- `harness/`：长任务 harness，负责持久化 run、队列租约、阶段验收、失败恢复和状态输出；如果要做端点恢复、任务队列、阶段性验收或失败后自动继续，优先从这里进入。
 - `app/`：CLI、doctor、HTTP command bridge 和真实终端交互入口；如果启动命令、`run --json`、bridge 或 `mcp-doctor` 出问题，优先看这一层。
 - `browser/`：真实浏览器意图、自然查询 harness、客户模式授权、Google 查询白名单和截图路径 helper；如果真实 Chrome 查询或免多次 `y/N` 出问题，优先看这一层。
 - `observability/`：调试日志、验收事件、权限事件和最终回答事件；如果 acceptance controller 或真实可见终端验收判断异常，优先看这一层。
@@ -545,7 +562,7 @@ cmd /c "learning_agent\start_codex_agent.bat selftest"
 
 ### 启动 OAuth/API 直连版本（推荐，不需要 OpenAI API key）
 
-如果你想参考 `D:\opencode2-main` 的 OpenAI OAuth/API 链路，而不是每次都启动 `codex exec`，可以直接双击：
+如果你想参考 opencode2-main 项目的 OpenAI OAuth/API 链路，而不是每次都启动 `codex exec`，可以直接双击：
 
 ```text
 learning_agent\start_oauth_agent.bat

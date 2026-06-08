@@ -1,0 +1,4 @@
+﻿Phase136 WeChat full-mode launch backup
+Created: 2026-06-07
+Purpose: 备份本轮普通应用微信启动链路修复涉及的源码、测试、验收场景和记忆记录。
+Acceptance run: learning_agent/acceptance_controller/runs/computer_use_full_open_wechat_probe-20260607_155536/result.json

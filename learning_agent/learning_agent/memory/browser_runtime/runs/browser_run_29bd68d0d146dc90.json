@@ -1,0 +1,23 @@
+{
+  "run_id": "browser_run_29bd68d0d146dc90",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_profile_status",
+  "status": "completed",
+  "current_stage_id": "browser_profile_status",
+  "completed_stage_ids": [
+    "browser_profile_status"
+  ],
+  "action_ids": [
+    "browser_run_29bd68d0d146dc90-action-1"
+  ],
+  "observation_ids": [],
+  "summary": "browser_profile_status\nmode=independent_chromium\nsession_mode=disconnected\nsession_connected=false\nsession_visible=false\nsession_tab_count=0\nreal_chrome_connected=false\nvisible_browser=false\nheadless=true\nchrome_started_by_agent=false\nendpoint=\nprofile=\npages=0\n最近安全拒绝：无\nstrict_site_permissions=false\nsite_grants=0\naction_log=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\browser_action_log.jsonl\n最近恢复：无\n最近流程：无",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780415258874,
+  "updated_at_ms": 1780415258907
+}

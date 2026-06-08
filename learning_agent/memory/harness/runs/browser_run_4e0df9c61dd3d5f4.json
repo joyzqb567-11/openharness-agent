@@ -1,0 +1,44 @@
+{
+  "run_id": "browser_run_4e0df9c61dd3d5f4",
+  "prompt": "MCP browser tool call: browser_profile_status",
+  "stages": [
+    {
+      "name": "browser_profile_status",
+      "prompt": "Browser tool: browser_profile_status",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser runtime verifier passed"
+      },
+      "checkpoint": "browser_profile_status\nmode=independent_chromium\nsession_mode=disconnected\nsession_connected=false\nsession_visible=false\nsession_tab_count=0\nreal_chrome_connected=false\nvisible_browser=false\nheadless=true\nchrome_started_by_agent=false\nendpoint=\nprofile=\npages=0\n最近安全拒绝：无\nstrict_site_permissions=false\nsite_grants=0\naction_log=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\browser_action_log.jsonl\n最近恢复：无\n最近流程：无",
+      "started_at": "2026-06-01T14:41:26Z",
+      "completed_at": "2026-06-01T14:41:26Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T14:41:26Z",
+  "updated_at": "2026-06-01T14:41:26Z"
+}

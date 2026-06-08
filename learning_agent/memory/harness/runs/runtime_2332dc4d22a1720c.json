@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_2332dc4d22a1720c",
+  "prompt": "请执行一次 Browser Visual Evidence Stage 9 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_VISUAL_EVIDENCE_STAGE9_READY。 你必须调用 bash 执行这个命令验证录制 store、统一录制工具、状态快照、终端渲染和 verifier glob 门禁：python -m unittest learning_agent.tests.test_browser_recording_stage9 然后必须继续调用 bash 执行这个命令，在真实项目 browser_artifacts 目录下生成可复验帧序列和 GIF：python -m learning_agent.browser.recording --selftest --workspace H:\\codexworkplace\\sofeware\\OpenHarness-main 不要提前最终回答；只有两个命令都成功、单测显示 OK、selftest 显示 STAGE9_RECORDING_SELFTEST_OK 后，最终回答最后一行必须完整输出：BROWSER_VISUAL_EVIDENCE_STAGE9_READY STAGE9_VISUAL_EVIDENCE_OK",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Browser Visual Evidence Stage 9 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_VISUAL_EVIDENCE_STAGE9_READY。 你必须调用 bash 执行这个命令验证录制 store、统一录制工具、状态快照、终端渲染和 verifier glob 门禁：python -m unittest learning_agent.tests.test_browser_recording_stage9 然后必须继续调用 bash 执行这个命令，在真实项目 browser_artifacts 目录下生成可复验帧序列和 GIF：python -m learning_agent.browser.recording --selftest --workspace H:\\codexworkplace\\sofeware\\OpenHarness-main 不要提前最终回答；只有两个命令都成功、单测显示 OK、selftest 显示 STAGE9_RECORDING_SELFTEST_OK 后，最终回答最后一行必须完整输出：BROWSER_VISUAL_EVIDENCE_STAGE9_READY STAGE9_VISUAL_EVIDENCE_OK",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Browser Visual Evidence Stage 9 真实可见终端验收已完成。\n\n- 单测命令成功：`python -m unittest learning_agent.tests.test_browser_recording_stage9`\n- 单测结果：`Ran 3 tests ... OK`\n- selftest 命令成功：`python -m learning_agent.browser.recording --selftest --workspace H:\\codexworkplace\\sofeware\\OpenHarness-main`\n- selftest 标记：`STAGE9_RECORDING_SELFTEST_OK`\n- 生成帧/GIF 录制：`H:\\codexworkplace\\sofeware\\OpenHarness-main\\browser_artifacts\\browser_recordings\\stage9_selftest_1780311586243_577db3\\stage9_selftest.gif`\n\nBROWSER_VISUAL_EVI",
+      "started_at": "2026-06-01T10:59:20Z",
+      "completed_at": "2026-06-01T10:59:52Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T10:59:20Z",
+  "updated_at": "2026-06-01T10:59:52Z"
+}

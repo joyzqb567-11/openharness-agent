@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_275e3c33ad6ec332",
+  "prompt": "请执行一次 harness runtime 真实终端验收，最终回答必须包含固定标记：HARNESS_RUNTIME_ALIGNMENT_READY。 请只使用 read 工具读取 learning_agent/runtime/session_runtime.py、learning_agent/runtime/command_queue.py、learning_agent/runtime/task_registry.py、learning_agent/harness/cli.py，确认当前 agent.run 已经接入 session runtime、RuntimeCommandQueue、TaskRegistry 和 harness CLI。 不要使用 bash、write、edit 或浏览器工具；本场景只验证真实终端 agent 启动、源码可见、最终回答可观测，落盘结果由外部验收器读取 memory/harness 和 memory/runtime 确认。 最终回答请简短说明你看到的结果，并必须包含：HARNESS_RUNTIME_ALIGNMENT_READY、run_agent_with_harness_session、RuntimeCommandQueue、TaskRegistry、queue、tasks、events。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 harness runtime 真实终端验收，最终回答必须包含固定标记：HARNESS_RUNTIME_ALIGNMENT_READY。 请只使用 read 工具读取 learning_agent/runtime/session_runtime.py、learning_agent/runtime/command_queue.py、learning_agent/runtime/task_registry.py、learning_agent/harness/cli.py，确认当前 agent.run 已经接入 session runtime、RuntimeCommandQueue、TaskRegistry 和 harness CLI。 不要使用 bash、write、edit 或浏览器工具；本场景只验证真实终端 agent 启动、源码可见、最终回答可观测，落盘结果由外部验收器读取 memory/harness 和 memory/runtime 确认。 最终回答请简短说明你看到的结果，并必须包含：HARNESS_RUNTIME_ALIGNMENT_READY、run_agent_with_harness_session、RuntimeCommandQueue、TaskRegistry、queue、tasks、events。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已查看指定源码：agent.run 通过 run_agent_with_harness_session 接入 session runtime；其中使用 RuntimeCommandQueue 将 prompt 写入 queue，并将 agent events 镜像到 harness。TaskRegistry 已接入任务持久登记与通知队列；harness CLI 已包含 queue、tasks、events 等命令入口。\n\nHARNESS_RUNTIME_ALIGNMENT_READY\nrun_agent_with_harness_session RuntimeCommandQueue TaskRegistry queue tasks events",
+      "started_at": "2026-05-31T08:56:50Z",
+      "completed_at": "2026-05-31T08:57:00Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T08:56:50Z",
+  "updated_at": "2026-05-31T08:57:00Z"
+}

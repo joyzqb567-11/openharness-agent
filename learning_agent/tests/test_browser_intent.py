@@ -1,21 +1,87 @@
-﻿"Real browser intent and customer-mode tests."  # Stage14: this file owns the browser_intent test group.
+"Real browser intent and customer-mode tests."  # Stage14: this file owns the browser_intent test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.
 
 class BrowserIntentTests(LearningAgentTestBase):  # Stage14: unittest discovers this concrete modular test class.
+    def test_natural_weather_travel_prompt_is_visible_browser_information_task(self) -> None:  # 新增代码+自然可见浏览器路由: 验证普通天气攻略查询也会进入可见浏览器路线；若没有这行代码，精准 prompt 可能继续只走后台搜索。
+        from learning_agent.browser.intent import detect_visible_browser_information_task  # 新增代码+自然可见浏览器路由: 导入新增自然实时查询识别函数；若没有这行代码，测试无法锁定生产入口。
+        prompt = "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。"  # 新增代码+自然可见浏览器路由: 使用用户要求的精准 prompt；若没有这行代码，测试可能覆盖不到真实失败样本。
+        self.assertTrue(detect_visible_browser_information_task(prompt))  # 新增代码+自然可见浏览器路由: 断言该 prompt 会触发可见浏览器 workflow；若没有这行代码，后台搜索回归不会失败。
+    def test_natural_weather_travel_prompt_adds_visible_browser_harness_message(self) -> None:  # 新增代码+自然可见浏览器路由: 验证精准 prompt 会收到可见浏览器系统约束；若没有这行代码，模型可能不知道要启动可见窗口。
+        workspace = self._project_root()  # 新增代码+自然可见浏览器路由: 使用真实项目根目录读取静态 prompt；若没有这行代码，测试不会覆盖交付路径。
+        agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="不会调用模型。")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+自然可见浏览器路由: 创建最小 agent 构造初始 messages；若没有这行代码，harness 注入入口没有测试对象。
+        prompt = "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。"  # 新增代码+自然可见浏览器路由: 固定用户精准验收 prompt；若没有这行代码，测试无法证明当前痛点被覆盖。
+        messages = agent._build_initial_messages(prompt)  # 新增代码+自然可见浏览器路由: 生成真实首轮消息；若没有这行代码，无法检查系统约束是否进入模型上下文。
+        combined_content = "\n".join(str(message.get("content", "")) for message in messages)  # 新增代码+自然可见浏览器路由: 合并消息文本方便断言；若没有这行代码，system/user 消息位置变化会让测试脆弱。
+        self.assertIn("Visible Browser Task Harness", combined_content)  # 新增代码+自然可见浏览器路由: 断言新增可见浏览器 harness 标题存在；若没有这行代码，缺注入不会失败。
+        self.assertIn("browser_launch_visible", combined_content)  # 新增代码+自然可见浏览器路由: 断言 harness 明确要求启动可见浏览器；若没有这行代码，模型可能仍不打开窗口。
+        self.assertIn("confirm_visible_browser=true", combined_content)  # 新增代码+自然可见浏览器路由: 断言启动可见窗口需要显式确认参数；若没有这行代码，模型可能少填关键安全参数。
+        self.assertIn("不要用 web_search、fetch_url", combined_content)  # 新增代码+自然可见浏览器路由: 断言后台搜索不能替代真实可见浏览器；若没有这行代码，精准 prompt 失败会回归。
+        self.assertIn("visible_browser=true", combined_content)  # 新增代码+自然可见浏览器路由: 断言最终验收需要可见窗口机器标记；若没有这行代码，controller 难以判断是否真的可见。
+    def test_natural_weather_travel_prompt_preloads_visible_browser_launch_tool(self) -> None:  # 新增代码+自然可见浏览器路由: 验证模型第一轮实际能看到 browser_launch_visible；若没有这行代码，harness 有文案但工具池仍可能旁路失败。
+        workspace = self._project_root()  # 新增代码+自然可见浏览器路由: 使用真实项目根目录初始化 agent；若没有这行代码，MCP 工具目录上下文不完整。
+        fake_client = FakeMcpClient(tools=[{"name": "browser_profile_status", "description": "Status", "inputSchema": {"type": "object", "properties": {}}}, {"name": "browser_launch_visible", "description": "Launch visible browser", "inputSchema": {"type": "object", "properties": {"confirm_visible_browser": {"type": "boolean"}}, "required": ["confirm_visible_browser"]}}, {"name": "browser_open", "description": "Open page", "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]}}, {"name": "browser_snapshot", "description": "Snapshot", "inputSchema": {"type": "object", "properties": {}}}], result_prefix="browser_result")  # 新增代码+自然可见浏览器路由: 构造最小浏览器 MCP 工具集合；若没有这行代码，测试无法观察首轮外部工具可见性。
+        registry = McpToolRegistry({"browser_automation": fake_client})  # 新增代码+自然可见浏览器路由: 用真实 browser_automation server 名触发生产能力包规则；若没有这行代码，MCP 工具不会归入浏览器包。
+        model = RecordingToolNameFakeModel(ModelMessage(text="VISIBLE_BROWSER_TOOL_POOL_CHECK_DONE"))  # 新增代码+自然可见浏览器路由: 记录模型实际收到的工具名；若没有这行代码，只能猜工具池状态。
+        agent = LearningAgent(model=model, workspace=workspace, ask_permission=lambda action: True, mcp_tool_registry=registry, debug_enabled=False)  # 新增代码+自然可见浏览器路由: 创建自动授权 agent；若没有这行代码，registry 不会启动并暴露 MCP 工具。
+        list(agent.run_events("帮我查询3天后武汉的天气，并帮我做一下旅游攻略。", max_turns=1))  # 新增代码+自然可见浏览器路由: 运行一轮事件流触发真实初始工具池；若没有这行代码，假模型不会记录 tools 参数。
+        self.assertTrue(model.received_tool_names)  # 新增代码+自然可见浏览器路由: 确认模型确实被调用；若没有这行代码，后续断言可能在空列表上误判。
+        first_turn_tools = model.received_tool_names[0]  # 新增代码+自然可见浏览器路由: 取第一轮模型可见工具名；若没有这行代码，断言对象不清楚。
+        self.assertIn("mcp__browser_automation__browser_launch_visible", first_turn_tools)  # 新增代码+自然可见浏览器路由: 断言可见浏览器启动工具首轮可见；若没有这行代码，精准 prompt 会继续无法主动打开窗口。
+        self.assertIn("mcp__browser_automation__browser_open", first_turn_tools)  # 新增代码+自然可见浏览器路由: 断言打开网页工具也被预加载；若没有这行代码，启动窗口后下一步仍可能工具不可见。
+    def test_explicit_real_chrome_prompt_does_not_become_visible_browser_query(self) -> None:  # 新增代码+自然可见浏览器路由: 防止登录态/真实 Chrome 请求被普通可见 Chromium 误替代；若没有这行代码，高风险 profile 路线可能被降级。
+        from learning_agent.browser.intent import detect_visible_browser_information_task  # 新增代码+自然可见浏览器路由: 导入可见浏览器自然查询判断；若没有这行代码，无法锁定负向边界。
+        prompt = "请使用真实浏览器和登录态，帮我查询我的订单状态。"  # 新增代码+自然可见浏览器路由: 构造明确真实 Chrome/profile 场景；若没有这行代码，测试无法保护登录态边界。
+        self.assertFalse(detect_visible_browser_information_task(prompt))  # 新增代码+自然可见浏览器路由: 断言该场景不走普通可见 Chromium；若没有这行代码，隐私边界回归不会失败。
     def test_browser_intent_detects_real_browser_weather_task(self) -> None:  # 新增代码+BrowserSplit: 验证真实浏览器信息查询意图已从主文件迁移到 browser.intent；若没有这行代码，阶段 7 可能只移动文件不锁定可复用入口
         from learning_agent.browser.intent import detect_real_browser_information_task  # 新增代码+BrowserSplit: 从新 browser.intent 模块导入识别函数；若没有这行代码，测试无法证明浏览器意图有独立模块入口
         prompt = "请使用真实浏览器，帮我查询3天后重庆的天气，并帮我做一下旅游攻略。"  # 新增代码+BrowserSplit: 使用用户真实验收风格的自然短 prompt；若没有这行代码，测试可能只覆盖人工工具步骤 prompt 而漏掉客户场景
         self.assertTrue(detect_real_browser_information_task(prompt))  # 新增代码+BrowserSplit: 断言自然天气攻略查询会被识别为真实浏览器公开信息任务；若没有这行代码，后续客户模式自动授权可能失去触发条件
     def test_browser_permissions_auto_approve_public_google_workflow(self) -> None:  # 新增代码+BrowserSplit: 验证客户模式授权白名单已经迁入 browser.permissions；若没有这行代码，阶段 7 可能只拆意图不拆授权。
-        from learning_agent.browser.permissions import real_browser_customer_auto_approve_reason  # 新增代码+BrowserSplit: 从新权限模块导入自动授权判断；若没有这行代码，测试无法锁定授权层新入口。
-        connect_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_connect_real_chrome", {"confirm_real_profile": True}, customer_mode_active=True)  # 新增代码+BrowserSplit: 验证真实 Chrome 连接在显式确认参数下可自动授权；若没有这行代码，用户仍可能在连接时被 y/N 打断。
-        open_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "https://www.google.com/search?q=test"}, customer_mode_active=True)  # 新增代码+BrowserSplit: 验证 Google 搜索 URL 在客户模式下可自动授权；若没有这行代码，公开查询第一步仍会弹权限。
-        unsafe_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "https://example.com/private"}, customer_mode_active=True)  # 新增代码+BrowserSplit: 验证非 Google URL 不被客户模式静默放行；若没有这行代码，白名单边界可能被放宽。
-        self.assertIn("真实 Chrome", connect_reason)  # 新增代码+BrowserSplit: 断言连接自动授权原因可审计；若没有这行代码，空原因也可能误通过。
-        self.assertIn("Google URL", open_reason)  # 新增代码+BrowserSplit: 断言 Google URL 白名单原因可审计；若没有这行代码，测试无法区分固定白名单和 URL 白名单。
-        self.assertEqual(unsafe_reason, "")  # 新增代码+BrowserSplit: 断言未知 URL 仍需原权限流程；若没有这行代码，客户模式可能越界打开任意网站。
+        from learning_agent.browser.permissions import DANGEROUS_SKIP_PERMISSIONS_ENV_VAR, real_browser_customer_auto_approve_reason  # 修改代码+DangerousDebugDefault: 同时导入危险模式环境变量名和自动授权判断；若没有这行代码，测试无法显式关闭默认危险模式来验证白名单逻辑。
+        with mock.patch.dict(os.environ, {DANGEROUS_SKIP_PERMISSIONS_ENV_VAR: "0"}, clear=False):  # 新增代码+DangerousDebugDefault: 本测试专门验证安全白名单，所以显式关闭默认危险模式；若没有这行代码，默认危险模式会先接管授权原因。
+            connect_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_connect_real_chrome", {"confirm_real_profile": True}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证真实 Chrome 连接在显式确认参数下可自动授权；若没有这行代码，用户仍可能在连接时被 y/N 打断。
+            open_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "https://www.google.com/search?q=test"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证 Google 搜索 URL 在客户模式下可自动授权；若没有这行代码，公开查询第一步仍会弹权限。
+            unsafe_reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "https://example.com/private"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证非 Google URL 不被客户模式静默放行；若没有这行代码，白名单边界可能被放宽。
+        self.assertIn("真实 Chrome", connect_reason)  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后连接授权原因仍来自真实 Chrome 白名单；若没有这行代码，空原因或危险模式原因都可能误通过。
+        self.assertIn("Google URL", open_reason)  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后 Google URL 白名单原因可审计；若没有这行代码，测试无法区分固定白名单和 URL 白名单。
+        self.assertEqual(unsafe_reason, "")  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后未知 URL 仍需原权限流程；若没有这行代码，客户模式可能越界打开任意网站。
+    def test_visible_browser_public_query_auto_approve_scope(self) -> None:  # 新增代码+自然可见浏览器路由: 验证普通可见浏览器查询的自动授权范围；若没有这行代码，真实验收可能再次被 y/N 焦点问题打断。
+        from learning_agent.browser.permissions import DANGEROUS_SKIP_PERMISSIONS_ENV_VAR, visible_browser_customer_auto_approve_reason  # 修改代码+DangerousDebugDefault: 同时导入危险模式环境变量名和可见浏览器授权 helper；若没有这行代码，测试无法显式关闭默认危险模式。
+        with mock.patch.dict(os.environ, {DANGEROUS_SKIP_PERMISSIONS_ENV_VAR: "0"}, clear=False):  # 新增代码+DangerousDebugDefault: 本测试专门验证可见浏览器安全白名单，所以关闭默认危险模式；若没有这行代码，危险模式会让所有原因都变成全局放行。
+            launch_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_launch_visible", {"confirm_visible_browser": True}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证显式确认后可自动启动可见窗口；若没有这行代码，精准 prompt 第一项工具仍会弹权限。
+            open_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "https://www.baidu.com/s?wd=武汉天气"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证 http(s) 公开网页可自动打开；若没有这行代码，实际天气搜索页会卡在权限。
+            snapshot_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_snapshot", {"page_id": "page-1"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证公开页快照可自动读取；若没有这行代码，资料读取会反复弹权限。
+            missing_confirm_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_launch_visible", {}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证缺少可见确认时不自动放行；若没有这行代码，窗口启动安全边界会变弱。
+            file_url_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_open", {"url": "file:///C:/secret.txt"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证本地文件 URL 不自动放行；若没有这行代码，公开查询可能越界到本地文件。
+            evaluate_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_evaluate", {"script": "document.cookie"}, customer_mode_active=True)  # 修改代码+DangerousDebugDefault: 验证高风险脚本执行不自动放行；若没有这行代码，敏感读取可能被误允许。
+            inactive_reason = visible_browser_customer_auto_approve_reason("mcp__browser_automation__browser_snapshot", {"page_id": "page-1"}, customer_mode_active=False)  # 修改代码+DangerousDebugDefault: 验证非自然查询模式不自动放行；若没有这行代码，普通浏览器工具权限会过宽。
+        self.assertIn("独立 Chromium", launch_reason)  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后启动授权原因来自可见浏览器白名单；若没有这行代码，空原因或危险模式原因都可能误通过。
+        self.assertIn("公开网页", open_reason)  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后网页打开授权原因明确；若没有这行代码，URL 边界不清楚。
+        self.assertIn("白名单", snapshot_reason)  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后快照工具命中白名单；若没有这行代码，自动授权原因不可读。
+        self.assertEqual(missing_confirm_reason, "")  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后缺确认不自动启动窗口；若没有这行代码，安全确认可能失效。
+        self.assertEqual(file_url_reason, "")  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后 file URL 不自动打开；若没有这行代码，本地文件边界可能被绕过。
+        self.assertEqual(evaluate_reason, "")  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后 evaluate 仍需人工授权；若没有这行代码，敏感脚本风险会扩大。
+        self.assertEqual(inactive_reason, "")  # 修改代码+DangerousDebugDefault: 断言关闭危险模式后非客户模式不自动放行；若没有这行代码，权限模式会污染普通任务。
+    def test_dangerously_skip_permissions_allows_any_mcp_tool_reason(self) -> None:  # 新增代码+危险调试权限: 验证危险模式会给任意 MCP 工具返回自动授权原因；若没有这行代码，全放开调试模式可能只放行真实浏览器白名单。
+        from learning_agent.browser.permissions import dangerously_skip_permissions_enabled, real_browser_customer_auto_approve_reason  # 新增代码+危险调试权限: 导入危险开关和 MCP 自动授权入口；若没有这行代码，测试无法覆盖生产权限判断。
+        with mock.patch.dict(os.environ, {"LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"}, clear=False):  # 新增代码+危险调试权限: 临时开启危险模式且不污染其他环境变量；若没有这行代码，测试会依赖开发者本机设置。
+            self.assertTrue(dangerously_skip_permissions_enabled())  # 新增代码+危险调试权限: 断言环境变量被识别为开启；若没有这行代码，后续原因断言可能掩盖开关解析失败。
+            reason = real_browser_customer_auto_approve_reason("mcp__browser_automation__browser_evaluate", {"script": "document.title"}, customer_mode_active=False)  # 新增代码+危险调试权限: 用非客户模式高风险工具验证全局放行；若没有这行代码，只能证明原白名单仍工作。
+        self.assertIn("危险调试模式", reason)  # 新增代码+危险调试权限: 断言原因明确提示危险模式；若没有这行代码，日志可能让用户误以为普通安全白名单放行。
+        self.assertIn("mcp__browser_automation__browser_evaluate", reason)  # 新增代码+危险调试权限: 断言原因包含具体工具名；若没有这行代码，审计时无法知道哪项权限被自动允许。
+    def test_dangerously_skip_permissions_defaults_on_when_env_missing(self) -> None:  # 新增代码+DangerousDebugDefault: 函数段开始，验证调试开发阶段未设置环境变量也默认开启危险权限；若没有这段测试，controller 或非 ps1 入口可能继续保守卡权限而无人发现。
+        from learning_agent.browser.permissions import DANGEROUS_SKIP_PERMISSIONS_ENV_VAR, dangerously_skip_permissions_enabled  # 新增代码+DangerousDebugDefault: 导入真实环境变量名和生产判断函数；若没有这行代码，测试会硬编码字符串且无法覆盖核心入口。
+        with mock.patch.dict(os.environ, {}, clear=True):  # 新增代码+DangerousDebugDefault: 清空环境变量模拟非 start_oauth_agent.ps1 入口；若没有这行代码，测试会被开发机器已有设置污染。
+            self.assertNotIn(DANGEROUS_SKIP_PERMISSIONS_ENV_VAR, os.environ)  # 新增代码+DangerousDebugDefault: 确认本次测试真的没有危险模式环境变量；若没有这行代码，红灯可能是假阳性。
+            self.assertTrue(dangerously_skip_permissions_enabled())  # 新增代码+DangerousDebugDefault: 断言核心权限层默认开启危险调试；若没有这行代码，默认值回归保守不会被发现。
+        # 新增代码+DangerousDebugDefault: 函数段结束，保证未设置环境变量时也走开发期默认放行；若没有这段结束注释，用户学习时不容易看出测试边界。
+    def test_dangerously_skip_permissions_can_be_explicitly_disabled(self) -> None:  # 新增代码+DangerousDebugDefault: 函数段开始，验证未来正式产品或手动安全模式仍可关闭危险权限；若没有这段测试，默认开启后可能失去安全回退开关。
+        from learning_agent.browser.permissions import DANGEROUS_SKIP_PERMISSIONS_ENV_VAR, dangerously_skip_permissions_enabled  # 新增代码+DangerousDebugDefault: 导入真实环境变量名和生产判断函数；若没有这行代码，测试无法锁定实际关闭入口。
+        with mock.patch.dict(os.environ, {DANGEROUS_SKIP_PERMISSIONS_ENV_VAR: "0"}, clear=True):  # 新增代码+DangerousDebugDefault: 显式设置 0 模拟用户或正式产品关闭危险模式；若没有这行代码，测试无法证明关闭优先于默认开启。
+            self.assertFalse(dangerously_skip_permissions_enabled())  # 新增代码+DangerousDebugDefault: 断言显式关闭仍然有效；若没有这行代码，默认开启会变成不可关闭的硬编码风险。
+        # 新增代码+DangerousDebugDefault: 函数段结束，保证默认激进但仍保留清晰退出开关；若没有这段结束注释，用户不容易理解安全边界。
     def test_browser_artifacts_sanitizes_paths_inside_artifact_dir(self) -> None:  # 新增代码+BrowserSplit: 验证浏览器产物路径安全 helper 已迁入 browser.artifacts；若没有这行代码，截图路径清洗只能靠端到端测试发现问题。
         from learning_agent.browser.artifacts import safe_browser_artifact_path  # 新增代码+BrowserSplit: 从新 artifacts 模块导入路径 helper；若没有这行代码，测试无法证明产物路径逻辑有独立入口。
         with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+BrowserSplit: 创建临时产物目录隔离测试文件；若没有这行代码，测试会污染真实 browser_artifacts。

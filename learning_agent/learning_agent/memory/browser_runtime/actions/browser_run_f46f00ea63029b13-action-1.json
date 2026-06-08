@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_f46f00ea63029b13-action-1",
+  "run_id": "browser_run_f46f00ea63029b13",
+  "stage_id": "browser_console",
+  "tool_name": "browser_console",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780441141422,
+  "finished_at_ms": 1780441141428,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

@@ -1,0 +1,22 @@
+{
+  "task_id": "bg_ad1e432d8712",
+  "prompt": "python -c \"print('BACKGROUND_SHELL_AUTO_DONE_OK', flush=True)\"",
+  "kind": "background_shell",
+  "status": "completed",
+  "output": "BACKGROUND_SHELL_AUTO_DONE_OK\n",
+  "error": "",
+  "output_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\tasks\\outputs\\bg_ad1e432d8712.txt",
+  "last_offset": 30,
+  "notified": true,
+  "owner_run_id": "",
+  "allowed_tool_names": [],
+  "max_turns": null,
+  "background": true,
+  "metadata": {
+    "cwd": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent",
+    "label": "harness-background-shell-real"
+  },
+  "created_at": "2026-05-31T10:03:00Z",
+  "updated_at": "2026-05-31T10:03:00Z",
+  "completed_at": "2026-05-31T10:03:00Z"
+}

@@ -1,4 +1,4 @@
-﻿"""这个测试文件集中保存模块化测试共用的 fake、helper 和路径准备逻辑。"""  # 修改代码+Stage14硬清理: 说明当前 support.py 是新测试架构的共享支撑；若没有这行代码，维护者会误以为测试仍围绕旧脚本入口展开
+"""这个测试文件集中保存模块化测试共用的 fake、helper 和路径准备逻辑。"""  # 修改代码+Stage14硬清理: 说明当前 support.py 是新测试架构的共享支撑；若没有这行代码，维护者会误以为测试仍围绕旧脚本入口展开
 
 import json  # 新增代码: 解析调试日志 JSONL，验证 agent 是否把关键步骤写入日志；若省略: 无法读取结构化调试日志
 import io  # 新增代码+AcceptanceHarness: 提供内存文本流来接收终端标记；若没有这行代码，测试只能读取真实 stdout，容易污染测试输出
@@ -56,6 +56,7 @@ from learning_agent.tools.schemas import TOOL_SCHEMAS  # 修改代码+LegacyEntr
 from learning_agent.observability.acceptance_events import (  # 新增代码+AcceptanceHarness: 导入验收事件协议入口；若没有这行代码，外部 agent 无法用测试锁定可控制接口
     ACCEPTANCE_EVENT_ENV_VAR,  # 新增代码+AcceptanceHarness: 导入环境变量名；若没有这行代码，测试会把配置入口写死成散落字符串
     ACCEPTANCE_EVENT_MARKER_PREFIX,  # 新增代码+AcceptanceHarness: 导入终端标记前缀；若没有这行代码，测试无法确认可见终端里有机器可识别状态行
+    ACCEPTANCE_EVENT_STDOUT_ENV_VAR,  # 修改代码+AcceptanceStdoutNoiseControl: 导入终端机器标记显式开关；若没有这行代码，测试无法验证默认隐藏和按需打开两种模式。
     emit_acceptance_event,  # 新增代码+AcceptanceHarness: 导入事件写入函数；若没有这行代码，测试无法驱动最小验收协议
 )  # 新增代码+AcceptanceHarness: 结束验收 harness 导入；若没有这行代码，Python 导入语法不完整
 from learning_agent.browser_real_chrome import (  # 新增代码+RealChrome测试: 导入真实 Chrome helper；若省略: 后续测试无法驱动新 helper 模块

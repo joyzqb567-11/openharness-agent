@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_5e7137bb28dd645c",
+  "prompt": "请执行一次 BrowserActionExecutor 批量并发与流式结果的真实可见终端验收，最终回答必须包含固定标记：ACTION_EXECUTOR_BATCH_STREAM_READY。 第一步必须调用 bash 执行：python -m unittest learning_agent.tests.test_browser_action_executor 必须确认命令输出包含 Ran 10 tests 和 OK。 不要提前最终回答；只有 bash 命令完成且测试通过后，最终回答最后一行必须完整复制：ACTION_EXECUTOR_BATCH_STREAM_READY batch=true streaming=true tests=10 ok=true",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 BrowserActionExecutor 批量并发与流式结果的真实可见终端验收，最终回答必须包含固定标记：ACTION_EXECUTOR_BATCH_STREAM_READY。 第一步必须调用 bash 执行：python -m unittest learning_agent.tests.test_browser_action_executor 必须确认命令输出包含 Ran 10 tests 和 OK。 不要提前最终回答；只有 bash 命令完成且测试通过后，最终回答最后一行必须完整复制：ACTION_EXECUTOR_BATCH_STREAM_READY batch=true streaming=true tests=10 ok=true",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "BrowserActionExecutor 批量并发与流式结果的真实可见终端验收已通过：命令输出包含 “Ran 10 tests” 和 “OK”。\nACTION_EXECUTOR_BATCH_STREAM_READY batch=true streaming=true tests=10 ok=true",
+      "started_at": "2026-06-01T04:53:55Z",
+      "completed_at": "2026-06-01T04:54:09Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T04:53:55Z",
+  "updated_at": "2026-06-01T04:54:09Z"
+}

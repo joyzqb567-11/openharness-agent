@@ -1,0 +1,30 @@
+{
+  "name": "long_task_harness_status",
+  "output_prefix": "long_task_harness_status",
+  "window_title_prefix": "LearningAgent-Controller-LongTaskHarness",
+  "max_seconds": 300,
+  "final_log_wait_seconds": 20,
+  "success_marker": "LONG_TASK_HARNESS_READY",
+  "prompt_lines": [
+    "请使用 read 工具读取 learning_agent/harness/README.md 和 learning_agent/harness/__init__.py，确认 long-task harness 模块是否存在，并用中文简短说明它能做什么。回答中必须包含 HarnessRun、HarnessQueue、StageVerifier、render_harness_status 四个名字。最后单独一行输出 LONG_TASK_HARNESS_READY。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/harness/README.md",
+    "learning_agent/harness/__init__.py",
+    "HarnessQueue",
+    "StageVerifier"
+  ],
+  "event_answer_contains": [
+    "HarnessRun",
+    "HarnessQueue",
+    "StageVerifier",
+    "render_harness_status",
+    "LONG_TASK_HARNESS_READY"
+  ]
+}

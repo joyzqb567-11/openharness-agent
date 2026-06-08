@@ -1,9 +1,15 @@
-﻿"MCP config, registry, transport, and resource tests."  # Stage14: this file owns the mcp_registry test group.
+"MCP config, registry, transport, and resource tests."  # Stage14: this file owns the mcp_registry test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.
 
 class McpRegistryTests(LearningAgentTestBase):  # Stage14: unittest discovers this concrete modular test class.
+    def setUp(self) -> None:  # 新增代码+DangerousDebugDefault: 函数段开始，为 MCP 权限测试建立默认安全测试环境；若没有这段函数，开发期默认危险模式会绕过大量权限提示测试。
+        super().setUp()  # 新增代码+DangerousDebugDefault: 先执行父类测试初始化；若没有这行代码，LearningAgentTestBase 未来新增的通用准备逻辑可能被跳过。
+        self._dangerous_debug_default_off_patch = mock.patch.dict(os.environ, {"LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"}, clear=False)  # 新增代码+DangerousDebugDefault: 在本测试类默认关闭危险模式以验证普通权限边界；若没有这行代码，默认危险模式会自动允许工具导致拒绝和风险提示测试失真。
+        self._dangerous_debug_default_off_patch.start()  # 新增代码+DangerousDebugDefault: 立即启用测试级环境变量补丁；若没有这行代码，后续测试仍会读取生产默认开启语义。
+        self.addCleanup(self._dangerous_debug_default_off_patch.stop)  # 新增代码+DangerousDebugDefault: 测试结束自动恢复环境变量；若没有这行代码，测试之间会互相污染危险模式状态。
+        # 新增代码+DangerousDebugDefault: 函数段结束，本类普通权限测试走安全模式，危险模式专项测试可用内部 patch 覆盖为 1；若没有这段注释，用户不容易理解为什么测试默认和产品默认不同。
     def test_mcp_package_exports_config_and_registry(self) -> None:  # 新增代码+McpSplit: 验证 MCP 配置和 registry 已迁移到 mcp 包；若没有这行代码，MCP 层可能继续堆在主文件里没人发现。
         from learning_agent.mcp.config import McpServerConfig as McpPackageServerConfig  # 新增代码+McpSplit: 直接导入 MCP 配置模块；若没有这行代码，mcp_servers.json 解析边界无法被测试锁住。
         from learning_agent.mcp.registry import McpToolRegistry as McpPackageToolRegistry  # 新增代码+McpSplit: 直接导入 MCP registry 模块；若没有这行代码，工具发现和路由边界无法被测试锁住。
@@ -25,6 +31,39 @@ class McpRegistryTests(LearningAgentTestBase):  # Stage14: unittest discovers th
             self.assertEqual([event["state"] for event in events], ["permission_auto_approved"])  # 新增代码+真实浏览器客户模式: 断言自动授权不会产生 permission_required；若没有这行代码，控制器仍可能输入 y
             self.assertEqual(events[0]["payload"]["permission_kind"], "mcp_server_start")  # 新增代码+真实浏览器客户模式: 断言自动授权对象是 MCP 启动；若没有这行代码，审计无法区分启动和工具调用
             self.assertTrue(events[0]["payload"]["allowed"])  # 新增代码+真实浏览器客户模式: 断言事件记录允许结果；若没有这行代码，result 复盘时不知道是否真的放行
+    def test_dangerously_skip_permissions_auto_approves_terminal_tool_without_input(self) -> None:  # 新增代码+危险调试权限: 验证危险调试模式会跳过终端工具权限输入；若没有这行代码，真实 Chrome 调试仍可能卡在 y/N。
+        action = "\n".join([  # 新增代码+危险调试权限: 构造真实 MCP 工具权限文本；若没有这行代码，测试无法覆盖生产解析格式。
+            "调用 MCP 工具：mcp__browser_automation__browser_evaluate",  # 新增代码+危险调试权限: 使用原本高风险的脚本工具作为测试对象；若没有这行代码，只测低风险工具不能证明全放开。
+            "风险等级：浏览器自动化高风险",  # 新增代码+危险调试权限: 放入高风险等级方便审计事件保存风险信息；若没有这行代码，测试覆盖不到风险字段。
+            "风险说明：会执行页面脚本；确认前请重点核对 script。",  # 新增代码+危险调试权限: 放入风险说明模拟真实提示；若没有这行代码，权限文本和生产场景差距过大。
+            '参数：{"script":"document.title"}',  # 新增代码+危险调试权限: 放入 JSON 参数方便检查工具参数仍被结构化记录；若没有这行代码，审计无法证明放行了哪段输入。
+        ])  # 新增代码+危险调试权限: 结束权限文本数组；若没有这行代码，Python 语法不完整。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+危险调试权限: 创建临时目录保存本次事件日志；若没有这行代码，测试会污染真实验收日志。
+            event_log_path = Path(raw_dir) / "events.jsonl"  # 新增代码+危险调试权限: 指定事件日志文件；若没有这行代码，测试无法读取自动授权证据。
+            env = {ACCEPTANCE_EVENT_ENV_VAR: str(event_log_path), "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"}  # 新增代码+危险调试权限: 同时启用验收日志和危险跳过权限；若没有这行代码，生产开关不会被测试覆盖。
+            with mock.patch.dict(os.environ, env, clear=False):  # 新增代码+危险调试权限: 在本测试内临时设置环境变量；若没有这行代码，测试会依赖用户电脑环境。
+                with mock.patch("sys.stdout", new=io.StringIO()) as fake_stdout:  # 新增代码+危险调试权限: 捕获终端提示文本；若没有这行代码，无法确认用户能看到危险模式提示。
+                    with mock.patch("builtins.input", side_effect=AssertionError("危险模式不应调用 input")) as fake_input:  # 新增代码+危险调试权限: 如果代码仍等待输入就让测试失败；若没有这行代码，回归会悄悄卡住真实终端。
+                        allowed = ask_permission_from_terminal_customer_mode(action)  # 新增代码+危险调试权限: 调用真实客户模式权限入口；若没有这行代码，无法覆盖 start_oauth_agent.bat 真实路径。
+            self.assertTrue(allowed)  # 修改代码+危险调试权限: 断言危险模式直接允许本次高风险工具并留在临时目录生命周期内；若没有这行代码，拒绝也可能被误认为没有卡住。
+            fake_input.assert_not_called()  # 修改代码+危险调试权限: 断言完全没有调用 input 并留在临时目录生命周期内；若没有这行代码，真实终端焦点问题可能回归。
+            self.assertIn("危险调试模式", fake_stdout.getvalue())  # 修改代码+危险调试权限: 断言终端清楚提示当前全放开并留在临时目录生命周期内；若没有这行代码，用户不知道权限为何被自动允许。
+            events = self._read_acceptance_events(event_log_path)  # 修改代码+危险调试权限: 在临时目录删除前读取自动授权事件；若没有这行代码，测试会误报事件日志不存在。
+            self.assertEqual([event["state"] for event in events], ["permission_auto_approved"])  # 修改代码+危险调试权限: 断言不会产生 permission_required；若没有这行代码，controller 仍可能发送权限回答。
+            self.assertEqual(events[0]["payload"]["tool_name"], "mcp__browser_automation__browser_evaluate")  # 修改代码+危险调试权限: 断言高风险工具名被记录；若没有这行代码，事后无法知道自动允许了什么。
+            self.assertTrue(events[0]["payload"]["allowed"])  # 修改代码+危险调试权限: 断言事件明确记录允许结果；若没有这行代码，验收报告无法确认授权结果。
+            self.assertTrue(events[0]["payload"]["auto_approved"])  # 修改代码+危险调试权限: 断言这是自动授权而非人工回答；若没有这行代码，控制器无法证明没有输入 y。
+            self.assertIn("危险调试模式", events[0]["payload"]["reason"])  # 修改代码+危险调试权限: 断言审计原因包含危险模式；若没有这行代码，日志会和普通白名单自动授权混淆。
+    def test_start_oauth_agent_defaults_to_dangerously_skip_permissions(self) -> None:  # 新增代码+危险调试权限: 验证真实启动脚本默认开启危险权限跳过；若没有这行代码，bat 入口可能又退回人工 y/N。
+        script_path = self._project_root() / "learning_agent" / "start_oauth_agent.ps1"  # 新增代码+危险调试权限: 定位真实 PowerShell 启动脚本；若没有这行代码，测试可能检查到错误文件。
+        script_text = script_path.read_text(encoding="utf-8")  # 新增代码+危险调试权限: 读取脚本文本做静态保护；若没有这行代码，无法确认真实入口是否设置环境变量。
+        self.assertIn("LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS", script_text)  # 新增代码+危险调试权限: 断言脚本包含危险权限开关名；若没有这行代码，启动默认放开可能被删掉也不失败。
+        self.assertIn('$env:LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS = "1"', script_text)  # 新增代码+危险调试权限: 断言脚本默认把开关设为 1；若没有这行代码，用户打开终端后仍会被权限确认打断。
+        self.assertIn('$env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE = "1"', script_text)  # 新增代码+真实ComputerUse入口：断言 OAuth 可见终端默认启用真实鼠标键盘动作；如果没有这一行，/computer use --full 会只授权模式但后端仍安全关闭。
+        self.assertIn('$env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE = "1"', script_text)  # 新增代码+真实ComputerUse入口：断言 OAuth 可见终端默认启用窗口枚举观察；如果没有这一行，模型打开软件后无法获取可信窗口。
+        self.assertIn('$env:LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_NATIVE_OBSERVE = "1"', script_text)  # 新增代码+真实ComputerUse入口：断言 OAuth 可见终端默认启用 native 截图观察；如果没有这一行，模型看不到真实屏幕 PNG 回灌。
+        self.assertIn('$env:LEARNING_AGENT_PHASE105_ENABLE_FULL_MODE_CONTROLLED_REAL_LAUNCH = "1"', script_text)  # 新增代码+真实ComputerUse入口：断言 OAuth 可见终端默认启用 launch_app 真实启动门；如果没有这一行，模型会返回占位窗口而不会真正打开本机软件。
+        self.assertIn("危险调试权限", script_text)  # 新增代码+危险调试权限: 断言脚本会打印危险模式提示；若没有这行代码，用户可能不知道当前权限已全放开。
     def test_terminal_permission_emits_structured_mcp_tool_payload(self) -> None:  # 新增代码+StructuredPermissionLedger: 验证 MCP 工具权限事件带结构化工具名和参数；若没有这行代码，controller 只能继续靠文本 contains 猜权限
         action = "\n".join([  # 新增代码+StructuredPermissionLedger: 构造真实 MCP 权限提示文本；若没有这行代码，测试无法覆盖生产格式解析
             "调用 MCP 工具：mcp__browser_automation__browser_open",  # 新增代码+StructuredPermissionLedger: 第一行提供 MCP 工具名；若没有这行代码，解析器没有 tool_name 输入
@@ -68,6 +107,21 @@ class McpRegistryTests(LearningAgentTestBase):  # Stage14: unittest discovers th
         open_output = agent._execute_tool(ToolCall(name="mcp__browser_automation__browser_open", arguments={"url": "data:text/html,<title>ok</title>"}))  # 新增代码+浏览器自动化: 直接调用刚解锁的 MCP 浏览器工具；若没有这行代码，只检查可见性会漏掉执行层仍阻断的问题
         self.assertIn("browser_result browser_open", open_output)  # 新增代码+浏览器自动化: 断言调用结果来自 fake browser_open；若没有这行代码，执行可能路由到错误工具或失败文本
         self.assertEqual(fake_client.calls[-1][0], "browser_open")  # 新增代码+浏览器自动化: 断言 MCP 前缀被正确剥离成原始工具名；若没有这行代码，真实 server 可能收到错误名称
+    def test_reading_long_running_skill_loads_background_command_tools(self) -> None:  # 新增代码+长任务真实入口: 验证真实终端按提示读取 long_running_work skill 后会看见后台命令工具；若没有这行代码，可见终端验收会再次卡在“工具不存在”
+        workspace = self._project_root()  # 新增代码+长任务真实入口: 使用真实项目根目录读取包内 skill 文件；若没有这行代码，测试无法覆盖用户实际 start_oauth_agent.bat 的路径形态
+        agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="不会调用模型。")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+长任务真实入口: 创建不依赖真实模型的 agent；若没有这行代码，无法离线检查工具池是否被 skill 解锁
+        initial_tool_names = agent._tool_schema_names(agent._available_tool_schemas())  # 新增代码+长任务真实入口: 记录读取 skill 前的模型可见工具名；若没有这行代码，无法证明后台工具不是默认常驻塞进上下文
+        self.assertNotIn("start_background_command", initial_tool_names)  # 新增代码+长任务真实入口: 断言启动后台命令首轮隐藏；若没有这行代码，极简工具面膨胀不会被发现
+        tool_list_output = agent._execute_tool(ToolCall(name="read", arguments={"path": "learning_agent/skills/tool_list.md"}))  # 新增代码+长任务真实入口: 先读取第一层工具索引满足动态提示词门禁；若没有这行代码，第二层 skill 会被正确拦截导致测试跑偏
+        self.assertIn("long_running_work/SKILL.md", tool_list_output)  # 新增代码+长任务真实入口: 断言总索引真实指向长期工作 skill；若没有这行代码，后续读取路径可能只是测试硬编码
+        skill_output = agent._execute_tool(ToolCall(name="read", arguments={"path": "learning_agent/skills/long_running_work/SKILL.md"}))  # 新增代码+长任务真实入口: 读取第二层长期工作 skill 来触发工具包解锁；若没有这行代码，问题入口不会被覆盖
+        self.assertIn("Long Running Work", skill_output)  # 新增代码+长任务真实入口: 断言 skill 文件确实读取成功；若没有这行代码，错误文本也可能继续进入工具池断言
+        loaded_tool_names = agent._tool_schema_names(agent._available_tool_schemas())  # 新增代码+长任务真实入口: 读取 skill 后的模型可见工具名；若没有这行代码，无法验证下一轮真实 schema 是否变化
+        self.assertIn("start_background_command", loaded_tool_names)  # 新增代码+长任务真实入口: 断言启动后台命令已经可见；若没有这行代码，真实终端无法启动长任务
+        self.assertIn("read_background_command", loaded_tool_names)  # 新增代码+长任务真实入口: 断言读取后台输出已经可见；若没有这行代码，模型启动后无法观察长任务结果
+        self.assertIn("stop_background_command", loaded_tool_names)  # 新增代码+长任务真实入口: 断言停止后台命令已经可见；若没有这行代码，模型无法收束后台进程
+        self.assertIn("monitor", loaded_tool_names)  # 新增代码+长任务真实入口: 断言长期监控记录工具也随 skill 可见；若没有这行代码，长任务 harness 状态记录能力仍可能不可达
+        self.assertNotIn("tool_search", loaded_tool_names)  # 新增代码+长任务真实入口: 断言修复不靠恢复旧工具搜索入口；若没有这行代码，真实入口可能退回高 token 的旁路系统
     def test_mcp_registry_exposes_agent_tools_as_deferred_catalog_entries(self) -> None:  # 新增代码+ToolArchitectureV2: 验证 MCP registry 能把已发现工具包装成延迟加载的 AgentTool；若没有这行代码，MCP 工具目录化回归不会被测试发现
         fake_client = FakeMcpClient(tools=[  # 新增代码+ToolArchitectureV2: 创建只暴露天气查询工具的 fake MCP client；若没有这行代码，测试没有可控 MCP 工具来源
             {  # 新增代码+ToolArchitectureV2: 定义一个 MCP tools/list 返回的工具条目；若没有这行代码，registry 无法发现 weather_lookup

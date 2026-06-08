@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ca122db2b3b6e966",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "目前无法在本地画图软件中画树：OS 级 Computer Use 后端尚未启用，状态显示未设置 `LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE=1` 或 `LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE=1`，所以我不能读取窗口、打开画图或执行鼠标绘制动作。\n\n如果你启用本地 Computer Use 后端后再让我继续，我可以按步骤打开画图并绘制一棵树。",
+      "started_at": "2026-06-06T06:15:53Z",
+      "completed_at": "2026-06-06T06:16:04Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T06:15:53Z",
+  "updated_at": "2026-06-06T06:16:04Z"
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "browser_run_91b05d8a2703fcf4",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_snapshot",
+  "status": "completed",
+  "current_stage_id": "browser_snapshot",
+  "completed_stage_ids": [
+    "browser_snapshot"
+  ],
+  "action_ids": [
+    "browser_run_91b05d8a2703fcf4-action-1"
+  ],
+  "observation_ids": [
+    "browser_observation_b21233e0072208c2"
+  ],
+  "summary": "browser_snapshot 成功\n标题：Example Domain\nURL：https://example.com/\n正文截断状态：未截断\nobservation_id=browser_observation_b21233e0072208c2\n正文摘要：Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more\n可交互元素：\n1. <a> label='Learn more' selector=body:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > a:nth-of-type(1) visible=True box=256,210,87,20 center_x=299 center_y=220",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780287442703,
+  "updated_at_ms": 1780287442915
+}

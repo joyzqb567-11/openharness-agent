@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_79c3da623c60b955",
+  "prompt": "Please run one Phase 58 Windows Computer Use real SendInput target guard acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The self-check may open its own temporary dedicated Phase58 safe window, may send controlled SendInput only to that safe window, and must clean it up. The final answer must include the fixed marker: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_sendinput_guard import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK and real_smoke=true, the final answer's last line must completely copy: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK target_guard=true low_level_events=true forbidden_zero_events=true before_after=true after_changed=true raw_text_hidden=true safe_window_only=true real_smoke=true actions_expanded=true",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 58 Windows Computer Use real SendInput target guard acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The self-check may open its own temporary dedicated Phase58 safe window, may send controlled SendInput only to that safe window, and must clean it up. The final answer must include the fixed marker: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_sendinput_guard import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK and real_smoke=true, the final answer's last line must completely copy: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK target_guard=true low_level_events=true forbidden_zero_events=true before_after=true after_changed=true raw_text_hidden=true safe_window_only=true real_smoke=true actions_expanded=true",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "验证通过。\nPHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK target_guard=true low_level_events=true forbidden_zero_events=true before_after=true after_changed=true raw_text_hidden=true safe_window_only=true real_smoke=true actions_expanded=true",
+      "started_at": "2026-06-03T09:53:45Z",
+      "completed_at": "2026-06-03T09:53:56Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T09:53:45Z",
+  "updated_at": "2026-06-03T09:53:56Z"
+}

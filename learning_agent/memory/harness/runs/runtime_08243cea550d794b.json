@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_08243cea550d794b",
+  "prompt": "你可以使用鼠标点击打开啊",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "你可以使用鼠标点击打开啊",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "可以，但我这边当前可用工具里没有“鼠标点击/桌面操作/打开窗口”的具体执行工具；我不能假装已经用鼠标点开了。\n\n如果你希望我操作真实 Chrome、当前浏览器或桌面可见窗口，需要提供对应的浏览器/桌面自动化工具入口。当前我只能使用已列出的工具，例如读取/编辑文件、执行命令，或查看浏览器自动化连接状态。",
+      "started_at": "2026-06-07T05:59:46Z",
+      "completed_at": "2026-06-07T05:59:53Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T05:59:46Z",
+  "updated_at": "2026-06-07T05:59:53Z"
+}

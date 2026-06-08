@@ -1,0 +1,39 @@
+{
+  "run_id": "runtime_7bdab15e993b6858",
+  "prompt": "请调用 computer_action 的 launch_app 打开本地画图软件，app_name 使用 mspaint。不要画图，不要点击画布。启动后只回复一行：ACCEPTANCE_FULL_LAUNCH_PAINT_OK。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请调用 computer_action 的 launch_app 打开本地画图软件，app_name 使用 mspaint。不要画图，不要点击画布。启动后只回复一行：ACCEPTANCE_FULL_LAUNCH_PAINT_OK。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "running",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "2026-06-06T10:18:34Z",
+      "completed_at": ""
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "running",
+  "current_stage_index": 0,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T10:18:34Z",
+  "updated_at": "2026-06-06T10:18:34Z"
+}

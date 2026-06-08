@@ -1,0 +1,21 @@
+bash 成功：exit_code=0
+stdout:
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\core\transcript_v2.py
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\core\__pycache__\transcript_v2.cpython-312.pyc
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\core\__pycache__\transcript_v2.cpython-313.pyc
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_082612_db9eeac9\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_082746_f8f649f7\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_134506_1f0e655e\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_134530_cfe29a74\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_135215_41e2e6c7\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_135229_fbfb1c3c\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_141553_1e231f24\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_141737_b24143c3\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_141909_23fc4e2d\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_142029_9bc0db69\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory\sessions\session_20260606_143535_e5ee1fa8\transcript_v2.jsonl
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\observability\transcript.py
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\observability\__pycache__\transcript.cpython-312.pyc
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\observability\__pycache__\transcript.cpython-313.pyc
+
+stderr:

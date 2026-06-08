@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_46aae8c7bb09b8cf",
+  "prompt": "Please run one Phase 90 Windows Computer Use live app dispatcher acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE90_WINDOWS_LIVE_APP_DISPATCHER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.live_app_dispatcher import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE90_WINDOWS_LIVE_APP_DISPATCHER_OK, the final answer's last line must completely copy: PHASE90_WINDOWS_LIVE_APP_DISPATCHER_READY PHASE90_WINDOWS_LIVE_APP_DISPATCHER_OK live_dispatcher_ready=true real_app_dispatch_path=true default_real_dispatch_enabled=false requires_explicit_live_env_gate=true uses_phase72_safety_boundary=true uses_phase60_persistent_grants=true uses_phase69_app_window_control=true uses_phase71_input_events=true safe_window_real_smoke_path=true representative_live_apps_ready=true notepad_live_dispatch_contract=true mspaint_pikachu_live_plan=true dangerous_window_zero_events=true unauthorized_window_zero_events=true raw_text_hidden=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 90 Windows Computer Use live app dispatcher acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE90_WINDOWS_LIVE_APP_DISPATCHER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.live_app_dispatcher import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE90_WINDOWS_LIVE_APP_DISPATCHER_OK, the final answer's last line must completely copy: PHASE90_WINDOWS_LIVE_APP_DISPATCHER_READY PHASE90_WINDOWS_LIVE_APP_DISPATCHER_OK live_dispatcher_ready=true real_app_dispatch_path=true default_real_dispatch_enabled=false requires_explicit_live_env_gate=true uses_phase72_safety_boundary=true uses_phase60_persistent_grants=true uses_phase69_app_window_control=true uses_phase71_input_events=true safe_window_real_smoke_path=true representative_live_apps_ready=true notepad_live_dispatch_contract=true mspaint_pikachu_live_plan=true dangerous_window_zero_events=true unauthorized_window_zero_events=true raw_text_hidden=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 90 Windows Computer Use live app dispatcher acceptance passed.\n\nPHASE90_WINDOWS_LIVE_APP_DISPATCHER_READY PHASE90_WINDOWS_LIVE_APP_DISPATCHER_OK live_dispatcher_ready=true real_app_dispatch_path=true default_real_dispatch_enabled=false requires_explicit_live_env_gate=true uses_phase72_safety_boundary=true uses_phase60_persistent_grants=true uses_phase69_app_window_control=true uses_phase71_input_events=true safe_window_real_smoke_path=true representative_live_apps_ready=true notepad_live_d",
+      "started_at": "2026-06-04T01:39:45Z",
+      "completed_at": "2026-06-04T01:39:56Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T01:39:45Z",
+  "updated_at": "2026-06-04T01:39:56Z"
+}

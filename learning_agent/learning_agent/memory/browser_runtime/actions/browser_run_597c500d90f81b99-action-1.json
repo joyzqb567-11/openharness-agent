@@ -1,0 +1,13 @@
+{
+  "action_id": "browser_run_597c500d90f81b99-action-1",
+  "run_id": "browser_run_597c500d90f81b99",
+  "stage_id": "browser_network",
+  "tool_name": "browser_network",
+  "arguments_redacted": {},
+  "status": "completed",
+  "started_at_ms": 1780402745941,
+  "finished_at_ms": 1780402745950,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

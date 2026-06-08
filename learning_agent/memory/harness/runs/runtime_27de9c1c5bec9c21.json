@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_27de9c1c5bec9c21",
+  "prompt": "Please run one Phase 93 universal Windows Computer Use live execution gate acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_live_execution import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK, the final answer's last line must completely copy: PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK uses_phase92_universal_runtime=true single_universal_live_loop=true prompt_to_observe_plan_act_verify=true no_per_app_controller=true representative_apps_are_acceptance_only=true uses_closed_loop_executor=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapter=true requires_explicit_user_authorization=true real_actions_default_disabled=true authorized_recording_loop_ready=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_prompt_hidden=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 93 universal Windows Computer Use live execution gate acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_live_execution import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK, the final answer's last line must completely copy: PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK uses_phase92_universal_runtime=true single_universal_live_loop=true prompt_to_observe_plan_act_verify=true no_per_app_controller=true representative_apps_are_acceptance_only=true uses_closed_loop_executor=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapter=true requires_explicit_user_authorization=true real_actions_default_disabled=true authorized_recording_loop_ready=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_prompt_hidden=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY\nPHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_READY PHASE93_UNIVERSAL_LIVE_EXECUTION_GATE_OK uses_phase92_universal_runtime=true single_universal_live_loop=true prompt_to_observe_plan_act_verify=true no_per_app_controller=true representative_apps_are_acceptance_only=true uses_closed_loop_executor=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapter=true requires_explicit_user_authorization=true real_actions_defaul",
+      "started_at": "2026-06-04T12:39:02Z",
+      "completed_at": "2026-06-04T12:39:14Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T12:39:02Z",
+  "updated_at": "2026-06-04T12:39:14Z"
+}

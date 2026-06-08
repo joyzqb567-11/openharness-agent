@@ -46,3 +46,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\accepta
 - `post_success_wait_seconds`：可选成功后停留秒数，适合 Google 拟人演示这类希望用户肉眼观察真实窗口的场景。
 
 窗口启动、权限输入、prompt 重试、截图、事件日志、调试日志归档和 `result.json` 输出都由 `controller.ps1` 统一处理。
+
+## 离线复验
+
+controller 跑完后，可以用独立 verifier 复验某个 run 目录是否真的满足场景断言：
+
+```powershell
+python -m learning_agent.acceptance.verifier .\learning_agent\acceptance_controller\runs\smoke-20260531_140112 .\learning_agent\acceptance_controller\scenarios\smoke.json
+```
+
+verifier 会重新读取 `events.jsonl`、`result.json`、归档 debug log 和截图路径，输出一份新的 JSON 报告。核心字段包括 `completed`、`assertion.state_checks`、`assertion.event_answer_checks`、`assertion.debug_log_checks`、`assertion.artifact_checks` 和 `assertion.permission_count_passed`。

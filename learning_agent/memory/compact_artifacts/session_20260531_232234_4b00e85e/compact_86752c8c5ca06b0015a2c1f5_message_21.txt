@@ -1,0 +1,14 @@
+browser_snapshot 成功
+标题：皇上快点
+URL：https://gd-h5ly-web01.leishenhuyu.com/gt_h5ly/?r_plat=h5kunyou-1003007029&r_bid=1003007000&r_host=hskd-h5lianyun-sdk.leishenhuyu.com
+正文截断状态：未截断
+正文摘要：欢迎回来 游客：OPeXt1780241117210 绑定手机
+可交互元素：
+1. <textarea> label='' selector=textarea#egretTextarea visible=True box=259,-100,1,12 center_x=260 center_y=-94
+2. <input> label='' selector=input#egretInput visible=True box=259,-100,1,12 center_x=260 center_y=-94
+3. <input> label='手机号/用户名' selector=input#usernameval visible=True box=377,299,270,36 center_x=512 center_y=317
+4. <input> label='密码' selector=input#passwordval visible=True box=377,350,270,36 center_x=512 center_y=368
+5. <input> label='登录' selector=body:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > form:nth-of-type(1) > ul:nth-of-type(1) > input:nth-of-type(1) visible=True box=377,401,270,40 center_x=512 center_y=421
+6. <a> label='快速试玩' selector=body:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1) visible=True box=362,467,99,56 center_x=412 center_y=495
+7. <a> label='快速注册' selector=body:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1) visible=True box=462,467,99,56 center_x=512 center_y=495
+8. <a> label='找回密码' selector=body:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1) visible=True box=563,467,99,56 center_x=612 center_y=495

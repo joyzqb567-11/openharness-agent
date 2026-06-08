@@ -1,0 +1,23 @@
+{
+  "run_id": "browser_run_80583fa4e532fc74",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_wait",
+  "status": "completed",
+  "current_stage_id": "browser_wait",
+  "completed_stage_ids": [
+    "browser_wait"
+  ],
+  "action_ids": [
+    "browser_run_80583fa4e532fc74-action-1"
+  ],
+  "observation_ids": [],
+  "summary": "browser_wait 成功\npage_id=page-1\nURL：http://127.0.0.1:53885/index.html\n文本检查：text=Hello Codex",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780304390244,
+  "updated_at_ms": 1780304390346
+}

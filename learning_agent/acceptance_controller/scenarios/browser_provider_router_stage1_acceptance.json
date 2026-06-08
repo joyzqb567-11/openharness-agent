@@ -1,0 +1,34 @@
+{
+  "name": "browser_provider_router_stage1_acceptance",
+  "output_prefix": "browser_provider_router_stage1_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-ProviderRouter",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "BROWSER_PROVIDER_ROUTER_STAGE1_READY",
+  "prompt_lines": [
+    "请执行一次 Browser Provider Router Stage 1 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ROUTER_STAGE1_READY。",
+    "你必须调用 bash 执行这个命令验证 provider router 协议层：python -c \"from learning_agent.browser.providers import BrowserProviderRouter, BrowserProviderHealth, BrowserProviderKind, build_provider_decision_event; r=BrowserProviderRouter(); h={BrowserProviderKind.CHROME_EXTENSION: BrowserProviderHealth.unavailable(BrowserProviderKind.CHROME_EXTENSION,'extension_not_connected'), BrowserProviderKind.REAL_CHROME_CDP: BrowserProviderHealth.available(BrowserProviderKind.REAL_CHROME_CDP)}; d=r.decide_provider(user_input='当前浏览器 login state', tool_name='browser_snapshot', arguments={}, provider_health=h, allow_cdp_fallback=True); p=build_provider_decision_event(d); assert d.provider==BrowserProviderKind.REAL_CHROME_CDP; assert p['schema_version']==1; assert p['reason_code']=='extension_unavailable_cdp_fallback_allowed'; assert p['metadata']['fallback_from']=='chrome_extension'; print('PROVIDER_ROUTER_STAGE1_OK provider='+p['provider']+' reason_code='+p['reason_code']+' schema_version='+str(p['schema_version'])+' fallback_from='+p['metadata']['fallback_from'])\"",
+    "不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ROUTER_STAGE1_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ROUTER_STAGE1_READY PROVIDER_ROUTER_STAGE1_OK provider=real_chrome_cdp reason_code=extension_unavailable_cdp_fallback_allowed schema_version=1 fallback_from=chrome_extension"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PROVIDER_ROUTER_STAGE1_OK",
+    "provider=real_chrome_cdp",
+    "reason_code=extension_unavailable_cdp_fallback_allowed",
+    "schema_version=1",
+    "fallback_from=chrome_extension"
+  ],
+  "event_answer_contains": [
+    "BROWSER_PROVIDER_ROUTER_STAGE1_READY",
+    "PROVIDER_ROUTER_STAGE1_OK",
+    "provider=real_chrome_cdp",
+    "reason_code=extension_unavailable_cdp_fallback_allowed",
+    "schema_version=1",
+    "fallback_from=chrome_extension"
+  ]
+}

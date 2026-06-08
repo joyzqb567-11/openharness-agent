@@ -1,0 +1,16 @@
+{
+  "action_id": "browser_run_0c159f5f91d0e505-action-1",
+  "run_id": "browser_run_0c159f5f91d0e505",
+  "stage_id": "browser_type",
+  "tool_name": "browser_type",
+  "arguments_redacted": {
+    "selector": "#name",
+    "text": "Codex"
+  },
+  "status": "completed",
+  "started_at_ms": 1780313540887,
+  "finished_at_ms": 1780313540908,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

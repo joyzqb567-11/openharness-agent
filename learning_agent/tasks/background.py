@@ -21,6 +21,8 @@ class BackgroundCommand:  # 新增代码+TasksSplit: 保存一个后台命令的
     started_at: str  # 新增代码+TasksSplit: 保存启动时间文本；如果没有这行代码，用户难以判断后台任务运行了多久。
     stdout_thread: threading.Thread | None = None  # 新增代码+TasksSplit: 保存 stdout reader 线程便于停止时等待收尾；如果没有这行代码，Windows 临时目录可能在 reader 线程未结束时仍被占用。
     stderr_thread: threading.Thread | None = None  # 新增代码+TasksSplit: 保存 stderr reader 线程便于停止时等待收尾；如果没有这行代码，错误输出管道可能延迟释放导致测试清理失败。
+    monitor_thread: threading.Thread | None = None  # 新增代码+BackgroundAutoNotify: 保存自动收尾监控线程对象；若没有这行代码，后台命令结束只能靠模型手动 read 才会写入持久状态。
+    stop_requested: bool = False  # 新增代码+BackgroundAutoNotify: 记录 stop_background_command 是否已经接管停止流程；若没有这行代码，自动监控可能把用户主动停止误报成失败或完成。
 
 
 def drain_text_queue(output_queue: queue.Queue[str], max_chars: int) -> str:  # 新增代码+TasksSplit: 非阻塞读取队列中的增量文本；如果没有这行代码，后台 read/stop 输出读取逻辑会继续留在主文件里。

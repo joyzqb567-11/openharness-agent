@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_880309c7886b0c52",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Codex CLI 返回格式错误：{\"decision_note\":\"用户明确要求使用本地画图软件完成桌面绘图任务，因此先启动本机画图应用并在后续观察后逐步绘制。\",\"text\":\"\",\"tool_calls\":[{\"name\":\"computer_action\",\"arguments\":{\"action\":\"launch_app\",\"confirm_desktop_control\":true,\"app_name\":\"mspaint}}]} } malformed. Need proper. final must JSON. Ensure no markdown. Also tool_calls array. Need fix. 补. (Need no extra fields). ileswi Wait final currently invalid. Need provide valid.}      久草Ndzi final.      (analysis shouldn't influence). Need include app_name value.   :    Need",
+      "started_at": "2026-06-06T09:46:58Z",
+      "completed_at": "2026-06-06T09:56:25Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T09:46:58Z",
+  "updated_at": "2026-06-06T09:56:25Z"
+}

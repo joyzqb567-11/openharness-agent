@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_5e0f87e2ef5b5edc-action-1",
+  "run_id": "browser_run_5e0f87e2ef5b5edc",
+  "stage_id": "browser_close",
+  "tool_name": "browser_close",
+  "arguments_redacted": {
+    "all": true
+  },
+  "status": "completed",
+  "started_at_ms": 1780406560427,
+  "finished_at_ms": 1780406560504,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

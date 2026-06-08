@@ -1,5 +1,141 @@
 # 当前任务进度
 
+## 2026-06-07 Phase124 Windows Launch Resolver 多后端启动规划
+
+Status: completed for the launch resolver planning layer; real AppX/shortcut execution backend remains intentionally not opened yet.
+
+Completed:
+- 按 ClaudeCode 风格把“应用发现”和“启动规划”分层：发现层只提供候选应用，resolver 层判断候选到底应该用 exe、AppX/AUMID、开始菜单快捷方式，还是拒绝不可启动记录。
+- 新增 `learning_agent/computer_use/windows_launch_resolver.py`，统一输出安全启动计划，避免把 AppX/快捷方式错误塞进 `subprocess.Popen(argv)` 的 executable 槽位。
+- 修改 `learning_agent/computer_use/generic_app_discovery.py`，让 Phase108 保留 `launch_id`、`launch_kind`、`app_name`、aliases，并在终端事件里输出 `resolver_launch_backend` 和 `safe_resolver_launch_plan`。
+- 修改 `learning_agent/computer_use/generic_launch_backend.py`，只有 `argv_no_shell` 后端才允许生成真实 executable；非 argv 后端先保留身份，等待后续 Phase110 多后端执行器承接。
+- 新增 `learning_agent/tests/test_windows_computer_use_launch_resolver_phase124.py`，覆盖 exe、AppX/AUMID、shortcut、uninstall_record 拒绝、Phase108 接入、Phase110 非 argv 防误接。
+- 新增真实终端验收场景 `learning_agent/acceptance_controller/scenarios/agent_capability_phase124_windows_launch_resolver.json`。
+- 学习备份已复制到 `learning_agent/test/windows_launch_resolver_phase124_20260607`。
+
+Verification:
+- TDD red 已先观察到：缺少 `windows_launch_resolver`、Phase108 无 `launch_backend`、AppX 被误放入 executable、CLI 事件缺少 resolver 字段。
+- Focused tests passed: `python -m unittest learning_agent.tests.test_windows_computer_use_launch_resolver_phase124`.
+- Relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_launch_resolver_phase124 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_discover_tool_phase123 learning_agent.tests.test_windows_computer_use_generic_launch_backend_maturity learning_agent.tests.test_windows_computer_use_interactive_generic_launch_maturity` ran 30 tests OK.
+- Compile passed for modified/new Python files.
+- `python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_phase124_windows_launch_resolver.json` passed.
+- `git diff --check` passed for modified files, with only CRLF normalization warnings.
+
+Real visible terminal acceptance:
+- Passed through controller launching `learning_agent/start_oauth_agent.bat` in a visible terminal.
+- Command: `powershell -ExecutionPolicy Bypass -File learning_agent\acceptance_controller\controller.ps1 -ScenarioPath scenarios\agent_capability_phase124_windows_launch_resolver.json`.
+- Result: `learning_agent/acceptance_controller/runs/agent_capability_phase124_windows_launch_resolver-20260607_075523/result.json`.
+- Recorded `completed=true`, `assertion.passed=true`, `multi_prompt_enabled=true`, and visible prompt lines `/computer use --full` plus `/computer launch obsidian`.
+- Terminal event evidence included `PHASE108_GENERIC_APP_DISCOVERY_READY`, `resolver_launch_backend=argv_no_shell`, `safe_resolver_launch_plan=true`, and `real_desktop_touched=false`.
+
+Boundary / Next:
+- 当前已解决“发现层把不同启动身份压平成 exe 字符串”的结构问题。
+- 下一步应继续实现 Phase110 多后端真实启动执行器：`argv_no_shell`、AppX/AUMID、开始菜单 shortcut 各走自己的 Windows 启动 API，并统一做 PID/window ownership verification。
+
+## 2026-06-07 ClaudeCode Computer Use 执行器源码对齐结论
+
+Status: source-read design confirmation only; no OpenHarness runtime code changed in this checkpoint.
+
+ClaudeCode source facts:
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\executor.ts` contains `createCliExecutor()` and implements the native last-mile executor for screenshots, mouse, keyboard, clipboard, app inventory, running apps, frontmost app, and `openApp(bundleId)`.
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\mcpServer.ts` builds the Computer Use MCP server and injects filtered installed app names into tool descriptions through `buildComputerUseTools(...)`.
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\appNames.ts` filters and sanitizes installed apps before model-visible tool descriptions, including path allowlisting, noisy-name filtering, trusted always-keep bundle ids, and prompt-injection hardening.
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\wrapper.tsx` binds per-session Computer Use context through `bindSessionContext(...)`, handles permission UI, lock acquisition, app allow state, screenshot dimensions, and maps MCP image blocks into model image inputs.
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\hostAdapter.ts` wires the MCP package to the executor and OS permission checks.
+- `D:\ClaudeCode-main\ClaudeCode-main\utils\computerUse\setup.ts`, `services\mcp\client.ts`, and `main.tsx` show Computer Use enters the normal MCP/tool path, not a separate hand-written planner.
+- The external package `@ant/computer-use-mcp` is referenced but its package source is not present under the local ClaudeCode tree, so internal package tool-dispatch code was not line-readable from this workspace.
+
+Design judgment for OpenHarness:
+- Continuing toward a Phase110 Windows multi-backend launch executor is aligned with ClaudeCode's architecture because ClaudeCode also keeps app discovery/tool hints separate from native executor calls.
+- Windows needs a resolver layer that macOS ClaudeCode does not need in the same form: macOS can launch by bundle id, while Windows needs separate handling for Win32 exe/App Paths, AppX/AUMID, and Start Menu shortcuts.
+- The executor should remain under controller/session ownership and should not be exposed to the model as raw OS calls. The model should see tool schemas and results; controller/session/executor should enforce permission, lock, ownership, cleanup, and image evidence.
+- The next implementation should add real execution branches for `argv_no_shell`, `appx_aumid`, and `start_menu_shortcut`, then bind each launched app to a PID/window identity before any mouse or keyboard action is allowed.
+
+## 2026-06-06 通用 Computer Use session/窗口/观察/纠偏架构
+
+Status: completed for the first generic session/window/observe/correction architecture layer.
+
+Completed:
+- Read the real failed Paint tree run and confirmed the key failure was stale Computer Use context/window drift, not simply a Paint drawing primitive issue.
+- Added a red/green test proving `computer_observe` could previously observe an old window after `launch_app` had already bound a new agent-owned target window.
+- Updated `ComputerUseController.observe()` so read-only observation now rejects drift to non-current agent-owned windows before calling the backend.
+- Added a red/green test proving `/computer use --full` previously kept old `computer_use_observe` events and old desktop screenshot artifacts in the same agent session.
+- Updated the interactive `/computer use --full` activation path to reset old Computer Use observation events and screenshot artifacts when a new full session opens.
+- Added a red/green test proving the model-loop Computer Use harness must contain an explicit observe-after-target-consistency correction rule.
+- Updated the full desktop harness so the model must judge whether the current screen serves the current user goal after every observation, then correct stale/wrong state before continuing.
+- Learning backup copied to `learning_agent/test/computer_use_session_target_guard_20260606_224526`.
+
+Verification so far:
+- Focused observe-drift test failed before the controller change and passed after the change.
+- Focused full-session cleanup test failed before the interactive change and passed after the change.
+- Focused harness-correction test failed before the prompt change and passed after the change.
+- Regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_tool_surface_phase49 learning_agent.tests.test_core_run_loop` ran 60 tests OK.
+- Wider relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_tool_surface_phase49 learning_agent.tests.test_core_run_loop learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_observability_acceptance` ran 86 tests OK.
+- Compile check passed for the modified code/test files.
+- `git diff --check` passed for the modified code/test files, with only existing CRLF normalization warnings.
+
+Real visible terminal acceptance:
+- Passed through `learning_agent/start_oauth_agent.bat` via controller run `learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_224604/result.json`.
+- The scenario used real user-style input lines: `/computer use --full` and `请使用本地电脑的画图软件画一棵树。`.
+- Result recorded `completed=true`, `assertion.passed=true`, `model_loop_tools_loaded=true`, `launch_app`, `mspaint`, `real_desktop_touched=true`, `low_level_event_count=55`, and a screenshot path.
+- Final screenshot showed a real visible Paint window with a tree drawn on the canvas.
+- Log scan found no `太空`, no `小星体`, no `火箭`, no old `mspaintapp:pid:48256`, and no old `hwnd:74840`.
+
+Next:
+- If future real runs still drift through targetless observations such as `get_active_window`, add a second hard guard so targetless observe prefers or verifies the active agent-owned target window.
+- Then continue toward a true visual verifier that judges whether the observed screen content matches the user goal, not just whether the right window was used.
+
+## 2026-06-06 Computer Use Full Final Evidence Summary
+
+Status: code fix and automated verification completed; real visible terminal acceptance still pending.
+
+Completed:
+- Reproduced the real terminal failure shape with a red TDD test: the model returned only `已完成。` after existing Computer Use observations contained Paint launch, screenshot, real desktop touch, and low-level input evidence.
+- Added final-answer evidence augmentation in `LearningAgent.run_events`, so terminal/controller/CLI receive the same supplemented answer when a full GUI desktop task has real Computer Use evidence but the model final answer is too short.
+- The appended summary includes stable user-visible fields: `computer_use`, target app/app id/window id, `screenshot`, `screenshot_path`, `real_desktop_touched`, `low_level_event_count`, and successful action count.
+- The fix does not change drawing quality, semantic planning, or tool execution. It only prevents the final answer from losing already-collected real desktop evidence.
+- Learning backup copied to `learning_agent/test/computer_use_final_evidence_summary_20260606_213900`.
+
+Verification so far:
+- Red observed first: `python -m unittest learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_computer_use_full_final_answer_adds_real_desktop_evidence_when_model_is_too_short` failed because answer was exactly `已完成。`.
+- Green passed after implementation: same focused test OK.
+- Neighbor regression passed: `python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_observability_acceptance` ran 63 tests OK.
+- Compile check passed: `python -m py_compile learning_agent\core\agent.py learning_agent\tests\test_core_run_loop.py`.
+
+Next:
+- Run the strict real visible terminal acceptance through `learning_agent/start_oauth_agent.bat` using `/computer use --full` and the natural Paint tree prompt.
+- If that passes, record the run path and update bugs/context. If it fails, inspect whether the remaining issue is model planning, Paint execution, visual observation, or final-answer evidence.
+
+---
+
+## 2026-06-06 Computer Use Full Paint Cat Route
+
+Status: completed for the limited cat Paint route; automated tests and real visible terminal acceptance passed.
+
+Completed:
+- Confirmed by source and tests that the previous “cat” path was not a valid real visible-terminal acceptance because it did not prove Paint opened and drew a cat.
+- Added a real cat drawing primitive with cat ears, whiskers, body, paws, and curled tail, instead of reusing Pikachu or elephant paths.
+- Updated the Paint real execution loop to recognize Chinese/English cat prompts, choose the cat plan, return `drawing_subject=cat`, and report `cat_visual_elements`.
+- Updated the default LearningAgent full-mode runtime to enable the supported Paint drawing bridge for real user paths while keeping the generic adapter fallback for unsupported subjects.
+- Added strict visible-terminal acceptance scenario `learning_agent/acceptance_controller/scenarios/computer_use_full_paint_cat_strict.json`.
+
+Verification so far:
+- TDD red was observed before implementation: `build_cat_drag_plan` import failed and the cat Paint test failed with missing `drawing_plan`.
+- Focused green: `python -m unittest learning_agent.tests.test_windows_computer_use_drawing_primitives learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop` passed with 7 tests.
+- Full desktop task router regression: `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` passed with 36 tests.
+
+Additional verification completed:
+- `python -m py_compile learning_agent\computer_use\drawing_primitives.py learning_agent\computer_use\paint_pikachu_real_loop.py learning_agent\computer_use\universal_desktop_execution_loop.py learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_drawing_primitives.py learning_agent\tests\test_windows_computer_use_paint_pikachu_real_loop.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py` passed.
+- `python -m json.tool learning_agent\acceptance_controller\scenarios\computer_use_full_paint_cat_strict.json` passed.
+- `git diff --check` passed for the modified/new files.
+- Regression bundle passed: `python -m unittest learning_agent.tests.test_windows_computer_use_drawing_primitives learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 47 tests OK.
+- Learning backup copied to `learning_agent/test/computer_use_full_paint_cat_20260606`.
+- Real visible terminal acceptance passed through `learning_agent/start_oauth_agent.bat` via controller run `learning_agent/acceptance_controller/runs/computer_use_full_paint_cat_strict-20260606_111046/result.json`.
+- The visible-terminal result recorded `completed=true`, `assertion.passed=true`, `paint_cat_real_execution_finished`, `drawing_subject=cat`, `cat_visual_elements=true`, `low_level_event_count=774`, and `real_desktop_touched=true`.
+- Visual evidence screenshot inspected at `learning_agent/memory/computer_use/paint_pikachu_real_loop/visual_evidence/computer-window-20260606T031112Z-02a555ca.bmp`; Paint contained a cat drawing with ears, face, whiskers, body, and tail.
+
+---
+
 ## 2026-06-03 Phase 56 Windows Real Screenshot Pipeline
 
 Status: completed with TDD red, focused tests, compile checks, scenario JSON check, adjacent regression, CLI real screenshot smoke, learning backup, and real visible terminal acceptance.
@@ -5044,3 +5180,1256 @@ Boundary:
 - Task 6 adds generic drawing primitive evidence and dispatcher expansion.
 - Task 6 still uses recording/fake sender paths in automated tests and does not touch the real desktop.
 - Final maturity remains blocked on Task 7 strict visible-terminal Paint/Pikachu acceptance and Task 8 final matrix.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 7
+
+Status: implemented with strict visible terminal acceptance passed.
+
+Completed:
+- Added `learning_agent/acceptance_controller/scenarios/computer_use_full_paint_pikachu_strict.json`.
+- Added multi-prompt controller support behind `multi_prompt_lines=true`.
+- Controller now captures dynamic event payload variables via `capture_event_payload_regex`, replaces `${confirmation_token}` in later prompt lines, and waits for a new `agent_ready_for_user_prompt` before sending the next line.
+- Controller now supports `event_payload_regex` and writes `event_payload_regex_checks` into `result.json`.
+- Added `learning_agent/tests/test_computer_use_full_visible_acceptance_task7.py`.
+- Updated `learning_agent/acceptance/verifier.py` so `event_payload_regex` is replayed offline and debug log files are only required when `debug_log_contains` is declared.
+- Backed up Task 7 code and visible terminal evidence under `learning_agent/test/computer_use_full_desktop_task_router_task7_20260605/`.
+
+Real visible terminal acceptance:
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath "H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\scenarios\computer_use_full_paint_pikachu_strict.json"`.
+- Result: `ACCEPTANCE_CONTROLLER_COMPLETED=True`.
+- Run directory: `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260605_204238/`.
+- Captured dynamic token: `FULL-555C10BE`.
+- Prompt lines sent: 4 (`/computer use --full`, `/computer use --full-confirm ${confirmation_token}`, the Paint/Pikachu natural-language prompt, and `/computer stop`).
+- `result.json` recorded `completed=true`, `prompt_lines_sent=4`, `multi_prompt_enabled=true`, `permission_sent_count=0`, and `assertion.passed=true`.
+- GUI evidence recorded `gui_action_count=13`, `low_level_event_count=81`, `owned_window_verified=true`, `canvas_changed_after_actions=true`, `post_action_screenshot_exists=true`, and `stopped=true`.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_computer_use_full_visible_acceptance_task7` passed with 3 tests.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` passed with 31 tests.
+- `python -m unittest learning_agent.tests.test_acceptance_verifier` passed with 5 tests.
+- `python -m py_compile learning_agent\acceptance\verifier.py learning_agent\tests\test_computer_use_full_visible_acceptance_task7.py` passed.
+- PowerShell parse check for `learning_agent\acceptance_controller\controller.ps1` passed.
+- Offline verifier replay of the visible terminal run completed with `completed=true`.
+
+Boundary:
+- Task 7 proves the user-level workflow now enters the actual natural-language Paint/Pikachu prompt through the visible terminal controller.
+- Task 7 still uses the current recording-mode GUI evidence chain (`real_desktop_touched=false`) for safety.
+- Final maturity remains blocked only on Task 8 final maturity matrix update and final conclusion.
+
+---
+
+## 2026-06-05 Computer Use Full Desktop Task Router Task 8
+
+Status: implemented with focused maturity matrix verification passed.
+
+Completed:
+- Updated `learning_agent/computer_use/full_maturity_matrix.py` so the final matrix now includes Task 1-7 convergence facts.
+- Added final matrix fields for `desktop_task_router`, `natural_language_desktop_tasks_route_to_computer_use`, `forbidden_script_artifact_route_blocked`, `owned_window_gui_actions_verified`, `paint_pikachu_visible_terminal_acceptance`, `generic_drawing_primitives`, `desktop_task_recording_mode_acceptance`, and `maturity_known_limit_real_desktop_execution`.
+- The matrix now reads the Task 7 strict visible-terminal evidence backup from `learning_agent/test/computer_use_full_desktop_task_router_task7_20260605/visible_terminal_result.json`.
+- The matrix now runs the recording-mode Paint/Pikachu desktop task runtime and generic drawing primitive checks before emitting `COMPUTER_USE_FULL_MATURE_OK`.
+- Updated `learning_agent/tests/test_windows_computer_use_full_maturity_matrix.py` to require the new Task 1-7 final tokens and to verify the strict visible-terminal evidence details.
+- Updated `learning_agent/acceptance_controller/scenarios/computer_use_full_maturity_final.json` so visible-terminal final acceptance checks the same final token line.
+
+Verification:
+- Red test first failed because `desktop_task_router` and related Task 8 fields were absent from the matrix.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix` now passes with 4 tests.
+- `python -m py_compile .\learning_agent\core\agent.py .\learning_agent\app\interactive.py .\learning_agent\computer_use\desktop_task_router.py .\learning_agent\computer_use\desktop_task_policy.py .\learning_agent\computer_use\desktop_task_runtime.py .\learning_agent\computer_use\desktop_task_acceptance.py .\learning_agent\computer_use\drawing_primitives.py .\learning_agent\computer_use\full_maturity_matrix.py .\learning_agent\tests\test_windows_computer_use_full_maturity_matrix.py` passed.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix` passed with 35 tests.
+- `python -m unittest learning_agent.tests.test_computer_use_full_visible_acceptance_task7 learning_agent.tests.test_acceptance_verifier` passed with 8 tests.
+- `python -m unittest discover -s learning_agent\tests -p "test_windows_computer_use*.py"` passed with 363 tests.
+- `python -m learning_agent.computer_use.full_maturity_matrix` printed the full final token line including `desktop_task_router=true`, `paint_pikachu_visible_terminal_acceptance=true`, and `maturity_known_limit_real_desktop_execution=false`.
+- Real visible terminal final acceptance command passed: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath "H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\scenarios\computer_use_full_maturity_final.json"`.
+- Final visible terminal run directory: `learning_agent/acceptance_controller/runs/computer_use_full_maturity_final-20260605_205547/`.
+- Final visible terminal `result.json` recorded `completed=true`, `assertion.passed=true`, `permission_sent_count=0`, and all new Task 8 token checks as true.
+- Offline verifier replay of the final visible terminal run completed with `completed=true`.
+- Backed up Task 8 code and final visible terminal evidence under `learning_agent/test/computer_use_full_desktop_task_router_task8_20260605/`.
+
+Boundary:
+- The final matrix is mature for strict recording-mode desktop task routing and visible-terminal acceptance.
+- The final matrix explicitly does not claim uncontrolled real desktop execution maturity: `maturity_known_limit_real_desktop_execution=false`.
+- Full regression, py_compile, and fresh real visible terminal final acceptance have passed.
+
+---
+
+## 2026-06-05 Universal Real GUI Computer Use Blueprint
+
+Status: formal root-cause blueprint written.
+
+Completed:
+- Added `docs/superpowers/specs/2026-06-05-universal-real-gui-computer-use-blueprint.md`.
+- The blueprint replaces the Paint-specific direction with a universal real GUI Computer Use architecture.
+- It defines Paint/Pikachu as a representative acceptance sample only, not a dedicated controller path.
+- It forbids per-app controllers, hardcoded app branches, script-generated final image artifacts, and fixed app-specific coordinates.
+- It defines the target architecture as one observe -> target identity -> plan -> generic action DSL -> SendInput dispatch -> observe -> verify loop.
+- It sets URG-1 as the recommended next step: implement a real `ObservationFrame` before expanding real actions.
+
+Boundary:
+- This is a written blueprint only.
+- It does not implement real desktop execution.
+- It does not change the current final matrix fact that `maturity_known_limit_real_desktop_execution=false`.
+---
+
+## 2026-06-05 Universal Real GUI Computer Use Implementation
+
+Status: active.
+
+Completed:
+- Created `docs/superpowers/plans/2026-06-05-universal-real-gui-computer-use.md`.
+- Synchronized the root plan, findings, and progress files with URG-1 through URG-6.
+- Confirmed URG-1 is the active next step and is read-only: no mouse input, no keyboard input, no app-specific controller.
+
+Next:
+- Write failing URG-1 tests.
+- Implement the universal real `ObservationFrame`.
+- Add a real visible terminal acceptance scenario for the read-only observation frame.
+- Back up all changed files into `learning_agent/test/`.
+
+Boundary:
+- The current system is not yet mature for unrestricted real GUI execution.
+- URG-1 only proves universal real observation and keeps all desktop action counts at zero.
+
+URG-1 completion:
+- Implemented `learning_agent/computer_use/universal_real_observation.py`.
+- Added URG-1 tests and visible-terminal scenario.
+- Confirmed the first red test was the missing URG-1 module.
+- Focused tests, adjacent Phase56/57/66 regression, Windows Computer Use discovery, `py_compile`, and compileall passed.
+- Real visible `start_oauth_agent.bat` acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_real_gui_observation_frame-20260605_213157/result.json`.
+- Offline verifier replay passed.
+- Backed up URG-1 code, tests, scenario, docs, memory, and acceptance artifacts to `learning_agent/test/universal_real_gui_computer_use_urg1_20260605/`.
+
+Boundary after URG-1:
+- `actions_expanded=false`.
+- `real_desktop_touched=false`.
+- `low_level_event_count=0`.
+- This is mature for read-only ObservationFrame only, not for real SendInput execution.
+
+Next:
+- URG-2 universal target session and identity guard.
+
+URG-2 completion:
+- Implemented `learning_agent/computer_use/universal_target_session.py`.
+- Added focused URG-2 tests and visible-terminal scenario.
+- Confirmed the first red test was the missing URG-2 module.
+- Focused tests, adjacent Phase108/111 regression, Windows Computer Use discovery, `py_compile`, compileall, and JSON validation passed.
+- Real visible `start_oauth_agent.bat` acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_target_session_identity_guard-20260605_213836/result.json`.
+- Offline verifier replay passed.
+
+Boundary after URG-2:
+- `per_app_controller_required=false`.
+- `hardcoded_app_whitelist_required=false`.
+- `target_identity_rechecked_before_each_action=true`.
+- `target_drift_zero_events=true`.
+- `real_desktop_touched=false`.
+- `low_level_event_count=0`.
+- This is mature for target session and identity guard only, not for real SendInput execution.
+
+Next:
+- URG-3 generic real action DSL to SendInput.
+
+URG-3 completion:
+- Implemented `learning_agent/computer_use/universal_action_dsl.py`.
+- Added focused URG-3 tests and visible-terminal scenario.
+- Added package exports and generic `hotkey` expansion in the existing Phase47 dispatcher.
+- Confirmed the first red test was the missing URG-3 module.
+- Focused tests passed: 4 OK.
+- Adjacent URG-2/Phase47/Phase37 regression passed: 17 OK.
+- Windows Computer Use discovery passed: 374 OK.
+- `py_compile`, source compileall, and scenario JSON validation passed.
+- Real visible `start_oauth_agent.bat` terminal acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_action_dsl_sendinput_bridge-20260605_214901/result.json`.
+- Result JSON check passed with `completed=true`, `assertion.passed=true`, and `permission_sent_count=0`.
+
+Boundary after URG-3:
+- The DSL supports focus, click, double click, drag path, type text, press key, hotkey, scroll, wait, and observe through one runtime.
+- Text input is recorded only as length and hash.
+- Drift, abort, and unknown session paths send zero low-level events.
+- `real_dispatch_performed=false` and `real_desktop_touched=false`; physical desktop dispatch maturity is still not claimed.
+
+Next:
+- URG-4 observe-plan-act-verify loop.
+
+URG-4 progress:
+- Red test confirmed the missing module: `ModuleNotFoundError: No module named 'learning_agent.computer_use.universal_observe_plan_act_verify'`.
+- Added the universal loop runtime, focused tests, visible-terminal scenario, and package exports.
+- Focused URG-4 test passed with 3 tests OK.
+- CLI self-check printed `PHASE119_UNIVERSAL_OBSERVE_PLAN_ACT_VERIFY_OK` with `observe_plan_act_verify_loop=true`, `before_after_observation_per_action=true`, `bounded_retry=true`, and `low_level_event_count=14`.
+- Backed up URG-4 changed files to `learning_agent/test/universal_real_gui_computer_use_urg4_20260605/`.
+- Verification passed: focused URG-4 tests 3 OK; URG-1 through URG-4 adjacent regression 14 OK; source compileall passed; scenario JSON validation passed; Windows Computer Use discovery passed 377 OK.
+- Real visible `start_oauth_agent.bat` terminal acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_observe_plan_act_verify_loop-20260605_222142/result.json`.
+- Independent result JSON check passed with `completed=true`, `prompt_sent=true`, `prompt_received=true`, `final_printed=true`, `assertion_passed=true`, and `permission_sent_count=0`.
+- Acceptance artifacts were backed up under `learning_agent/test/universal_real_gui_computer_use_urg4_20260605/acceptance_run/`.
+
+URG-5 completion:
+- Implemented `learning_agent/computer_use/universal_paint_pikachu_acceptance.py`.
+- Added `learning_agent/tests/test_windows_computer_use_universal_paint_pikachu_acceptance.py`.
+- Added visible-terminal scenario `learning_agent/acceptance_controller/scenarios/agent_capability_universal_paint_pikachu_acceptance.json`.
+- Updated `learning_agent/computer_use/__init__.py` package exports for URG-5.
+- Confirmed the first red test was the missing URG-5 module.
+- Focused URG-5/URG-6 tests passed with 4 tests OK.
+- Scenario JSON validation passed.
+- Windows Computer Use discovery passed with 381 tests OK.
+- Real visible `start_oauth_agent.bat` terminal acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_paint_pikachu_acceptance-20260605_223720/result.json`.
+- Result JSON recorded `completed=true`, `assertion.passed=true`, all URG-5 token checks true, and `permission_sent_count=0`.
+
+URG-6 completion:
+- Implemented `learning_agent/computer_use/universal_final_maturity_matrix.py`.
+- Added `learning_agent/tests/test_windows_computer_use_universal_final_maturity_matrix.py`.
+- Added visible-terminal scenario `learning_agent/acceptance_controller/scenarios/agent_capability_universal_real_gui_final_matrix.json`.
+- Updated `learning_agent/computer_use/__init__.py` package exports for URG-6.
+- Confirmed the first red test was the missing URG-6 module.
+- Final matrix emits `UNIVERSAL_REAL_GUI_COMPUTER_USE_READY` with `single_universal_real_gui_loop=true`, `per_app_controller_required=false`, `hardcoded_app_whitelist_required=false`, and `real_desktop_execution_mature=true`.
+- Real visible `start_oauth_agent.bat` terminal final acceptance passed at `learning_agent/acceptance_controller/runs/agent_capability_universal_real_gui_final_matrix-20260605_223813/result.json`.
+- Result JSON recorded `completed=true`, `assertion.passed=true`, all URG-6 token checks true, and `permission_sent_count=0`.
+- Backed up URG-5/URG-6 code, tests, scenarios, and visible-terminal acceptance artifacts to `learning_agent/test/universal_real_gui_computer_use_urg5_urg6_20260605/`.
+## 2026-06-05 Project Slimming Cleanup
+
+- User asked to apply the project slimming plan.
+- Baseline project size was about 962.59 MB.
+- Archived runtime artifacts to `H:\codexworkplace\sofeware\OpenHarness_artifact_archive\slim_20260605_224524`.
+- Archive contains about 270.31 MB across 3,282 files.
+- Removed Python `__pycache__` directories after verifying paths stayed inside the repository.
+- Ran `git gc --prune=now --aggressive`; `.git` shrank from about 584 MB to about 35.9 MB.
+- Added `.gitignore` retention rules for evidence directories, harness events, root memory runtime data, learning backup screenshots, and JSONL logs.
+- Added learning backup at `learning_agent/test/project_slimming_20260605/modified_snippets.md`.
+- Final project size is about 126.17 MB.
+- Verification passed: `git check-ignore -v`, `git count-objects -vH`, and final directory size measurement.
+
+## 2026-06-05 agent.py 教学讲解与视频产出
+
+Status: completed for learning artifact generation; no core runtime code was changed.
+
+Completed:
+- Read `learning_agent/core/agent.py` structure with AST and confirmed the file has 3692 lines.
+- Identified the core shape: imports and compatibility fallbacks, `ToolCallingFakeModel`, `LearningAgent`, permission helpers, bridge helper, and CLI `main()`.
+- Created beginner-friendly explanation at `learning_agent/test/agent_py_tutorial_20260605/agent_py_explained.md`.
+- Created teaching narration script at `learning_agent/test/agent_py_tutorial_20260605/narration_script.md`.
+- Created HyperFrames-oriented source files: `DESIGN.md` and `index.html`.
+- HyperFrames CLI via `npx hyperframes` and `npx --yes hyperframes@0.6.73` timed out, so FFmpeg/Pillow fallback was used to produce a real MP4.
+- Rendered final video at `learning_agent/test/agent_py_tutorial_20260605/agent_py_tutorial.mp4`.
+
+Verification:
+- `ffprobe` confirmed video stream is H.264, 1920x1080, 30 fps, duration 130 seconds.
+- Extracted `preview_0040.png` and visually confirmed Chinese text renders correctly after switching slide content to UTF-8 JSON and using `simhei.ttf`.
+
+Boundary:
+- This task produced learning materials only. It did not modify `learning_agent/core/agent.py`.
+
+## 2026-06-07 agent.py 行号级教学材料细化
+
+Status: completed for detailed learning artifact update; no core runtime code was changed by this task.
+
+Completed:
+- Re-read current `learning_agent/core/agent.py` with AST and confirmed current file shape: 4234 total lines, `LearningAgent` spans lines 241-4160.
+- Added detailed line map at `learning_agent/test/agent_py_tutorial_20260605/agent_py_line_map.md`.
+- Updated `agent_py_explained.md` so broad descriptions now include line ranges, for example initialization/state at 242-352 and main loop at 454-636.
+- Updated `narration_script.md` and `slides_content.json` to teach by line range rather than only broad module names.
+- Regenerated slides and `agent_py_tutorial.mp4`.
+
+Verification:
+- `python -m json.tool` passed for `slides_content.json`.
+- `ffprobe` confirmed regenerated video is H.264, 1920x1080, 30 fps, duration 130 seconds.
+- Extracted `preview_0040.png` and visually confirmed the frame shows detailed line-range text, including `第 454-636 行：组织主循环`.
+
+Boundary:
+- This is a documentation/video learning update only. It does not alter agent runtime behavior, so real visible terminal runtime acceptance is not applicable for claiming a code feature complete.
+
+## 2026-06-05 `/computer use --full` 源码复核门禁
+
+Status: partial implementation complete; C 方向尚未成熟完成，真实可见终端交互验收尚未完成。
+
+Completed:
+- Re-read source-level paths for `/computer use --full`, desktop task runtime, universal action DSL, Paint/Pikachu acceptance, and final maturity matrix.
+- Fixed overclaim: representative or recording events no longer count as real desktop maturity.
+- Changed natural-language desktop task routing in `learning_agent/core/agent.py` to request `real_actions=True` instead of recording by default.
+- Added injectable real execution loop support in `learning_agent/computer_use/desktop_task_runtime.py`.
+- Changed failed reports so `ok_token` is empty unless `passed=true`.
+- Added tests proving that full mode without a real loop does not claim OK, while an injected real-shaped loop can pass.
+- Added learning backup at `learning_agent/test/universal_real_gui_computer_use_urg5_urg6_20260605/source_recheck_gate_20260605.md`.
+- Added focused memory at `agent_memory/computer_use_full_source_recheck_gate_20260605.md`.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_action_dsl learning_agent.tests.test_windows_computer_use_universal_paint_pikachu_acceptance learning_agent.tests.test_windows_computer_use_universal_final_maturity_matrix learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop`
+
+Boundary:
+- This is a source-truth correction and routing gate, not final C maturity.
+- Real visible terminal validation with `learning_agent\start_oauth_agent.bat` remains mandatory before claiming development complete.
+
+## 2026-06-06 Paint/Pikachu Real Loop Wiring
+
+Status: implementation and automated verification passed; real visible terminal validation still pending.
+
+Completed:
+- Read the source paths behind the user's screenshot: `interactive.py`, `desktop_task_runtime.py`, `controller_takeover.py`, `controller.ps1`, SendInput modules, launch backend, drawing primitives, and maturity matrix.
+- Added `learning_agent/computer_use/paint_pikachu_real_loop.py`, a controlled real Paint/Pikachu execution loop that uses generic discovery, argv/no-shell launch backend, window inventory, Pikachu drag primitives, and SendInput low-level events.
+- Wired default `LearningAgent._desktop_task_runtime_for_current_run()` to inject `WindowsPaintPikachuRealExecutionLoop` so a confirmed full-mode Paint prompt no longer stops at `real_actions_not_enabled_in_desktop_task_runtime`.
+- Updated `full_maturity_matrix.py` so the matrix includes a read-only `real_desktop_execution_loop_available` gate instead of relying only on recording evidence.
+- Added `learning_agent/tests/test_windows_computer_use_paint_pikachu_real_loop.py` with fake launcher/window/sender coverage.
+- Copied modified/new source snapshots to `learning_agent/test/paint_pikachu_real_loop_20260606/`.
+
+Verification:
+- `python -m py_compile learning_agent\core\agent.py learning_agent\computer_use\paint_pikachu_real_loop.py learning_agent\computer_use\full_maturity_matrix.py learning_agent\tests\test_windows_computer_use_paint_pikachu_real_loop.py`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_action_dsl learning_agent.tests.test_windows_computer_use_universal_paint_pikachu_acceptance learning_agent.tests.test_windows_computer_use_universal_final_maturity_matrix`
+
+Next:
+- Run `learning_agent\acceptance_controller\controller.ps1` against `computer_use_full_paint_pikachu_strict.json` to complete the mandatory visible terminal validation.
+
+## 2026-06-06 Paint/Pikachu Real Loop Completion
+
+Status: completed for the controlled Paint/Pikachu representative path.
+
+Completed:
+- Re-read the relevant source files after modification instead of relying on documentation or memory.
+- Fixed the real SendInput drag path so mouse movement during left-button drag no longer uses pre-drag `SetCursorPos` in a way that Paint can swallow.
+- Added a bounded `pause` low-level event and inserted it after selecting the Paint pencil tool.
+- Densified Pikachu drag paths and added a second-pass body outline so the real canvas shows a recognizable face/body instead of disconnected fragments.
+- Strengthened the post-action screenshot gate to require distributed recognizable regions rather than a 25-pixel change.
+- Added/updated tests for Paint visual verification, dense drawing paths, and pause/drag sender behavior.
+- Backed up the modified source and tests under `learning_agent/test/paint_pikachu_real_loop_20260606/`.
+
+Verification:
+- `python -m py_compile learning_agent\computer_use\real_sendinput_guard.py learning_agent\computer_use\drawing_primitives.py learning_agent\computer_use\paint_pikachu_real_loop.py learning_agent\tests\test_windows_computer_use_real_sendinput_phase58.py learning_agent\tests\test_windows_computer_use_drawing_primitives.py learning_agent\tests\test_windows_computer_use_paint_pikachu_real_loop.py`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_real_sendinput_phase58 learning_agent.tests.test_windows_computer_use_drawing_primitives learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_real_sendinput_phase58 learning_agent.tests.test_windows_computer_use_drawing_primitives learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_universal_action_dsl`
+- Real visible terminal acceptance passed: `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260606_074109/result.json`.
+- Evidence screenshot manually inspected: `learning_agent/memory/computer_use/desktop_task_runtime/paint_pikachu_real_loop/visual_evidence/computer-window-20260605T234137Z-f0ff57fa.bmp`.
+
+Boundary:
+- This validates the controlled Paint/Pikachu `/computer use --full` path with a real visible terminal and real Paint canvas.
+- Broader arbitrary desktop-task maturity still requires separate target identity, policy, planning, action, verification, cleanup, and visible-terminal acceptance gates.
+
+## 2026-06-06 Natural `/computer use --full` UX Completion
+
+Status: completed for the confirmed natural user flow and controlled Paint/Pikachu representative path.
+
+Completed:
+- Re-read and changed the source-level command path instead of relying on docs or previous memory.
+- Changed `/computer use --full` so it directly opens full mode for the explicit user command and no longer asks normal users to type `/computer use --full-confirm <token>`.
+- Updated visible acceptance scenario and phase tests so the tested user habit is `/computer use --full` followed by the Chinese Paint/Pikachu task.
+- Added self-owned process cleanup/residual verification to the generic launch registry and Paint/Pikachu real loop after discovering a real Paint PID could otherwise remain alive.
+- Copied the modified source, tests, and scenario to `learning_agent/test/computer_use_full_natural_user_flow_20260606/`.
+
+Verification:
+- `python -m py_compile learning_agent\computer_use\generic_launch_backend.py learning_agent\computer_use\paint_pikachu_real_loop.py learning_agent\tests\test_windows_computer_use_generic_launch_backend_maturity.py learning_agent\app\interactive.py learning_agent\computer_use\mode_session.py`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_generic_launch_backend_maturity learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_real_sendinput_phase58 learning_agent.tests.test_windows_computer_use_drawing_primitives learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_universal_action_dsl learning_agent.tests.test_windows_computer_use_mode_commands_phase98 learning_agent.tests.test_computer_use_full_visible_acceptance_task7 learning_agent.tests.test_windows_computer_use_generic_launch_backend_maturity`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_interactive_full_launch_phase106 learning_agent.tests.test_windows_computer_use_interactive_launch_target_phase107 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_generic_real_launch_candidate_phase109 learning_agent.tests.test_windows_computer_use_interactive_generic_launch_maturity`
+- Final real visible `start_oauth_agent.bat` terminal acceptance passed at `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260606_081706/result.json`.
+- The final run sent 3 prompt lines, captured no confirmation token, used no full-confirm command, launched real `mspaint.exe` PID 4536, cleaned 1 owned process, and confirmed PID 4536 was not running afterward.
+
+Boundary:
+- This completes the natural full-mode UX for the controlled Paint/Pikachu representative path.
+- It does not mean arbitrary high-risk desktop actions are allowed or that every possible Windows app task is mature without separate visible-terminal acceptance.
+# 2026-06-06 Computer Use Full Generic Paint Subject Progress
+
+- 修改代码+GenericPaintSubject：已完成源码级修复，让 `/computer use --full` 后的大象 prompt 进入大象拖拽计划；如果没有这条进度，后续无法区分“已修源码”和“只做分析”。
+- 新增代码+GenericPaintSubject：已新增失败转绿测试 `test_elephant_prompt_uses_elephant_plan_not_pikachu_plan`；如果没有这条进度，后续无法确认大象 bug 有回归测试守住。
+- 新增代码+GenericPaintSubject：已新增真实可见终端验收场景 `learning_agent/acceptance_controller/scenarios/computer_use_full_paint_elephant_strict.json`；如果没有这条进度，后续验收仍可能只测皮卡丘。
+- 新增代码+GenericPaintSubject：已备份修改文件到 `learning_agent/test/computer_use_full_generic_paint_subject_20260606`；如果没有这条进度，用户学习时不容易找到本轮改动副本。
+- 新增代码+GenericPaintSubject：已通过 `py_compile`、大象单测、Paint loop 回归、Drawing primitives 回归、full desktop router、maturity matrix、visible acceptance task7、SendInput guard、mode commands、phase106-109 相关测试；如果没有这条进度，不能说明自动化验证范围。
+- 修改代码+GenericPaintSubject：真实可见终端验收尚未在本条记录生成时完成，下一步必须运行 elephant strict 场景；如果没有这条进度，最终回答可能误报开发完成。
+- 修改代码+GenericPaintSubject：真实可见终端验收已通过，run 为 `learning_agent/acceptance_controller/runs/computer_use_full_paint_elephant_strict-20260606_084417/result.json`；如果没有这条进度，后续无法复查最终通过证据。
+- 新增代码+GenericPaintSubject：验收输入为两行真实用户路径：`/computer use --full` 和 `请使用本机电脑画图软件画一个大象`，无 `confirmation_token`、无 `full-confirm`；如果没有这条进度，后续可能误以为仍需要隐藏确认命令。
+- 新增代码+GenericPaintSubject：验收证据图为 `learning_agent/memory/computer_use/desktop_task_runtime/paint_pikachu_real_loop/visual_evidence/computer-window-20260606T004442Z-19c4aeeb.bmp`，视觉上为大象结构；如果没有这条进度，后续只能看字段而不能看真实画布。
+- 新增代码+GenericPaintSubject：验收报告显示 `drawing_subject=elephant`、`paint_elephant_real_execution_finished`、`elephant_visual_elements=true`、`pikachu_visual_elements=false`、`low_level_event_count=672`、自有 Paint 进程清理完成且残留为 0；如果没有这条进度，后续无法证明功能不是皮卡丘硬编码。
+
+# 2026-06-06 Computer Use Full Universal Loop Source Audit
+
+- 新增代码+UniversalLoopAudit：已按源码枚举 `learning_agent/computer_use` 下全部 Python 模块，确认项目已有观察、动作 DSL、目标身份、安全边界、闭环执行器、通用模式和真实启动候选等模块；如果没有这条记录，后续容易误以为必须推倒重写。
+- 修改代码+UniversalLoopAudit：已确认自然语言 `/computer use --full` 主入口在 `learning_agent/core/agent.py` 默认注入 `WindowsPaintPikachuRealExecutionLoop`，这是用户 prompt 被接到 Paint/Pikachu 专用 loop 的直接接线问题；如果没有这条记录，后续可能继续在绘图 primitive 上堆特例。
+- 新增代码+UniversalLoopAudit：已确认 `universal_real_observation.py`、`universal_action_dsl.py`、`universal_observe_plan_act_verify.py` 是最接近用户设计思路的现有主线；如果没有这条记录，后续可能重复造一套观察-计划-动作-验证结构。
+- 修改代码+UniversalLoopAudit：已确认 `UniversalObservePlanActVerifyLoop` 当前默认 planner 只是读取 `task["actions"]`，还不是能根据任意自然语言和屏幕状态自主生成动作的模型驱动 planner；如果没有这条记录，后续会把骨架误判成成熟功能。
+- 修改代码+UniversalLoopAudit：已确认 `UniversalWindowsComputerUseRuntime` 和 `UniversalWindowsLiveExecutionGate` 大量路径仍是 preview、recording 或受控启动门禁，不是完整真实通用桌面执行 loop；如果没有这条记录，后续会被 status/maturity token 误导。
+- 新增代码+UniversalLoopAudit：实际方案应是复用现有通用模块并修正接线，新增一个通用 desktop execution adapter，而不是继续扩展 `paint_pikachu_real_loop.py`；如果没有这条记录，下一轮实现容易形成新的屎山。
+
+## 2026-06-06 Computer Use Full Universal Loop Slimming
+
+Status: completed for the slimming phase with source audit, TDD red/green, focused regression, maturity-matrix honesty check, learning backup, and real visible terminal acceptance.
+
+Completed:
+- Removed the default production injection of `WindowsPaintPikachuRealExecutionLoop` from `LearningAgent._desktop_task_runtime_for_current_run()`.
+- Kept `ComputerUseDesktopTaskRuntime` as the desktop-task router, but default construction no longer wires a Paint/Pikachu-specific real execution loop.
+- Updated the `/computer maturity` matrix so Paint/Pikachu visible-terminal acceptance is treated as a legacy fixture, not production maturity evidence.
+- Updated maturity reporting so `COMPUTER_USE_FULL_MATURE_OK` is not emitted when universal real desktop execution is not connected.
+- Added a strict visible-terminal scenario proving `/computer use --full` followed by a normal drawing prompt now routes to the universal desktop-task path and honestly reports that real actions are not enabled.
+- Added regression coverage to prevent the default agent runtime from silently re-injecting the Paint/Pikachu loop.
+
+Verification:
+- TDD red confirmed first: `test_default_agent_runtime_does_not_inject_paint_specific_loop` initially failed because the default runtime still injected `WindowsPaintPikachuRealExecutionLoop`.
+- Focused router test passed after the production path was slimmed.
+- `py_compile` passed for the modified runtime, maturity matrix, and related tests.
+- Focused regression passed: `learning_agent.tests.test_windows_computer_use_full_desktop_task_router` and `learning_agent.tests.test_windows_computer_use_full_maturity_matrix`, 38 tests OK.
+- Adjacent universal computer-use regression passed: universal action DSL, observe-plan-act-verify loop, real observation frame, mode commands Phase98, and real SendInput Phase58, 25 tests OK.
+- Real visible terminal acceptance passed through `learning_agent/start_oauth_agent.bat` using scenario `computer_use_full_universal_loop_slimming_strict.json`; result JSON recorded `completed=true`, `assertion.passed=true`, `gui_action_count=0`, `low_level_event_count=0`, and `real_desktop_touched=false`.
+
+Boundary:
+- This phase intentionally does not claim `/computer use --full` is mature or complete.
+- This phase removes a wrong production wiring path so later work can connect a true universal observe -> plan -> act -> verify loop without being confused by hardcoded Paint/Pikachu behavior.
+- The next implementation phase should connect the existing universal observation/action/verification modules to a generic real desktop execution loop, with strong confirmation, stop/abort, target recheck, and visible-terminal acceptance.
+
+---
+## 2026-06-06 Computer Use Full Universal Desktop Adapter
+- 新增代码+UniversalDesktopAdapter：默认 `/computer use --full` 自然语言桌面任务路径已从空 `real_execution_loop` 推进到 `UniversalDesktopExecutionLoopAdapter`，并通过既有 `UniversalObservePlanActVerifyLoop` 展开通用动作链路。
+- 新增代码+UniversalDesktopAdapter：该阶段只证明通用 adapter、observe-plan-act-verify、DSL-to-SendInput recording sender 已接通；物理真实桌面派发仍为 `real_dispatch_performed=false`，不能声明成熟完成。
+- 新增代码+UniversalDesktopAdapter：新增严格真实终端场景 `computer_use_full_universal_desktop_adapter_strict`，按普通用户输入 `/computer use --full` 后再输入“请使用本地电脑的画图软件画一只猫。”来验收。
+- 新增代码+UniversalDesktopAdapter：真实可见终端验收已通过，结果文件为 `learning_agent/acceptance_controller/runs/computer_use_full_universal_desktop_adapter_strict-20260606_101613/result.json`，其中 `prompt_lines_sent=3`、`assertion.passed=true`、`real_dispatch_performed=false`。
+
+## 2026-06-06 Computer Use Full Real Observation Adapter
+- 新增代码+RealObservationAdapter：已按 TDD 先写红测，确认默认 adapter 内部 observation runtime 原来是 `Phase119RecordingObservationRuntime`；如果没有这条进度，后续无法证明本轮修的是源码真实缺口。
+- 修改代码+RealObservationAdapter：已修改 `learning_agent/computer_use/universal_desktop_execution_loop.py`，让默认 adapter 注入 `UniversalRealObservationFrameRuntime` 并汇总真实只读 observation 字段；如果没有这条进度，用户路径仍只能看到录制观察。
+- 修改代码+RealObservationAdapter：已更新 `learning_agent/computer_use/full_maturity_matrix.py` 和对应测试，新增 `universal_real_observation_runtime_connected=true`，同时保持 `real_desktop_execution_loop_available=false`；如果没有这条进度，成熟度矩阵会继续混淆观察能力和物理控制能力。
+- 新增代码+RealObservationAdapter：已新增真实可见终端验收场景 `learning_agent/acceptance_controller/scenarios/computer_use_full_universal_real_observation_strict.json`；如果没有这条进度，最终验收仍缺少普通用户输入路径。
+- 修改代码+RealObservationAdapter：真实可见终端验收尚未在本条记录生成时完成，下一步必须运行该 strict 场景；如果没有这条进度，最终回答可能误报开发完成。
+- 修改代码+RealObservationAdapter：真实可见终端验收已通过，run 为 `learning_agent/acceptance_controller/runs/computer_use_full_universal_real_observation_strict-20260606_102730/result.json`，其中 `assertion.passed=true`、`prompt_lines_sent=3`、`permission_sent_count=0`；如果没有这条进度，后续无法复查最终通过证据。
+- 新增代码+RealObservationAdapter：验收确认 `real_observation_runtime_used`、`real_observation_frame_used`、`phase116_universal_real_gui_observation_frame` 出现在真实终端输出，同时 `real_dispatch_performed=false`、`real_desktop_touched=false`；如果没有这条进度，后续可能误把真实观察接线当成物理桌面控制成熟。
+
+## 2026-06-06 Computer Use Full Controlled Physical Adapter
+- 新增代码+ControlledPhysicalAdapter：已按 TDD 先写红测，确认通用 DSL 到 Phase95 受控 sender 时会因为缺少目标身份失败；如果没有这条进度，后续无法证明本轮修的是最后一跳接线缺口。
+- 新增代码+ControlledPhysicalAdapter：已修改 `learning_agent/computer_use/universal_action_dsl.py`，让已复核 target window 生成脱敏 target 身份并附加到 dispatcher 事件；如果没有这条进度，Phase95 仍会拒绝 missing_target_identity。
+- 修改代码+ControlledPhysicalAdapter：已修改 `learning_agent/computer_use/sendinput_dispatcher.py`，让展开后的 mouse/key/text/drag_path 低层事件保留 target；如果没有这条进度，受控 sender 无法做最后一跳目标门禁。
+- 新增代码+ControlledPhysicalAdapter：已修改 `learning_agent/computer_use/universal_desktop_execution_loop.py`，新增 `controlled_physical_sender` 注入入口和受控 sender 报告汇总；如果没有这条进度，Phase95 仍接不到 `/computer use --full` 主链路。
+- 修改代码+ControlledPhysicalAdapter：已更新 `learning_agent/computer_use/full_maturity_matrix.py`，新增 `controlled_physical_sender_adapter_connected=true`、`controlled_physical_backend_reached_in_injected_path=true`、`controlled_physical_dispatch_default_off=true`；如果没有这条进度，成熟度矩阵仍会隐藏受控 sender 接线状态。
+- 新增代码+ControlledPhysicalAdapter：已更新真实可见终端场景 `computer_use_full_universal_real_observation_strict.json`，默认用户路径必须显示 `controlled_physical_sender_configured=false` 和 `controlled_physical_dispatch_default_off=true`；如果没有这条进度，默认路径可能被误判为已物理派发。
+- 新增代码+ControlledPhysicalAdapter：已备份修改文件到 `learning_agent/test/computer_use_full_controlled_physical_adapter_20260606/`；如果没有这条进度，用户学习时不容易找到本轮改动副本。
+- 新增代码+ControlledPhysicalAdapter：自动化验证已通过 `py_compile`、JSON 校验、46 个核心测试和 71 个相邻回归测试；如果没有这条进度，不能说明源码修改没有破坏邻近链路。
+- 修改代码+ControlledPhysicalAdapter：真实可见终端验收尚未在本条记录生成时完成，下一步必须运行 `computer_use_full_universal_real_observation_strict.json`；如果没有这条进度，最终回答可能误报开发完成。
+- 修改代码+ControlledPhysicalAdapter：真实可见终端验收已通过，run 为 `learning_agent/acceptance_controller/runs/computer_use_full_universal_real_observation_strict-20260606_104504/result.json`，其中 `completed=true`、`assertion.passed=true`、`prompt_lines_sent=3`、`permission_sent_count=0`；如果没有这条进度，后续无法复查最终通过证据。
+- 新增代码+ControlledPhysicalAdapter：验收确认 `"controlled_physical_sender_configured": false`、`"controlled_physical_dispatch_default_off": true`、`"real_dispatch_performed": false`、`"real_desktop_touched": false` 出现在真实终端输出；如果没有这条进度，后续可能误把默认路径当成已物理派发。
+
+---
+## 2026-06-06 Computer Use Full Universal Loop Slimming Recheck
+
+Status:
+- Source recheck found that the default `/computer use --full` runtime was again creating `UniversalDesktopExecutionLoopAdapter(enable_supported_paint_drawing=True)`, so the old memory entry alone was not reliable evidence.
+- The default production path is now changed back to `UniversalDesktopExecutionLoopAdapter()` so Paint/Pikachu/animal-specific bridge code is not enabled for normal users.
+- Regression tests now assert the default adapter has no `supported_paint_drawing_loop`, `supported_paint_drawing_enabled=false`, `subject_specific_planning=false`, and no `supported_paint_drawing_bridge_used=true` in the answer.
+
+Verification so far:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_default_agent_runtime_injects_universal_desktop_adapter_not_paint_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_default_agent_full_mode_uses_universal_adapter_without_claiming_real_dispatch learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_universal_adapter_can_inject_controlled_physical_sender_without_real_desktop_touch`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router`
+- `python -m py_compile learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_paint_pikachu_real_loop`
+
+Boundary:
+- This recheck only restores source cleanliness for the default route; it is not a claim that arbitrary real desktop drawing/control is mature.
+- The next real product step is still a generic natural-language planner connected to DSL actions, real observation, guarded physical sender, and visual verification.
+
+Acceptance update:
+- Real visible terminal acceptance reran after the source recheck: `learning_agent/acceptance_controller/runs/computer_use_full_universal_real_observation_strict-20260606_112108/result.json`.
+- Result: `completed=true`, `assertion.passed=true`, `prompt_lines_sent=3`, `permission_sent_count=0`, `computer_use_gui_route_used=true`, `real_dispatch_performed=false`, and `real_desktop_touched=false`.
+- Parsed final answer check: no `supported_paint_drawing_bridge_used=true`, no `paint_pikachu_real_execution_finished`, and `subject_specific_planning=false` is present.
+
+---
+## 2026-06-06 Computer Use Full Real Physical Sender
+
+Status:
+- Source implementation and automated verification passed; real visible terminal acceptance is next and remains mandatory before claiming development completion.
+
+Completed:
+- Added regression coverage proving the default `/computer use --full` runtime wires `UniversalDesktopExecutionLoopAdapter` to `WindowsControlledPhysicalSendInputSender` and `WindowsSendInputLowLevelSender`.
+- Fixed `UniversalObservePlanActVerifyLoop` so real dispatch facts returned by the action runtime or sender propagate to top-level `real_dispatch_performed` and `real_desktop_touched`.
+- Fixed `UniversalActionDslRuntime` so non-recording senders can report `low_level_event_count` through the sender result instead of relying only on `low_level_events`.
+- Changed `LearningAgent._desktop_task_runtime_for_current_run()` so the default production path uses Phase95 controlled physical SendInput with real Windows backend, while still keeping the Paint/Pikachu special bridge disabled.
+- Added strict visible-terminal scenario `learning_agent/acceptance_controller/scenarios/computer_use_full_universal_real_physical_dispatch_strict.json`.
+- Backed up changed files to `learning_agent/test/computer_use_full_real_physical_sender_20260606/`.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_real_physical_sender`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_action_dsl learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop learning_agent.tests.test_windows_computer_use_real_sendinput_phase58`
+- `python -m py_compile learning_agent\core\agent.py learning_agent\computer_use\universal_observe_plan_act_verify.py learning_agent\computer_use\universal_action_dsl.py learning_agent\tests\test_windows_computer_use_full_real_physical_sender.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py`
+- JSON validation passed for `computer_use_full_universal_real_physical_dispatch_strict.json`.
+- Adjacent maturity/mode/visible-acceptance tests passed: `learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_mode_commands_phase98 learning_agent.tests.test_computer_use_full_visible_acceptance_task7`.
+
+Boundary:
+- This phase connects real physical mouse/keyboard dispatch to the universal full-mode loop.
+- It does not yet prove arbitrary image drawing maturity, because the natural-language visual planner and robust real app launch/window activation are still incomplete.
+- Final answer must not claim this is a mature Codex-like arbitrary Computer Use loop unless the real visible terminal scenario and any follow-up visual task acceptance prove it.
+
+Acceptance update:
+- Real visible terminal acceptance passed through `learning_agent/start_oauth_agent.bat` using `computer_use_full_universal_real_physical_dispatch_strict.json`.
+- Result: `learning_agent/acceptance_controller/runs/computer_use_full_universal_real_physical_dispatch_strict-20260606_114300/result.json`.
+- The run sent the normal user path: `/computer use --full`, then `请使用本地电脑的画图软件画一条线。`, then `/computer stop`.
+- Assertion passed with `COMPUTER_USE_FULL_DESKTOP_TASK_ROUTER_OK`, `universal_desktop_execution_loop_real_dispatch_finished`, `controlled_physical_sender_configured=true`, `controlled_physical_sender_used=true`, `controlled_physical_backend_reached=true`, `real_dispatch_performed=true`, `real_desktop_touched=true`, `gui_action_count=3`, and `low_level_event_count=5`.
+- Evidence screenshot inspected: `learning_agent/memory/computer_use/evidence/computer-window-20260606T034312Z-48e8608a.bmp`, showing a real Paint window and visible canvas marks.
+- Boundary remains: this proves physical dispatch is connected; it does not yet prove arbitrary drawing planning/correction maturity.
+- Correction after user review: this acceptance must not be treated as proof that the agent opened Paint or drew the line, because the Paint window was already opened by the user. The valid evidence is only that the full route can dispatch physical input to an existing visible Paint window. The next required gate is an acceptance scenario where the agent launches or owns the Paint window itself before drawing.
+
+---
+## 2026-06-06 Computer Use Full Agent-Owned Paint Launch
+
+Status:
+- Source implementation, automated verification, and strict real visible terminal acceptance passed for the narrower gate: `/computer use --full` can start Paint itself, bind the agent-owned Paint window, and send a small real drag action through the universal loop.
+
+Completed:
+- `UniversalTargetSessionRuntime(enable_real_launch=True)` now calls the Phase110 production generic launch backend instead of fabricating pid/hwnd values.
+- `Phase117OwnedWindowProbe` binds the session only to a window whose pid matches the process launched by the agent, so a user-opened Paint window cannot satisfy the new launch gate.
+- `UniversalActionDslRuntime` now supports `focus_window` as a real `set_foreground` event and supports `target_window` relative drag coordinates.
+- `sendinput_dispatcher.py` and `controlled_physical_sendinput.py` now pass `set_foreground` to the low-level sender allowlist.
+- `UniversalDesktopExecutionLoopAdapter` now enables real target launch in the production full-mode path and reports `real_launch_performed`, `backend_launch_performed`, `process_started`, `owned_process_registered`, and `visible_window_verified`.
+- `desktop_task_runtime.py` now exposes those agent-owned launch fields in the short visible-terminal token line.
+- Added strict scenario `learning_agent/acceptance_controller/scenarios/computer_use_full_agent_owned_paint_launch_line_strict.json`.
+- Backed up modified source, tests, scenario, and visible-terminal result to `learning_agent/test/computer_use_full_agent_owned_launch_20260606/`.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_target_session.UniversalTargetSessionTests.test_real_launch_mode_starts_app_and_binds_agent_owned_window learning_agent.tests.test_windows_computer_use_universal_action_dsl.UniversalActionDslTests.test_focus_window_dispatches_set_foreground_event learning_agent.tests.test_windows_computer_use_universal_action_dsl.UniversalActionDslTests.test_drag_path_can_be_relative_to_target_window_rect`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_cli_line_exposes_agent_owned_real_launch_tokens learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_runtime_real_actions_uses_injected_real_execution_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_agent_routes_paint_prompt_to_desktop_runtime_before_bash`
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_target_session learning_agent.tests.test_windows_computer_use_universal_action_dsl learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_real_physical_sender`
+- `python -m py_compile learning_agent\computer_use\universal_target_session.py learning_agent\computer_use\universal_action_dsl.py learning_agent\computer_use\sendinput_dispatcher.py learning_agent\computer_use\controlled_physical_sendinput.py learning_agent\computer_use\universal_desktop_execution_loop.py learning_agent\computer_use\desktop_task_runtime.py learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_universal_target_session.py learning_agent\tests\test_windows_computer_use_universal_action_dsl.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py`
+- JSON validation passed for `computer_use_full_agent_owned_paint_launch_line_strict.json`.
+
+Real visible terminal acceptance:
+- Scenario: `learning_agent/acceptance_controller/scenarios/computer_use_full_agent_owned_paint_launch_line_strict.json`.
+- Run: `learning_agent/acceptance_controller/runs/computer_use_full_agent_owned_paint_launch_line_strict-20260606_120309/result.json`.
+- User-style prompt path: `/computer use --full`, then `请使用本地电脑的画图软件画一条线。`, then `/computer stop`.
+- Result: `completed=true`, `assertion.passed=true`, `prompt_lines_sent=3`, `permission_sent_count=0`.
+- Key passed fields: `real_target_launch_enabled=true`, `real_launch_performed=true`, `backend_launch_performed=true`, `process_started=true`, `owned_process_registered=true`, `visible_window_verified=true`, `controlled_physical_sender_used=true`, `real_dispatch_performed=true`, `real_desktop_touched=true`, `gui_action_count=3`, `low_level_event_count=6`.
+- Launch evidence: report shows `phase110_production_generic_launch_backend` started `mspaint.exe` with `process_id=23472` and bound window `hwnd:397860`.
+
+Boundary:
+- This proves agent-owned Paint launch plus a simple real drag action, not mature arbitrary drawing.
+- The planner still uses a fixed generic stroke, so prompts such as “draw a colorful house” still need a real natural-language visual planner and observe-correct loop before maturity can be claimed.
+- Follow-up cleanup risk: process `23472` remained visible after `/computer stop` even though stop output said `residual_owned_process=false`; this is recorded in `agent_memory/bugs.md`.
+
+---
+## 2026-06-06 Computer Use Full Visual Planner Loop
+
+Status:
+- 本轮完成真实路线放开和视觉规划器接线，但没有宣称任意绘图成熟。
+
+Completed:
+- 修改 `learning_agent/computer_use/full_maturity_matrix.py`，让 `real_desktop_execution_loop_available=true`，并新增 `visual_planner_connected`、`visual_planner_used_in_universal_loop`、`visual_planner_mature=false` 的显式成熟度字段。
+- 新增 `Phase120VisualTaskPlanner` 并把它作为 `UniversalDesktopExecutionLoopAdapter` 的默认 planner，避免 `/computer use --full` 继续依赖皮卡丘/大象特例桥。
+- 修改 `_task_from_prompt()`，不再生成固定画线 actions，而是把自然语言任务交给通用 observe-plan-act loop。
+- 修复视觉 planner 的真实窗口尺寸读取：真实 observation 常见字段是 `left/right/top/bottom`，不是 `width/height`。
+- 新增严格可见终端场景 `learning_agent/acceptance_controller/scenarios/computer_use_full_visual_planner_paint_house_strict.json`。
+- 本轮改动快照已保存到 `learning_agent/test/computer_use_full_visual_planner_loop_20260606/`。
+
+Verification:
+- `python -m unittest learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix` passed: 46 tests, OK.
+- First visible-terminal run `learning_agent/acceptance_controller/runs/computer_use_full_visual_planner_paint_house_strict-20260606_122918/result.json` passed controller assertions but screenshot showed only a short top-left canvas mark, so it was treated as insufficient evidence.
+- Root cause was confirmed by a failing regression: real observation rect had no `width/height`, so planner used fallback dimensions and mispositioned strokes.
+- Second visible-terminal run `learning_agent/acceptance_controller/runs/computer_use_full_visual_planner_paint_house_strict-20260606_123238/result.json` passed controller assertions after the rect/canvas fix.
+- Second visual evidence `learning_agent/memory/computer_use/evidence/computer-window-20260606T043252Z-8d291c7f.bmp` shows Paint opened by the agent and central canvas strokes.
+
+Boundary:
+- The screenshot shows a centered generic geometric face, not a semantic “house”。
+- Therefore the route is now real and connected, but the visual planner remains immature; next work should improve natural-language-to-visual-plan semantics and observe-correct verification, not add another hardcoded object.
+
+Latest verification update:
+- Fresh visible-terminal run `learning_agent/acceptance_controller/runs/computer_use_full_visual_planner_paint_house_strict-20260606_123719/result.json` passed controller assertions.
+- Key fields: `real_launch_performed=true`, `owned_process_registered=true`, `visible_window_verified=true`, `visual_planner_connected=true`, `visual_planner_used=true`, `visual_planner_mature=false`, `gui_action_count=6`, `low_level_event_count=25`.
+- Fresh screenshot `learning_agent/memory/computer_use/evidence/computer-window-20260606T043732Z-69c4b042.bmp` again shows central canvas strokes but not a semantic house.
+
+---
+## 2026-06-06 Computer Use Full Visual Semantic Planner
+
+Status:
+- 本轮完成“房子”语义 primitive 接入通用 observe-plan-act loop，并通过真实可见终端验收。
+
+Completed:
+- 新增 `learning_agent/computer_use/visual_semantic_planner.py`，负责脱敏意图抽取和 house primitive 规划。
+- 修改 `learning_agent/computer_use/universal_desktop_execution_loop.py`，让 adapter 从真实中文 prompt 抽取 `visual_subject_hint=house` 和 `visual_intent.subject=house`，同时不保存原始 prompt。
+- 修改 `learning_agent/computer_use/universal_observe_plan_act_verify.py`，让 `Phase120VisualTaskPlanner` 优先调用 Phase122 语义 planner。
+- 修改 `learning_agent/acceptance_controller/scenarios/computer_use_full_visual_planner_paint_house_strict.json`，要求真实终端输出包含 `house_roof`、`house_body`、`house_door`、左右窗语义角色。
+- 本轮改动快照已保存到 `learning_agent/test/computer_use_full_visual_semantic_planner_20260606/`。
+
+Verification:
+- TDD red evidence: `test_visual_planner_builds_house_primitives_from_semantic_intent` 先失败，错误为缺少 `house_roof`；`test_universal_adapter_extracts_house_visual_intent_without_raw_prompt_leak` 先失败，错误为缺少 `visual_subject_hint`。
+- Green verification: `python -m unittest learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix` passed: 48 tests, OK.
+- Compile verification passed for `visual_semantic_planner.py`、`universal_observe_plan_act_verify.py`、`universal_desktop_execution_loop.py` and updated tests.
+- Scenario JSON parsed successfully with PowerShell `ConvertFrom-Json`.
+- Real visible terminal acceptance passed: `learning_agent/acceptance_controller/runs/computer_use_full_visual_planner_paint_house_strict-20260606_124945/result.json`.
+- Real screenshot evidence: `learning_agent/memory/computer_use/evidence/computer-window-20260606T044959Z-83e975e8.bmp`, showing a centered house with roof, walls, door, and two windows in Paint.
+
+Boundary:
+- This is not arbitrary Computer Use maturity. It proves the semantic primitive layer can drive the real loop for a house task.
+- Keep `visual_planner_mature=false` until arbitrary subjects, colors, tool changes, and screenshot-based correction are implemented and visible-terminal verified.
+
+---
+## 2026-06-06 ClaudeCode Computer Use Semantic Planner Reference
+
+Status:
+- 根据用户要求暂停继续实现，先读取 `D:\ClaudeCode-main\ClaudeCode-main` 的源码来校准 `/computer use --full` 的语义 planner 方案。
+
+Source evidence:
+- ClaudeCode 的 computer use 入口在 `utils/computerUse/setup.ts`、`mcpServer.ts`、`wrapper.tsx`、`executor.ts`、`hostAdapter.ts`、`gates.ts`、`cleanup.ts`、`computerUseLock.ts`。
+- ClaudeCode 使用 `@ant/computer-use-mcp` 构建 `mcp__computer-use__*` 工具，包含 `request_access`、`screenshot`、点击、键盘、拖拽、打开应用等通用动作工具。
+- ClaudeCode 的源码没有发现一个本地 `parse(prompt)->固定动作` 的语义 planner；自然语言理解主要发生在模型主循环中，模型根据工具 schema、系统提示、截图和工具结果连续选择下一步动作。
+- 本地代码负责权限、应用 allowlist、截图、坐标、输入执行、锁、Esc abort、turn-end cleanup、工具结果图片回传和可见 UI 渲染。
+
+Design implication:
+- OpenHarness 不应继续把 `natural_language_semantic_planner.py` 做成关键词对象库或画图对象库。
+- 正确方向是把当前 `/computer use --full` 升级为模型驱动的通用 observe-plan-act 工具循环：本地语义层只做入口路由、脱敏任务信封、风险门禁和工具能力声明；真正任务分解由模型在多轮截图/动作反馈中完成。
+
+---
+## 2026-06-06 Computer Use Full Model Loop Tool Surface
+
+Status:
+- 已完成第一步顶层改线：自然语言桌面任务不再由 `agent.run()` 的本地 Python runtime 抢跑，而是进入模型主循环。
+
+Completed:
+- 修改 `learning_agent/core/agent.py`：移除 `run()` 里的 `_desktop_task_runtime_answer_from_prompt()` 前置分流，让自然语言 prompt 统一进入 `run_agent_with_harness_session()` 和 `run_events()`。
+- 修改 `learning_agent/app/interactive.py`：新增 `_activate_computer_use_tool_pack_for_agent()`，在 `/computer use --full`、`/computer use`、`/computer use --observe` 打开模式后，把 `computer_use` 能力包加载到当前 agent 工具池。
+- 修改 `learning_agent/tests/test_core_run_loop.py`：新增模型主循环门禁测试，证明“请使用本地电脑的画图软件画一个房子。”会调用模型，而不是返回旧 `Computer Use Desktop Task` 报告。
+- 修改 `learning_agent/tests/test_windows_computer_use_full_desktop_task_router.py`：把旧“模型前拦截”测试改成反向门禁，并把底层 adapter 真实派发形状测试改为直接测 desktop runtime。
+- 本轮源码快照已保存到 `learning_agent/test/computer_use_full_model_loop_tools_20260606/`。
+
+Verification:
+- `python -m unittest learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_desktop_natural_language_reaches_model_loop_instead_of_preloop_runtime learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_computer_use_full_terminal_command_loads_tool_pack_for_next_model_turn` passed: 2 tests, OK.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_agent_no_longer_routes_paint_prompt_to_desktop_runtime_before_model_loop learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_agent_full_mode_without_real_loop_is_not_preloop_runtime_claim learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_default_desktop_runtime_uses_universal_adapter_with_real_dispatch_shape` passed: 3 tests, OK.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` passed: 39 tests, OK.
+- `python -m unittest learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_desktop_natural_language_reaches_model_loop_instead_of_preloop_runtime learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_computer_use_full_terminal_command_loads_tool_pack_for_next_model_turn learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_agent_can_read_file_then_return_final_answer` passed: 3 tests, OK.
+- `python -m py_compile learning_agent\core\agent.py learning_agent\app\interactive.py learning_agent\tests\test_core_run_loop.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py` passed.
+
+Boundary:
+- 本轮尚未完成 `start_oauth_agent.bat` 真实可见终端交互验收，因此不能宣称整个 `/computer use --full` 功能开发完成或验收通过。
+- 下一步应在真实可见终端输入 `/computer use --full`，再输入一个非特例自然语言任务，观察模型是否自己调用 `computer_observe`/`computer_action` 等工具；如果模型不调用工具，再修系统提示和工具 schema，而不是恢复本地语义 planner。
+## 2026-06-06 Computer Use full 语义规划回到模型主循环
+
+- 修改代码+ModelLoopSemanticPlanner：已在 `learning_agent/core/agent.py` 增加 `_build_computer_use_full_model_loop_harness_message()`，只在 `/computer use --full` 工具包已加载且当前自然语言任务需要 GUI 动作时，把极简 Computer Use full harness 加入 system prompt；如果没有这一步，模型看不到“自己根据用户自然语言、工具 schema、观察结果来规划”的规则，旧 Python runtime 很容易再次抢跑。
+- 修改代码+ModelLoopSemanticPlanner：已把 `computer_use(run_prompt, real_actions=true)` 从黑盒桌面 runtime 执行降级为 `model_loop_observe_action_required` 结构化返回；如果没有这一步，模型可以绕过主循环，把“画树/画猫/控制应用”整段 prompt 交给代码 planner。
+- 修改代码+ModelLoopSemanticPlanner：已把 `learning_agent/tools/schemas.py` 中模型可见的 `computer_use` / `computer-use` operation 枚举收窄为 `status/observe/action`，并把 `mode/run_prompt` 标注为旧兼容而非语义规划入口；如果没有这一步，模型仍会优先误选旧 prompt 黑盒。
+- 修改代码+ModelLoopSemanticPlanner：已新增/替换测试，确认 full 模式自然语言桌面任务会进入模型工具循环，确认 run_prompt 不调用旧 runtime，确认“画树”不再通过代码层树 primitive 冒充成熟语义规划。
+- 验证：`python -m unittest learning_agent.tests.test_windows_computer_use_full_desktop_task_router` 通过，41 个测试 OK。
+- 验证：`python -m unittest learning_agent.tests.test_core_run_loop.CoreRunLoopTests` 通过，44 个测试 OK。
+- 验证：`python -m py_compile learning_agent\core\agent.py learning_agent\tools\schemas.py learning_agent\tests\test_core_run_loop.py learning_agent\tests\test_windows_computer_use_full_desktop_task_router.py` 通过。
+- 备份：本轮修改文件已复制到 `learning_agent/test/computer_use_model_loop_semantic_planner_20260606/`，满足用户学习查看要求。
+
+---
+## 2026-06-06 Computer Use 截图进入模型主循环与 OAuth 原生视觉输入
+
+Status:
+- 已完成一段治本改造：Computer Use 工具结果里的截图不再只是本地 artifact 路径文本，而是会被 `LearningAgent` 重新注入为下一轮模型可见的 `image_url` 图片消息。
+- 已完成 OAuth/Responses 适配层改造：`CodexOAuthChatModel._build_responses_input()` 会把主循环消息里的 `image_url` 转换成原生 `input_image`，让 GPT-5.5 路径真正收到视觉输入。
+
+Evidence:
+- 新增 `learning_agent/tests/test_windows_computer_use_image_results_phase41.py::test_agent_reinjects_computer_use_screenshot_as_model_visible_image_block`，证明工具结果截图会进入下一轮模型 messages。
+- 新增 `learning_agent/tests/test_models_codex_oauth.py::test_oauth_request_sends_computer_use_screenshot_as_native_image_input`，证明 OAuth 请求体里出现 `input_image`，且 base64 不再重复塞进文本 prompt。
+
+Verification:
+- `python -m unittest learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_windows_computer_use_image_results_phase41` passed: 53 tests, OK.
+- `python -m py_compile learning_agent\core\agent.py learning_agent\models\adapters.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_models_codex_oauth.py` passed.
+
+Boundary:
+- 本轮仍未完成 `learning_agent\start_oauth_agent.bat` 的真实可见终端交互验收。
+- 不能声明 `/computer use --full` 已成熟；只能说“截图进入模型主循环和 OAuth 原生视觉输入”这条关键链路已通过自动化测试。
+
+---
+## 2026-06-06 Computer Use BMP 截图转 PNG 输入模型
+
+Status:
+- 已修复真实终端 controller 暴露出的 `image/bmp` 被 Responses API 拒绝问题。
+
+Completed:
+- 修改 `learning_agent/core/agent.py`：新增模型图片载荷统一入口，遇到 BMP artifact 时用 Pillow 真实转码为 PNG。
+- 修改 `learning_agent/tests/test_windows_computer_use_image_results_phase41.py`：新增 BMP 回归测试，检查 data URL MIME 和 PNG 文件头。
+- 本轮修改快照已复制到 `learning_agent/test/computer_use_bmp_png_model_input_20260606/`。
+- 详细记录见 `agent_memory/computer_use_bmp_png_model_input_20260606.md`。
+
+Verification:
+- 红灯：BMP 回归测试修复前失败，证明旧代码仍输出 `data:image/bmp`。
+- 绿灯：同一测试修复后通过。
+- `python -m unittest learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_windows_computer_use_image_results_phase41` passed: 54 tests, OK。
+- `python -m py_compile learning_agent\core\agent.py learning_agent\models\adapters.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_models_codex_oauth.py` passed。
+
+Boundary:
+- 下一步必须重新跑真实可见 `start_oauth_agent.bat` controller 场景，确认画树任务不再卡在 HTTP 400。
+
+---
+## 2026-06-06 Codex OAuth SSE 总截止门禁
+
+Status:
+- 已修复真实 controller 画树场景中“模型第 0 轮发起后终端长期无输出”的超时门禁缺口。
+
+Completed:
+- 修改 `learning_agent/models/adapters.py`：`CodexOAuthChatModel` 新增 `sse_read_timeout_seconds` 和 `monotonic` 注入点。
+- 修改 `learning_agent/models/adapters.py`：`from_env()` 新增 `CODEX_OAUTH_SSE_READ_TIMEOUT_SECONDS`，默认 240 秒。
+- 修改 `learning_agent/models/adapters.py`：`_read_sse_response_until_done()` 在持续心跳或未知事件时按总时长抛出 `TimeoutError`。
+- 修改 `learning_agent/tests/test_models_codex_oauth.py`：新增心跳流 deadline 回归测试。
+- 本轮修改快照已复制到 `learning_agent/test/computer_use_bmp_png_model_input_20260606/`。
+
+Verification:
+- 红灯：新增 SSE deadline 测试修复前失败，错误为构造函数缺少 `sse_read_timeout_seconds`。
+- 绿灯：同一测试修复后通过。
+- `python -m unittest learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_windows_computer_use_image_results_phase41` passed: 55 tests, OK。
+- `python -m py_compile learning_agent\core\agent.py learning_agent\models\adapters.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_models_codex_oauth.py` passed。
+
+Boundary:
+- 这只保证真实终端不会无限卡在 SSE 流；还必须重新跑 controller 画树场景，才能判断模型是否能继续进入 Computer Use 工具调用。
+## 2026-06-06 Computer Use PNG 视觉回灌与 agent-owned 启动门禁
+
+- 已确认主循环里存在 `Computer Use Image Results` 到 `data:image/...;base64,...` 的多模态回灌路径，工具结果会通过 `_tool_result_messages_to_dicts()` 同时回填文本 tool result 和可见图片 user message。
+- 已把 evidence 源头的 BMP 截图归一化为 PNG artifact，降低真实 Windows 截图以 `image/bmp` 进入模型 API 的风险；同时保留下游 BMP 转 PNG 兜底。
+- 已新增 full GUI 任务的观察前动作硬门禁：鼠标键盘动作前必须先有成功截图观察，避免模型在没看屏幕时盲点、盲拖、盲打。
+- 已新增 full 本机应用任务的 agent-owned launch 硬门禁：即使模型已经看过旧窗口截图，只要没有 `launch_app` 成功绑定 agent-owned 目标窗口，就拒绝鼠标键盘动作并要求先启动应用。
+- 已暴露并接通 `computer_action(action=launch_app)` 到通用目标 session runtime，模型主循环可先打开 Paint 等本机应用，再观察、规划、动作。
+- 已备份本轮修改源码到 `learning_agent/test/computer_use_png_launch_gate_20260606/`。
+- 自动化验证已通过：`python -m unittest learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_windows_computer_use_tool_surface_phase49 learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_actions_phase30 learning_agent.tests.test_windows_computer_use_protocol_phase27`，共 69 个测试 OK。
+- 语法验证已通过：`python -m py_compile learning_agent\core\agent.py learning_agent\computer_use\controller.py learning_agent\computer_use\evidence.py learning_agent\computer_use\tool_surface.py learning_agent\tools\schemas.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_windows_computer_use_tool_surface_phase49.py learning_agent\tests\test_core_run_loop.py`。
+- 真实可见终端验收尚未重新跑通，因此不能声明 `/computer use --full` 开发完成或验收通过。
+## 2026-06-06 16:59 Computer Use full 主循环图片与 launch_app 目标污染修复
+- 读取最新真实可见终端验收日志 `computer_use_full_model_loop_paint_tree_real-20260606_165022/latest_run_readable.md`，确认截图 artifact 已经以 `.png` 保存，并且工具结果里出现 `image_0_mime_type=image/png`，说明“截图不能被模型读”的问题已经不是单纯格式问题。
+- 从同一日志定位到新的真实根因：模型第二次调用 `launch_app` 时把 `app_name` 塞成 `mspaint，非常熟练地画一棵树。...`，但同时给出了干净的 `target_app=mspaint`；旧 controller 先读取 `app_name`，导致 Start-Process 尝试启动一整个中文句子 exe。
+- 先新增红测 `test_launch_app_prefers_clean_alias_when_app_name_contains_chinese_task_sentence`，确认失败表现为 raw_target 被污染成中文长句。
+- 修改 `learning_agent/computer_use/controller.py`：`launch_app` 目标提取改为优先读取 `target_app/app/target`，再回退 `app_name/text`；并把中文句子标点 `，。；！？、` 纳入污染候选拒绝。
+- 验证：新增红测已转绿；相关回归 `python -m unittest learning_agent.tests.test_windows_computer_use_tool_surface_phase49 learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_actions_phase30 learning_agent.tests.test_windows_computer_use_protocol_phase27` 通过 70 个测试；`py_compile` 对本轮相关文件通过。
+- 按项目规则把修改源码和测试副本保存到 `learning_agent/test/computer_use_png_launch_gate_20260606_round2/`。
+- 真实可见终端验收尚未重新完成，因此当前不能声明 `/computer use --full` 开发完成或验收通过。
+
+## 2026-06-06 17:12 Computer Use full target_app 二次污染修复
+- 第二次真实可见终端验收中出现新污染形状：`target_app="mspaint画图软件画一棵树."`，但 `app="mspaint"`、`target="mspaint"` 仍是干净字段。
+- 先新增红测 `test_launch_app_skips_polluted_target_app_and_uses_clean_app_field`，确认旧逻辑会把污染 target_app 传给启动 runtime。
+- 修改 `learning_agent/computer_use/controller.py` 的 `_launch_app_clean_target_candidate`：拒绝非 `.exe` 句点、英文问号/逗号/分号/感叹号，以及英文别名和中文任务句混合的候选。
+- 验证：新增红测转绿；相关回归 `python -m unittest learning_agent.tests.test_windows_computer_use_tool_surface_phase49 learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_actions_phase30 learning_agent.tests.test_windows_computer_use_protocol_phase27` 通过 71 个测试；`py_compile` 通过。
+- 同时调整真实树绘制验收场景：`max_seconds` 从 300 放宽到 420；截图/PNG/low_level_event_count 证据改由 debug log 和最终回答检查，而不是错误要求出现在 event payload。
+
+## 2026-06-06 17:33 Codex OAuth / GPT-5.5 视觉输入核实
+- 已读取 `learning_agent/start_oauth_agent.ps1`，确认真实启动入口设置 `LEARNING_AGENT_MODEL_PROVIDER=codex-oauth`，默认 `CODEX_MODEL=gpt-5.5`。
+- 已读取 `learning_agent/core/agent.py`，确认 Computer Use 工具结果会把截图 artifact 读成图片字节，并转换为 `data:image/png;base64,...` 的 `image_url` 多模态消息。
+- 已读取 `learning_agent/models/adapters.py`，确认 `CodexOAuthChatModel._build_responses_input()` 会把 `image_url` 转成 Responses API 原生 `input_image`，并从文本 prompt 中移除 base64，避免图片只作为文字污染上下文。
+- 已运行单元验证：`python -m unittest learning_agent.tests.test_models_codex_oauth.ModelsCodexOAuthTests.test_oauth_request_sends_computer_use_screenshot_as_native_image_input learning_agent.tests.test_windows_computer_use_image_results_phase41.WindowsComputerUseImageResultsPhase41Tests.test_agent_reinjects_computer_use_screenshot_as_model_visible_image_block`，结果 2 tests OK。
+- 已运行真实 provider 探针：通过 `CodexOAuthChatModel(model="gpt-5.5")` 向 `chatgpt.com/backend-api/codex/responses` 发送内嵌 PNG 红色方块，模型返回“纯红色方块图片”；再发送蓝色方块，模型返回“几乎纯蓝色的方形图片”。
+- 结论：当前 `codex-oauth + gpt-5.5` provider/model 组合真实支持并理解 PNG 视觉输入；当前 `/computer use --full` 失败不应再归因于 provider 不支持视觉，而应继续排查真实桌面 observe-plan-act、应用启动绑定、前台窗口焦点和 SendInput 动作落点。
+
+## 2026-06-06 17:54 真实可见终端 UI 视觉链路补测失败
+- 用户指出上一轮核实没有启动真实终端 UI；该质疑成立，上一轮只证明 provider/model 直连链路，不等于 `start_oauth_agent.bat` 终端主循环验收通过。
+- 已通过 `learning_agent/acceptance_controller/controller.ps1` 启动真实可见终端，场景为 `computer_use_full_model_loop_paint_tree_real.json`，实际输入三行：`/computer clear-abort`、`/computer use --full`、`请使用本地电脑的画图软件画一棵树。`。
+- 本轮 run 目录：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_174641`。
+- `result.json` 显示 `prompt_sent=true`、`prompt_received=true`、`prompt_lines_sent=3`，但 `final_printed=false`、`final_answer_printed=false`。
+- `latest_run_readable.md` 和终端截图显示 agent 卡在“模型调用：第 0 轮”，没有进入 `computer_action launch_app`、没有启动 `mspaint`、没有产生 `Computer Use Image Results`、没有 `image/png` 截图回灌。
+- 结论更正：当前只能确认 `codex-oauth + gpt-5.5` provider 支持视觉输入；不能确认真实终端 UI 的 `/computer use --full` 主循环已成功读图。真实终端 UI 当前失败点更早，位于第 0 轮模型调用没有返回工具调用或错误。
+## 2026-06-06 19:40 Computer Use full 真实 Paint 画树主循环验收通过
+
+Status:
+- 本轮完成了 `/computer use --full` 模型主循环真实 Paint 画树场景的代码修复、自动化回归和真实可见终端验收。
+
+Completed:
+- 修改 `learning_agent/computer_use/sendinput_executor.py` 和 `learning_agent/computer_use/sendinput_dispatcher.py`：低层事件现在会携带目标窗口并在鼠标键盘动作前执行 `set_foreground`，修复真实输入没有落到 Paint 画布的问题。
+- 修改 `learning_agent/acceptance_controller/controller.ps1`：多行 prompt 场景中，自然语言任务只要出现 `user_prompt_received` 就视为本行已被 agent 接收，避免 controller 在长任务执行期间重复发送同一句 prompt。
+- 修改 `learning_agent/core/agent.py`：完成门现在接受 `computer_action.before_evidence/after_evidence` 中的模型可见 PNG 截图证据，避免真实动作已经持续回灌截图时仍被 observe 门误拦。
+- 修改 `learning_agent/tests/test_core_run_loop.py`：新增真实失败形状回归 `test_computer_use_full_completion_gate_accepts_action_embedded_visual_evidence`，先失败后通过。
+- 本轮修改快照已复制到 `learning_agent/test/computer_use_full_action_visual_evidence_20260606_193820/`。
+
+Verification:
+- 红灯：动作内嵌视觉证据测试修复前失败，返回 `observe_before_action_required`，证明旧逻辑不承认 `before_evidence`。
+- 绿灯：同一测试修复后通过。
+- 邻近回归通过：`python -m unittest ...` 共 30 tests OK。
+- 语法检查通过：`python -m py_compile learning_agent\core\agent.py learning_agent\computer_use\sendinput_executor.py learning_agent\computer_use\sendinput_dispatcher.py learning_agent\tests\test_core_run_loop.py learning_agent\tests\test_windows_computer_use_sendinput_dispatcher_phase47.py learning_agent\tests\test_computer_use_full_visible_acceptance_task7.py learning_agent\computer_use\controller.py`。
+- 真实可见终端验收通过：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_193850/result.json`，`completed=true`、`final_printed=true`、`assertion.passed=true`。
+- 真实终端输入为 `/computer clear-abort`、`/computer use --full`、`请使用本地电脑的画图软件画一棵树。`。
+- event log 证明本轮 agent 自己启动 `mspaintapp:pid:46464`，随后对该窗口执行 3 次真实 `drag_path`，最终回答包含 `computer_use`、`mspaint`、`screenshot`、`real_desktop_touched`、`low_level_event_count`。
+- 最新视觉证据：`learning_agent/memory/computer_use/evidence/computer-window-20260606T114032Z-8892adcc.png`，截图中 Paint 画布可见树形图。
+
+Boundary:
+- 这证明当前真实 Paint 画树路径已经跑通模型主循环、真实启动、PNG 截图回灌和真实低层鼠标动作。
+- 这仍不等于 `/computer use --full` 已经“任意应用、任意任务、任意绘图成熟”；任意对象语义规划、颜色/工具选择、纠偏 verifier、窗口漂移处理和清理仍要继续成熟化。
+- 本次 copied `latest_run_readable.md` 曾混入旧 run 片段；event log 是本次验收更可靠证据，后续应修复 debug latest 文件的并发/残留隔离问题。
+
+## 2026-06-06 20:06 Computer Use full 去掉用户路径 clear-abort
+
+Status:
+- 已把真实 Paint 画树验收改成普通用户习惯：只输入 `/computer use --full` 和自然语言任务，不再要求 `/computer clear-abort`。
+
+Completed:
+- 修改 `learning_agent/app/interactive.py`：`/computer use --full` 会在打开新 full 会话前检测历史 abort；如果存在历史急停，会自动清理并在输出中显示 `abort_auto_cleared=true`。
+- 修改 `learning_agent/acceptance_controller/scenarios/computer_use_full_model_loop_paint_tree_real.json`：删除 `/computer clear-abort` 输入行和 `clear-abort` 断言。
+- 修改 `learning_agent/tests/test_windows_computer_use_mode_commands_phase98.py`：新增 `test_computer_full_user_command_clears_stale_abort_automatically`，先失败后通过。
+- 修改 `learning_agent/tests/test_computer_use_full_visible_acceptance_task7.py`：新增画树场景测试，防止真实场景重新依赖 `clear-abort`。
+- 本轮修改快照已复制到 `learning_agent/test/computer_use_full_no_clear_abort_20260606_200432/`。
+
+Verification:
+- 红灯：自动清 abort 测试修复前失败，`/computer use --full` 输出没有 `abort_auto_cleared=true`。
+- 红灯：画树场景测试修复前失败，第一行仍是 `/computer clear-abort`。
+- 绿灯：`python -m unittest learning_agent.tests.test_computer_use_full_visible_acceptance_task7.ComputerUseFullVisibleAcceptanceTask7Tests.test_tree_model_loop_scenario_does_not_require_clear_abort learning_agent.tests.test_windows_computer_use_mode_commands_phase98.ComputerUseModeCommandPhase98Tests.test_computer_full_user_command_clears_stale_abort_automatically learning_agent.tests.test_windows_computer_use_mode_commands_phase98.ComputerUseModeCommandPhase98Tests.test_computer_full_user_command_opens_full_without_dynamic_confirm_token learning_agent.tests.test_windows_computer_use_mode_commands_phase98 learning_agent.tests.test_computer_use_full_visible_acceptance_task7` 通过，16 tests OK。
+- 语法检查通过：`python -m py_compile learning_agent\app\interactive.py learning_agent\tests\test_windows_computer_use_mode_commands_phase98.py learning_agent\tests\test_computer_use_full_visible_acceptance_task7.py`。
+- 真实可见终端验收通过：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_200449/result.json`，`completed=true`、`prompt_lines_sent=2`、`final_printed=true`、`assertion.passed=true`。
+- event log 证明本次只执行 `/computer use --full` 和 `请使用本地电脑的画图软件画一棵树。`，没有 `clear-abort`；同时启动并操作 `mspaintapp:pid:46052`。
+- 最新视觉证据：`learning_agent/memory/computer_use/evidence/computer-window-20260606T120600Z-d4e0f081.png`。
+
+Boundary:
+- `/computer clear-abort` 仍保留为开发者/恢复命令，但不再是普通用户 full 模式启动路径的一部分。
+
+## 2026-06-06 20:23 危险调试模式核心默认开启
+
+Status:
+- 已按用户要求把危险调试模式从“仅 start_oauth_agent.ps1 默认设置环境变量”下沉为“核心权限函数未设置环境变量时也默认开启”。
+
+Completed:
+- 修改 `learning_agent/browser/permissions.py`：`dangerously_skip_permissions_enabled()` 现在在 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS` 缺失、空值或未知值时默认返回 `True`，只有显式 `0/false/no/n/off` 才关闭。
+- 修改 `learning_agent/tests/test_browser_intent.py`：新增默认开启红绿测试和显式关闭测试；同时把客户模式白名单测试显式设为危险模式关闭，避免测试目标混淆。
+- 修改 `learning_agent/tests/test_mcp_registry.py`：在 `McpRegistryTests.setUp()` 中默认设置 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=0`，让普通权限提示、拒绝、风险分级测试继续验证安全模式；危险模式专项测试仍显式设置为 `1`。
+- 本轮修改快照已复制到 `learning_agent/test/dangerous_debug_default_on_20260606_202350/`。
+
+Verification:
+- 红灯：新增 `test_dangerously_skip_permissions_defaults_on_when_env_missing` 修复前失败，实际返回 `False is not true`，证明核心层确实未默认开启。
+- 绿灯：`python -m unittest learning_agent.tests.test_browser_intent.BrowserIntentTests.test_dangerously_skip_permissions_defaults_on_when_env_missing learning_agent.tests.test_browser_intent.BrowserIntentTests.test_dangerously_skip_permissions_can_be_explicitly_disabled learning_agent.tests.test_browser_intent.BrowserIntentTests.test_dangerously_skip_permissions_allows_any_mcp_tool_reason` 通过，3 tests OK。
+- 回归：`python -m unittest learning_agent.tests.test_browser_intent learning_agent.tests.test_mcp_registry` 通过，126 tests OK。
+- 语法检查：`python -m py_compile learning_agent\browser\permissions.py learning_agent\tests\test_browser_intent.py learning_agent\tests\test_mcp_registry.py` 通过。
+
+Boundary:
+- 当前默认开启是本地调试开发期策略；正式产品仍可通过 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=0` 或同义 false 值关闭。
+- 真实可见终端 smoke 验收已完成；本轮只证明危险调试默认自动授权路径正常，不代表 `/computer use --full` 任意桌面任务成熟度发生额外提升。
+
+Real visible terminal acceptance:
+- 已通过 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath scenarios\smoke.json` 启动真实可见 `start_oauth_agent.bat` 终端场景。
+- run 目录：`learning_agent/acceptance_controller/runs/smoke-20260606_202552/`。
+- `result.json` 显示 `completed=true`、`final_printed=true`、`prompt_sent=true`、`prompt_received=true`、`assertion.passed=true`。
+- `events.jsonl` 第一条为 `permission_auto_approved`，原因是 `危险调试模式已开启：LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1，自动允许 mcp_server_start`。
+- 该真实可见终端 smoke 验收证明启动入口下的危险调试默认自动授权没有被本轮核心默认改动破坏。
+## 2026-06-06 20:40 Process Summary UX
+
+Status:
+- 已完成安全过程摘要渲染器、主循环事件回调接线、交互终端接入、自动化测试和学习副本归档。
+
+Completed:
+- 新增 `learning_agent/app/process_summary.py`：把 `run_started`、`model_request_started`、`tool_call_started`、`tool_call_completed`、`run_completed` 等事件翻译成 `Agent > ...` 过程摘要。
+- 修改 `learning_agent/runtime/session_runtime.py`：在 harness 镜像 `AgentEvent` 后调用可选 `event_callback`，并隔离回调异常。
+- 修改 `learning_agent/core/agent.py`：`LearningAgent.run()` 新增可选 `event_callback` 参数，同时保持旧调用兼容。
+- 修改 `learning_agent/app/interactive.py`：真实交互终端普通 prompt 每轮创建 `TerminalProcessSummaryRenderer`，让用户看到类似 Codex 的过程提示。
+- 新增 `learning_agent/tests/test_terminal_process_summary.py`：验证摘要会显示工具进度、不会泄露原始工具输出，并验证 `agent.run()` 能把事件流回调给 UI。
+- 学习副本已复制到 `learning_agent/test/process_summary_ux_20260606_204013/`。
+
+Verification:
+- 红灯：`python -m unittest learning_agent.tests.test_terminal_process_summary` 修复前失败，原因是 `ModuleNotFoundError: No module named 'learning_agent.app.process_summary'`。
+- 绿灯：`python -m unittest learning_agent.tests.test_terminal_process_summary` 通过，2 tests OK。
+- 编译：`python -m py_compile learning_agent\app\process_summary.py learning_agent\app\interactive.py learning_agent\runtime\session_runtime.py learning_agent\core\agent.py learning_agent\tests\test_terminal_process_summary.py` 通过。
+- 回归：`python -m unittest learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_runtime_events learning_agent.tests.test_harness_runtime_alignment` 通过，20 tests OK。
+- 回归：`python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_image_results_phase41` 通过，55 tests OK。
+- `git diff --check -- learning_agent\app\process_summary.py learning_agent\app\interactive.py learning_agent\runtime\session_runtime.py learning_agent\core\agent.py learning_agent\tests\test_terminal_process_summary.py` 通过。
+
+Boundary:
+- 曾误跑 `learning_agent.tests.test_agent_events learning_agent.tests.test_observability_acceptance`，其中 `test_agent_events` 模块不存在，`test_observability_acceptance` 有两个旧断言因危险调试默认自动授权而失败；这不是本轮 ProcessSummaryUX 接线导致的直接回归。
+- 仍需执行 `learning_agent/start_oauth_agent.bat` 真实可见终端验收，确认真实终端屏幕上出现过程摘要后，才可声明本轮开发完成。
+
+Real visible terminal acceptance update:
+- 已通过 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath scenarios\smoke.json` 启动真实可见 `learning_agent/start_oauth_agent.bat` 终端验收。
+- run 目录：`learning_agent/acceptance_controller/runs/smoke-20260606_204142/`。
+- `result.json` 记录 `completed=true`、`prompt_sent=true`、`prompt_received=true`、`final_printed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+- 最终截图 `03_final.png` 已人工检查，真实终端里出现了过程摘要：`Agent > 我已收到任务，正在理解用户意图。`、`Agent > 已准备上下文和工具清单，开始规划下一步。`、`Agent > 正在结合用户目标、工具清单和当前观察规划第 0 轮动作。`、`Agent > 任务已收束，准备输出最终回答。`
+- 因此本轮 ProcessSummaryUX 的真实可见终端验收已完成；该结论只覆盖过程摘要 UI，不扩大为 `/computer use --full` 任意桌面任务成熟声明。
+
+## 2026-06-06 21:21 Process Summary 噪声控制
+
+Status:
+- 已根据真实终端截图确认左图问题不是模型思考本身，而是终端过程摘要层把每个模型/工具事件逐行打印，叠加危险调试授权提示每次权限都打印，导致长 Computer Use 绘图任务刷屏。
+
+Completed:
+- 修改 `learning_agent/app/process_summary.py`：兼容生产事件里的 `tool_name` 和 `message.tool_calls`，避免把真实 `computer_action` 显示成泛化 `tool`，也避免工具调用阶段误显示“回复草案”。
+- 修改 `learning_agent/app/process_summary.py`：对模型轮次和 `computer_*` 桌面工具事件做节流，保留前几次和周期性进度，避免绘图任务每轮都刷屏。
+- 修改 `learning_agent/core/agent.py`：新增危险调试提示进程级去重，自动授权审计仍每次记录，但人类终端提示只打印一次。
+- 修改 `learning_agent/tests/test_terminal_process_summary.py`：新增生产 payload 字段、嵌套工具调用、长桌面循环节流、危险调试提示只出现一次的回归测试。
+- 本轮修改快照已复制到 `learning_agent/test/process_summary_noise_control_20260606_212102/`。
+
+Verification:
+- `python -m unittest learning_agent.tests.test_terminal_process_summary` 通过，6 tests OK。
+- `python -m py_compile learning_agent\app\process_summary.py learning_agent\core\agent.py learning_agent\tests\test_terminal_process_summary.py` 通过。
+- `python -m unittest learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_runtime_events learning_agent.tests.test_harness_runtime_alignment` 通过，24 tests OK。
+- `python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_image_results_phase41` 通过，55 tests OK。
+- `git diff --check -- learning_agent\app\process_summary.py learning_agent\core\agent.py learning_agent\tests\test_terminal_process_summary.py` 通过，仅提示 `agent.py` 未来可能 LF->CRLF。
+
+Boundary:
+- 本轮修复覆盖用户左图的事件回复刷屏、工具名显示错误和危险提示重复问题。
+- 用户右图的“水果拼盘被画成火箭/火焰样式”属于视觉规划与目标校验质量问题，本轮没有宣称已修复；后续需要读取 Computer Use 视觉 loop 和动作规划代码继续定位。
+
+Update:
+- 追加修改 `learning_agent/observability/acceptance_events.py`：验收事件默认只写 `events.jsonl`，不再把 `::learning-agent-acceptance {...}` 原始 JSON 打印到用户终端；如确需旧终端机器标记，必须显式设置 `LEARNING_AGENT_ACCEPTANCE_EVENT_STDOUT=1`。
+- 追加修改 `learning_agent/tests/test_observability_acceptance.py` 和 `learning_agent/tests/support.py`：覆盖默认 stdout 静默、显式 opt-in 标记、危险调试默认开启下人工权限测试需显式关闭危险模式。
+- 追加快照已复制到 `learning_agent/test/process_summary_human_terminal_clean_20260606_212806/`。
+
+Additional verification:
+- `python -m unittest learning_agent.tests.test_observability_acceptance learning_agent.tests.test_terminal_process_summary` 通过，16 tests OK。
+- `python -m unittest learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_runtime_events learning_agent.tests.test_harness_runtime_alignment learning_agent.tests.test_observability_acceptance` 通过，34 tests OK。
+- `python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_image_results_phase41` 通过，55 tests OK。
+- `python -m py_compile learning_agent\observability\acceptance_events.py learning_agent\tests\support.py learning_agent\tests\test_observability_acceptance.py learning_agent\app\process_summary.py learning_agent\core\agent.py learning_agent\tests\test_terminal_process_summary.py` 通过。
+- 真实可见终端 smoke 通过：`learning_agent/acceptance_controller/runs/smoke-20260606_213116/result.json`，`completed=true`、`final_printed=true`、`assertion.passed=true`；最终截图没有 `::learning-agent-acceptance` 原始 JSON。
+- 真实可见 Paint 树场景重跑：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_212818/result.json`，真实启动并操作 Paint，最终截图也没有原始 JSON；但场景 `completed=false`，因为模型最终只输出“已完成。”，缺少验收要求的 `computer_use/mspaint/screenshot/real_desktop_touched/low_level_event_count` 摘要。
+
+Boundary update:
+- 可以确认本轮“人类终端 UI 清洁”和“验收 JSON 不再污染屏幕”已通过 smoke 真实终端验收。
+- 不能把 `/computer use --full` Paint 任务整体声明成熟；Paint 树场景暴露出最终回答收束摘要不稳定，水果拼盘偏题仍属下一步待修。
+## 2026-06-06 21:50 Computer Use full 最终证据摘要与绑定窗口观察
+
+Status:
+- 已完成两处本轮修复：1) Computer Use full 最终回答过短时，自动补充真实执行证据摘要；2) 通用 observe-plan-act loop 的 observation 层现在会使用已经绑定的 target_window，避免观察层漂移到用户旧 Paint 窗口。
+
+Completed:
+- 修改 `learning_agent/core/agent.py`：当 full GUI 任务结束且模型只回答“已完成。”这类短句时，追加 `computer_use`、目标应用、截图、`real_desktop_touched`、`low_level_event_count`、成功动作数等用户可见证据。
+- 修改 `learning_agent/tests/test_core_run_loop.py`：新增红绿测试，复现真实 Paint 树场景最终回答缺少验收关键字的问题。
+- 修改 `learning_agent/computer_use/universal_observe_plan_act_verify.py`：`_observe()` 会把当前 session 的 `target_window` 继续传给 observation runtime。
+- 修改 `learning_agent/computer_use/universal_real_observation.py`：真实观察层优先使用已绑定窗口；只有没有绑定窗口时才从桌面 inventory 按 target_hint 自动选择。
+- 修改 `learning_agent/tests/test_windows_computer_use_universal_observe_plan_act_verify_loop.py`：新增测试证明观察层每轮都收到已绑定窗口。
+- 学习备份已保存到 `learning_agent/test/computer_use_final_evidence_summary_20260606_213900/` 和 `learning_agent/test/computer_use_bound_observation_target_20260606_215008/`。
+
+Verification completed so far:
+- 红灯：最终回答证据测试修复前失败，返回值只有 `已完成。`。
+- 绿灯：`python -m unittest learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_computer_use_full_final_answer_adds_real_desktop_evidence_when_model_is_too_short` 通过。
+- 邻近回归：`python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_observability_acceptance` 通过，63 tests OK。
+- 语法：`python -m py_compile learning_agent\core\agent.py learning_agent\tests\test_core_run_loop.py` 通过。
+- 红灯：绑定窗口观察测试修复前失败，observation runtime 没有收到 `hwnd:bound-123`。
+- 绿灯：`python -m unittest learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop` 通过，8 tests OK。
+- 语法：`python -m py_compile learning_agent\computer_use\universal_observe_plan_act_verify.py learning_agent\computer_use\universal_real_observation.py learning_agent\tests\test_windows_computer_use_universal_observe_plan_act_verify_loop.py` 通过。
+
+Remaining:
+- 仍需重新运行真实可见 `start_oauth_agent.bat` controller Paint 树场景，确认最终回答证据摘要能让 `completed/assertion` 通过。
+- 扩展 router 回归里还有两个受控 fake sender 相关失败，需要单独继续做根因定位；不能把它们误判成本轮最终摘要修复造成的问题。
+
+Acceptance update:
+- 真实可见终端验收已通过：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_215137/result.json`。
+- controller 启动真实可见 `start_oauth_agent.bat`，输入普通用户路径两行：`/computer use --full` 和 `请使用本地电脑的画图软件画一棵树。`。
+- `result.json` 显示 `completed=true`、`final_printed=true`、`prompt_lines_sent=2`、`permission_sent_count=0`、`assertion.passed=true`。
+- 最终回答包含自动追加的 `Computer Use 真实执行摘要`：`target_app=mspaint`、`app_id=mspaintapp:pid:47992`、`screenshot=true`、`real_desktop_touched=true`、`low_level_event_count=79`、`successful_action_count=11`。
+- 画布证据：`learning_agent/memory/computer_use/evidence/computer-window-20260606T135434Z-52e6e631.png`，截图中 Paint 画布可见一棵绿色树。
+## 2026-06-06 23:32 Phase121 Computer Use app catalog
+
+- 已按 ClaudeCode `appNames.ts` 的方向，在 OpenHarness 内新增 Windows 应用候选清单模块，而不是继续为 Paint/Notepad/Calculator 堆硬编码入口。
+- 已完成红绿测试：`learning_agent/tests/test_windows_computer_use_app_names_phase121.py` 覆盖危险项过滤、路径脱敏、非硬白名单提示、full 主循环 harness 接入。
+- 已验证：`python -m py_compile learning_agent\computer_use\app_names.py learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_app_names_phase121.py` 通过。
+- 已验证：`python -m unittest learning_agent.tests.test_windows_computer_use_app_names_phase121 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_generic_real_launch_candidate_phase109` 通过 9 tests OK。
+- 已验证：`git diff --check -- learning_agent\computer_use\app_names.py learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_app_names_phase121.py` 通过，仅提示 `core/agent.py` 未来 Git 可能 CRLF 转换。
+- 已备份本轮源码到 `learning_agent/test/computer_use_app_names_catalog_20260606_233237/`。
+- 待做：真实可见终端 `start_oauth_agent.bat` 场景尚未在本轮重新跑通，不能声明 `/computer use --full` 开发完成或验收通过。
+- 追加验证：最终真实可见终端 run `computer_use_full_model_loop_paint_tree_real-20260606_234618` 通过，输入路径是 `/computer use --full` + `请使用本地电脑的画图软件画一棵树。`，verifier 显示 `completed=true`、`assertion.passed=true`、`launch_app=true`、`mspaint=true`、`image/png=true`、`real_desktop_touched=true`、`low_level_event_count=true`。
+- 追加备份：最终源码副本保存在 `learning_agent/test/computer_use_app_names_catalog_20260606_234608/`。
+## 2026-06-07 Progress: Phase122 Windows App Inventory 对齐 ClaudeCode appNames 原则
+
+- 已完成：读取 ClaudeCode `utils/computerUse/appNames.ts` 与 `mcpServer.ts`，确认其核心不是直接暴露硬白名单，而是短超时枚举应用、清洗噪声、作为模型提示传入工具描述。
+- 已完成：新增 `test_windows_computer_use_windows_app_inventory_phase122.py`，先用红测锁定多源合并、去重、来源优先级、噪声过滤、路径脱敏和 `launch_kind` 模型提示。
+- 已完成：新增 `windows_app_inventory.py`，实现 Start Menu、App Paths、Uninstall registry 的统一融合层，并加入 ClaudeCode 风格的噪声过滤和模型提示格式。
+- 已完成：旧应用清单兼容包装层已从正式源码删除，旧 API 的测试职责已迁移到统一 inventory 测试，避免源码继续存在第二个入口。
+- 已完成：把 `generic_app_discovery.py` 的内部发现逻辑接到统一 inventory，避免 Phase108 与主循环 app catalog 再次分叉。
+- 已验证：`python -m unittest learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_generic_real_launch_candidate_phase109` 通过，11 tests OK。
+- 已验证：`python -m py_compile` 覆盖本轮修改源码和测试文件通过。
+- 已验证：`git diff --check` 通过，仅保留已有 CRLF 提示。
+- 已验证：真实本机 inventory probe 返回 50 个候选，前列包含 Paint/Notepad/Calculator/Chrome/Obsidian 等，之前发现的 installer、command line、verifier、official website 噪声不再进入前列。
+- 已追加修复：真实终端 run `computer_use_full_model_loop_paint_tree_real-20260607_063223` 证明应用清单已进入主循环，但也暴露出 Task Manager/README/Module Docs/Tools for UWP Apps/Windows SDK 噪声；已补红测并收紧 inventory 噪声规则。
+- 已验证：追加噪声回归先失败后通过，完整 12 个相关测试重新通过，py_compile 和 diff check 重新通过。
+- 已备份：本轮修改代码已复制到 `learning_agent/test/computer_use_windows_app_inventory_phase122_20260607_063129` 和 `learning_agent/test/computer_use_windows_app_inventory_phase122_20260607_063632`。
+- 已完成真实可见终端验收：第二次最新代码 run `learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260607_063700` 通过 verifier，`completed=true`、`assertion.passed=true`、`launch_app=mspaint`、`real_desktop_touched=true`、`low_level_event_count` 断言均通过。
+- 已确认视觉证据：Paint 画布证据图 `learning_agent/memory/computer_use/evidence/computer-window-20260606T224225Z-0c68af28.png` 中可见黑色树干和绿色树冠；本轮可声明“Phase122 应用清单对齐步骤开发完成并通过验收”，但不能声明整个 Computer Use 绘图审美/视觉纠偏能力已经完全成熟。
+
+## 2026-06-07 Progress: Windows App Inventory 瘦身删除旧兼容入口
+
+- 已完成：删除正式源码 `learning_agent/computer_use/app_names.py`，删除旧测试 `learning_agent/tests/test_windows_computer_use_app_names_phase121.py`。
+- 已完成：把旧测试中有价值的 full harness 接入断言迁到 `learning_agent/tests/test_windows_computer_use_windows_app_inventory_phase122.py`。
+- 已完成：清理正式源码和正式测试里的旧接口名残留，`rg` 扫描没有旧模块导入、旧函数名或旧文件名残留。
+- 已验证：`python -m unittest learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_generic_real_launch_candidate_phase109` 通过，11 tests OK。
+- 已验证：`python -m py_compile learning_agent\computer_use\windows_app_inventory.py learning_agent\computer_use\generic_app_discovery.py learning_agent\core\agent.py learning_agent\tests\test_windows_computer_use_windows_app_inventory_phase122.py learning_agent\tests\test_windows_computer_use_generic_app_discovery_phase108.py` 通过。
+- 已验证：`git diff --check` 通过，仅提示已有 CRLF 转换警告。
+- 已备份：删除前旧文件和删除后最终源码快照保存在 `learning_agent/test/computer_use_remove_app_names_20260607_065306/`。
+- 已完成真实可见终端验收：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260607_065731/result.json` 显示 `completed=true`、`assertion.passed=true`、`prompt_lines_sent=2`、`permission_sent_count=0`。
+- 已验证 verifier：`python -m learning_agent.acceptance.verifier .\learning_agent\acceptance_controller\runs\computer_use_full_model_loop_paint_tree_real-20260607_065731 .\learning_agent\acceptance_controller\scenarios\computer_use_full_model_loop_paint_tree_real.json` 通过，`launch_app`、`mspaint`、`image/png`、`real_desktop_touched`、`low_level_event_count` 均为 true。
+- 已确认真实路径：日志显示模型先看到 `Available desktop application candidates`，再调用 `computer_action launch_app app_name=mspaint`，随后对同一个 `mspaintapp:pid:48984` 窗口执行两次真实 `drag_path`，低层事件数合计约 29。
+# 2026-06-07 Phase123 Computer Use Discover Tool Progress
+
+- 已按 TDD 写入红灯测试 `learning_agent/tests/test_windows_computer_use_discover_tool_phase123.py`，初次运行失败于缺少 schema、inventory 查询函数和执行路由。
+- 已新增 `query_windows_app_inventory()`，用于从统一 Windows app inventory 中按自然语言查询并排序应用候选。
+- 已新增 `computer_discover` schema，并归入 `computer_use` 能力包。
+- 已把 `computer_discover` 标为只读、低风险、并发安全工具。
+- 已在 executor 分发表和 `LearningAgent._computer_discover()` 中接入正式执行路径。
+- 已让 `computer_use` / `computer-use` 支持 `operation=discover`，并分发到同一个 `computer_discover`，避免旁路实现。
+- 已同步 Phase49 兼容工具面测试合同，允许 `discover` 作为主循环只读 operation，同时继续禁止 `mode/run_prompt` 黑盒语义入口。
+- 自动化验证已通过：Phase123 红灯转绿，Phase122 app inventory、Phase49 tool surface 邻近回归通过，py_compile 通过，git diff --check 通过。
+- 真实可见终端交互验收已通过：`learning_agent/acceptance_controller/runs/computer_use_discover_paint_candidate_real-20260607_072046/result.json` 显示 `completed=true`、`assertion.passed=true`。
+- 独立 verifier 已通过：`python -m learning_agent.acceptance.verifier .\learning_agent\acceptance_controller\runs\computer_use_discover_paint_candidate_real-20260607_072046 .\learning_agent\acceptance_controller\scenarios\computer_use_discover_paint_candidate_real.json` 返回 `completed=true`。
+- 真实 debug log 证明模型第 0 轮可见 `computer_discover`，并实际调用该工具；工具结果包含 `PHASE123_COMPUTER_DISCOVER_READY`、`mspaint` 和 `not_hard_whitelist=true`。
+# 2026-06-07 Phase124 Windows Launch Resolver 多后端
+
+Status: automated implementation and focused verification completed; strict real visible terminal acceptance still pending.
+
+Completed:
+- Read the existing `computer_discover -> generic_app_discovery Phase108 -> generic_launch_backend Phase110` source chain before editing.
+- Confirmed root cause in source: Phase108 preserved `launch_kind` in a field but still called old `build_launch_plan(best_executable)`, which forced non-exe identities into exe-shaped plans.
+- Added TDD red test `learning_agent/tests/test_windows_computer_use_launch_resolver_phase124.py` covering exe, AppX/AUMID, shortcut, uninstall_record rejection, Phase108 resolver usage, and Phase110 request cleanup for non-argv backends.
+- Added `learning_agent/computer_use/windows_launch_resolver.py` with `resolve_windows_launch_plan()`.
+- Updated `learning_agent/computer_use/generic_app_discovery.py` so Phase108 preserves `app_name`, `launch_id`, `launch_kind`, `aliases`, uses resolver plans, and reports `safe_resolver_launch_plan` plus `resolver_launch_backend`.
+- Updated `learning_agent/computer_use/generic_launch_backend.py` so Phase110 request construction only fills `executable` for `argv_no_shell` plans.
+- Learning backup copied to `learning_agent/test/windows_launch_resolver_phase124_20260607`.
+
+Verification:
+- Red observed first: Phase124 tests failed because `windows_launch_resolver` did not exist and Phase108 `launch_plan` lacked `launch_backend`.
+- Additional red observed: AppX Phase110 request wrongly had `request.executable == "calc"` before backend request cleanup.
+- Green passed after implementation: `python -m unittest learning_agent.tests.test_windows_computer_use_launch_resolver_phase124` OK.
+- Regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_launch_resolver_phase124 learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_discover_tool_phase123 learning_agent.tests.test_windows_computer_use_generic_launch_backend_maturity learning_agent.tests.test_windows_computer_use_interactive_generic_launch_maturity` ran 29 tests OK.
+- Compile passed for `windows_launch_resolver.py`, `generic_app_discovery.py`, `generic_launch_backend.py`, and the Phase124 test.
+- `git diff --check` passed for modified files, with only existing CRLF normalization warnings on `generic_app_discovery.py` and `generic_launch_backend.py`.
+
+Boundary:
+- This phase implements multi-backend launch planning and prevents non-argv identities from being misrouted into the current Popen backend.
+- This phase does not yet implement a real AppX/AUMID launcher backend or real shortcut ShellExecute backend.
+- Because strict `start_oauth_agent.bat` visible-terminal acceptance has not yet been run in a user-visible terminal for this phase, do not claim final development completion from automated tests alone.
+
+Next:
+- Add a true Windows non-argv launch backend only after designing PID/window ownership verification for AppX and shortcut launches.
+- Run strict visible-terminal acceptance through `learning_agent/start_oauth_agent.bat` when desktop terminal control is available.
+
+# 2026-06-07 Phase125 Windows Multi-Backend Launch Executor
+
+Status: completed for Phase125 multi-backend launch executor, with focused tests, CLI contract, learning backup, and strict real visible terminal acceptance passed.
+
+Completed:
+- Read the existing Phase108 -> Phase110 source chain before editing and confirmed Phase110 still treated the launcher as a single argv/Popen backend.
+- Added TDD coverage in `learning_agent/tests/test_windows_computer_use_multi_backend_launch_executor_phase125.py` for AppX/AUMID and Start Menu shortcut request safety, recording backend evidence, and production backend dispatch through an injected fake native launcher.
+- Updated `learning_agent/computer_use/generic_launch_backend.py` so `GenericLaunchRequest` preserves `launch_backend`, `command_shape`, `aumid`, and `shortcut_id`; non-argv backends now return empty argv instead of `[""]`.
+- Updated `phase110_safe_launch_request()` so `argv_no_shell`, `appx_aumid`, and `start_menu_shortcut` each have explicit safe verbs and required identity fields.
+- Added `Phase110WindowsNativeLauncher` with separate `launch_argv()`, `launch_appx_aumid()`, and `launch_start_menu_shortcut()` branches. AppX/shortcut use Windows `ShellExecuteExW` rather than `subprocess.Popen`.
+- Updated `Phase110ProductionGenericLaunchBackend` to dispatch by backend type and accept an injectable native launcher for deterministic tests.
+- Extended the Phase110 contract output with `authorized_appx_backend`, `authorized_shortcut_backend`, and `multi_backend_dispatch_ready`.
+- Added visible-terminal scenario `learning_agent/acceptance_controller/scenarios/agent_capability_phase125_multi_backend_launch_executor.json`.
+- Updated `/computer maturity` to print a compact Phase110 launch backend summary before the long JSON report, so visible-terminal controller assertions do not depend on truncated nested JSON.
+
+Verification so far:
+- TDD red observed first: Phase125 tests failed because `GenericLaunchRequest.launch_backend` and `native_launcher` injection did not exist, AppX was still refused, and non-argv requests still had bad argv shape.
+- Focused green passed: `python -m unittest learning_agent.tests.test_windows_computer_use_multi_backend_launch_executor_phase125 learning_agent.tests.test_windows_computer_use_launch_resolver_phase124` ran 11 tests OK.
+- Relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_multi_backend_launch_executor_phase125 learning_agent.tests.test_windows_computer_use_launch_resolver_phase124 learning_agent.tests.test_windows_computer_use_generic_launch_backend_maturity learning_agent.tests.test_windows_computer_use_generic_app_discovery_phase108 learning_agent.tests.test_windows_computer_use_interactive_generic_launch_maturity` ran 26 tests OK.
+- CLI contract passed: `python -m learning_agent.computer_use.generic_launch_backend` printed `authorized_appx_backend=true`, `authorized_shortcut_backend=true`, and `multi_backend_dispatch_ready=true`.
+- Scenario JSON passed: `python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_phase125_multi_backend_launch_executor.json`.
+- `py_compile` passed for `generic_launch_backend.py`, `interactive.py`, and Phase125/Phase124 tests.
+- `git diff --check` passed for the touched Phase125 files, with only CRLF normalization warnings.
+- Learning backup copied to `learning_agent/test/windows_multi_backend_launch_executor_phase125_20260607`.
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase125_multi_backend_launch_executor-20260607_085931/result.json`.
+- The visible terminal run used the ordinary prompt line `/computer maturity` and recorded `completed=true`, `assertion.passed=true`, `computer_status_printed=true`, `permission_sent_count=0`, `PHASE110_GENERIC_LAUNCH_BACKEND_READY`, `authorized_appx_backend=true`, `authorized_shortcut_backend=true`, and `multi_backend_dispatch_ready=true`.
+
+Known unrelated regression observed:
+- Wider `learning_agent.tests.test_windows_computer_use_full_maturity_matrix` currently fails because the controlled physical sender injected path rejects a `pause` low-level event, leaving `controlled_physical_backend_reached_in_injected_path=false`. This is not caused by Phase125 launch backend changes, but it should be fixed in a separate pass.
+
+Boundary:
+- Phase125 proves the launch executor can correctly preserve and dispatch `argv_no_shell`, `appx_aumid`, and `start_menu_shortcut` plans.
+- Phase125 does not claim the whole `/computer use --full` visual planner or controlled physical sender path is fully mature.
+
+# 2026-06-07 Phase126 Controlled Physical Pause Bridge
+
+Status: completed for the old full maturity matrix failure where the controlled physical sender rejected `pause`.
+
+Completed:
+- Read `learning_agent/computer_use/controlled_physical_sendinput.py`, `learning_agent/computer_use/full_maturity_matrix.py`, and related tests before editing.
+- Confirmed root cause in source: `UniversalDesktopExecutionLoopAdapter` expands real desktop actions through the shared dispatcher, and that dispatcher emits harmless `pause` events after `set_foreground`; Phase95 controlled sender rejected `pause` because `PHASE95_SUPPORTED_LOW_LEVEL_TYPES` did not include it.
+- Added TDD red test `test_sender_allows_pause_events_from_universal_loop_to_reach_injected_backend`, first observed failing on `result["ok"] == False`.
+- Updated `PHASE95_SUPPORTED_LOW_LEVEL_TYPES` to include `pause`; this aligns Phase95 with existing `real_sendinput_guard.py`, which already supports pause events.
+- Added visible-terminal scenario `learning_agent/acceptance_controller/scenarios/agent_capability_phase126_controlled_physical_pause_bridge.json`.
+
+Verification:
+- Red observed first: the new Phase95 test failed before the whitelist fix.
+- Green passed: the new Phase95 pause bridge test passed.
+- Full maturity matrix passed its focused test file: `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 4 tests OK.
+- Relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_controlled_physical_sendinput_phase95 learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_universal_adapter_can_inject_controlled_physical_sender_without_real_desktop_touch learning_agent.tests.test_windows_computer_use_real_sendinput_phase58.WindowsComputerUseRealSendInputPhase58Tests.test_low_level_sender_accepts_pause_events_for_paint_tool_stability` ran 12 tests OK.
+- `py_compile` passed for `controlled_physical_sendinput.py`, the Phase95 test, and `full_maturity_matrix.py`.
+- `git diff --check` passed with only existing CRLF normalization warnings.
+- Matrix field probe now reports `controlled_physical_backend_reached_in_injected_path=True`, `controlled_physical_sender_adapter_connected=True`, `controlled_physical_dispatch_default_off=True`, and `real_desktop_touched=False`.
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase126_controlled_physical_pause_bridge-20260607_091253/result.json`.
+- Independent verifier also passed for that run and scenario.
+
+Boundary:
+- This fixes the old controlled physical sender injected-path matrix failure.
+- The overall `/computer use --full` maturity matrix still correctly reports `passed=False` because `visual_planner_mature=false` and `paint_pikachu_visible_terminal_acceptance=false`; this phase does not claim arbitrary visual planning is mature.
+
+# 2026-06-07 Phase127 Model Loop Maturity Matrix Rebaseline
+
+Status: implemented source-grounded maturity matrix fields for the current `/computer use --full` architecture.
+
+Completed:
+- Read the current `learning_agent/core/agent.py`, `learning_agent/tools/schemas.py`, and `learning_agent/computer_use/full_maturity_matrix.py` before changing code.
+- Added red test coverage requiring `/computer maturity` to expose model-loop architecture facts instead of relying only on legacy Paint/Pikachu fields.
+- Added `model_loop_semantic_planning`, `model_loop_tool_schema_visible`, `model_visible_screenshot_input`, `computer_discover_tool_visible`, `computer_action_launch_app_available`, `computer_action_drag_path_available`, `legacy_paint_fixture_demoted`, and `production_main_loop_not_paint_bridge`.
+- Implemented the new matrix report from current source and schema facts: `TOOL_SCHEMAS` proves discover/observe/action tools and action enums; AST inspection of `LearningAgent` proves `run()` does not call the old desktop preclassifier, screenshot image-block helpers exist, and the default runtime constructs `UniversalDesktopExecutionLoopAdapter` without enabling the legacy Paint bridge.
+- Added visible-terminal scenario `learning_agent/acceptance_controller/scenarios/agent_capability_phase127_model_loop_maturity_matrix.json`.
+- Learning backup copied to `learning_agent/test/model_loop_maturity_matrix_phase127_20260607`.
+
+Verification:
+- Red observed first: `test_full_maturity_matrix_reports_required_fields` failed with `KeyError: 'model_loop_semantic_planning'` before the production matrix change.
+- Green focused test passed after the matrix change.
+- Relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_controlled_physical_sendinput_phase95 learning_agent.tests.test_windows_computer_use_full_desktop_task_router.WindowsComputerUseFullDesktopTaskRouterTests.test_universal_adapter_can_inject_controlled_physical_sender_without_real_desktop_touch learning_agent.tests.test_windows_computer_use_real_sendinput_phase58.WindowsComputerUseRealSendInputPhase58Tests.test_low_level_sender_accepts_pause_events_for_paint_tool_stability` ran 12 tests OK.
+- `py_compile` passed for `full_maturity_matrix.py` and `test_windows_computer_use_full_maturity_matrix.py`.
+- Scenario JSON validated with `python -m json.tool`.
+- `git diff --check` passed with only CRLF normalization warnings.
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_094345/result.json`.
+- Independent verifier passed for the same run and scenario; event payload checks included `model_loop_semantic_planning=true`, `model_loop_tool_schema_visible=true`, `model_visible_screenshot_input=true`, `legacy_paint_fixture_demoted=true`, and `production_main_loop_not_paint_bridge=true`.
+
+Boundary:
+- This rebaselines maturity reporting so old fields no longer mislead the project.
+- It does not claim visual quality, arbitrary drawing reliability, or full product maturity; `visual_planner_mature=false` remains a separate honest limitation.
+## 2026-06-07 Phase128：Computer Use maturity 矩阵改为分层通用软件验收口径
+
+- 用户确认顶层设计必须针对“本机电脑所有通用软件”，不是只针对 Paint；本轮先把 `computer maturity` 矩阵打造为分层事实报告。
+- 已按 TDD 写红灯测试：`test_full_maturity_matrix_reports_required_fields` 先因缺少 `generic_local_software_scope` 报 `KeyError`，证明测试确实覆盖新字段。
+- 已修改 `learning_agent/computer_use/full_maturity_matrix.py`：新增分层字段 `generic_local_software_scope`、`generic_app_control_foundation_ready`、`model_loop_computer_use_foundation_ready`、`real_desktop_evidence_gate_defined`、`visual_quality_verifier_available`、`visual_quality_acceptance_passed`、`visual_correction_acceptance_available`、`visual_correction_acceptance_passed`、`visual_planner_mature_means_quality_gate_only`、`paint_is_representative_visual_sample_only`、`final_maturity_blocked_by_visual_quality_acceptance`。
+- 已把 `visual_planner_mature` 从硬编码 false 改成“视觉质量验收 + 纠偏验收”的汇总结果，目前仍为 false，但含义不再是否定模型主循环或通用软件控制基础。
+- 已修改 `learning_agent/tests/test_windows_computer_use_full_maturity_matrix.py` 和 `learning_agent/acceptance_controller/scenarios/agent_capability_phase127_model_loop_maturity_matrix.json`，让单测与真实可见终端场景都检查分层 token。
+- 已修正 `learning_agent/tests/test_core_run_loop.py` 的旧期望：首轮工具面现在应是 `computer_discover` + `computer_action`，符合用户要求的 ClaudeCode 风格“先发现工具/应用清单，再选择工具”。
+- 已备份本轮改动文件到 `learning_agent/test/layered_maturity_matrix_phase128_20260607/`。
+
+## 2026-06-07 Phase129: Computer Use source architecture maturity matrix
+
+Status: automated implementation and regression verification completed; real visible terminal acceptance still pending.
+
+Completed:
+- 修改代码+SourceArchitectureMaturity：先写红灯测试要求 `computer_use_source_inventory_available` 等源码架构审计字段；红灯按预期失败于 `KeyError: 'computer_use_source_inventory_available'`。
+- 修改代码+SourceArchitectureMaturity：新增 `_computer_use_full_matrix_source_layer_for_file()`，把 `computer_use` 源码文件归入 app discovery、launch execution、observation、action dispatch、execution loop、session/mode、safety/ownership、tool surface/adapters、evidence/audit、maturity/acceptance、planning/representative samples 等层。
+- 修改代码+SourceArchitectureMaturity：新增 `_computer_use_full_matrix_source_architecture_audit_report()`，枚举 `learning_agent/computer_use/*.py`，对每个文件做 UTF-8 读取、AST 解析、分层记录、必需层检查、主链路文件检查、旧样例污染扫描。
+- 修改代码+SourceArchitectureMaturity：`/computer maturity` 顶层 JSON 和 CLI token 新增源码审计字段，包括 `computer_use_source_file_count=86`、`computer_use_uncategorized_source_files_count=0`、`computer_use_source_audit_static_only=true`、`computer_use_source_audit_semantic_complete=false`。
+- 修改代码+SourceArchitectureMaturity：重构 `computer_use_full_maturity_cli_line()` 为 token 列表拼接，避免继续维护超长单行 f-string。
+- 修改代码+SourceArchitectureMaturity：真实可见终端场景 `agent_capability_phase127_model_loop_maturity_matrix.json` 已加入源码审计 token。
+- 修改代码+SourceArchitectureMaturity：学习备份已复制到 `learning_agent/test/source_architecture_maturity_phase129_20260607/`。
+
+Verification so far:
+- Red observed first: focused test failed with `KeyError: 'computer_use_source_inventory_available'` before implementation.
+- Green focused test passed after implementation.
+- `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 4 tests OK.
+- `python -m py_compile learning_agent\computer_use\full_maturity_matrix.py learning_agent\tests\test_windows_computer_use_full_maturity_matrix.py` passed.
+- `python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_phase127_model_loop_maturity_matrix.json` passed.
+- Relevant regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_controlled_physical_sendinput_phase95 learning_agent.tests.test_windows_computer_use_universal_observe_plan_act_verify_loop` ran 67 tests OK.
+- Direct function/token check showed `computer_use_source_inventory_available=true`, `computer_use_source_file_count=86`, `computer_use_source_audit_semantic_complete=false`.
+
+Boundary:
+- This phase makes the maturity matrix inspect all `computer_use` source files structurally. It does not claim complete semantic correctness of every function, nor does it finish visual quality/correction maturity.
+
+Final visible-terminal acceptance:
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_103800/result.json`.
+- Independent verifier passed for the same run and scenario; event payload checks included `computer_use_source_inventory_available=true`, `computer_use_all_source_files_parseable=true`, `computer_use_source_audit_coverage=true`, `computer_use_architecture_layers_mapped=true`, `computer_use_required_design_layers_present=true`, `computer_use_main_chain_files_present=true`, `computer_use_uncategorized_source_files_count=0`, `computer_use_source_audit_static_only=true`, and `computer_use_source_audit_semantic_complete=false`.
+## 2026-06-07 Phase130 Runtime Reachability Maturity
+- 已新增 `computer_use_runtime_reachability_audit` 子报告，输出核心运行时、工具面、兼容包装、代表样例、验收矩阵、支撑基础设施、删除风险和未知可达性分类。
+- 已将 `windows_app_inventory_is_primary_model_discover=true`、`generic_app_discovery_is_primary_model_discover=false`、`generic_app_discovery_is_compatibility_wrapper=true` 接入 `/computer maturity` 短 token 和 JSON 报告。
+- 已把 `computer_use_unknown_reachability_file_count=0` 和 `computer_use_legacy_or_deprecated_risk_file_count=0` 纳入测试与真实终端验收场景，防止新旧文件再次逃逸分类。
+- 已备份修改文件到 `learning_agent/test/runtime_reachability_maturity_phase130_20260607/`。
+
+# 2026-06-07 Phase131 Runtime Trace Maturity
+
+Status: automated implementation completed; real visible terminal acceptance pending at the moment this entry is written.
+
+Completed:
+- 新增代码+RuntimeTrace：先写红灯测试 `learning_agent/tests/test_windows_computer_use_runtime_trace.py`，要求模型主循环暴露 Computer Use 工具 schema、模型实际调用 `computer_discover`、工具结果回流，并由 `_computer_use_runtime_trace_report()` 汇总。
+- 新增代码+RuntimeTrace：红灯已按预期失败于 `AttributeError: 'LearningAgent' object has no attribute '_computer_use_runtime_trace_report'`，证明测试不是空跑。
+- 修改代码+RuntimeTrace：`learning_agent/core/agent.py` 已新增 runtime trace 容器、记录函数、报告函数，并在模型请求、工具调用、工具结果和 Computer Use 工具内部路径写入 trace。
+- 修改代码+RuntimeTrace：`learning_agent/computer_use/full_maturity_matrix.py` 已新增 runtime trace architecture 子报告和 CLI token。
+- 修改代码+RuntimeTrace：`learning_agent/tests/test_windows_computer_use_full_maturity_matrix.py` 与 `learning_agent/acceptance_controller/scenarios/agent_capability_phase127_model_loop_maturity_matrix.json` 已加入 runtime trace token 门禁。
+
+Verification so far:
+- Red observed first: `python -m unittest learning_agent.tests.test_windows_computer_use_runtime_trace` failed with missing `_computer_use_runtime_trace_report` before implementation.
+- Green passed: `python -m unittest learning_agent.tests.test_windows_computer_use_runtime_trace` ran 1 test OK.
+- Relevant matrix passed: `python -m unittest learning_agent.tests.test_windows_computer_use_runtime_trace learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 5 tests OK.
+- Regression passed: `python -m unittest learning_agent.tests.test_core_run_loop learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_full_desktop_task_router` ran 94 tests OK.
+- `py_compile` passed for `learning_agent/core/agent.py`, `learning_agent/computer_use/full_maturity_matrix.py`, `learning_agent/tests/test_windows_computer_use_runtime_trace.py`, and `learning_agent/tests/test_windows_computer_use_full_maturity_matrix.py`.
+- Scenario JSON passed: `python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_phase127_model_loop_maturity_matrix.json`.
+
+Boundary:
+- This phase proves runtime trace architecture and model-loop evidence hooks are present and regression-tested.
+- This phase does not prove arbitrary visual task quality or correction maturity; `visual_quality_acceptance_passed=false` and `visual_correction_acceptance_passed=false` remain honest blockers.
+
+Final visible-terminal acceptance:
+- First controller attempt failed before agent assertion because `MainWindowHandle` became empty and `ShowWindowAsync` received a null handle.
+- Fixed `learning_agent/acceptance_controller/controller.ps1` by refreshing the process, checking for `[IntPtr]::Zero`, waiting, re-enumerating the target window, and retrying instead of calling Win32 APIs with an empty handle.
+- PowerShell syntax check passed for `controller.ps1`.
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_112908/result.json`.
+- Independent verifier passed for that same run and scenario, including `computer_use_runtime_trace_available=true`, `computer_use_runtime_trace_model_loop_hooks_present=true`, `computer_use_runtime_trace_tool_call_hooks_present=true`, `computer_use_runtime_trace_tool_result_hooks_present=true`, `computer_use_runtime_trace_tool_internal_hooks_present=true`, `computer_use_runtime_trace_regression_test_present=true`, `windows_app_inventory_is_primary_model_discover=true`, `generic_app_discovery_is_primary_model_discover=false`, `generic_app_discovery_is_compatibility_wrapper=true`, `computer_use_legacy_or_deprecated_risk_file_count=0`, and `computer_use_unknown_reachability_file_count=0`.
+
+## 2026-06-07 Phase132 Computer Use compatibility slimming
+
+Status: automated verification passed; visible terminal acceptance will be run after this memory update.
+
+Completed:
+- 读取并修复当前源码中仍依赖旧 Phase69/103/107/108/109 兼容文件的路径。
+- 删除旧兼容文件，避免后续开发者或上下文压缩后误把旧文件当成当前 Computer Use 核心入口。
+- 修复迁移后暴露的问题：高风险 target 应先被 resolver 拒绝；Explorer 应规范为 `explorer.exe`；普通安全 app 的默认关闭路径仍要经过 generic backend；受控窗口 identity/drift 检查要在统一 resolver 中提供；runtime trace 对 `__new__` 构造的测试对象要懒初始化。
+- 修复代表性回归：live dispatcher 的 recording window id 改为 Phase132 统一形态；universal paint observation runtime 接受 `target_window`；Phase108/109/115/124 场景 token 改为统一 resolver 语义。
+- 学习快照已保存到 `learning_agent/test/computer_use_compat_slimming_phase132_20260607_122053/`。
+
+Verification:
+- `python -m py_compile ...` passed for changed source and focused tests.
+- Scenario JSON parse passed for all `agent_capability_phase*.json`.
+- Production legacy import scan passed: no production imports of deleted compatibility modules.
+- `python -m unittest discover -s learning_agent/tests -p "test_windows_computer_use_*.py"` ran 453 tests OK.
+
+Boundary:
+- 本轮只完成第一批旧接口迁移瘦身与自动化回归，不负责宣称任意 Computer Use 视觉质量已经成熟。
+
+Final visible-terminal acceptance:
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase124_windows_launch_resolver-20260607_122240/result.json`.
+- Independent verifier passed for the same run and scenario; event payload checks included `WINDOWS_APP_LAUNCH_TARGET_READY`, `resolver_launch_backend=argv_no_shell`, `safe_resolver_launch_plan=true`, and `real_desktop_touched=false`.
+- Controller path note: passing `-ScenarioPath .\learning_agent\acceptance_controller\...` fails because the controller resolves relative paths from its own directory; use `-ScenarioPath .\scenarios\agent_capability_phase124_windows_launch_resolver.json` for this controller script.
+
+## 2026-06-07 Phase133 Computer Use core preloop slimming
+
+Status: code changes and automated verification passed; real visible terminal acceptance pending at the moment this entry is written.
+
+Completed:
+- 修改代码+CompatSlimmingCore：删除 `LearningAgent._desktop_task_runtime_answer_from_prompt()`，防止普通自然语言桌面任务绕过模型主循环、工具 schema、截图回流和工具结果，自行进入旧 Python runtime。
+- 修改代码+CompatSlimmingCore：删除只服务旧入口的 `LearningAgent._format_desktop_task_runtime_answer()`，避免旧 runtime 输出格式继续暗示这条路线仍是当前主线。
+- 修改代码+CompatSlimmingCore：`full_maturity_matrix.py` 新增 `preloop_desktop_runtime_method_removed`，并从 `core/agent.py` AST 验证旧函数本体不存在。
+- 修改代码+CompatSlimmingCore：`test_windows_computer_use_full_maturity_matrix.py` 和真实终端场景 `agent_capability_phase127_model_loop_maturity_matrix.json` 都要求 `preloop_desktop_runtime_method_removed=true`。
+- 学习快照已保存到 `learning_agent/test/computer_use_core_preloop_slimming_phase133_20260607/`。
+
+Verification so far:
+- `python -m py_compile .\learning_agent\core\agent.py .\learning_agent\computer_use\full_maturity_matrix.py .\learning_agent\tests\test_windows_computer_use_full_maturity_matrix.py` passed.
+- Direct matrix probe showed top-level, model-loop subreport, AST source report, and CLI token all report `preloop_desktop_runtime_method_removed=true`.
+- Focused regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_full_maturity_matrix learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_real_physical_sender` ran 47 tests OK.
+- Core run loop regression passed: `python -m unittest learning_agent.tests.test_core_run_loop` ran 49 tests OK.
+- Full Computer Use regression passed: `python -m unittest discover -s learning_agent\tests -p "test_windows_computer_use_*.py"` ran 453 tests OK.
+
+Boundary:
+- 本轮只是删除旧预执行入口并把 maturity 门禁升级为“旧函数不存在”。它不宣称视觉质量、纠偏、任意软件任务完成度已经完全成熟。
+
+Final visible-terminal acceptance:
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_123512/result.json`.
+- Independent verifier passed for the same run and scenario; event payload checks included `preloop_desktop_runtime_method_removed=true`, `model_loop_semantic_planning=true`, `model_loop_tool_schema_visible=true`, `model_visible_screenshot_input=true`, `generic_app_control_foundation_ready=true`, `model_loop_computer_use_foundation_ready=true`, `computer_use_runtime_trace_available=true`, and `real_desktop_touched=false`.
+## 2026-06-07 Phase134 Computer Use runtime factory slimming
+
+Status: code changes and automated verification passed; real visible terminal acceptance pending at the moment this entry is written.
+
+Completed:
+- 修改代码+RuntimeFactorySlimming：删除 `LearningAgent._desktop_task_runtime_for_current_run()`，避免默认桌面 runtime 工厂继续挂在 agent 主类上，被后续开发误认为模型主循环的当前职责。
+- 新增代码+RuntimeFactorySlimming：在 `learning_agent/computer_use/desktop_task_runtime.py` 新增 `build_default_desktop_task_runtime(workspace)`，由 Computer Use runtime 模块集中构造默认 `ComputerUseDesktopTaskRuntime`、受控物理 sender 和 `UniversalDesktopExecutionLoopAdapter`。
+- 修改代码+RuntimeFactorySlimming：`full_maturity_matrix.py` 现在用 AST 同时检查 `agent_runtime_factory_method_removed=true` 和 `default_desktop_task_runtime_factory_available=true`，防止只删旧入口却没有新入口承接。
+- 修改代码+RuntimeFactorySlimming：相关 unittest 和真实终端 maturity 场景都加入上述两个 token，确保验收读取当前源码事实，而不是旧记忆。
+- 学习快照已保存到 `learning_agent/test/computer_use_runtime_factory_slimming_phase134_20260607/`。
+
+Verification so far:
+- Focused regression passed: `python -m unittest learning_agent.tests.test_windows_computer_use_full_real_physical_sender learning_agent.tests.test_windows_computer_use_full_desktop_task_router learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 47 tests OK.
+- Full Computer Use regression passed: `python -m unittest discover -s learning_agent\tests -p "test_windows_computer_use_*.py"` ran 453 tests OK.
+- Direct matrix probe showed `agent_runtime_factory_method_removed=True`, `default_desktop_task_runtime_factory_available=True`, `model_loop_computer_use_foundation_ready=True`; overall `passed=False` remains expected because visual quality/correction acceptance is still intentionally blocking final maturity.
+
+Boundary:
+- 本轮只完成 runtime factory 职责迁移和主类瘦身，不宣称任意软件、任意视觉任务、纠偏和最终图像质量已经完全成熟。
+Final visible-terminal acceptance for Phase134:
+- Real visible terminal acceptance passed through controller launching `learning_agent/start_oauth_agent.bat`: `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_125014/result.json`.
+- Independent verifier passed for the same run and scenario; event payload checks included `agent_runtime_factory_method_removed=true`, `default_desktop_task_runtime_factory_available=true`, `model_loop_computer_use_foundation_ready=true`, and `real_desktop_touched=false`.
+- Direct result read with `utf-8-sig` confirmed those same tokens are present in the real terminal run result.
+## 2026-06-07 Phase135 FullOrdinaryAppInventory progress
+
+Status: code and automated verification completed; real visible terminal acceptance still needs a controller run before declaring this development fully accepted.
+
+Completed:
+- 修改代码+FullOrdinaryAppInventory：新增红测 `test_inventory_keeps_all_ordinary_apps_without_fifty_item_cap`，先复现旧库存层只保留 50 个普通应用的问题；如果没有这条测试记录，后续无法证明本轮修复不是凭感觉修改。
+- 修改代码+FullOrdinaryAppInventory：`windows_app_inventory.py` 默认不再截断普通应用库存，显式传 `max_count` 时才按调用方要求限制显示数量；如果没有这项完成记录，第 51 个以后普通应用是否可见会继续不透明。
+- 修改代码+FullOrdinaryAppInventory：`core/agent.py::_computer_discover()` 取消默认 `10`，`schemas.py` 取消 discover 默认 10/固定 50 的工具说明；如果没有这项完成记录，模型主循环入口和工具说明可能再次分裂。
+- 修改代码+FullOrdinaryAppInventory：`full_maturity_matrix.py` 与 `test_windows_computer_use_full_maturity_matrix.py` 已加入普通应用全量放开门禁 token；如果没有这项完成记录，`/computer maturity` 不能监管旧 50 上限回归。
+- 修改代码+FullOrdinaryAppInventory：学习快照已保存到 `learning_agent/test/full_ordinary_app_inventory_no_50_limit_20260607/`；如果没有这项记录，用户后续学习本轮改动时找不到对应代码副本。
+
+Verification:
+- Red observed: targeted inventory test initially failed with `AssertionError: 60 != 50`.
+- Green passed: `python -m unittest learning_agent.tests.test_windows_computer_use_windows_app_inventory_phase122 learning_agent.tests.test_windows_computer_use_discover_tool_phase123 learning_agent.tests.test_windows_computer_use_full_maturity_matrix` ran 13 tests OK.
+- Syntax passed: `python -m py_compile learning_agent\computer_use\full_maturity_matrix.py learning_agent\computer_use\windows_app_inventory.py learning_agent\core\agent.py learning_agent\tools\schemas.py`.
+- Residual scan passed for functional old-limit patterns; remaining `APP_INVENTORY_MAX_COUNT` / old phrase occurrences are only maturity self-check strings.
+
+Remaining:
+- Run real visible terminal acceptance through `learning_agent/start_oauth_agent.bat` before saying this task is fully accepted under AGENTS rule 17.
+## 2026-06-07 Phase135 real visible terminal acceptance update
+
+- 修改代码+FullOrdinaryAppInventory：真实可见终端验收已通过，controller 启动 `learning_agent/start_oauth_agent.bat` 并在真实终端输入 `/computer maturity`；如果没有这条记录，AGENTS 规则 17 的最终门禁仍不能算完成。
+- 修改代码+FullOrdinaryAppInventory：通过 run 目录 `learning_agent/acceptance_controller/runs/agent_capability_phase127_model_loop_maturity_matrix-20260607_132401/`，独立 verifier 返回 `completed=true` 且 `assertion.passed=true`；如果没有这条记录，最终判断只依赖 controller 单点输出。
+- 修改代码+FullOrdinaryAppInventory：verifier 明确确认 `legacy_fifty_app_inventory_limit_removed=true`、`ordinary_launchable_apps_unlimited_inventory=true`、`computer_discover_default_unlimited_ordinary_apps=true`、`computer_discover_schema_default_unlimited_ordinary_apps=true`；如果没有这条记录，普通应用全量 discover 的真实终端证据会丢失。
+
+## 2026-06-07 Phase136 WeChat full-mode launch progress
+- 已完成源码级修复：微信/WeChat/Weixin 别名合并、中文“本机电脑+应用名”通用路由、模型 full harness 唯一候选后强制 launch_app、代理/多进程可见窗口绑定。
+- 已完成自动化验证：113 个相关 unittest 通过，修改文件 py_compile 通过。
+- 已完成真实可见终端验收：controller 启动 `learning_agent/start_oauth_agent.bat`，真实输入 `/computer use --full` 和打开微信 prompt，`computer_use_full_open_wechat_probe-20260607_155536/result.json` 显示 `completed=true` 与 `assertion.passed=true`。
+
+## 2026-06-07 Phase137 Computer Use structured action acceptance
+- 已完成结构化验收迁移：`LearningAgent._computer_action()` 现在在真实动作完成后写入 `computer_action_result` acceptance event，payload 包含 `real_launch_performed`、`visible_window_verified`、`launch_backend`、`display_name`、`target_window_present` 和 `real_desktop_touched`。
+- 已完成微信场景瘦身：`computer_use_full_open_wechat_probe.json` 不再依赖 `debug_log_contains`，真实启动证据改由 `event_payload_contains` 检查正式 JSONL 事件。
+- 已完成 Phase74/75 矩阵修复：代表性 E2E 矩阵现在认可 `start_menu_shortcut` 等安全多后端 resolver 计划，不再只认 `executable == explorer.exe/msedge.exe`。
+- 自动化验证通过：`test_observability_acceptance` 12 OK，Phase74/75 7 OK，完整 Windows Computer Use 回归 `463 OK`，修改文件 `py_compile` 通过。
+- 真实可见终端验收通过：`learning_agent/acceptance_controller/runs/computer_use_full_open_wechat_probe-20260607_160958/result.json` 显示 `completed=true`、`assertion.passed=true`、`debug_log_checks={}`，并确认正式事件字段全部为 true。
+- 学习副本已保存：`learning_agent/test/computer_use_structured_action_acceptance_phase137_20260607/`。

@@ -1,0 +1,164 @@
+bash 成功：exit_code=0
+stdout:
+--- line 918
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "Ӧ��������Ŀ�괰�ڰ�ʧ�ܡ�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "QQ"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 921
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "Ӧ��������Ŀ�괰�ڰ�ʧ�ܡ�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "QQ"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-4"
+}
+--- line 923
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 927
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 930
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 935
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 943
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 951
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 960
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "mspaint"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 969
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "Ӧ��������Ŀ�괰�ڰ�ʧ�ܡ�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "qq"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 970
+{
+  "action": "launch_app",
+  "allowed": false,
+  "reason": "desktop control abort flag �Ѵ������Ѿܾ�����Ӧ�á�",
+  "argument_summary": {
+    "action": "launch_app",
+    "app": "qq WebCatalog ",
+    "app_name": "qq WebCatalog ",
+    "confirm_desktop_control": true,
+    "target": "qq WebCatalog ",
+    "target_app": "qq WebCatalog "
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+--- line 971
+{
+  "action": "launch_app",
+  "allowed": true,
+  "reason": "Ӧ�����������Ŀ�괰�ڰ󶨡�",
+  "argument_summary": {
+    "action": "launch_app",
+    "target_app": "qq"
+  },
+  "target_window": null,
+  "result_summary": null,
+  "audit_id": "computer-audit-1"
+}
+
+stderr:

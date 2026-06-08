@@ -1,0 +1,26 @@
+{
+  "pending_pairing_request": {
+    "request_id": "chrome-pair-1780402314-31895706",
+    "request_nonce": "14b0445951d348edb817ed9ccf76359f",
+    "status": "completed",
+    "source": "chrome_terminal",
+    "created_at": 1780402314,
+    "completed_at": 1780411429,
+    "paired_session_id": "chrome-session-1780411429282"
+  },
+  "last_seen_at": 1780411529,
+  "last_browser_prompt_id": "cmd_6c89be14b78a85ea",
+  "last_browser_prompt_url": "https://session-sync.local/selftest",
+  "connected": false,
+  "extension_id": "lepnefooepbnjbcnhooiccpnafalfbdk",
+  "disconnect_reason": "chrome_native_host_eof",
+  "pairing": {
+    "action": "pair_device",
+    "extension_id": "lepnefooepbnjbcnhooiccpnafalfbdk",
+    "device_id": "chrome-extension-lepnefooepbnjbcnhooiccpnafalfbdk",
+    "session_id": "chrome-session-1780411429282",
+    "allowed_origins": [],
+    "request_id": "",
+    "request_nonce": ""
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "agent_capability_phase12_chrome_status_guide",
+  "output_prefix": "agent_capability_phase12_chrome_status_guide",
+  "window_title_prefix": "LearningAgent-Phase12-Chrome",
+  "max_seconds": 90,
+  "final_log_wait_seconds": 5,
+  "success_marker": "",
+  "prompt_lines": [
+    "/chrome"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "chrome_status_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [],
+  "max_permission_sent_count": 0
+}

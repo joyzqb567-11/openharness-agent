@@ -1,0 +1,83 @@
+bash 成功：exit_code=0
+stdout:
+PWD=H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+
+Name                                          Mode   Length
+----                                          ----   ------
+acceptance                                    d-----       
+acceptance_controller                         d-----       
+app                                           d-----       
+browser                                       d-----       
+browser_artifacts                             d-----       
+change                                        d-----       
+core                                          d-----       
+debug_logs                                    d-----       
+dynamicprompt                                 d-----       
+harness                                       d-----       
+mcp                                           d-----       
+memory                                        d-----       
+models                                        d-----       
+observability                                 d-----       
+prompts                                       d-----       
+runtime                                       d-----       
+sdk                                           d-----       
+skills                                        d-----       
+staticprompt                                  d-----       
+tasks                                         d-----       
+test                                          d-----       
+tests                                         d-----       
+tools                                         d-----       
+__pycache__                                   d-----       
+AGENT_ARCHITECTURE_INDEX.md                   -a---- 13277 
+browser_automation_mcp_server.py              -a---- 271594
+browser_profiles.example.json                 -a---- 246   
+browser_real_chrome.py                        -a---- 46972 
+browser_search_mcp_server.py                  -a---- 32925 
+claude_code_gap_baseline_backup_20260531.md   -a---- 3316  
+claude_code_tool_gap_matrix.md                -a---- 34371 
+context_assembler.py                          -a---- 34371 
+fake_model_repl.py                            -a---- 4762  
+learning_agent.py                             -a---- 3870  
+learning_agent_annotations.md                 -a---- 13928 
+learning_agent_explanations.md                -a---- 10497 
+manual_fake_output.txt                        -a---- 54    
+mcp_servers.json                              -a---- 1050  
+memory.md                                     -a---- 297   
+prompt_registry.py                            -a---- 7923  
+README.md                                     -a---- 49125 
+runtime_config.json                           -a---- 24    
+stage15_event_runtime_plan_backup_20260531.md -a---- 1899  
+start_codex_agent.bat                         -a---- 397   
+start_codex_agent.ps1                         -a---- 4893  
+start_fake_agent.bat                          -a---- 407   
+start_fake_agent.ps1                          -a---- 1012  
+start_oauth_agent.bat                         -a---- 1037  
+start_oauth_agent.ps1                         -a---- 5173  
+tool_policy.py                                -a---- 11063 
+--- memory sessions ---
+session_20260531_165153_b8b08f06                           
+session_20260531_165415_26138b39                           
+session_20260531_165650_72c7d5d2                           
+session_20260531_174908_734236e9                           
+session_20260531_175100_9a81131c                           
+session_20260531_175621_0bff3c6e                           
+session_20260531_175913_4f8e7c42                           
+session_20260531_180010_41e0b85d                           
+session_20260531_180050_af9fa86d                           
+session_20260531_180208_f3149506                           
+session_20260531_180244_081cd575                           
+session_20260531_180405_2b20f8da                           
+session_20260531_182229_b5f9fd5f                           
+session_20260531_190000_e71f387a                           
+session_20260531_190403_57d4274a                           
+session_20260531_200128_9375804e                           
+session_20260531_203818_16508881                           
+session_20260531_204038_e64ed9e7                           
+session_20260531_210005_f0201d18                           
+session_20260531_211135_d7750406                           
+--- learning_agent memory sessions ---
+no learning_agent/memory/sessions
+
+
+
+stderr:

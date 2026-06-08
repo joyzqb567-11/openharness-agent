@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_002aa0f5c0ef5ab3",
+  "prompt": "帮我打开本机电脑的opencode",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "帮我打开本机电脑的opencode",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已打开本机电脑的 OpenCode。",
+      "started_at": "2026-06-07T07:29:45Z",
+      "completed_at": "2026-06-07T07:30:14Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:29:45Z",
+  "updated_at": "2026-06-07T07:30:14Z"
+}

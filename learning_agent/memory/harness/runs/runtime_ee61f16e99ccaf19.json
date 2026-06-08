@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ee61f16e99ccaf19",
+  "prompt": "Please run one Phase 66 Windows Computer Use observation fusion acceptance. Use only the project terminal self-check command. Do not install OCR, do not install vision dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE66_OBSERVATION_FUSION_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.observation_fusion import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE66_OBSERVATION_FUSION_OK, the final answer's last line must completely copy: PHASE66_OBSERVATION_FUSION_READY PHASE66_OBSERVATION_FUSION_OK screenshot_observation=true uia_tree_observation=true ocr_or_vision_slot=true window_state_observation=true sensitive_text_boundary=true uia_ocr_vision_fusion=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 66 Windows Computer Use observation fusion acceptance. Use only the project terminal self-check command. Do not install OCR, do not install vision dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE66_OBSERVATION_FUSION_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.observation_fusion import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE66_OBSERVATION_FUSION_OK, the final answer's last line must completely copy: PHASE66_OBSERVATION_FUSION_READY PHASE66_OBSERVATION_FUSION_OK screenshot_observation=true uia_tree_observation=true ocr_or_vision_slot=true window_state_observation=true sensitive_text_boundary=true uia_ocr_vision_fusion=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 66 Windows Computer Use observation fusion acceptance passed.\n\nPHASE66_OBSERVATION_FUSION_READY PHASE66_OBSERVATION_FUSION_OK screenshot_observation=true uia_tree_observation=true ocr_or_vision_slot=true window_state_observation=true sensitive_text_boundary=true uia_ocr_vision_fusion=true actions_expanded=false",
+      "started_at": "2026-06-03T13:01:55Z",
+      "completed_at": "2026-06-03T13:02:07Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T13:01:55Z",
+  "updated_at": "2026-06-03T13:02:07Z"
+}

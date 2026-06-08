@@ -1,0 +1,22 @@
+{
+  "task_id": "bg_48da3e0bb376",
+  "prompt": "python -c \"print('TASK_NOTIFICATION_REAL_OK', flush=True)\"",
+  "kind": "background_shell",
+  "status": "completed",
+  "output": "TASK_NOTIFICATION_REAL_OK\n",
+  "error": "",
+  "output_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\tasks\\outputs\\bg_48da3e0bb376.txt",
+  "last_offset": 26,
+  "notified": true,
+  "owner_run_id": "",
+  "allowed_tool_names": [],
+  "max_turns": null,
+  "background": true,
+  "metadata": {
+    "cwd": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent",
+    "label": "harness-task-notification-real"
+  },
+  "created_at": "2026-05-31T09:56:42Z",
+  "updated_at": "2026-05-31T09:56:42Z",
+  "completed_at": "2026-05-31T09:56:42Z"
+}

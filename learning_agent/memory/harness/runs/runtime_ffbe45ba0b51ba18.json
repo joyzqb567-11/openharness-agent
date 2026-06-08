@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ffbe45ba0b51ba18",
+  "prompt": "请先帮我查找本机画图软件是否可用，并告诉我应该使用哪个 app_name，不要打开或操作软件。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请先帮我查找本机画图软件是否可用，并告诉我应该使用哪个 app_name，不要打开或操作软件。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "本机画图软件候选已找到：Paint。\n\n应使用的 `app_name` 是：`mspaint`\n\n说明：本次只进行了应用候选发现，没有打开或操作软件。",
+      "started_at": "2026-06-06T23:20:57Z",
+      "completed_at": "2026-06-06T23:21:08Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T23:20:57Z",
+  "updated_at": "2026-06-06T23:21:08Z"
+}

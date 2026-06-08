@@ -1,6 +1,20 @@
 import importlib  # 新增代码+GenericLaunchBackendMaturity：导入动态模块加载工具；如果没有这一行，红测无法清楚暴露 generic launch backend 模块缺失。
 import unittest  # 新增代码+GenericLaunchBackendMaturity：导入 unittest 测试框架；如果没有这一行，本文件不能被项目标准测试命令执行。
 
+class FakeOwnedProcess:  # 新增代码+FullNaturalUserFlowCleanup：类段开始，模拟 subprocess.Popen 对象用于测试自有进程清理；如果没有这个 fake，cleanup 测试就需要真的启动应用。
+    def __init__(self) -> None:  # 新增代码+FullNaturalUserFlowCleanup：函数段开始，初始化 fake 进程状态；如果没有这段函数，测试无法控制进程是否存活。
+        self.terminated = False  # 新增代码+FullNaturalUserFlowCleanup：记录 terminate 是否被调用；如果没有这一行，测试无法证明 cleanup 真做了动作。
+    # 新增代码+FullNaturalUserFlowCleanup：函数段结束，FakeOwnedProcess.__init__ 到此结束；如果没有这个边界说明，初学者不容易看出 fake 初始化范围。
+
+    def poll(self) -> int | None:  # 新增代码+FullNaturalUserFlowCleanup：函数段开始，模拟 Popen.poll；如果没有这段函数，registry 无法判断 fake 是否仍存活。
+        return 0 if self.terminated else None  # 新增代码+FullNaturalUserFlowCleanup：未 terminate 前返回 None，terminate 后返回退出码；如果没有这一行，cleanup 流程没有可测状态变化。
+    # 新增代码+FullNaturalUserFlowCleanup：函数段结束，FakeOwnedProcess.poll 到此结束；如果没有这个边界说明，初学者不容易看出存活判断范围。
+
+    def terminate(self) -> None:  # 新增代码+FullNaturalUserFlowCleanup：函数段开始，模拟终止进程；如果没有这段函数，registry cleanup 无法触发状态变化。
+        self.terminated = True  # 新增代码+FullNaturalUserFlowCleanup：把 fake 进程标记为已退出；如果没有这一行，残留检查会一直失败。
+    # 新增代码+FullNaturalUserFlowCleanup：函数段结束，FakeOwnedProcess.terminate 到此结束；如果没有这个边界说明，初学者不容易看出终止动作范围。
+# 新增代码+FullNaturalUserFlowCleanup：类段结束，FakeOwnedProcess 到此结束；如果没有这个边界说明，初学者不容易看出 fake 进程范围。
+
 class WindowsComputerUseGenericLaunchBackendMaturityTests(unittest.TestCase):  # 新增代码+GenericLaunchBackendMaturity：类段开始，集中验收通用启动后端成熟边界；如果没有这个类，Task 2 的安全启动要求没有回归保护。
     def _backend_module(self):  # 新增代码+GenericLaunchBackendMaturity：函数段开始，统一加载待实现的通用启动后端模块；如果没有这个函数，每个测试都会重复导入并让失败原因分散。
         return importlib.import_module("learning_agent.computer_use.generic_launch_backend")  # 新增代码+GenericLaunchBackendMaturity：加载 generic launch backend 模块；如果没有这一行，测试无法访问请求、结果和后端类。
@@ -52,6 +66,19 @@ class WindowsComputerUseGenericLaunchBackendMaturityTests(unittest.TestCase):  #
         self.assertTrue(registry.owned_processes[0]["cleanup_registered"])  # 新增代码+GenericLaunchBackendMaturity：断言登记记录带 cleanup 责任；如果没有这一行，后续 stop/abort 不知道该清理什么。
     # 新增代码+GenericLaunchBackendMaturity：函数段结束，test_launched_process_is_registered_as_owned 到此结束；如果没有这个边界说明，读者不容易看出自有资源登记测试范围。
 
+    def test_owned_process_registry_terminates_registered_process_object(self) -> None:  # 新增代码+FullNaturalUserFlowCleanup：函数段开始，验证 registry 能清理自己保存的真实进程对象；如果没有这个测试，Paint 验收后可能再次残留进程却报告成功。
+        module = self._backend_module()  # 新增代码+FullNaturalUserFlowCleanup：读取通用启动后端模块；如果没有这一行，测试无法创建 registry。
+        registry = module.Phase110OwnedProcessRegistry()  # 新增代码+FullNaturalUserFlowCleanup：创建自有进程 registry；如果没有这一行，没有 cleanup 被测对象。
+        process = FakeOwnedProcess()  # 新增代码+FullNaturalUserFlowCleanup：创建 fake 自有进程；如果没有这一行，测试无法证明 terminate 被调用。
+        registry.register(4242, "mspaint.exe", ["mspaint.exe"], process_object=process)  # 新增代码+FullNaturalUserFlowCleanup：登记本 agent 启动的 fake Paint 进程；如果没有这一行，cleanup 没有目标。
+        cleanup = registry.cleanup_owned_processes(reason="unit-test-cleanup")  # 新增代码+FullNaturalUserFlowCleanup：执行自有进程清理；如果没有这一行，测试不会触发新增 cleanup API。
+        residual = registry.residual_owned_processes()  # 新增代码+FullNaturalUserFlowCleanup：执行清理后的残留检查；如果没有这一行，测试无法证明进程真的退出。
+        self.assertTrue(process.terminated)  # 新增代码+FullNaturalUserFlowCleanup：断言 fake 进程被 terminate；如果没有这一行，cleanup 可能只是改报告字段。
+        self.assertTrue(cleanup["cleanup_completed"])  # 新增代码+FullNaturalUserFlowCleanup：断言 cleanup 报告成功；如果没有这一行，调用方无法信任清理结果。
+        self.assertEqual(cleanup["cleaned_process_count"], 1)  # 新增代码+FullNaturalUserFlowCleanup：断言成功清理一个进程；如果没有这一行，清理数量可能漂移。
+        self.assertFalse(residual["residual_owned_process"])  # 新增代码+FullNaturalUserFlowCleanup：断言没有自有进程残留；如果没有这一行，Paint 残留误报无法被测试挡住。
+    # 新增代码+FullNaturalUserFlowCleanup：函数段结束，test_owned_process_registry_terminates_registered_process_object 到此结束；如果没有这个边界说明，初学者不容易看出清理测试范围。
+
     def test_launch_failure_returns_structured_reason(self) -> None:  # 新增代码+GenericLaunchBackendMaturity：函数段开始，验证后端失败返回结构化原因；如果没有这个测试，启动失败会变成难懂异常或沉默失败。
         module = self._backend_module()  # 新增代码+GenericLaunchBackendMaturity：读取通用启动后端模块；如果没有这一行，后续无法创建失败后端。
         backend = module.Phase110FailingGenericLaunchBackend("simulated_create_process_failure")  # 新增代码+GenericLaunchBackendMaturity：创建可预测失败后端；如果没有这一行，失败路径只能依赖真实系统异常。
@@ -64,7 +91,7 @@ class WindowsComputerUseGenericLaunchBackendMaturityTests(unittest.TestCase):  #
 
     def test_phase109_default_backend_is_phase110_generic_backend(self) -> None:  # 新增代码+GenericLaunchBackendMaturity：函数段开始，验证 Phase109 默认后端升级为 Task 2 的通用后端；如果没有这个测试，新后端可能孤立存在没有接入候选链路。
         module = self._backend_module()  # 新增代码+GenericLaunchBackendMaturity：读取通用启动后端模块；如果没有这一行，后续无法比对后端类型。
-        phase109 = importlib.import_module("learning_agent.computer_use.generic_real_launch_candidate")  # 新增代码+GenericLaunchBackendMaturity：加载 Phase109 候选模块；如果没有这一行，测试无法验证旧链路接入新后端。
+        phase109 = importlib.import_module("learning_agent.computer_use.generic_launch_backend")  # 新增代码+GenericLaunchBackendMaturity：加载 Phase109 候选模块；如果没有这一行，测试无法验证旧链路接入新后端。
         candidate = phase109.Phase109GenericRealLaunchCandidate()  # 新增代码+GenericLaunchBackendMaturity：创建默认 Phase109 候选器；如果没有这一行，默认后端升级无法被检查。
         self.assertIsInstance(candidate.launch_backend, module.Phase110RecordingGenericLaunchBackend)  # 新增代码+GenericLaunchBackendMaturity：断言默认后端是 Phase110 记录型通用后端；如果没有这一行，新后端可能不会被真实入口复用。
     # 新增代码+GenericLaunchBackendMaturity：函数段结束，test_phase109_default_backend_is_phase110_generic_backend 到此结束；如果没有这个边界说明，读者不容易看出 Phase109 接入测试范围。

@@ -1,0 +1,17 @@
+{
+  "action_id": "browser_run_94ff635ee2871801-action-1",
+  "run_id": "browser_run_94ff635ee2871801",
+  "stage_id": "browser_screenshot",
+  "tool_name": "browser_screenshot",
+  "arguments_redacted": {
+    "page_id": "page-1",
+    "filename": "example-visible-runtime.png",
+    "full_page": true
+  },
+  "status": "completed",
+  "started_at_ms": 1780287451721,
+  "finished_at_ms": 1780287451815,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": "browser_observation_8073c0ebc8e28566"
+}

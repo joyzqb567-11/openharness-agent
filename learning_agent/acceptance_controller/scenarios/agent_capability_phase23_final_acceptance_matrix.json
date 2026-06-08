@@ -1,0 +1,34 @@
+{
+  "name": "agent_capability_phase23_final_acceptance_matrix",
+  "output_prefix": "agent_capability_phase23_final_acceptance_matrix",
+  "window_title_prefix": "LearningAgent-Phase23-FinalMatrix",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE23_FINAL_ACCEPTANCE_MATRIX_READY",
+  "prompt_lines": [
+    "请执行 Phase 23 最终端到端验收矩阵检查：验证 Phase 14 到 Phase 22 的测试、场景、报告、备份、真实终端 run 和截图都完整通过，最终回答必须包含固定标记：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY。",
+    "你必须调用终端工具执行这个命令：python -m unittest learning_agent.tests.test_final_acceptance_matrix_phase23 && python -c \"import json; from pathlib import Path; p=Path('learning_agent/acceptance_controller/final_acceptance_matrix_phase23.json'); data=json.loads(p.read_text(encoding='utf-8')); print('PHASE23_MATRIX_OK phases='+str(len(data['phases']))+' first_phase='+str(data['phases'][0]['phase'])+' last_phase='+str(data['phases'][-1]['phase'])+' matrix_path='+str(p))\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE23_MATRIX_OK 后，最终回答最后一行必须完整复制：PHASE23_FINAL_ACCEPTANCE_MATRIX_READY PHASE23_MATRIX_OK phases=9 first_phase=14 last_phase=22 matrix_path=learning_agent\\acceptance_controller\\final_acceptance_matrix_phase23.json"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE23_MATRIX_OK",
+    "phases=9",
+    "first_phase=14",
+    "last_phase=22",
+    "final_acceptance_matrix_phase23.json"
+  ],
+  "event_answer_contains": [
+    "PHASE23_FINAL_ACCEPTANCE_MATRIX_READY",
+    "PHASE23_MATRIX_OK",
+    "phases=9",
+    "first_phase=14",
+    "last_phase=22"
+  ],
+  "max_permission_sent_count": 0
+}

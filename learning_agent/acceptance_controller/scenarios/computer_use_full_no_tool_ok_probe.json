@@ -1,0 +1,34 @@
+{
+  "id": "computer_use_full_no_tool_ok_probe",
+  "name": "computer_use_full_no_tool_ok_probe",
+  "output_prefix": "computer_use_full_no_tool_ok_probe",
+  "window_title_prefix": "LearningAgent-FullNoToolOkProbe",
+  "max_seconds": 180,
+  "final_log_wait_seconds": 10,
+  "post_success_wait_seconds": 2,
+  "success_marker": "ACCEPTANCE_FULL_NO_TOOL_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, then verify the visible terminal model loop can answer without calling tools.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请只回复一行：ACCEPTANCE_FULL_NO_TOOL_OK。不要调用任何工具。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "ACCEPTANCE_FULL_NO_TOOL_OK"
+  ],
+  "event_answer_contains": [
+    "ACCEPTANCE_FULL_NO_TOOL_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "model_loop_tools_loaded=true"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -22,3 +22,37 @@ learning_agent/browser_artifacts/
 learning_agent/browser_profiles.json
 # 忽略真实 Chrome 审计日志文件；没有这行会把真实浏览器连接和操作审计提交进仓库，可能暴露用户浏览器行为。
 learning_agent/browser_artifacts/real_chrome_audit.jsonl
+# 新增代码+项目瘦身：忽略 Windows Computer Use 截图证据目录；如果没有这行，真实桌面截图和 BMP 证据会继续进入 Git 状态，让项目体积快速变大。
+learning_agent/memory/computer_use/evidence/
+# 新增代码+项目瘦身：忽略 harness 运行事件目录；如果没有这行，长期任务每次运行产生的 JSONL 事件会持续堆进项目，后续排查和提交都会变慢。
+learning_agent/memory/harness/events/
+# 新增代码+项目瘦身：忽略根目录 memory 的会话记录；如果没有这行，外层运行记录也会继续留下 transcript 和事件流，项目会再次膨胀。
+memory/sessions/
+# 新增代码+项目瘦身：忽略根目录 memory 的状态事件；如果没有这行，状态 JSONL 会随着每次运行增长，仓库会被运行历史拖大。
+memory/status/
+# 新增代码+GitHub上传瘦身：忽略 learning_agent 内部状态事件目录；如果没有这行，真实运行产生的 events.jsonl 会被提交到 GitHub，既膨胀仓库也暴露本机运行痕迹。
+learning_agent/memory/status/
+# 新增代码+GitHub上传瘦身：忽略 learning_agent 的 Computer Use 运行记忆目录；如果没有这行，桌面截图索引、审计 JSONL 和绘图运行记录会混进源码仓库。
+learning_agent/memory/computer_use/
+# 新增代码+GitHub上传瘦身：忽略根目录 Computer Use 运行记忆目录；如果没有这行，本地 native_dependency_report 等运行状态会被提交到 GitHub。
+memory/computer_use/
+# 新增代码+GitHub上传瘦身：忽略 acceptance_controller 下误嵌套出来的 learning_agent 运行副本；如果没有这行，错误路径里的终端截图和事件日志会混进仓库。
+learning_agent/acceptance_controller/learning_agent/
+# 新增代码+GitHub上传瘦身：忽略学习目录里的视频文件；如果没有这行，mp4 教学录屏会让仓库变大，且不属于源码上传的核心。
+learning_agent/test/**/*.mp4
+# 新增代码+项目瘦身：忽略学习备份中的验收截图目录；如果没有这行，learning_agent/test 里会继续复制可见终端截图，学习目录会越来越大。
+learning_agent/test/**/acceptance_run/
+# 新增代码+项目瘦身：忽略学习备份中的可见终端截图目录；如果没有这行，visible terminal 截图会被保存进学习目录，项目体积会反复膨胀。
+learning_agent/test/**/visible_terminal_run/
+# 新增代码+项目瘦身：忽略学习备份中的 PNG 图片；如果没有这行，截图类学习附件会进入 Git 状态，源码仓库会被图片文件拖大。
+learning_agent/test/**/*.png
+# 新增代码+项目瘦身：忽略学习备份中的 BMP 图片；如果没有这行，未压缩 BMP 截图可能单个就占数 MB，让 agent 项目显得异常臃肿。
+learning_agent/test/**/*.bmp
+# 新增代码+项目瘦身：忽略学习备份中的 JPG/JPEG 图片；如果没有这行，浏览器或桌面验收图片会继续污染学习备份目录。
+learning_agent/test/**/*.jpg
+# 新增代码+项目瘦身：忽略学习备份中的 JPEG 图片；如果没有这行，不同后缀的同类截图仍可能漏网进入仓库。
+learning_agent/test/**/*.jpeg
+# 新增代码+项目瘦身：忽略学习备份中的 WebP 图片；如果没有这行，浏览器产出的 WebP 证据也会继续增加项目体积。
+learning_agent/test/**/*.webp
+# 新增代码+项目瘦身：忽略学习备份中的 JSONL 事件流；如果没有这行，学习目录会复制大量逐行日志，后续阅读和提交都会变重。
+learning_agent/test/**/*.jsonl

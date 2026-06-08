@@ -1,0 +1,39 @@
+{
+  "name": "harness_cli_echo_run",
+  "output_prefix": "harness_cli_echo_run",
+  "window_title_prefix": "LearningAgent-Controller-HarnessCliEcho",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 30,
+  "success_marker": "HARNESS_CLI_AGENT_EXECUTION_OK",
+  "prompt_lines": [
+    "请严格执行一次 harness CLI 真实终端验收，最终回答必须包含固定标记：HARNESS_CLI_AGENT_EXECUTION_OK。",
+    "第一步使用 read 工具读取 learning_agent/harness/README.md 和 learning_agent/harness/agent_executor.py，确认现在有 enqueue/run CLI 和 AgentStageExecutor。",
+    "第二步使用 bash 工具在当前工作区依次执行这三条命令：",
+    "python -m learning_agent.harness enqueue --store memory/harness_cli_visible_acceptance --run-id visible-cli --prompt \"visible cli acceptance\" --stage \"only::请输出 VISIBLE_HARNESS_CLI_OK\" --success-marker \"only=VISIBLE_HARNESS_CLI_OK\"",
+    "python -m learning_agent.harness run --store memory/harness_cli_visible_acceptance --run-id visible-cli --executor echo",
+    "python -m learning_agent.harness status --store memory/harness_cli_visible_acceptance --run-id visible-cli",
+    "最终回答请简短说明命令结果，并必须包含：HARNESS_CLI_AGENT_EXECUTION_OK、visible-cli、status=completed、acceptance=passed、VISIBLE_HARNESS_CLI_OK、AgentStageExecutor。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/harness/README.md",
+    "learning_agent/harness/agent_executor.py",
+    "python -m learning_agent.harness enqueue",
+    "python -m learning_agent.harness run",
+    "python -m learning_agent.harness status",
+    "VISIBLE_HARNESS_CLI_OK"
+  ],
+  "event_answer_contains": [
+    "HARNESS_CLI_AGENT_EXECUTION_OK",
+    "visible-cli",
+    "status=completed",
+    "acceptance=passed",
+    "VISIBLE_HARNESS_CLI_OK",
+    "AgentStageExecutor"
+  ]
+}

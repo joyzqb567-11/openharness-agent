@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a3ff6568dc6b5f44",
+  "prompt": "请执行一次 Phase 41 Windows Computer Use 图片结果块验收：这次只允许运行项目内 evidence 模块自检，必须证明截图 artifact、model-visible image_result block、agent active_artifacts 登记、敏感 UIA 文本隐藏都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE41_WINDOWS_IMAGE_RESULTS_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.evidence import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE41_WINDOWS_IMAGE_RESULTS_OK 后，最终回答最后一行必须完整复制：PHASE41_WINDOWS_IMAGE_RESULTS_READY PHASE41_WINDOWS_IMAGE_RESULTS_OK artifact=true image_block=true agent_artifact=true sensitive_text_hidden=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 41 Windows Computer Use 图片结果块验收：这次只允许运行项目内 evidence 模块自检，必须证明截图 artifact、model-visible image_result block、agent active_artifacts 登记、敏感 UIA 文本隐藏都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE41_WINDOWS_IMAGE_RESULTS_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.evidence import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE41_WINDOWS_IMAGE_RESULTS_OK 后，最终回答最后一行必须完整复制：PHASE41_WINDOWS_IMAGE_RESULTS_READY PHASE41_WINDOWS_IMAGE_RESULTS_OK artifact=true image_block=true agent_artifact=true sensitive_text_hidden=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 41 Windows Computer Use 图片结果块验收通过。\n\n已由项目内 evidence 模块自检证明：\n- 截图 artifact 成立\n- model-visible image_result block 成立\n- agent active_artifacts 登记成立\n- 敏感 UIA 文本隐藏成立\n- 未点击真实桌面、未移动鼠标、未输入真实窗口\n\nPHASE41_WINDOWS_IMAGE_RESULTS_READY PHASE41_WINDOWS_IMAGE_RESULTS_OK artifact=true image_block=true agent_artifact=true sensitive_text_hidden=true actions_expanded=false",
+      "started_at": "2026-06-03T03:45:23Z",
+      "completed_at": "2026-06-03T03:45:32Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T03:45:23Z",
+  "updated_at": "2026-06-03T03:45:32Z"
+}

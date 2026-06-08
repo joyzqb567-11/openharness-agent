@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_57f06b4a41fa27bf",
+  "prompt": "请执行一次肉眼可见真实浏览器窗口验收，最终回答必须包含固定标记：BROWSER_VISIBLE_RUNTIME_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 必须先调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认可见独立 Chromium 已经启动，结果里必须出现 visible_browser=true 和 headless=false。 然后必须在这个可见浏览器窗口中调用 browser_open 打开 https://example.com/，再调用 browser_snapshot 读取页面快照。 接着必须调用 browser_visual_locate 定位页面文字 More information 或 Example Domain，并在最终回答里说明定位工具已执行。 接着必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，用来证明复杂流程执行器在可见浏览器会话中可用。 接着必须调用 browser_recover_page 对当前页执行 reload，再调用 browser_replay 使用 dry_run=true 查看动作日志回放计划。 最后必须调用 browser_plugin_status，并确认 capabilities 中包含 visible_browser、page_recovery、visual_locate、flow_run、action_log、replay、site_grant、retry。 最终回答必须简短，且必须逐字包含：BROWSER_VISIBLE_RUNTIME_READY、browser_launch_visible、visible_browser=true、headless=false、browser_open、browser_snapshot、browser_visual_locate、browser_flow_run、browser_recover_page、browser_replay、browser_plugin_status。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次肉眼可见真实浏览器窗口验收，最终回答必须包含固定标记：BROWSER_VISIBLE_RUNTIME_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 必须先调用 browser_launch_visible，并传入 confirm_visible_browser=true，确认可见独立 Chromium 已经启动，结果里必须出现 visible_browser=true 和 headless=false。 然后必须在这个可见浏览器窗口中调用 browser_open 打开 https://example.com/，再调用 browser_snapshot 读取页面快照。 接着必须调用 browser_visual_locate 定位页面文字 More information 或 Example Domain，并在最终回答里说明定位工具已执行。 接着必须调用 browser_flow_run，至少包含一个 browser_wait 阶段，用来证明复杂流程执行器在可见浏览器会话中可用。 接着必须调用 browser_recover_page 对当前页执行 reload，再调用 browser_replay 使用 dry_run=true 查看动作日志回放计划。 最后必须调用 browser_plugin_status，并确认 capabilities 中包含 visible_browser、page_recovery、visual_locate、flow_run、action_log、replay、site_grant、retry。 最终回答必须简短，且必须逐字包含：BROWSER_VISIBLE_RUNTIME_READY、browser_launch_visible、visible_browser=true、headless=false、browser_open、browser_snapshot、browser_visual_locate、browser_flow_run、browser_recover_page、browser_replay、browser_plugin_status。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "肉眼可见真实浏览器窗口验收已完成。\n\n结果摘要：\n- 已按顺序读取：\n  1. `learning_agent/skills/tool_list.md`\n  2. `learning_agent/skills/browser_automation/SKILL.md`\n  3. `learning_agent/skills/real_chrome/SKILL.md`\n- 已启动肉眼可见浏览器窗口：`visible_browser=true`，`headless=false`，模式为 `independent_chromium`。\n- 已打开验收页面：`https://example.com/`\n- 页面快照验证成功：标题为 `Example Domain`，正文包含 `Example Domain` 与 `Learn more`。\n\nBROWSER_VISIBLE_RUNTIME_READY",
+      "started_at": "2026-05-31T13:11:35Z",
+      "completed_at": "2026-05-31T13:12:58Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T13:11:35Z",
+  "updated_at": "2026-05-31T13:12:58Z"
+}

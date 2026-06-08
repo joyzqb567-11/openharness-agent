@@ -1,0 +1,54 @@
+{
+  "id": "agent_capability_phase53_parity_gap_matrix",
+  "name": "agent_capability_phase53_parity_gap_matrix",
+  "output_prefix": "agent_capability_phase53_parity_gap_matrix",
+  "window_title_prefix": "LearningAgent-Phase53-ParityGapMatrix",
+  "max_seconds": 600,
+  "final_log_wait_seconds": 35,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE53_PARITY_GAP_MATRIX_READY",
+  "prompt": "Please run the Phase53 Windows Computer Use ClaudeCode parity gap matrix acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 53 Windows Computer Use ClaudeCode parity gap matrix acceptance. Use only the project terminal self-check command. Do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE53_PARITY_GAP_MATRIX_READY.",
+    "You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.parity_gap_matrix import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE53_PARITY_GAP_MATRIX_OK, the final answer's last line must completely copy: PHASE53_PARITY_GAP_MATRIX_READY PHASE53_PARITY_GAP_MATRIX_OK gap_count=12 owner_phases_complete=true real_provider_required=true non_fake_acceptance=true claudecode_source_reviewed=true actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE53_PARITY_GAP_MATRIX_READY",
+    "PHASE53_PARITY_GAP_MATRIX_OK",
+    "gap_count=12",
+    "owner_phases_complete=true",
+    "real_provider_required=true",
+    "non_fake_acceptance=true",
+    "claudecode_source_reviewed=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE53_PARITY_GAP_MATRIX_READY",
+    "PHASE53_PARITY_GAP_MATRIX_OK",
+    "gap_count=12",
+    "owner_phases_complete=true",
+    "real_provider_required=true",
+    "non_fake_acceptance=true",
+    "claudecode_source_reviewed=true",
+    "actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE53_PARITY_GAP_MATRIX_READY",
+      "PHASE53_PARITY_GAP_MATRIX_OK",
+      "gap_count=12",
+      "owner_phases_complete=true",
+      "real_provider_required=true",
+      "non_fake_acceptance=true",
+      "claudecode_source_reviewed=true",
+      "actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

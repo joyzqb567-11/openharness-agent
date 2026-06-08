@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a091069cefecb111",
+  "prompt": "Please run one Phase 70 Windows Computer Use generic click, type, and visual point control action acceptance. Use only the project terminal self-check command. Do not call an LLM for execution planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE70_GENERIC_CONTROL_ACTIONS_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.generic_control_actions import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE70_GENERIC_CONTROL_ACTIONS_OK, the final answer's last line must completely copy: PHASE70_GENERIC_CONTROL_ACTIONS_READY PHASE70_GENERIC_CONTROL_ACTIONS_OK generic_click=true generic_type=true control_locator=true visual_fallback=true before_after_evidence=true zero_event_refusal=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 70 Windows Computer Use generic click, type, and visual point control action acceptance. Use only the project terminal self-check command. Do not call an LLM for execution planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE70_GENERIC_CONTROL_ACTIONS_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.generic_control_actions import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE70_GENERIC_CONTROL_ACTIONS_OK, the final answer's last line must completely copy: PHASE70_GENERIC_CONTROL_ACTIONS_READY PHASE70_GENERIC_CONTROL_ACTIONS_OK generic_click=true generic_type=true control_locator=true visual_fallback=true before_after_evidence=true zero_event_refusal=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "验证通过。\nPHASE70_GENERIC_CONTROL_ACTIONS_READY PHASE70_GENERIC_CONTROL_ACTIONS_OK generic_click=true generic_type=true control_locator=true visual_fallback=true before_after_evidence=true zero_event_refusal=true actions_expanded=false",
+      "started_at": "2026-06-03T14:49:56Z",
+      "completed_at": "2026-06-03T14:50:05Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T14:49:56Z",
+  "updated_at": "2026-06-03T14:50:05Z"
+}

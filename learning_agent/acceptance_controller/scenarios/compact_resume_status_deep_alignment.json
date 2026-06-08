@@ -1,0 +1,51 @@
+{
+  "name": "compact_resume_status_deep_alignment",
+  "output_prefix": "compact_resume_status_deep_alignment",
+  "window_title_prefix": "LearningAgent-Controller-DeepCompactStatus",
+  "max_seconds": 600,
+  "final_log_wait_seconds": 30,
+  "success_marker": "COMPACT_RESUME_STATUS_DEEP_READY",
+  "prompt_lines": [
+    "请执行一次 deep compact/resume/status 真实终端验收，最终回答必须包含固定标记：COMPACT_RESUME_STATUS_DEEP_READY。",
+    "请只使用 read 工具读取 learning_agent/core/compact.py、learning_agent/core/reactive_compact.py、learning_agent/core/resume_loader.py、learning_agent/core/resume_repair.py、learning_agent/runtime/status_schema.py、learning_agent/runtime/status_events.py、learning_agent/runtime/status_snapshot.py、learning_agent/app/interactive.py、learning_agent/app/http_bridge.py、learning_agent/sdk/status.py、learning_agent/tools/schemas.py、learning_agent/tools/executor.py、learning_agent/tools/catalog.py。",
+    "不要使用 bash、write、edit 或浏览器工具；本场景只验证真实可见终端 agent 启动、源码可见、最终回答可观测，自动化测试已经另行验证 compact/resume/status 行为。",
+    "最终回答请简短说明你看到的结果，并必须包含：COMPACT_RESUME_STATUS_DEEP_READY、tool_output_snip、microcompact、context_collapse、reactive_compact_retry、ResumeRepairReport、resume_needs_review、STATUS_SCHEMA_VERSION、get_health、load_resume_report、resume_report、run_status、health_status、/events、/sessions、/compact。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/core/compact.py",
+    "learning_agent/core/reactive_compact.py",
+    "learning_agent/core/resume_loader.py",
+    "learning_agent/core/resume_repair.py",
+    "learning_agent/runtime/status_schema.py",
+    "learning_agent/runtime/status_events.py",
+    "learning_agent/runtime/status_snapshot.py",
+    "learning_agent/app/interactive.py",
+    "learning_agent/app/http_bridge.py",
+    "learning_agent/sdk/status.py",
+    "learning_agent/tools/schemas.py"
+  ],
+  "event_answer_contains": [
+    "COMPACT_RESUME_STATUS_DEEP_READY",
+    "tool_output_snip",
+    "microcompact",
+    "context_collapse",
+    "reactive_compact_retry",
+    "ResumeRepairReport",
+    "resume_needs_review",
+    "STATUS_SCHEMA_VERSION",
+    "get_health",
+    "load_resume_report",
+    "resume_report",
+    "run_status",
+    "health_status",
+    "/events",
+    "/sessions",
+    "/compact"
+  ]
+}

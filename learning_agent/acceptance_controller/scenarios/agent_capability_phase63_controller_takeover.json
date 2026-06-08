@@ -1,0 +1,66 @@
+{
+  "id": "agent_capability_phase63_controller_takeover",
+  "name": "agent_capability_phase63_controller_takeover",
+  "output_prefix": "agent_capability_phase63_controller_takeover",
+  "window_title_prefix": "LearningAgent-Phase63-ControllerTakeover",
+  "max_seconds": 700,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY",
+  "prompt": "Please run the Phase63 Windows Computer Use controller takeover acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 63 Windows Computer Use external agent controller takeover and debug surface acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.controller_takeover import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK, the final answer's last line must completely copy: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK controller_surface=true launches_visible_terminal=true reads_acceptance_run=true evidence_package=true can_abort=true http_loopback_only=true token_required=true approval_bypass_blocked=true visible_terminal_required=true actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY",
+    "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK",
+    "controller_surface=true",
+    "launches_visible_terminal=true",
+    "reads_acceptance_run=true",
+    "evidence_package=true",
+    "can_abort=true",
+    "http_loopback_only=true",
+    "token_required=true",
+    "approval_bypass_blocked=true",
+    "visible_terminal_required=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY",
+    "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK",
+    "controller_surface=true",
+    "launches_visible_terminal=true",
+    "reads_acceptance_run=true",
+    "evidence_package=true",
+    "can_abort=true",
+    "http_loopback_only=true",
+    "token_required=true",
+    "approval_bypass_blocked=true",
+    "visible_terminal_required=true",
+    "actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY",
+      "PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK",
+      "controller_surface=true",
+      "launches_visible_terminal=true",
+      "reads_acceptance_run=true",
+      "evidence_package=true",
+      "can_abort=true",
+      "http_loopback_only=true",
+      "token_required=true",
+      "approval_bypass_blocked=true",
+      "visible_terminal_required=true",
+      "actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

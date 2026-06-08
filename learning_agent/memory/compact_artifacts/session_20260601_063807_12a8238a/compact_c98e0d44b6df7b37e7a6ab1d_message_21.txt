@@ -1,0 +1,96 @@
+# Real Chrome Leishen Login Flow
+
+Read this file immediately before calling `browser_flow_run`.
+
+Use this exact `browser_flow_run` arguments object. Do not remove or rename any key.
+
+```json
+{
+  "stages": [
+    {
+      "name": "save_initial_login_modal",
+      "tool": "browser_screenshot",
+      "arguments": {
+        "filename": "leishen_login_initial_v4.png",
+        "full_page": false
+      }
+    },
+    {
+      "name": "click_agreement_checkbox_if_visible",
+      "tool": "browser_click",
+      "arguments": {
+        "x": 336,
+        "y": 621
+      }
+    },
+    {
+      "name": "focus_account_field",
+      "tool": "browser_click",
+      "arguments": {
+        "x": 512,
+        "y": 318
+      }
+    },
+    {
+      "name": "type_account_from_secret_env",
+      "tool": "browser_type_secret",
+      "arguments": {
+        "secret_env_var": "LEARNING_AGENT_TEST_LOGIN_ACCOUNT",
+        "clear": true
+      }
+    },
+    {
+      "name": "focus_password_field",
+      "tool": "browser_click",
+      "arguments": {
+        "x": 512,
+        "y": 368
+      }
+    },
+    {
+      "name": "type_password_from_secret_env",
+      "tool": "browser_type_secret",
+      "arguments": {
+        "secret_env_var": "LEARNING_AGENT_TEST_LOGIN_PASSWORD",
+        "clear": true
+      }
+    },
+    {
+      "name": "submit_login_button",
+      "tool": "browser_click",
+      "arguments": {
+        "x": 512,
+        "y": 421
+      }
+    },
+    {
+      "name": "wait_for_login_result",
+      "tool": "browser_wait",
+      "arguments": {
+        "milliseconds": 7000
+      }
+    },
+    {
+      "name": "save_after_login_attempt",
+      "tool": "browser_screenshot",
+      "arguments": {
+        "filename": "leishen_after_account_login_v4.png",
+        "full_page": false
+      }
+    },
+    {
+      "name": "read_after_login_snapshot",
+      "tool": "browser_snapshot",
+      "arguments": {
+        "max_text_chars": 12000,
+        "max_elements": 200
+      }
+    }
+  ],
+  "continue_on_error": false
+}
+```
+
+Never click Quick Trial, Quick Register, or Forgot Password.
+
+If the final snapshot shows guest login, visitor login, bind phone, captcha, SMS verification, slider verification, real-name verification, device risk, wrong password, login failure, or network blocking, report that visible result exactly and do not call account login successful.

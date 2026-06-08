@@ -1,0 +1,36 @@
+{
+  "scenario_id": "browser_safe_blank_page",
+  "target_process": "msedge.exe",
+  "launch_plan": {
+    "app_name": "msedge",
+    "executable": "msedge.exe",
+    "arguments": [
+      "about:blank"
+    ],
+    "launch_verb": "Start-Process",
+    "safe_to_launch": true,
+    "refusal_reason": "",
+    "changes_registry": false,
+    "changes_system_settings": false,
+    "requires_admin": false,
+    "uses_shell_string": false,
+    "actions_expanded": false
+  },
+  "safe_page": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_browser\\phase74_safe_page.html",
+  "operations": [
+    "launch_app",
+    "open_about_blank_or_controlled_page",
+    "type_url",
+    "verify_page_title"
+  ],
+  "reads_private_profile": false,
+  "cookies_read": false,
+  "tokens_read": false,
+  "uses_private_profile_content": false,
+  "real_smoke_requested": false,
+  "real_visible_app_invoked": false,
+  "scenario_passed": true,
+  "marker": "PHASE74_REPRESENTATIVE_E2E_READY",
+  "model": "phase74_windows_representative_e2e_matrix",
+  "created_at": "2026-06-03T22:28:58Z"
+}

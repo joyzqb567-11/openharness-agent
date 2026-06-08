@@ -90,11 +90,11 @@ def _phase113_resolve_generic_report(raw_target: Any, generic_report: dict[str, 
     if generic_report is not None:  # 新增代码+InteractiveGenericLaunchMaturity：优先复用交互层已经生成的 Phase108 报告；如果没有这一行，同一命令会重复发现并可能输出不一致证据。
         return dict(generic_report)  # 新增代码+InteractiveGenericLaunchMaturity：复制报告避免污染调用方对象；如果没有这一行，Phase113 补字段可能改动上游报告。
     try:  # 新增代码+InteractiveGenericLaunchMaturity：优先按包路径导入 Phase108 发现器；如果没有这一行，项目根运行时无法加载标准模块。
-        from learning_agent.computer_use.generic_app_discovery import resolve_generic_app_launch_target  # 新增代码+InteractiveGenericLaunchMaturity：导入通用目标解析器；如果没有这一行，raw_target 无法转成安全启动计划。
+        from learning_agent.computer_use.windows_launch_resolver import resolve_generic_app_launch_target  # 新增代码+InteractiveGenericLaunchMaturity：导入通用目标解析器；如果没有这一行，raw_target 无法转成安全启动计划。
     except ModuleNotFoundError as error:  # 新增代码+InteractiveGenericLaunchMaturity：兼容 start_oauth_agent.bat 从 learning_agent 目录运行；如果没有这一行，真实可见终端可能导入失败。
-        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.generic_app_discovery"}:  # 新增代码+InteractiveGenericLaunchMaturity：只兜底包路径缺失；如果没有这一行，Phase108 内部 bug 会被误吞。
+        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.windows_launch_resolver"}:  # 新增代码+InteractiveGenericLaunchMaturity：只兜底包路径缺失；如果没有这一行，Phase108 内部 bug 会被误吞。
             raise  # 新增代码+InteractiveGenericLaunchMaturity：重新抛出真实内部错误；如果没有这一行，排查会被错误 fallback 干扰。
-        from computer_use.generic_app_discovery import resolve_generic_app_launch_target  # type: ignore  # 新增代码+InteractiveGenericLaunchMaturity：脚本模式导入同一解析器；如果没有这一行，双击 bat 后 Phase113 无法发现普通应用。
+        from computer_use.windows_launch_resolver import resolve_generic_app_launch_target  # type: ignore  # 新增代码+InteractiveGenericLaunchMaturity：脚本模式导入同一解析器；如果没有这一行，双击 bat 后 Phase113 无法发现普通应用。
     return dict(resolve_generic_app_launch_target(str(raw_target or "")))  # 新增代码+InteractiveGenericLaunchMaturity：生成并复制 Phase108 报告；如果没有这一行，Phase113 没有安全计划输入。
 # 新增代码+InteractiveGenericLaunchMaturity：函数段结束，_phase113_resolve_generic_report 到此结束；如果没有这个边界说明，初学者不容易看出发现报告范围。
 
@@ -103,11 +103,11 @@ def _phase113_prepare_candidate_report(raw_target: Any, generic_report: dict[str
     if phase109_report is not None:  # 新增代码+InteractiveGenericLaunchMaturity：优先复用交互层已经生成的 Phase109 报告；如果没有这一行，同一命令会重复构造候选并可能漂移。
         return dict(phase109_report)  # 新增代码+InteractiveGenericLaunchMaturity：复制候选报告避免污染调用方；如果没有这一行，Phase113 字段补充可能影响上游报告。
     try:  # 新增代码+InteractiveGenericLaunchMaturity：优先按包路径导入 Phase109 候选器；如果没有这一行，项目根运行时无法加载标准模块。
-        from learning_agent.computer_use.generic_real_launch_candidate import prepare_phase109_generic_real_launch_candidate  # 新增代码+InteractiveGenericLaunchMaturity：导入通用真实启动候选准备函数；如果没有这一行，Phase113 只能看到后端而缺少候选成熟证据。
+        from learning_agent.computer_use.generic_launch_backend import prepare_phase109_generic_real_launch_candidate  # 新增代码+InteractiveGenericLaunchMaturity：导入通用真实启动候选准备函数；如果没有这一行，Phase113 只能看到后端而缺少候选成熟证据。
     except ModuleNotFoundError as error:  # 新增代码+InteractiveGenericLaunchMaturity：兼容 start_oauth_agent.bat 脚本模式；如果没有这一行，真实可见终端可能导入失败。
-        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.generic_real_launch_candidate"}:  # 新增代码+InteractiveGenericLaunchMaturity：只兜底包路径缺失；如果没有这一行，Phase109 内部 bug 会被误吞。
+        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.generic_launch_backend"}:  # 新增代码+InteractiveGenericLaunchMaturity：只兜底包路径缺失；如果没有这一行，Phase109 内部 bug 会被误吞。
             raise  # 新增代码+InteractiveGenericLaunchMaturity：重新抛出真实内部错误；如果没有这一行，排查 Phase109 会被 fallback 干扰。
-        from computer_use.generic_real_launch_candidate import prepare_phase109_generic_real_launch_candidate  # type: ignore  # 新增代码+InteractiveGenericLaunchMaturity：脚本模式导入同一候选器；如果没有这一行，bat 入口无法显示候选证据。
+        from computer_use.generic_launch_backend import prepare_phase109_generic_real_launch_candidate  # type: ignore  # 新增代码+InteractiveGenericLaunchMaturity：脚本模式导入同一候选器；如果没有这一行，bat 入口无法显示候选证据。
     return dict(prepare_phase109_generic_real_launch_candidate(raw_target=str(raw_target or ""), generic_report=generic_report, enable_real_launch=False))  # 新增代码+InteractiveGenericLaunchMaturity：生成默认关闭候选报告；如果没有这一行，Phase113 不能证明默认不触碰桌面。
 # 新增代码+InteractiveGenericLaunchMaturity：函数段结束，_phase113_prepare_candidate_report 到此结束；如果没有这个边界说明，初学者不容易看出候选报告范围。
 
@@ -522,11 +522,11 @@ def _phase105_launch_action_report(report: dict[str, Any]) -> dict[str, Any]:  #
 
 def run_phase105_full_mode_controlled_real_launch_contract(base_dir: str | Path | None = None, real_launch: bool | None = None, allow_real_gate: bool | None = None, real_launch_candidate: Any | None = None, launch_backend: Any | None = None, window_probe: Any | None = None, platform: str | None = None) -> dict[str, Any]:  # 新增代码+Phase105FullModeControlledRealLaunch：函数段开始，运行 Phase105 full-mode 受控真实启动合同；如果没有这段函数，真实终端没有统一验收入口。
     try:  # 新增代码+Phase105FullModeControlledRealLaunch：优先按包路径导入 Phase103 安全候选；如果没有这段代码，默认安全分支无法复用受控启动计划。
-        from learning_agent.computer_use.controlled_app_launch import Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate  # 新增代码+Phase105FullModeControlledRealLaunch：导入记录后端和受控候选；如果没有这行代码，合同无法证明默认关闭和启用桥接。
+        from learning_agent.computer_use.generic_launch_backend import Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate  # 新增代码+Phase105FullModeControlledRealLaunch：导入记录后端和受控候选；如果没有这行代码，合同无法证明默认关闭和启用桥接。
     except ModuleNotFoundError as error:  # 新增代码+Phase105FullModeControlledRealLaunch：兼容 start_oauth_agent.bat 脚本模式；如果没有这段代码，可见终端可能导入失败。
-        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.controlled_app_launch"}:  # 新增代码+Phase105FullModeControlledRealLaunch：只兜底包路径缺失；如果没有这行代码，Phase103 内部 bug 会被误吞。
+        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.generic_launch_backend"}:  # 新增代码+Phase105FullModeControlledRealLaunch：只兜底包路径缺失；如果没有这行代码，Phase103 内部 bug 会被误吞。
             raise  # 新增代码+Phase105FullModeControlledRealLaunch：重新抛出非路径类错误；如果没有这行代码，真实问题会被隐藏。
-        from computer_use.controlled_app_launch import Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate  # type: ignore  # 新增代码+Phase105FullModeControlledRealLaunch：脚本模式导入 Phase103 候选；如果没有这行代码，bat 入口无法运行 Phase105 默认合同。
+        from computer_use.generic_launch_backend import Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate  # type: ignore  # 新增代码+Phase105FullModeControlledRealLaunch：脚本模式导入 Phase103 候选；如果没有这行代码，bat 入口无法运行 Phase105 默认合同。
     root = Path(base_dir) if base_dir is not None else DEFAULT_PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_ROOT / f"contract-{int(time.time() * 1000)}"  # 新增代码+Phase105FullModeControlledRealLaunch：选择隔离合同根目录；如果没有这行代码，多次报告和 mode 状态会互相污染。
     root.mkdir(parents=True, exist_ok=True)  # 新增代码+Phase105FullModeControlledRealLaunch：确保合同根目录存在；如果没有这行代码，报告和受控文件写入会失败。
     requested = _phase105_request_real_launch(real_launch)  # 新增代码+Phase105FullModeControlledRealLaunch：读取本次是否请求真实启动；如果没有这行代码，默认安全合同和真实 smoke 会混淆。

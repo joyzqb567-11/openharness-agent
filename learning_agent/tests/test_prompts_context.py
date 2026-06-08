@@ -1,4 +1,4 @@
-﻿"Prompt, context, skill, docs, and token-budget tests."  # Stage14: this file owns the prompts_context test group.
+"Prompt, context, skill, docs, and token-budget tests."  # Stage14: this file owns the prompts_context test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.

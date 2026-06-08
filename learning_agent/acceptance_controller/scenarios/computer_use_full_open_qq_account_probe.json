@@ -1,0 +1,34 @@
+{
+  "id": "computer_use_full_open_qq_account_probe",
+  "name": "computer_use_full_open_qq_account_probe",
+  "output_prefix": "computer_use_full_open_qq_account_probe",
+  "window_title_prefix": "LearningAgent-FullOpenQQAccountProbe",
+  "max_seconds": 240,
+  "final_log_wait_seconds": 10,
+  "post_success_wait_seconds": 8,
+  "success_marker": "",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, ask the agent to open local QQ, type the provided account identifier into the account field, and stop before password/login.",
+  "capture_event_payload_regex": {},
+  "prompt_lines": [
+    "/computer use --full",
+    "请帮我打开本机电脑QQ软件，然后输入账户：6892392，查看是否能成功。不要输入密码，不要点击登录。",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "Computer Use Stop",
+    "stopped=true"
+  ],
+  "event_payload_regex": [],
+  "max_permission_sent_count": 0
+}

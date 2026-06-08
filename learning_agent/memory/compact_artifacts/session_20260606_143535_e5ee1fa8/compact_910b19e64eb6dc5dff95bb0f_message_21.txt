@@ -1,0 +1,47 @@
+bash 成功：exit_code=0
+stdout:
+line_count 42
+01 permission_auto_approved tool= action=���� MCP server��browser_search, workspace_tools, browser_automation result=
+02 agent_ready_for_user_prompt tool= action= result=
+03 computer_status_printed tool= action= result=
+04 agent_ready_for_user_prompt tool= action= result=
+05 computer_status_printed tool= action= result=
+06 agent_ready_for_user_prompt tool= action= result=
+07 user_prompt_received tool= action= result=
+08 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+09 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����press_key ������{   "action": "press_key",   "confirm_desktop_control... result=
+10 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+11 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+12 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����type_text ������{   "action": "type_text",   "confirm_desktop_control... result=
+13 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����type_text ������{   "action": "type_text",   "confirm_desktop_control... result=
+14 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����screenshot ������{   "action": "screenshot",   "confirm_desktop_contr... result=
+15 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����clipboard_write ������{   "action": "clipboard_write",   "confirm_des... result=
+16 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+17 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+18 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+19 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+20 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,... result=
+21 permission_auto_approved tool= action=ִ�� OS Computer Use ���涯����screenshot ������{   "action": "screenshot",   "confirm_desktop_contr... result=
+22 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File learning_agent\memory | Where-Object { $_.Name -match 't... result=
+23 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File . | Where-Object { $_.Name -match 'transcript_v2|transcr... result=
+24 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File . | Where-Object { $_.FullName -match 'session_20260606_... result=
+25 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File learning_agent\memory\sessions -Filter transcript_v2.jso... result=
+26 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File . -Include *.jsonl,*.json,*.txt | Where-Object { $_.Full... result=
+27 permission_auto_approved tool= action=ִ�����Get-ChildItem -Recurse -File . -Include *.jsonl,*.json,*.txt,*.log | Select-String -P... result=
+28 permission_auto_approved tool= action=ִ�����$p='learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree... result=
+29 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+30 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+31 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+32 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+33 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+34 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+35 permission_auto_approved tool= action=ִ�����python - <<'PY' import json, pathlib p=pathlib.Path('acceptance_controller/runs/compu... result=
+36 permission_auto_approved tool= action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer... result=
+37 permission_auto_approved tool= action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer... result=
+38 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+39 permission_auto_approved tool= action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_... result=
+40 permission_auto_approved tool= action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer... result=
+41 permission_auto_approved tool= action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer... result=
+42 permission_auto_approved tool= action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer... result=
+
+stderr:

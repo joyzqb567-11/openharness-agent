@@ -1,0 +1,33 @@
+{
+  "name": "wuhan_weather_travel_exact_prompt",
+  "output_prefix": "wuhan_weather_travel_exact_prompt",
+  "window_title_prefix": "LearningAgent-Controller-WuhanWeather",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 15,
+  "success_marker": "",
+  "prompt_lines": [
+    "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "Visible Browser Task Harness",
+    "mcp__browser_automation__browser_launch_visible",
+    "browser_launch_visible 成功",
+    "visible_browser=true",
+    "headless=false",
+    "mcp__browser_automation__browser_open",
+    "mcp__browser_automation__browser_snapshot"
+  ],
+  "event_answer_contains": [
+    "武汉",
+    "browser_launch_visible",
+    "visible_browser=true",
+    "headless=false"
+  ]
+}

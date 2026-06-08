@@ -1,0 +1,38 @@
+{
+  "name": "agent_capability_phase38_windows_computer_approval",
+  "output_prefix": "agent_capability_phase38_windows_computer_approval",
+  "window_title_prefix": "LearningAgent-Phase38-WindowsComputerApproval",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE38_WINDOWS_COMPUTER_APPROVAL_READY",
+  "prompt_lines": [
+    "请执行一次 Phase 38 Windows Computer Use approval/session grant 合同验收：这次只允许运行项目内 approval 模块自检，必须证明 app allowlist、禁止终端目标拦截、grant flags、终端状态摘要都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE38_WINDOWS_COMPUTER_APPROVAL_READY。",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.approval import main; raise SystemExit(main())\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE38_WINDOWS_COMPUTER_APPROVAL_OK 后，最终回答最后一行必须完整复制：PHASE38_WINDOWS_COMPUTER_APPROVAL_READY PHASE38_WINDOWS_COMPUTER_APPROVAL_OK allowlist=true forbidden_blocked=true grant_flags=true terminal_status=true actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE38_WINDOWS_COMPUTER_APPROVAL_READY",
+    "PHASE38_WINDOWS_COMPUTER_APPROVAL_OK",
+    "allowlist=true",
+    "forbidden_blocked=true",
+    "grant_flags=true",
+    "terminal_status=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE38_WINDOWS_COMPUTER_APPROVAL_READY",
+    "PHASE38_WINDOWS_COMPUTER_APPROVAL_OK",
+    "allowlist=true",
+    "forbidden_blocked=true",
+    "grant_flags=true",
+    "terminal_status=true",
+    "actions_expanded=false"
+  ],
+  "max_permission_sent_count": 0
+}

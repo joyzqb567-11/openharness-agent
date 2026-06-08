@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_5c35e0fb0fed0a77",
+  "prompt": "Please run one Phase 63 Windows Computer Use external agent controller takeover and debug surface acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.controller_takeover import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK, the final answer's last line must completely copy: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK controller_surface=true launches_visible_terminal=true reads_acceptance_run=true evidence_package=true can_abort=true http_loopback_only=true token_required=true approval_bypass_blocked=true visible_terminal_required=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 63 Windows Computer Use external agent controller takeover and debug surface acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.controller_takeover import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK, the final answer's last line must completely copy: PHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK controller_surface=true launches_visible_terminal=true reads_acceptance_run=true evidence_package=true can_abort=true http_loopback_only=true token_required=true approval_bypass_blocked=true visible_terminal_required=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 63 Windows Computer Use external agent controller takeover and debug surface acceptance passed.\n\nPHASE63_WINDOWS_CONTROLLER_TAKEOVER_READY PHASE63_WINDOWS_CONTROLLER_TAKEOVER_OK controller_surface=true launches_visible_terminal=true reads_acceptance_run=true evidence_package=true can_abort=true http_loopback_only=true token_required=true approval_bypass_blocked=true visible_terminal_required=true actions_expanded=false",
+      "started_at": "2026-06-03T11:05:44Z",
+      "completed_at": "2026-06-03T11:05:58Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T11:05:44Z",
+  "updated_at": "2026-06-03T11:05:58Z"
+}

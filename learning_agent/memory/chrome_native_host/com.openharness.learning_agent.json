@@ -1,0 +1,13 @@
+{
+  "name": "com.openharness.learning_agent",
+  "description": "OpenHarness learning_agent Chrome bridge native host",
+  "path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\chrome_native_host\\com.openharness.learning_agent.cmd",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://lepnefooepbnjbcnhooiccpnafalfbdk/"
+  ],
+  "metadata": {
+    "python_executable": "C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "host_script": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_extension_host\\native_host.py"
+  }
+}

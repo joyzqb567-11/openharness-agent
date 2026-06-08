@@ -1,21 +1,385 @@
 # 问题与风险记录
 
+## 2026-06-06 通用 Computer Use session/窗口/观察/纠偏架构风险
+
+已处理风险：
+- 现象：用户真实测试“画一棵树”时，旧 Paint/旧太空画面污染新任务；模型没有先清理或切回正确窗口，反而继续补充旧主题。
+- 已确认根因：真实日志显示新 Paint 窗口已由 `launch_app` 创建并绑定，但后续模型仍观察/操作了旧窗口；旧 Computer Use observation/artifact 也可能留在同一 agent session 中进入主循环上下文。
+- 修复一：`/computer use --full` 成功打开新 full 会话时，交互层清理旧 `computer_use*` observation events 和旧 Computer Use 截图 artifact。
+- 修复二：`ComputerUseController.observe()` 复用 agent-owned target drift guard，阻断模型继续观察旧窗口截图。
+- 修复三：full desktop harness 增加通用观察后纠偏要求，要求模型每轮观察后判断屏幕是否服务于本轮目标，不一致时先纠偏再继续。
+- 自动化验证：新增红绿测试覆盖 observe 漂移、full 会话清理、harness 纠偏提示；相关回归 86 OK；py_compile 通过。
+
+剩余风险：
+- `get_active_window` 这类没有显式 `window` 参数的观察仍可能返回当前系统活动窗口；如果真实验收继续混入旧窗口，需要下一步把 targetless observe 也做成“优先返回/校验 active agent-owned target”的硬约束。
+- 当前纠偏主要靠主循环提示和窗口守卫；还没有独立视觉 verifier 去判断“画面内容是否真的像树/像用户要求的对象”。
+- 本轮真实可见终端验收已通过，但这只证明第一层通用会话/窗口/观察/纠偏架构在树场景中有效，不证明所有本机软件任务都已经成熟。
+
+## 2026-06-06 Computer Use Full Final Evidence Summary Risk
+
+已处理风险：
+- 现象：真实 `/computer use --full` Paint 场景中，桌面动作和截图证据已经存在，但模型最终只回答 `已完成。`，导致终端/controller 验收缺少 `computer_use`、`mspaint`、`screenshot`、`real_desktop_touched`、`low_level_event_count`。
+- 根因：`LearningAgent.run_events` 的最终回答出口原样使用 `model_message.text`，没有在模型短答时用本轮 `observation_events` 中已经存在的真实桌面证据补强。
+- 修复：最终回答出口统一调用 Computer Use final evidence summary helper；只在 full GUI 桌面任务且存在成功 `computer_use_action` / `computer_use_observe` 证据时追加摘要，避免污染普通回答。
+- 自动化验证：新增红绿回归测试，邻近回归 63 OK，py_compile 通过。
+
+剩余风险：
+- 该修复只保证“真实证据不在最终回答中丢失”，不证明视觉规划质量已经成熟。
+- Paint 场景如果仍画错对象、构图差、没有真正打开应用或截图没有进入模型主循环，仍需要继续从 planner/observe/action/visual verifier 层排查。
+- 真实可见终端验收尚未完成前，不能声明本轮开发完成。
+
+---
+
+## 2026-06-06 Computer Use Full Paint Cat Route Risks
+
+已处理风险：
+- 现象：用户输入“请使用本机电脑画图软件画一只猫”时，旧设计不能证明真实打开 Paint 并画猫；更早的大象场景也暴露出旧对象特例可能误画皮卡丘。
+- 根因：Paint 真实闭环只声明并实现了少数对象，且默认 full 路由先前没有把真实用户路径稳定接到受支持 Paint 绘图闭环。
+- 修复：新增猫 primitive；Paint loop 识别猫 prompt、选择猫计划、返回猫专属视觉字段；LearningAgent 默认 full runtime 显式启用受支持 Paint 绘图桥。
+- 验证：猫 primitive/loop focused tests 7 OK；full desktop task router regression 36 OK。
+
+剩余风险：
+- 这次修复只把“猫”加入已支持 Paint 绘图对象，并修正默认 full 路由；它仍不等于任意图像绘制能力成熟。
+- 当前 Paint 绘图桥仍是有限对象计划，报告通过 `subject_specific_planning=true` 和 `natural_language_planner_ready=false` 明确边界。
+- `start_oauth_agent.bat` 可见终端验收已完成并通过，证据在 `learning_agent/acceptance_controller/runs/computer_use_full_paint_cat_strict-20260606_111046/result.json`。
+- 真正接近 Codex Computer Use 的设计还需要后续把自然语言视觉规划、屏幕观察、鼠标键盘动作和迭代校正接入通用 observe-plan-act loop。
+
+---
+
+## 2026-06-03 Phase 56 Windows Real Screenshot Pipeline Risks
+
+已处理风险：
+- 旧风险：Phase45 证明 provider/evidence 合同，但 fake bytes 可能让黑屏、空白图或坏尺寸 artifact 误过。已处理：Phase56 新增 `Phase56PixelGuard`，解析 BMP 头、尺寸、位深、像素采样、全黑/全白、颜色多样性和标题区域可见性。
+- 旧风险：helper v2 的 `capture_window` 仍可能停留在 Phase55 占位摘要。已处理：`WindowsNativeHelperV2Worker` 支持注入或默认创建 `WindowsRealScreenshotPipeline`，并返回 `pixel_guard_passed`、artifact 路径和 provider 尝试链。
+- 旧风险：真实 Windows 截图可能在 WGC 缺依赖时被误报失败或被 fake 代替。已处理：Phase56 继续 WGC-first，但本机缺 WGC 绑定时诚实记录失败并 fallback 到 `win32_gdi_printwindow`。
+- 旧风险：截图 IPC 可能带出原始二进制内容。已处理：pipeline 和 helper v2 都设置 `screenshot_bytes_included=false`，并删除 `screenshot_bytes` / `raw_bytes` 字段。
+- 旧风险：真实 smoke 可能误截图用户窗口。已处理：Phase56 只启动并匹配自己的临时 Notepad 文件窗口，结束后清理。
+
+剩余风险：
+- 当前 WGC 仍未真实可用，原因是本机缺 `winrt.windows.graphics.capture` / `winsdk.windows.graphics.capture` 绑定。
+- GDI fallback 对某些 UWP、硬件加速、最小化、遮挡或权限特殊窗口可能失败或截图不完整。
+- Phase56 还不提供 OCR、视觉定位或 UIA 控件语义；这些仍属于 Phase57 及后续。
+- Phase56 不扩大 SendInput 或真实鼠标键盘动作；真实动作仍要等待 Phase58 的目标校验和安全门禁。
+
+---
+
+## 2026-06-05 Universal Computer Use Permission Mode Risks
+
+Resolved design risks:
+- Old risk: continuing to add per-app allowlists would make Computer Use non-universal.
+- Handling: the new spec requires `/computer use` to open a universal mode governed by action risk and target risk, not an ordinary-app allowlist.
+- Old risk: Notepad/Paint/Explorer live scenarios could be mistaken for the product architecture.
+- Handling: the new spec treats representative apps as acceptance samples only and keeps Phase92/93 as the universal runtime foundation.
+- Old risk: user-facing `/computer use` could be misunderstood as fully unrestricted desktop takeover.
+- Handling: the new spec separates observe, normal, and full modes. Normal mode controls ordinary apps; full mode requires strong confirmation, short TTL, abort/stop, target recheck, and audit.
+- Old risk: the project could keep relying on `/computer approve <app>` as the main path for ordinary desktop control.
+- Handling: the new spec keeps approve/grants/revoke for special high-risk or longer-lived grants, but not as the normal ordinary-app control path.
+
+Remaining risks:
+- Implementation still needs to add `ComputerUseModeSession` and command handling for `/computer use`, `/computer use --observe`, `/computer use --full`, `/computer stop`, and `/computer permissions`.
+- The action-risk and target-risk classifier must be strong enough to reject terminals, admin/security/system/auth/payment/private-data targets before low-level send.
+- `/computer use --full` must not become a one-command bypass; it needs explicit confirmation, TTL, status visibility, audit, and stop.
+- Real physical dispatch must still recheck target identity and abort state before every low-level event.
+- Future acceptance must prove generic mode behavior through the visible terminal and must show the path does not call a per-app Notepad/Paint controller.
+- The implementation plan now exists, but no production code has been changed yet; future agents must not describe Phase98-101 as completed until tests, compile checks, and `start_oauth_agent.bat` visible-terminal acceptance pass.
+
+---
+
+## 2026-06-05 Phase104 Controlled Notepad Launch Smoke Risks
+
+已处理风险：
+- 现象：直接真实 Phase104 smoke 首次失败，`process_ownership_verified=true`、`cleanup_completed=true`，但 `visible_window_verified=false`。
+- 根因：Windows 11 Notepad 可能通过 wrapper/代理进程启动，`subprocess.Popen` 返回的 pid 与真实可见 Notepad 窗口 pid 不一致；旧逻辑要求窗口 pid 必须等于启动 pid，因此误失败。
+- 额外风险：首次失败后仍可见一个 Phase104 受控 Notepad 窗口，说明只清理 wrapper 进程不足以证明窗口收尾。
+- 修复：Phase104 改为每次生成唯一受控文件名，启动前记录窗口 baseline，允许启动后新出现的唯一标题 Notepad 窗口通过验证，并对 pid 不同的已验证窗口发送受控关闭。
+- 验证：新增两个回归用例覆盖代理 pid 不一致和代理窗口关闭；Phase104 focused tests 5 OK；真实 CLI smoke 输出 `verified_window_cleanup_completed=true`；可见终端验收和独立 verifier 均通过。
+
+剩余风险：
+- Phase104 的真实关闭只针对已验证的唯一标题 Notepad 窗口，仍不应扩展成任意窗口关闭能力。
+- 如果未来 Windows Notepad 的窗口标题、类名或关闭行为变化，Phase104 可能需要更新窗口身份规则，但不能放宽到按标题关闭用户窗口。
+- Phase104 不代表 `/computer use --full` 可以随意打开所有应用；它只是受控 Notepad launch smoke。
+
+---
+
+## 2026-06-04 Phase97 Real Notepad Driver Quality Findings
+
+已处理风险：
+- 现象：Phase97 driver 成功路径在 fake sender 中发送 `key_down/key_up` 形式的 Ctrl+S，但默认真实 `WindowsSendInputLowLevelSender` 原先只处理 `set_foreground`、鼠标事件和 `unicode_text`。
+- 根因：测试替身接受了按键事件形状，但真实 sender 没有对应分支，导致真实 Notepad 可能只收到文本而没有保存。
+- 修复：真实 sender 只新增 `ctrl` 和 `s` 两个虚拟键白名单，Phase97 继续使用 `key_down/key_up` 表达 Ctrl+S，但没有开放任意键盘控制。
+- 验证：新增 `Phase97InspectableLowLevelSender` 测试，确认真实 sender 分发 `ctrl down -> s down -> s up -> ctrl up`，同时 Phase97 focused tests 9 OK。
+
+已处理风险：
+- 现象：默认 launcher 返回空 `window_id` 时，旧复核逻辑可以通过标题线索匹配后续 Notepad 窗口。
+- 根因：无 hwnd 场景缺少更硬的目标身份，多个 Notepad 或旧 Phase97 标题窗口可能被误当成本次启动目标。
+- 修复：无 `window_id` 时必须匹配 `pid/process_id`，否则拒绝；同标题不同 pid 测试覆盖为零事件失败。
+- 验证：新增 same-title/different-pid 拒绝测试，Phase97 focused tests 9 OK。
+
+已处理风险：
+- 现象：默认 launcher 启动 Notepad 后缺少 cleanup 路径。
+- 根因：driver 早退和成功路径没有统一收尾点。
+- 修复：默认 launcher 记录自己启动的进程，driver 使用 `finally` 调用可选 cleanup。
+- 验证：正向 driver 测试断言 fake launcher cleanup 调用 1 次，Phase95+97 regression 14 OK。
+
+剩余风险：
+- Phase97 真实可见终端验收已通过，旧风险关闭。
+- 仍不得把 Phase97 误读为通用桌面控制；它只证明受控 Notepad 固定文本 live edit。
+
+后续新增处理：
+- 现象：真实 Notepad 输入前复核失败，报告为 `target_recheck_before_input_failed`。
+- 根因：Windows 11 Notepad 可能通过单实例进程承载窗口，`subprocess.Popen` 返回的 pid 与真实 Notepad 窗口 pid 不一致；旧 pid 强匹配过严。
+- 修复：每次合同使用唯一目标文件名，启动前记录已有同名受控窗口 key，复核时接受启动后新出现的唯一文件名 Notepad 窗口。
+- 验证：直接真实 CLI 和可见终端验收均通过。
+
+后续新增处理：
+- 现象：真实 Notepad 文件已出现 `*` 未保存标记或保存后内容丢字/重复字，`saved_file_verified=false`。
+- 根因：对 Windows 11 Notepad 逐字符 Unicode SendInput 长文本不可靠，且 Ctrl+S 需要更稳定的真实输入路径。
+- 修复：Phase97 改为复核目标后点击 Notepad 编辑区，再使用临时剪贴板粘贴固定受控文本，并尽力恢复原文本剪贴板；保存仍使用受控 Ctrl+S。
+- 验证：直接真实 CLI 输出 `PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK`，可见终端 controller 和独立 verifier 均通过。
+
+---
+
+## 2026-06-03 Phase 55 Windows Native Helper V2 Risks
+
+已处理风险：
+- 旧风险：Phase44 仍是 in-process native host 合同，不能证明 helper 崩溃或卡死时主 agent 不被拖垮。已处理：Phase55 新增 `WindowsNativeHelperV2Client`，通过真实子进程 JSONL 协议覆盖启动、请求、cleanup、超时和崩溃路径。
+- 旧风险：Windows 中文 stdout 可能按系统代码页写出，父进程按 UTF-8 读取时触发 `UnicodeDecodeError`。已处理：子进程启动时显式设置 `PYTHONIOENCODING=utf-8`，父进程也用 UTF-8 且 `errors="replace"` 读取。
+- 旧风险：helper 崩溃后，后续请求可能返回不稳定的 transport error，让主 agent 不知道是否应该重启。已处理：client 在 EOF、坏管道或进程退出后标记 `_process_unavailable`，下一次请求稳定返回 `native_helper_v2_process_unavailable`。
+- 旧风险：超时或崩溃测试可能残留 stdio 句柄和 worker 进程。已处理：`close()` 会终止/杀掉 worker、等待退出并关闭 stdin/stdout/stderr。
+- 旧风险：Phase55 架构落地后可能被误解为已经允许真实桌面动作。已处理：`send_input` 默认拒绝，`actions_expanded=false`，截图和 UIA 只返回结构化占位摘要。
+
+剩余风险：
+- Phase55 尚未接入真实 Windows.Graphics.Capture/GDI 截图 pipeline，真实截图由 Phase56 处理。
+- Phase55 尚未接入真实 UIAutomation 控件树和语义 locator，真实 UIA 由 Phase57 处理。
+- Phase55 尚未开放真实 SendInput，动作执行必须继续等待 Phase58 的目标校验、安全门禁和真实验收。
+
+---
+
+## 2026-06-03 Phase 38 Windows ComputerUseApproval Risks
+
+已处理风险：
+- 旧风险：完成 SendInput executor 合同后，如果没有 session approval，真实动作可能只依赖锁和窗口校验，缺少 ClaudeCode 风格 app allowlist。已处理：新增 `WindowsComputerUseApprovalModel.grant_for_session()` 和 `evaluate()`，并可注入 controller。
+- 旧风险：终端、PowerShell、认证弹窗、密码管理器等高风险窗口可能被当成普通 app 授权。已处理：approval 模型对 shell/codex_ui/system_settings/password_manager/auth 分类返回 `denied_forbidden_target`。
+- 旧风险：系统级组合键如果只作为普通 `press_key` 处理，可能绕过危险权限确认。已处理：`ctrl+alt+delete`、`win+`、`alt+tab`、`ctrl+shift+esc` 等需要 `systemKeyCombos=true`。
+- 旧风险：用户在真实终端只看到 lock/abort 状态，看不到 approval 边界。已处理：`/computer status` 追加 `Computer Use Approval` 摘要。
+剩余风险：
+- Phase38 不是图形化审批弹窗，后续如果需要接近 ClaudeCode 的交互体验，还要补 terminal/GUI approval UI。
+- 当前 approval grant 存在于模型实例内；若未来要跨 turn/session 持久化授权，需要单独设计持久化、过期和撤销。
+- Phase38 不证明真实底层 `ctypes.SendInput`、Windows.Graphics.Capture 或 UIA 已成熟；这些仍需后续阶段继续验证。
+- 禁止目标分类基于摘要关键词，未来接入真实窗口 inventory 后还需要结合 process path、window class、签名或更可靠的安全分类。
+
+---
+
+## 2026-06-03 Phase 37 Windows SendInput Executor Risks
+
+已处理风险：
+- 旧风险：Windows 后端写动作仍可能停留在 `SetCursorPos + mouse_event` 的散落实现，难以统一审计和注入测试。
+- 已处理：Phase37 新增 `WindowsSendInputExecutor` 合同，并让 `WindowsComputerUseBackend` 把鼠标/键盘写动作统一路由到 action executor。
+- 旧风险：SendInput 成功路径如果只能靠真实鼠标键盘验证，会污染用户桌面。
+- 已处理：执行器支持注入 fake implementation，自检和单元测试只记录规范事件，不触碰真实鼠标键盘。
+- 旧风险：`type_text` 原文可能从底层 dispatch 返回值、事件或可见日志泄露。
+- 已处理：执行器只生成文本长度、短哈希和 `text_redacted=true`；底层 dispatch 结果也会按键名递归脱敏。
+- 旧风险：完成 SendInput 合同后，模型或后续开发者可能误以为可以绕过 Phase30/31 门禁直接执行 OS 写动作。
+- 已处理：controller 仍保留确认、可信窗口、持锁、abort 和 evidence 门禁；执行器 status 也明确 `safe_gate_required=true`。
+剩余风险：
+- 当前阶段没有实现真实底层 `ctypes.SendInput`，只证明合同、注入点、路由和脱敏。
+- 真实底层实现未来仍需单独处理虚拟键映射、Unicode 输入、滚轮单位、鼠标坐标、DPI、多显示器、前台窗口一致性和系统权限差异。
+- Phase38 需要补 approval 模型，避免真实动作在“用户没明确确认目标和风险”的情况下继续扩展。
+
+---
+
+## 2026-06-03 Phase 36 Windows.Graphics.Capture Provider Risks
+
+已处理风险：
+- 旧风险：Phase33 diagnostics 只把 WGC 当作未来缺口文字列出，没有真正 provider 合同。
+- 已处理：新增 `WindowsGraphicsCaptureProvider`，并让 diagnostics 的 WGC 项来自 provider.status，暴露 `contract=phase36_windows_graphics_capture_provider`。
+- 旧风险：发现 WGC 依赖时可能被误当成真实截图已经可用。
+- 已处理：Phase36 同时要求 dependency 和 capture_impl；当前未接真实实现时输出 `fallback_required=true`。
+- 旧风险：为了证明 WGC 可能误造 fake screenshot artifact。
+- 已处理：默认缺依赖/缺实现时 `capture_window()` 返回未捕获结果，不伪造截图 bytes。
+
+剩余风险：
+- 当前机器缺少 `winrt.windows.graphics.capture` / `winsdk.windows.graphics.capture`，所以 WGC 仍未在本机真实截图。
+- 真实 WGC helper 未来可能涉及用户授权、窗口选择、高 DPI、遮挡、最小化窗口和权限差异，需要单独验收。
+- Phase37 SendInput 不能因为 Phase36 provider 合同完成就直接放宽桌面动作范围。
+
+---
+
+## 2026-06-03 Phase 35 Windows Real UIA Smoke Risks
+
+已处理风险：
+- 旧风险：Phase34 主要通过 fake UIA module 验证 provider 合同，容易被误读成真实 Windows UIA 已经打通。
+- 已处理：Phase35 新增 `real_uia_smoke.py`，默认先探测 `uiautomation` 依赖；依赖缺失时输出 `dependency_available=false`，不启动窗口、不声明真实 UIA 已验证。
+- 旧风险：真实 smoke 如果扫描任意桌面窗口，可能读取用户敏感窗口。
+- 已处理：Phase35 只查找自己创建的安全 Notepad 临时文件窗口，输出 `safe_window_only=true`，并保持 `actions_expanded=false`。
+- 已确认工具经验：PowerShell controller 的 `-ScenarioPath` 相对路径会按 controller 目录拼接；从项目根调用时应传绝对路径或 `scenarios\xxx.json`。
+
+剩余风险：
+- 当前环境缺少 `uiautomation`，所以 `real_uia_verified=false` 是诚实诊断结果，不代表本机已完成真实 UIA 文本读取。
+- Phase35 不包含 Windows.Graphics.Capture、SendInput、DPI、多显示器、approval UI 或全局 abort hook。
+- 后续 Phase36/37 仍必须延续“不安装系统依赖、不写注册表、不自动操作敏感窗口”的边界。
+
+---
+
+## 2026-06-03 Phase 30 Windows Computer Use Safe Action Gate Risks
+
+已处理风险：
+- 旧风险：动作执行只有 confirm/window 校验，没有 durable desktop lock，两个会话可能同时控制同一桌面。
+- 已处理：新增 `ComputerUseLockManager`，显式注入锁管理器时必须由当前 `owner_session_id` 持锁后才能执行动作。
+- 旧风险：没有 abort flag，用户或 harness 无法在下一次动作前可靠阻断桌面控制。
+- 已处理：新增 abort request/clear/status，controller 在调用后端前检查 abort 并拒绝动作。
+- 旧风险：窗口相对坐标可能被当成屏幕坐标传给后端，导致点击落点错误。
+- 已处理：`action_policy.prepare_action_arguments()` 会用 window rect 将相对 x/y 转成屏幕 x/y，并在 `action_evidence.coordinate_used` 记录转换来源。
+- 旧风险：`type_text` 原始文本可能进入内存后端日志、controller audit、权限提示或 action evidence。
+- 已处理：统一使用脱敏摘要，只保存 `text_length`、`text_sha256_16` 和 `text_redacted=true`。
+
+剩余风险：
+- Phase 30 仍使用内存后端和静态窗口样本验收，不代表真实 SendInput 已安全可用。
+- 真实 Windows native helper、DPI、多显示器、窗口遮挡、前后台窗口一致性、动作前后真实截图 evidence chain 仍需后续 Phase 31+ 分阶段实现。
+- 真实动作目标仍必须避开终端、Codex UI、安全/隐私设置、密码管理器、认证弹窗和 Windows Run。
+
+---
+
+## 2026-06-02 Phase 27 Windows Computer Use Protocol Risks
+
+已处理风险：
+- 旧风险：`computer_action` 只有松散参数，模型可以声明窗口相关意图但控制器无法验证目标窗口是否真实存在。
+- 已处理：`computer_action` 增加可选 `window` 目标；如果提供窗口目标，控制器会先用只读 `get_window_state` 验证，不认识的窗口直接拒绝且不调用后端。
+- 旧风险：观察和动作混在 `computer_action` 中，容易让只读状态查询也被当成高风险桌面动作。
+- 已处理：新增 `computer_observe`，catalog 标记为低风险只读并发安全；`computer_action` 继续保持高风险串行。
+- 已确认验收控制器 bug：场景缺省 `event_payload_contains` 时，PowerShell 的 `@($null)` 会让 foreach 产生一个 null 检查项，随后用 null 做字典 key 抛错。
+- 已处理：`controller.ps1` 读取 `debug_log_contains`、`event_answer_contains`、`event_payload_contains` 时过滤空值和 null。
+
+剩余风险：
+- Phase 27 还没有真实 Windows 窗口枚举；`WindowsComputerUseBackend.observe()` 目前是明确占位。
+- 真实 Windows 后端仍不能声明达到 Codex Computer Use 插件级别；截图、UI Automation、DPI、多显示器、窗口遮挡和前台窗口锁都需要 Phase 28+ 分阶段验证。
+- 后续验收必须继续避免终端、Codex UI、安全/隐私设置、密码管理器、认证弹窗和 Windows Run。
+
+---
+
+## 2026-06-02 Phase 26 Windows OS Computer Use Blueprint Risks
+
+已确认风险：
+- Phase 25 编号已经被真实 extension/native-host 连接后续占用；如果继续把 Windows OS Computer Use 称为 Phase 25，会污染项目历史。处理：本轮改用 Phase 26。
+- learning_agent 当前 Computer Use 仍主要是安全外壳和最小 Windows ctypes 占位能力，尚未达到 Codex Computer Use 的窗口截图、UI Automation 文本树和窗口相对动作成熟度。
+- 直接实现真实鼠标键盘动作风险高，可能误控终端、Codex UI、安全设置、密码管理器或认证弹窗。处理：蓝图要求后续先做协议和只读观察，再做动作。
+- Codex Computer Use 插件只能作为参考，不应成为 learning_agent 生产依赖；否则 learning_agent 离开 Codex 环境会失去独立能力。
+
+剩余风险：
+- Windows native helper 技术选型仍需在 Phase 27/28 前确认：推荐 C#/.NET helper，但实现工作量高。
+- Windows.Graphics.Capture、UI Automation、DPI 缩放、多显示器、窗口遮挡和权限问题需要逐阶段验证，不能一次性假定可用。
+- 未来真实端到端验收必须避免自动化终端本身，建议使用 Notepad 或专用安全测试应用。
+
+---
+
+## 2026-06-01 Stage 12 可见浏览器验收格式风险
+已处理风险：
+- 现象：旧 `browser_visible_runtime_acceptance.json` 场景中，真实浏览器工具全部执行成功，debug log 也包含 `browser_launch_visible`、`browser_open`、`browser_snapshot`、`browser_screenshot`、`browser_flow_run`、`browser_plugin_status`，但最终回答没有逐字复制长验收行，导致 controller 判定失败。
+- 判断：这是验收输出格式问题，不是浏览器能力失败；但不能把该失败场景当作通过。
+- 处理：新增 `browser_dual_track_stage12_acceptance.json`，把真实浏览器动作交给 debug log 断言，把最终回答收敛为短标记 `BROWSER_DUAL_TRACK_STAGE12_READY STAGE12_VISIBLE_BROWSER_OK`。
+- 结果：新 Stage 12 场景 controller 完成且独立 verifier `assertion.passed=true`。
+剩余风险：
+- 长验收行容易被模型摘要化，后续验收场景应优先用 debug log 检查工具证据，用短 marker 检查最终回答。
+
+## 2026-06-01 Browser Dual Track Stage 11 Harness 接入风险
+已处理风险：
+- 旧风险：browser runtime 已有 run/action/observation，但没有同 id harness run，导致浏览器任务仍像旁路系统，长任务状态、verifier 和 resume 无法统一观察。
+- 已处理：新增 `BrowserHarnessMirror`，在 browser run 创建、provider decision、finish、flow report 同步四个生产节点写入 harness run/stage/event/verifier。
+- 已确认并修复的 bug：`BrowserHarnessMirror` 初始化早于 `learning_agent/memory` 目录创建时，`browser_harness_store_for_workspace()` 可能误选项目根 `memory/harness`，而测试和状态快照随后读取 `learning_agent/memory/harness`，导致同 id harness run 查不到。
+- 修复方式：项目根 workspace 固定写入 `learning_agent/memory/harness`，只有 workspace 本身就是 `learning_agent` 包目录时才写入直接 `memory/harness`。
+剩余风险：
+- Stage 11 已把浏览器 runtime 投影进 harness，但 ClaudeCode 级别的远程任务生态和更复杂 UI 状态生态仍属于 Stage 12 总验收后的后续增强范围。
+
+## 2026-06-01 BrowserActionExecutor 执行层风险与处理
+
+已处理风险：
+- 旧风险：`BrowserActionExecutor` 只负责 begin/progress/complete/fail 记录，真实浏览器工具 handler 仍由 `BrowserAutomationServer.call()` 直接执行，导致执行器不是调度中心。
+- 已处理：新增 `execute_action()`，让执行器统一接管 handler 调用、attempt progress、retry、成功完成、失败分类和 observation 回填。
+- 旧风险：server 的 browser runtime event log、旧 action log、observation id 和 retry 摘要分散在 `call()` 的手写 wrapper 中，容易形成 executor 和 server 双轨。
+- 已处理：server `call()` 现在通过回调把这些生产侧副作用挂到 `execute_action()`，生命周期最终由同一个 executor 收尾。
+- 已确认并修复的 bug：`browser_flow_run` 外层工具持有普通写锁后递归调用内层浏览器工具，内层再次申请同一把锁会死锁；已把写锁改成 `threading.RLock()`，相关 flow_run 用例从超时恢复为通过。
+- 已处理：旧 runtime store 测试只期待 started/completed；现在已更新为 started/progress/completed，避免 progress 事件丢失时测试仍误通过。
+
+剩余风险：
+- 当前执行器已经接管单个工具调用和嵌套流程，但还没有实现 ClaudeCode 级别的多工具并发批处理、真正的工具结果流式分块输出和远程任务 UI/SDK 生态。
+- `browser_automation_mcp_server.py` 仍很大，后续新增浏览器能力时应优先拆到 `learning_agent/browser/` 下的独立模块，避免重新堆回 server。
+- 真实可见终端验收已通过本轮执行层场景；后续每次修改浏览器执行链路仍必须继续跑 `start_oauth_agent.bat` 可见终端验收，不能只用单元测试替代。
+
+## 2026-06-01 BrowserActionExecutor 批量并发与流式结果风险
+
+已处理风险：
+- 旧风险：执行器只能一次执行一个动作，上层即使有多个只读浏览器动作也无法表达批处理，后续 UI/SDK 或模型工具调度容易继续手写并发。
+- 已处理：新增 `execute_batch()`，当批次全部是 `BrowserActionPolicy` 判定为并发安全的读工具时使用线程池并发执行，并按输入顺序返回结果。
+- 旧风险：如果简单把所有动作都并发，点击、输入、导航这类写工具会和读取动作抢同一页面状态。
+- 已处理：`execute_batch()` 只要发现任一写工具就整体串行执行，先保证真实浏览器页面不被并发污染。
+- 旧风险：长工具或未来流式工具只能等最终字符串返回，状态页和外部 controller 无法看到中间输出。
+- 已处理：`execute_action()` 支持 `on_result_chunk`；非字符串可迭代结果会逐片段写入 `browser_action_progress` 的 `result_chunk`，并回调给上层。
+
+剩余风险：
+- 当前批处理是执行器内部 API，尚未接入 `LearningAgent` 主工具调度器；也就是说模型一次给多个工具调用时，还不会自动合并成 executor batch。
+- 当前流式结果支持 Python iterable handler；真实 MCP stdio 的逐 token/逐 event 流式协议还没有接入，需要后续在工具协议层继续扩展。
+- 批处理当前采用“含写工具整体串行”的保守策略，安全但不够激进；未来可升级为按读写阶段分组，例如读读并发、写串行、写后读再并发。
+
+## 2026-05-31 Long-Task Harness v1 风险与边界
+
+已处理风险：
+- 旧风险：`learning_agent` 的 `task_runs`、`cron_records`、`monitor_records`、`background_commands` 主要是内存结构，长任务遇到进程中断后缺少独立持久化恢复底座。
+- 已处理：新增 `learning_agent/harness/`，把 run、stage、attempt、queue lease、event log、verification、recovery 和 status CLI 独立成可测试模块。
+- 旧风险：阶段性验收如果只靠模型口头说“完成”，Codex 或其他 agent 很难做真实可审计验收。
+- 已处理：`StageVerifier` 现在至少支持成功 marker 和 artifact 文件存在性两类确定性检查，并把通过/失败原因写入 `VerificationResult`。
+- 旧风险：临时 endpoint timeout 后只能靠人工重新启动任务，容易重复跑已完成阶段。
+- 已处理：`HarnessRunner` 会记录阶段 attempts 和 checkpoint，可恢复错误会按 `RecoveryPolicy` 重试，已完成阶段会跳过。
+
+剩余风险：
+- 当前 harness v1 仍是独立底座，尚未把真实交互式 `LearningAgent.run_events()` 强制改成 harness 驱动；后续接入时需要新增端到端测试。
+- 当前 CLI 先提供 `status` 和 `list`，任务创建和 executor 接入仍以 Python API 为主；如果要给用户直接操作，需要继续补 `enqueue/run` CLI。
+- 当前队列通过持久化 lease 状态防止顺序重复领取；如果未来多进程高并发 worker 同时抢占同一个 store，建议继续补文件锁或专用任务数据库。
+- 本轮真实可见终端验收已完成：`long_task_harness_status-20260531_152707/result.json` 显示通过；后续新功能仍必须继续遵守同样门禁。
+
+## 2026-05-31 Harness CLI Agent Execution 风险与边界
+
+已处理风险：
+- 旧风险：harness v1 只能通过 Python API 创建任务，外部 agent 不能用稳定命令行创建和推进任务。
+- 已处理：新增 `python -m learning_agent.harness enqueue` 和 `python -m learning_agent.harness run`。
+- 旧风险：runner 虽然能接 executor，但没有官方薄适配层连接真实 `LearningAgent.run()`。
+- 已处理：新增 `AgentStageExecutor` 和 `build_default_learning_agent_executor()`，并保持真实 agent 依赖懒加载。
+
+剩余风险：
+- `--executor agent` 会启动真实模型和 MCP，适合真实任务，但不适合快速单元测试；测试和 smoke 应优先使用 `--executor echo`。
+- 当前 `enqueue` 的阶段参数是轻量 `name::prompt` 文本格式；后续如果阶段配置复杂化，建议增加 JSON 计划文件输入。
+- 多 worker 高并发抢同一 store 时仍建议补文件锁；当前实现适合顺序 worker 和可审计教学场景。
+- 本轮真实可见终端验收已完成：`harness_cli_echo_run-20260531_154459/result.json` 显示目标 agent 在真实终端中通过 bash 执行了 `enqueue/run/status`，并得到 `status=completed` 与 `acceptance=passed`。
+
+## 2026-05-31 smoke 场景旧权限事件断言误判
+
+状态：已修复并通过真实可见终端 smoke 验收。
+
+证据：
+- 失败结果：`learning_agent/acceptance_controller/runs/smoke-20260531_135941/result.json` 显示 `completed=false`，但 `final_printed=true`、`prompt_received=true`、`marker_passed=true`。
+- 事件日志显示实际事件链为 `permission_auto_approved -> agent_ready_for_user_prompt -> user_prompt_received -> final_answer_printed -> agent_ready_for_user_prompt`。
+- 断言失败点只在 `permission_required=false` 和 `permission_answered=false`，说明真实终端输入和回答已经成功，失败来自场景仍等待旧人工权限事件。
+
+处理：
+- 已把 `learning_agent/acceptance_controller/scenarios/smoke.json` 的必需事件改为 `permission_auto_approved`、`agent_ready_for_user_prompt`、`user_prompt_received`、`final_answer_printed`。
+- 修复后真实可见终端验收 `smoke-20260531_140112/result.json` 显示 `completed=true`。
+- 后续如果客户模式继续默认自动允许内置 MCP server，smoke 场景不应再要求 `permission_required` 和 `permission_answered`。
+
 ## 2026-05-31 H 盘运行路径错位风险
 
 状态：已修复当前路径错位；仍需另行处理浏览器测试环境中的 Playwright 依赖缺失。
 
 已确认风险：
-- 当前项目实际运行目录为 `H:\codexworkplace\sofeware\OpenHarness-main`，但 `learning_agent/mcp_servers.json` 仍指向 `D:\codexworkplace\software\OpenHarness-main\learning_agent`。
-- 如果不修复，`mcp-doctor` 或真实 agent 启动 MCP server 时会尝试执行 D 盘旧路径，导致当前 H 盘项目的 browser/search/workspace tools 可能启动失败或启动到旧副本。
-- `AGENTS.md` 和 `agent_memory/context.md` 中的 D 盘路径会误导后续 agent 把学习备份、真实终端验收或项目根定位到错误目录。
+- 当前项目实际运行目录为 `H:\codexworkplace\sofeware\OpenHarness-main`，但 `learning_agent/mcp_servers.json` 曾经仍指向旧盘符下的 OpenHarness `learning_agent` 目录。
+- 如果不修复，`mcp-doctor` 或真实 agent 启动 MCP server 时会尝试执行旧盘符路径，导致当前 H 盘项目的 browser/search/workspace tools 可能启动失败或启动到旧副本。
+- `AGENTS.md` 和 `agent_memory/context.md` 中的旧盘符路径会误导后续 agent 把学习备份、真实终端验收或项目根定位到错误目录。
 
 处理策略：
 - 只改当前运行配置和协作上下文路径。
-- 不批量改历史验收日志，因为旧日志中的 D 盘路径代表历史运行证据，改掉会污染证据。
+- 不批量改历史验收日志，因为旧日志中的历史盘符路径代表真实运行证据，改掉会污染证据。
 
 验证结果：
 - `mcp-doctor` 已确认当前工作区、配置文件和 MCP server 启动路径均来自 H 盘项目。
-- 当前活跃配置范围内已搜不到旧 OpenHarness D 盘路径。
+- 当前活跃配置范围内已搜不到旧 OpenHarness 盘符路径。
 
 剩余环境风险：
 - `learning_agent.tests.test_mcp_registry` 中 2 个浏览器自动化测试仍失败，失败原因是运行环境缺少 Playwright：`No module named 'playwright'`。
@@ -635,3 +999,2083 @@ Residual risks:
 - Stage 15G session resume is a minimal file-level foundation, not a full product command for “resume session id” in the CLI.
 - Safe read parallelism can make observation event ordering less strictly linear for concurrent read-only tools; model message result order is preserved.
 - Real visible terminal interaction acceptance must still be completed before claiming the whole Stage 15 agent runtime is fully done.
+
+## 2026-05-31 Acceptance controller foreground focus bug
+
+Status: resolved for smoke acceptance.
+
+Symptom:
+- Runs `smoke-20260531_142012` and `smoke-20260531_142703` opened the real terminal and reached `agent_ready_for_user_prompt`, but never produced `user_prompt_received`.
+- Their `02_prompt_sent.png` screenshots showed Photoshop or another app in the foreground instead of the terminal.
+- This proved the controller believed prompt input was sent, while the actual visible terminal stayed at `你 >`.
+
+Root cause:
+- `controller.ps1` trusted `WScript.Shell.AppActivate()` return values without independently verifying the current foreground window.
+- On this desktop, Windows Terminal focus could fail or lag while another visible application remained active.
+
+Fix:
+- Added Win32 foreground-window checks using `GetForegroundWindow` and `GetWindowThreadProcessId`.
+- Added stronger terminal activation through `ShowWindowAsync`, `SetForegroundWindow`, `SwitchToThisWindow`, temporary topmost toggling, and a click inside the terminal.
+- `Send-TerminalTextLine` now only pastes after verified terminal focus.
+- Increased paste-to-enter wait to 800ms so the input line is filled before Enter is sent.
+
+Regression and acceptance evidence:
+- Static guard test now requires the controller to include foreground-window verification.
+- Successful visible-terminal run: `learning_agent/acceptance_controller/runs/smoke-20260531_143929/result.json`.
+- Result: `completed=true`, `prompt_send_attempts=1`, `final_answer_preview=ACCEPTANCE_HARNESS_OK`.
+- Independent verifier replay also passed for that run.
+
+Residual risk:
+- Foreground control still depends on Windows desktop focus rules. If the OS blocks all foreground changes, the controller should fail rather than paste into a non-terminal window.
+
+## 2026-05-31 Missing independent durable long-task harness
+
+Status: confirmed design gap, not a code defect introduced by the latest change.
+
+Evidence:
+- `learning_agent/core/agent.py` keeps `task_runs`, `cron_records`, `monitor_records`, and `background_commands` in process memory.
+- `learning_agent/core/session.py` can save a session summary and minimal compact data, but this is not a durable task queue or checkpoint runner.
+- `learning_agent/acceptance_controller` and `learning_agent/acceptance/verifier.py` provide real-terminal acceptance and replay verification, but they validate runs; they do not schedule, resume, or automatically continue long work.
+
+Risk:
+- Long tasks can be lost or become hard to resume after process exit, crash, OAuth/API failure, endpoint change, machine sleep, or manual interruption.
+- There is no single visible task state source that another agent can inspect to know current stage, last checkpoint, next action, failure reason, and acceptance status.
+
+Recommended fix:
+- Add a dedicated `learning_agent/harness/` package with durable task/run/stage state, append-only event logs, queue leasing, checkpoint recovery, stage verifiers, retry/backoff policy, and status endpoints for controller/Codex observation.
+
+## 2026-05-31 Harness session stage pending bug
+
+Status: resolved and regression-tested.
+
+Symptom:
+- Real visible terminal acceptance created `learning_agent/memory/harness/runs/runtime_0b61bcfb0c2589c2.json` with top-level `status=completed`, but its `interactive_turn` stage still had `status=pending` and `acceptance.passed=false`.
+- This meant the run looked finished while the stage-level audit record still looked unfinished.
+
+Root cause:
+- `HarnessRun.create()` deep-copies the input stages.
+- `learning_agent/runtime/session_runtime.py` updated the original local `stage` object instead of `run.stages[0]`, so the object saved to disk never received the running/completed/acceptance fields.
+
+Fix:
+- Rebound `stage = run.stages[0]` immediately after `HarnessRun.create(...)`.
+- Added `started_at` and `completed_at` timestamps to the persisted stage.
+- Added regression assertions in `learning_agent/tests/test_harness_runtime_alignment.py` for `stage.status=completed`, `stage.acceptance.passed=true`, and checkpoint content.
+
+Verification:
+- Red test reproduced the bug: focused session-runtime test failed with `pending != completed`.
+- Fixed focused test passed.
+- Full regression passed: `python -m unittest discover learning_agent` ran 407 tests OK, skipped=1.
+- Real visible terminal rerun passed: `learning_agent/acceptance_controller/runs/harness_runtime_alignment_status-20260531_165630/result.json`.
+- Latest durable run evidence: `learning_agent/memory/harness/runs/runtime_275e3c33ad6ec332.json` has `status=completed`, `stages[0].status=completed`, and `stages[0].acceptance.passed=true`.
+
+## 2026-05-31 Harness alignment false-completion risk
+
+Status: confirmed residual risk; not resolved yet.
+
+Symptom:
+- The project had a real visible terminal acceptance proving that a normal prompt created a durable harness run and completed its stage.
+- A later source-only comparison against ClaudeCode showed this does not prove core harness parity.
+- The key missing behavior is that the real main loop does not yet drain the durable runtime queue into model-visible context for prompt, task-notification, and resume-interrupted commands.
+
+Confirmed evidence:
+- `learning_agent/runtime/session_runtime.py` enqueues the user prompt with `command_queue.enqueue_prompt(user_input)`.
+- The same function then calls `agent.run_events(user_input, max_turns=max_turns)` directly.
+- Source search shows `RuntimeCommandQueue.dequeue_next()` is used by CLI/tests, but not by the real `LearningAgent.run()` path as a durable command consumer.
+- ClaudeCode source `query.ts` gets queued commands by priority, converts them to attachments, yields them into the model turn, and removes consumed prompt/task-notification commands from the queue.
+
+Risk:
+- Task notifications can be persisted but still not automatically reach the model on the next real turn.
+- Interrupted resume commands can be persisted but still not automatically drive the next real turn.
+- Passing unit tests and a single visible terminal status scenario can falsely suggest ClaudeCode harness alignment.
+
+Required fix:
+- Treat this as an unfinished alignment task.
+- Add red tests for queue-drain-to-model behavior and resume command consumption.
+- Implement a real runtime command drain in the main loop before claiming alignment again.
+- Add visible terminal acceptance scenarios that prove the model sees queued task notification and resume context without manual intervention.
+
+## 2026-05-31 Harness alignment false-completion risk resolved
+
+Status: resolved and verified.
+
+Root cause:
+- The earlier implementation created durable files and single-run acceptance evidence, but did not prove queued task notifications and interrupted resumes entered the real model turn.
+- Real visible terminal testing also exposed a second gap: `long_running_work/SKILL.md` loaded only prompt text, because `DYNAMIC_SKILL_CAPABILITY_PACKS` mapped browser skills but not long-running/execution skills.
+
+Fix:
+- `run_agent_with_harness_session()` now drains runtime commands and builds model-visible input before calling `run_events()`.
+- Background command completion now updates durable task records and enqueues task notifications automatically.
+- `DYNAMIC_SKILL_CAPABILITY_PACKS` now maps `long_running_work` to both `execution` and `long_running_work`, plus the other skill directories to their capability packs.
+- Acceptance scenarios now use the real `permission_answered` event name instead of the stale `permission_sent` state.
+
+Verification:
+- Red test reproduced the skill-loading bug before the mapping fix.
+- Full automated regression passed: 414 tests OK, skipped=1.
+- Real visible terminal scenarios passed for seed, task-notification feedback, resume-interrupted, background-shell watchdog, and background-shell notification.
+- Final queue audit reported `NO_QUEUED_COMMANDS`, proving acceptance notifications were consumed.
+
+Residual risk:
+- This resolves the planned core harness alignment gate, not every possible ClaudeCode feature. Future comparisons should still be source-based and should not use README claims as primary evidence.
+
+## 2026-05-31 Compact/status API missing from HTTP bridge
+
+Status: resolved in current compact/resume/status execution pass.
+
+Symptom:
+- A new regression test called GET `/status` on the real HTTP command bridge and received HTTP 404.
+
+Confirmed root cause:
+- `learning_agent/app/http_bridge.py` only routed GET `/health` and `/v1/health`; status snapshot and status event tail were available through SDK/CLI but not through HTTP.
+
+Fix:
+- Added GET `/status` and `/v1/status` backed by `build_status_snapshot()`.
+- Added GET `/events` and `/v1/events` backed by `StatusEventStore.list_events()`.
+- Added optional token protection for status endpoints when bridge token is configured.
+
+Verification:
+- The focused HTTP bridge test now passes and confirms `/events?since_sequence=0&limit=5` returns the same `status_probe` event written to the status event store.
+
+## 2026-05-31 Harness CLI module entrypoint missing
+
+Status: resolved in current compact/resume/status execution pass.
+
+Symptom:
+- Direct function test for harness CLI `snapshot` passed, but `python -m learning_agent.harness.cli snapshot --workspace ...` exited with no output.
+
+Confirmed root cause:
+- `learning_agent/harness/cli.py` defined `main()` but did not call it under `if __name__ == "__main__"`.
+
+Fix:
+- Added the module entrypoint and `SystemExit(main())` so real command-line use returns the correct exit code and prints the status snapshot.
+
+Verification:
+- Added regression test `test_harness_cli_module_entrypoint_prints_status_snapshot`.
+- The new red test first failed because stdout was empty, then passed after the entrypoint fix.
+
+## 2026-05-31 Compact summary regression expectation mismatch
+
+Status: resolved during deep compact alignment.
+
+Symptom:
+- `test_compact_boundary_and_resume_loader_reconstruct_context_without_rerun` failed because `old-0` appeared inside the new compact summary text.
+
+Confirmed root cause:
+- The old test was written for a simpler compact behavior where archived messages should disappear from the rendered recovery text.
+- The new ClaudeCode-like behavior intentionally preserves archived facts inside a single auditable summary while preventing archived messages from being replayed as standalone user/assistant turns.
+
+Fix:
+- Updated the assertion to require `old-0` to appear in the compact summary but not as an independent `{"role": "user", "content": "old-0"}` message.
+
+Verification:
+- `python -m unittest learning_agent.tests.test_compact_resume_status_ecosystem` passed.
+- Full `python -m unittest discover learning_agent.tests` passed: 426 tests OK, skipped=1.
+
+Residual risk:
+- Human-readable summaries can still contain sensitive old text; future privacy work should add redaction policy before summary generation if needed.
+
+## 2026-05-31 Real visible terminal gate for deep compact/status pass
+
+Status: resolved.
+
+Confirmed evidence:
+- Automated tests and compile checks passed for the deep compact/resume/status implementation.
+- Real visible terminal acceptance ran through `learning_agent/start_oauth_agent.bat` via the controller.
+- Run directory: `learning_agent/acceptance_controller/runs/compact_resume_status_deep_alignment-20260531_200122`.
+- Controller reported `ACCEPTANCE_CONTROLLER_COMPLETED=True`.
+- Independent verifier reported `completed=true`, `assertion.passed=true`, and `permission_sent_count=0`.
+
+Fix:
+- Added and used `learning_agent/acceptance_controller/scenarios/compact_resume_status_deep_alignment.json`.
+- The scenario checks visible terminal startup, prompt delivery, final answer observability, debug log evidence, screenshots, and key deep compact/status markers.
+
+Risk:
+- The visible terminal scenario verifies source visibility and final terminal output for this pass. It does not replace the separate unit tests that exercise reactive compact, resume repair, HTTP/SDK filters, and legacy migration behavior.
+# 2026-05-31 风险记录：真实浏览器能力
+
+1. 已补：浏览器 MCP 工具现在通过统一执行器记录动作并对临时错误做短重试。
+2. 已补：`browser_snapshot` 和 `browser_visual_locate` 现在输出 bounding box、center_x、center_y，`browser_click` 支持 x/y 坐标。
+3. 已补：新增 `browser_site_grant`，可开启真实 Chrome origin 严格边界；真实 Chrome 动作默认不自动回放。
+4. 已补：新增 `browser_action_log.jsonl` 和 `browser_replay` dry-run 安全回放。
+5. 仍需：真实可见终端验收依赖本地可见窗口控制，如果当前 Codex 环境无法观察或输入，最终不能声明完整验收通过。
+6. 已修复：`browser_flow_run` 的 `stages` array schema 曾缺少 `items`，真实终端中 OpenAI response_format 拒绝请求；已补 `items` 并加入测试。
+7. 已修复：浏览器运行层新增 `browser_launch_visible`，真实终端验收确认 `visible_browser=true`、`headless=false`，不再只有 headless 独立 Chromium。
+8. 已修复：真实可见终端验收中 `atomic_write_text()` 曾因 Windows `os.replace` 短暂拒绝访问导致最终失败；现在对 `PermissionError` 做退避重试，并用 `test_runtime_files.py` 锁定。
+9. 已修复：`browser_visual_locate` 曾只能定位可交互元素，找不到 `Example Domain` 这类标题文本；现在会额外收集标题、段落、表格等可见文本块。
+10. 已修复：`browser_flow_run` 曾因空 `browser_wait` 参数失败；现在在 flow 内自动补 `milliseconds=250`，真实验收日志显示 `browser_flow_run 完成`。
+
+## 2026-05-31 真实可见浏览器验收证据
+
+Status: resolved.
+
+Confirmed evidence:
+- Real visible terminal acceptance ran through `learning_agent/start_oauth_agent.bat` via controller.
+- Run directory: `learning_agent/acceptance_controller/runs/browser_visible_runtime_acceptance-20260531_211805`.
+- Controller reported `ACCEPTANCE_CONTROLLER_COMPLETED=True`.
+- `result.json` shows `completed=true`, `assertion.passed=true`, and all final-answer/debug-log checks true.
+- Debug log confirms `browser_visual_locate 成功` located `<h1> Example Domain` with center coordinates, and `browser_flow_run 完成` executed `browser_wait` with a 250 ms default wait.
+
+## 2026-05-31 自然实时查询未进入可见浏览器
+
+Status: resolved and verified.
+
+Symptom:
+- 精准 prompt `帮我查询3天后武汉的天气，并帮我做一下旅游攻略。` 能得到最终回答，但真实验收没有打开可见浏览器。
+
+Confirmed evidence:
+- Run directory: `learning_agent/acceptance_controller/runs/wuhan_weather_travel_exact_prompt-20260531_212955`.
+- `result.json` 显示 `completed=true`，但权限决策只有 `mcp__browser_search__web_search` 和 `mcp__browser_search__fetch_url`。
+- 日志没有 `mcp__browser_automation__browser_launch_visible`、`browser_open` 或 `browser_snapshot`。
+
+Root cause:
+- `detect_real_browser_information_task()` 只有在用户显式说“真实浏览器/可见浏览器/登录态”等关键词后才返回 true。
+- 普通天气和旅游攻略 prompt 没有触发 browser harness，也没有在首轮工具池里暴露 `browser_launch_visible`。
+
+Risk:
+- 用户以为 agent 在真实可见浏览器里查了天气，但实际只是后台搜索工具完成。
+- 这会破坏“肉眼可见真实验收”的可信度。
+
+Required fix:
+- 普通实时公开查询也要进入可见独立 Chromium 工作流。
+- 显式真实 Chrome 或登录态任务仍要保留原来的真实 Chrome profile 安全路径。
+
+Resolution:
+- 新增普通自然实时查询识别：`detect_visible_browser_information_task()`。
+- 新增 `Visible Browser Task Harness`，普通天气/攻略查询要求先 `browser_launch_visible(confirm_visible_browser=true)`。
+- `LearningAgent.run_events()` 在构造首轮工具池前预加载普通可见浏览器查询工具。
+- 普通可见浏览器公开查询新增安全自动授权白名单，避免真实终端验收被多次 y/N 焦点问题打断；`browser_evaluate`、`file://`、缺少 `confirm_visible_browser` 的启动请求仍不自动放行。
+
+Verification:
+- Full automated suite passed: `python -m unittest discover learning_agent.tests` ran 444 tests OK, skipped=1.
+- Real visible terminal acceptance passed: `learning_agent/acceptance_controller/runs/wuhan_weather_travel_exact_prompt-20260531_215353/result.json`.
+- Independent verifier passed for the same run with `completed=true`, `assertion.passed=true`, and `permission_sent_count=0`.
+- Debug log confirms `Visible Browser Task Harness`, `browser_launch_visible 成功`, `visible_browser=true`, `headless=false`, `browser_open`, and `browser_snapshot`.
+## 2026-05-31 危险调试权限风险记录
+
+- 风险：`LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1` 会跳过 learning_agent 的人工权限确认层，适合用户明确要求的本地调试，不适合默认用于普通用户生产环境。
+- 约束：该开关不能取消工具自身的必填确认参数，例如真实 Chrome 连接仍必须由模型传入 `confirm_real_profile=true`，否则验收不能算通过。
+- 验收风险：如果真实 Chrome 已被普通方式打开且没有调试端口，普通模式仍应阻断日常 profile 抢占；危险调试模式可以改用隔离 debug profile 启动真实 Google Chrome 测试窗口，但必须清楚说明未读取登录态。
+- 审计要求：危险模式下所有自动放行都必须留下 `permission_auto_approved` 事件，否则 controller 无法证明没有人工输入 y。
+# 2026-05-31 千问真实 Chrome 拟人操作验收格式风险
+
+现象：
+- `real_chrome_qianwen_yinzhou_weather-20260531_225525` 已经实际完成真实 Chrome 打开千问、点击输入框、输入提示词、按 Enter 提交并获得页面回答。
+- 但最终回答没有包含场景要求的固定标记和工具名清单，导致 controller 严格断言失败。
+- 模型在已有 `browser_snapshot` 内容足够的情况下调用了 `browser_evaluate(document.body.innerText)`，偏离真实 Chrome 默认不读内部状态的隐私边界。
+
+风险：
+- 用户目标可能已经完成，但验收器会判失败，容易造成“能力可用”和“验收不合格”的判断混乱。
+- 如果未来任务涉及登录态或敏感页面，额外 `browser_evaluate` 可能越过“只看页面可见内容”的边界。
+
+建议：
+- 后续需要在工具策略层对真实 Chrome 模式下的 `browser_evaluate` 增加更硬的门禁，而不是只靠 prompt 约束。
+- 最终回答格式应由 harness 自动补充关键验收证据，避免模型完成任务后忘记输出 marker、工具链和截图路径。
+
+## 2026-06-01 OAuth/API 结构化 JSON 损坏导致真实浏览器验收中断
+
+Status: resolved and verified.
+
+现象：
+- 雷神 H5 真实 Chrome 登录场景中，真实浏览器工具链曾经已经跑通一次，但后续重试时模型在第 0 轮直接输出 `Codex CLI 返回格式错误...`，没有进入 `browser_connect_real_chrome`、`browser_open` 或后续输入步骤。
+- 该错误不是浏览器工具失败，而是 OAuth/API 模型返回的结构化 JSON 偶发不完整，适配器把解析错误当作最终自然语言回答交给了 controller。
+
+根因：
+- `CodexCliChatModel.chat()` 和 `CodexOAuthChatModel.chat()` 之前只解析一次结构化输出。
+- 一旦返回内容不是合法 JSON，agent 会停止工具执行；对长任务和真实浏览器验收来说，这会把偶发格式错误误判成任务失败。
+
+修复：
+- `CodexCliChatModel` 新增一次性 JSON 修复重试：第一次解析失败且错误像结构化输出损坏时，追加“只返回合法 JSON”的修复提示，再用同一 schema 请求一次。
+- `CodexOAuthChatModel` 新增同样的一次性 JSON 修复重试，并保留原始失败作为兜底，避免修复请求也失败时吞掉真实错误。
+- 新增单元测试 `test_codex_oauth_model_retries_once_when_json_output_is_invalid`，证明第一次坏 JSON 会触发第二次修复请求，并最终得到合法工具调用。
+
+验证：
+- `python -m unittest learning_agent.tests.test_models_codex_oauth`：47 tests OK。
+- `python -m unittest learning_agent.tests.test_browser_runtime_alignment`：16 tests OK。
+- 真实可见终端验收 `real_chrome_leishen_login_content-20260601_075721` 通过，`result.json` 显示 `completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+剩余风险：
+- 如果第一次输出和一次修复输出都不是合法 JSON，agent 仍会明确失败；这是有意保留的边界，避免无限重试掩盖模型或接口问题。
+
+## 2026-06-01 Browser Runtime Stage 1-2 剩余风险
+
+Status: open.
+
+风险：
+- 当前新增的 `BrowserRuntimeStore` 已接入真实 `browser_automation_mcp_server.py` 工具调用路径，并已通过 `browser_runtime_event` 镜像到统一 status event；但 status snapshot/CLI/API 还没有专门 browser section，因此用户仍不容易用状态命令直接浏览 run/stage/action/event。
+- 当前只完成自动化测试和语法检查，没有完成 `learning_agent/start_oauth_agent.bat` 真实可见终端交互验收，不能声明整套浏览器 runtime 对齐开发完成。
+
+建议：
+- 下一阶段优先做 Stage 3 session manager，随后在 Stage 11 将 browser runtime run/stage/action/event 纳入 status snapshot、CLI/API 和 verifier 入口，避免用户只能查 JSONL。
+
+## 2026-06-01 Browser Runtime Stage 3 剩余风险
+
+Status: Stage 3 resolved; later browser runtime stages still open.
+
+已解决：
+- Stage 3 已补上独立 `BrowserSessionManager` 和 `BrowserTabRegistry`，并接入真实 `BrowserAutomationServer` 页面生命周期，不再只靠 `self.pages` 和 `current_page_id` 旁路状态。
+- `browser_plugin_status` 和 `browser_profile_status` 已能展示 session manager 的模式、连接、可见性、headless、tab_count 和 active_tab_id。
+- 自动化验证已覆盖 tab id 跨 session 不复用、真实 Chrome profile 路径脱敏、状态报告字段和公开 plugin status 接入。
+- 真实可见终端验收 `browser_visible_runtime_acceptance-20260601_105840` 已通过，debug log 确认 `session_mode=visible_chromium`、`connected=true`、`visible=true`、`tab_count=1`、`active_tab_id=browser_session_1_fa131c86-tab-1`。
+
+仍有风险：
+- Browser Runtime 仍缺 Observation Engine、Locator Engine、Action Executor、Recovery/Replay/Verifier 2.0、Status Browser Section 等后续阶段。
+- 当前 session manager 状态已经接入 server，但还没有被 status snapshot/CLI/API 独立聚合成浏览器专栏；外部 agent 仍需要读 `browser_plugin_status` 或底层 event。
+
+建议：
+- 下一步进入 Stage 4 Observation Engine，把 DOM/截图/可访问性/网络/console 观察结果做成可落盘、可比较、可复现的统一 observation，而不是继续只扩展 `browser_snapshot` 文本。
+
+## 2026-06-01 Browser Runtime Stage 4-12 剩余风险
+
+Status: code and automated tests resolved; visible terminal gate still open.
+
+已解决：
+- Stage 4-11 已补上 Observation Engine、Locator Engine、Action Policy/Executor、Recovery Manager、Flow Runtime、Secret/Site Permission 模型、Replay/Assertions、Status Browser Section。
+- `browser_snapshot` 和 `browser_screenshot` 不再只是返回一次性文本/图片路径，会保存 `BrowserObservation` 并关联到当前 action。
+- `browser_flow_run` 已接入 checkpoint runtime，可在同一 `flow_id` 下跳过已完成阶段，降低失败后重跑风险。
+- `acceptance.verifier` 已支持 `browser_assertions`，浏览器页面内容和截图证据可以成为真实验收门禁。
+- SDK、HTTP bridge、harness CLI、终端状态渲染器都能看到 browser runtime 区块。
+- 全量自动化测试已通过：483 tests OK，skipped=1。
+
+仍有风险：
+- 真实可见终端交互验收尚未执行；按 AGENTS.md 规则，不能声明开发完成或验收通过。
+- `BrowserActionExecutor` 和 `BrowserSecretVault` 已是独立模块，但 server 里仍有部分旧手写逻辑；当前属于兼容接入，不是完全替换。
+- `browser_flow_run` 的 checkpoint 依赖稳定 `flow_id`；如果调用方不传 `flow_id` 且不使用 `stages_file`，每次会生成新流程 id，不会自动 resume。
+
+建议：
+- Stage 12 必须运行 `learning_agent/start_oauth_agent.bat` 可见终端 controller 场景，检查 debug log 至少包含 `observation_id=`、`Browser Runtime`/browser status 字段或 browser runtime store 证据。
+- 后续若继续对齐 ClaudeCode，应把 `BrowserActionExecutor` 进一步接管 server 的 `_start/_complete/_fail_browser_runtime_action`，减少双轨逻辑。
+
+## 2026-06-01 Browser Runtime Stage 4-12 验收风险关闭
+
+Status: resolved and verified.
+
+已关闭：
+- Stage 12 真实可见终端门禁已通过，不再停留在“只通过自动化测试”的状态。
+- 验收 run：`learning_agent/acceptance_controller/runs/browser_visible_runtime_acceptance-20260601_114746`。
+- `result.json` 显示 `completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+- 独立 verifier 输出 `schema_version=2`、`completed=true`，并且 artifact checks 全部为 true。
+- debug log 已确认 `observation_id=`、`browser_runtime_store=`、`flow_checkpoint`、`status_browser_runtime` 和 `compatible=true`。
+
+仍需关注：
+- `BrowserActionExecutor` 是独立协议模块，但 `browser_automation_mcp_server.py` 内仍保留部分旧 action wrapper；当前属于兼容接入，不是完全替换。
+- `browser_flow_run` 的断点恢复仍依赖稳定 `flow_id` 或 `stages_file`；调用方完全不传稳定标识时，只能生成新的 flow run。
+- 本轮验收验证的是可见独立 Chromium 的 runtime 链路；真实 Chrome 登录态场景仍应继续使用单独的真实 Chrome 验收场景验证。
+
+## 2026-06-01 BrowserActionExecutor 双轨风险收敛
+
+Status: resolved and verified.
+
+已解决：
+- 之前的风险是 `BrowserActionExecutor` 已存在，但 `browser_automation_mcp_server.py` 的 `_start_browser_runtime_action()`、`_complete_browser_runtime_action()`、`_fail_browser_runtime_action()` 仍手写 action 生命周期，形成双轨逻辑。
+- 本次已让 server 创建 `BrowserActionExecutor(store=self.browser_runtime_store)`，并把 started/completed/failed 三条 helper 路径委托给 executor。
+- 红灯测试已证明旧代码不会调用 executor；修改后相关测试和全量测试都通过。
+
+仍需关注：
+- 当前只收敛了生命周期 helper，尚未把真实工具调用本身包进 `BrowserActionExecutor.write_lock`；未来如果要做真正并发调度，需要继续让 executor 接管串行/并发执行层。
+- 旧的 `browser_visible_runtime_acceptance.json` 大场景在本轮重跑时连续两次失败，确认原因是模型提前最终回答，没有调用 `browser_plugin_status`，不是浏览器工具或 executor 生命周期失败。
+- 本轮新增聚焦验收场景 `browser_action_executor_delegation_acceptance.json` 已通过真实可见终端和独立 verifier，适合后续专门验收 action executor 生命周期委托。
+
+## 2026-06-01 BrowserProviderRouter 评审风险收敛
+
+Status: code risk resolved by tests; visible terminal gate still open.
+
+已解决：
+- 代码质量审查指出 router 关键词和 `learning_agent/browser/intent.py` 不一致，可能漏判当前浏览器、真实浏览器、真实 Chrome、current browser、login state 等任务；本轮已复用 `REAL_CHROME_INTENT_KEYWORDS` 并新增覆盖测试。
+- 审查指出 provider 不可用时 fallback 语义会误导后续 agent；本轮已让普通不可用分支保持 `fallback_provider=unavailable`，只在插件不可用且存在候选 CDP 时把 CDP 作为候选 fallback。
+- 审查指出允许 CDP fallback 的分支语义不清；本轮已增加 `reason_code=extension_unavailable_cdp_fallback_allowed` 和 `metadata.fallback_from=chrome_extension`。
+- 审查指出 event payload 缺少稳定版本和机器可读原因码；本轮已新增 `schema_version=1`、`reason_code` 和 JSON 安全 `metadata`。
+- 审查指出 `provider_events` helper 与 registry 写入/快照路径缺测试；本轮已补充单元测试覆盖。
+
+验证：
+- `python -m unittest learning_agent.tests.test_browser_provider_router` 通过：12 tests OK。
+- `python -m unittest discover -s learning_agent\tests` 通过：502 tests OK，skipped=1。
+
+仍需关注：
+- Stage 1 只建立 provider router 协议层，还没有接管真实 `browser_automation_mcp_server.py` 执行路径。
+- `learning_agent/start_oauth_agent.bat` 真实可见终端交互验收仍未完成，按项目门禁不能声明 Stage 1 开发完成。
+
+## 2026-06-01 BrowserProviderRouter 真实终端门禁关闭
+
+Status: resolved and verified.
+
+已关闭：
+- Stage 1 真实可见终端交互验收已通过，run 为 `learning_agent/acceptance_controller/runs/browser_provider_router_stage1_acceptance-20260601_165755`。
+- controller 的 `result.json` 显示 `completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+- 真实终端里的 agent 使用 `bash` 成功验证 provider router 协议层，并输出 `PROVIDER_ROUTER_STAGE1_OK provider=real_chrome_cdp reason_code=extension_unavailable_cdp_fallback_allowed schema_version=1 fallback_from=chrome_extension`。
+- 独立 verifier 已复验同一 run，输出 `schema_version=2`、`completed=true`、`assertion.passed=true`，并确认 result、event log、debug log 和三张截图 artifact 都存在。
+
+仍需关注：
+- Stage 1 的职责是协议层和防误选路由，不负责接管 `browser_automation_mcp_server.py` 的真实执行路径；这个接管应放到 Stage 2 之后的单独阶段计划里继续做。
+## 2026-06-01 BrowserProviderAdapters Stage 2 风险关闭
+
+Status: resolved and verified.
+
+已关闭：
+- Stage 2 已把 `VisibleChromiumProvider` 和 `RealChromeCdpProvider` 接入真实 `BrowserAutomationServer.call()` 顶层工具路径；如果没有这一步，provider router 只能停留在测试协议层，真实浏览器工具仍会绕过双轨架构。
+- 顶层浏览器工具调用现在会写入 `browser_provider_decision` 事件；如果没有这条事件，其他 agent 和验收器无法复盘为什么走可见 Chromium 或真实 Chrome CDP。
+- 自动化验证已通过：`python -m unittest learning_agent.tests.test_browser_provider_adapters`、相关浏览器测试组合、全量 `python -m unittest discover -s learning_agent\tests`。
+- 真实可见终端验收已通过：`learning_agent/acceptance_controller/runs/browser_provider_adapters_stage2_acceptance-20260601_171446`，独立 verifier 显示 `completed=true` 且 `assertion.passed=true`。
+
+仍需关注：
+- Stage 2 只完成现有 Playwright/CDP provider 迁入；模型工具表面仍需要 Stage 3 明确禁止 provider-specific 重复工具，避免未来插件接入后把选择权重新暴露给模型。
+- 当前 `browser_connect_real_chrome` 仍是高级控制入口，不是普通 open/click/type 的重复工具；Stage 3 需要用测试把它和统一动作工具的边界写清楚。
+## 2026-06-01 Browser Tool Surface Stage 3 风险关闭
+
+Status: resolved and verified.
+
+已关闭：
+- provider-specific 重复动作风险已收敛：`chrome_extension_open`、`real_chrome_cdp_click`、`visible_chromium_type` 这类工具不会进入模型 catalog。
+- 真实 Chrome 控制入口风险已标记：`browser_connect_real_chrome`、`browser_disconnect_real_chrome`、`browser_profile_status` 会带 `advanced provider-control` 搜索提示，避免被模型当作普通页面动作。
+- skill/harness 已明确：不要直接选择 provider；模型只调用统一 `browser_*` 工具，底层由 `BrowserProviderRouter` 选择并写入 event log。
+- 自动化验证通过：Stage 3 单测 6 tests OK，相关回归 105 tests OK，全量 513 tests OK。
+- 真实可见终端验收通过：`browser_tool_surface_stage3_acceptance-20260601_172518`，独立 verifier 显示 `completed=true` 和 `assertion.passed=true`。
+
+仍需关注：
+- Stage 3 没有实现 `browser_tabs_context`；当前 Chrome/登录态任务的强制首步 tab context 合同需要 Stage 4 单独补齐。
+- Chrome 插件 provider 尚未实现；当前只是提前防止插件接入后模型工具表面分裂。
+## 2026-06-01 Browser Tabs Context Stage 4 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- 真实 Chrome / 登录态任务如果没有先读取当前标签页上下文，模型可能在不知道 active tab、URL、标题和 page_id 的情况下直接点击或输入。
+- 标签页切换、新建、关闭或导航后，如果旧 context 不失效，模型可能拿旧页面信息操作新页面。
+
+本轮处理：
+- 新增 `browser_tabs_context`，输出 session、provider、active tab、tab_id、page_id、URL 和 title。
+- 真实 Chrome 模式下，`browser_click`、`browser_type`、`browser_type_secret`、`browser_press_key`、`browser_upload_file` 会先经过 context 门禁。
+- active tab 改变、页面关闭、导航、真实 Chrome 重连/断开和 close_all 都会让旧 context 失效。
+
+风险关闭证据：
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，518 tests OK，skipped=1。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/browser_tabs_context_stage4_acceptance-20260601_174203`。
+- 独立 verifier 显示 `completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+## 2026-06-01 Chrome Extension Readonly Stage 5 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- Chrome 插件路线如果第一版就开放点击、输入、提交，会把登录态浏览器控制面扩大得太快，后续很难审计权限边界。
+- 插件脚本如果读取 cookie、storage 或密码类内容，会把“看得见页面内容”和“读取浏览器内部状态”混在一起，破坏真实浏览器隐私边界。
+- 插件 provider 如果默认可用，Router 可能在扩展未连接时误选插件路线，导致真实任务失败或误判。
+
+本轮处理：
+- Stage 5 只实现 Chrome extension、native host、bridge state、message protocol 和 provider 的只读 MVP。
+- 协议只允许 `tabs_context`、`read_page`、`status`，明确拒绝 click/type/press_key/navigate/upload/submit 等写动作。
+- 扩展脚本扫描测试禁止出现敏感浏览器 API 片段。
+- `ChromeExtensionProvider` 默认 `connected=false` 时不可用；只有 bridge 记录连接后才返回 available。
+- `BrowserAutomationServer` 只公开统一的 `browser_extension_status` 状态工具，不向模型暴露 provider-specific 重复动作。
+
+风险关闭证据：
+- `python -m unittest learning_agent.tests.test_chrome_extension_readonly_stage5` 已通过，5 tests OK。
+- 相关浏览器回归已通过，33 tests OK。
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，523 tests OK，skipped=1。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/chrome_extension_readonly_stage5_acceptance-20260601_175710`。
+- 独立 verifier 显示 `schema_version=2`、`completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+仍需关注：
+- Stage 5 没有安装真实 Chrome 插件，也没有写 Windows 注册表；这是本阶段有意边界。
+- Stage 6 若实现插件写动作，必须先补权限门禁、动作审计和真实终端验收，不能直接把写动作塞进只读 provider。
+
+## 2026-06-01 Chrome Extension Write Actions Stage 6 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- 插件写动作如果直接从扩展发起，可能绕过 provider 决策、权限、action executor 和事件审计。
+- 写动作如果只在 Python provider 里“假成功”，真实 Chrome 扩展脚本不会执行 click/type/key。
+- 写动作结果如果不脱敏，页面反馈里的敏感字段可能进入 bridge state 或 debug log。
+
+本轮处理：
+- 写动作只能通过 provider 创建 pending command，再由扩展轮询 `poll_commands` 拉取执行。
+- 扩展完成后必须通过 `action_result` 回传，bridge 使用协议层统一脱敏后保存。
+- `ChromeExtensionProvider` 等待 command result，成功才返回工具结果，失败或超时会抛错。
+- `BrowserAutomationServer` 仍通过 `BrowserActionExecutor.execute_action()` 包住插件 provider handler，保留 started/completed 事件。
+- 扩展脚本新增命令轮询、页面动作执行和结果回传，同时继续禁止敏感浏览器 API 片段。
+
+风险关闭证据：
+- `python -m unittest learning_agent.tests.test_chrome_extension_write_actions_stage6` 已通过，5 tests OK。
+- 相关回归已通过，38 tests OK。
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，528 tests OK，skipped=1。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/chrome_extension_write_actions_stage6_acceptance-20260601_181238`。
+- 独立 verifier 显示 `schema_version=2`、`completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+仍需关注：
+- Stage 6 尚未实现站点级权限，当前连接后的插件 provider 写动作可执行；Stage 7 必须补 origin 权限门禁。
+- 本阶段仍未执行真实 Chrome 扩展安装流程；安装 UX 和真实插件全链路总验收应在后续总验收阶段单独确认。
+
+## 2026-06-01 Chrome Extension Site Permissions Stage 7 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- Stage 6 后插件 provider 一旦连接，就可以排队执行 click/type/key 等写动作；如果没有 origin 权限，登录态页面风险过大。
+- 旧 `BrowserSitePermissions` 只有 origin 级宽授权，无法表达“只允许 read，不允许 click/type/submit”。
+- 旧 `browser_site_grant` 只维护 server 内存集合，没有同步 Chrome extension provider，容易形成两套权限系统。
+
+本轮处理：
+- `BrowserSitePermissions` 升级为 origin + action 级权限模型，并保留旧 `grant(origin)` 宽授权兼容。
+- `ChromeExtensionProvider` 在 `browser_snapshot`、`browser_tabs_context`、`browser_visual_locate`、`browser_click`、`browser_type`、`browser_press_key`、`browser_open` 等工具前检查对应权限。
+- `browser_press_key` 的 Enter 按 `submit` 权限处理。
+- `browser_site_grant` 新增 `permissions` 参数，并同步到 `ChromeExtensionProvider.site_permissions`。
+- 权限变化写入 `ChromeExtensionBridgeState.permission_events`，状态可查看事件数量。
+
+风险关闭证据：
+- `python -m unittest learning_agent.tests.test_chrome_extension_site_permissions_stage7` 已通过，4 tests OK。
+- 相关回归已通过，44 tests OK。
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，532 tests OK，skipped=1。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/chrome_extension_site_permissions_stage7_acceptance-20260601_182242`。
+- 独立 verifier 显示 `schema_version=2`、`completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+仍需关注：
+- 当前权限 UI 仍是文本/工具方式，不是图形化授权弹窗。
+- Stage 8 需要把 provider、native host、tab、permission、run、action、observation 做到状态 CLI/API 可见。
+
+## 2026-06-01 Chrome Extension Status Ecosystem Stage 8 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- provider、Chrome 插件连接、native host、tab、权限和最近动作如果分散在不同文件里，其他 agent 很难判断真实浏览器当前是否可用。
+- 如果终端渲染、SDK、HTTP API、CLI 和模型工具各自读取状态，会重新形成多套旁路系统。
+- `browser_provider_status` 如果只支持包路径导入，在 `start_oauth_agent.bat` 这类脚本入口下可能因为导入路径不同而失败。
+
+本轮处理：
+- `status_snapshot.py` 新增 `browser.provider_status`，统一从 bridge state 和 BrowserRuntimeStore 聚合状态。
+- `status_renderer.py`、`sdk/status.py`、`http_bridge.py`、`harness/cli.py` 和 `browser_automation_mcp_server.py` 全部复用统一快照。
+- `browser_provider_status` 增加脚本模式导入 fallback，避免真实可见终端入口下包路径差异导致工具不可用。
+- 新增 Stage 8 验收场景，要求真实终端里的 agent 自己执行 focused unittest 并输出固定成功标记。
+
+风险关闭证据：
+- `python -m unittest learning_agent.tests.test_chrome_extension_status_ecosystem_stage8` 已通过，3 tests OK。
+- Stage 5/6/7/8 与状态生态相关回归已通过，47 tests OK。
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，535 tests OK，skipped=1。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/chrome_extension_status_ecosystem_stage8_acceptance-20260601_184110`。
+- 独立 verifier 显示 `schema_version=2`、`completed=true`、`assertion.passed=true`、`permission_sent_count=0`。
+
+仍需关注：
+- Stage 8 不包含 GIF/录屏/帧序列证据；这是 Stage 9 的范围。
+- 当前 provider 状态是快照级状态，还需要 Stage 11 继续确认每个浏览器动作都进入长任务 harness run/stage/checkpoint。
+
+## 2026-06-01 Browser Visual Evidence Stage 9 风险记录
+
+Status: resolved and verified.
+
+已发现风险：
+- 只有单张截图和文本日志时，多步浏览器任务很难复盘“每一步到底看到了什么、点了哪里、页面怎么变化”。
+- 如果录制只是工具手动调用，模型在长任务中很容易忘记每一步截图，导致证据链断裂。
+- 如果 verifier 只看日志里的 GIF 路径，不检查真实文件，仍可能出现“假验收”。
+
+本轮处理：
+- 新增 `BrowserRecordingStore`，统一保存录制 manifest、PNG 帧序列和 GIF。
+- 新增 `browser_record_start`、`browser_record_stop`、`browser_gif_export`，保持统一 browser 工具表面。
+- 浏览器动作成功后自动捕帧，减少模型忘记截图造成的证据缺口。
+- 状态快照和终端渲染新增 `Browser Recordings`。
+- 独立 verifier 新增 `required_artifact_globs`，真实检查 manifest、frames 和 GIF 是否存在。
+
+风险关闭证据：
+- `python -m unittest learning_agent.tests.test_browser_recording_stage9 learning_agent.tests.test_acceptance_verifier` 已通过，7 tests OK。
+- 全量 `python -m unittest discover -s learning_agent\tests` 已通过，539 tests OK，skipped=1。
+- `python -m learning_agent.browser.recording --selftest --workspace H:\codexworkplace\sofeware\OpenHarness-main` 已生成真实帧和 GIF。
+- 真实可见终端验收 run 为 `learning_agent/acceptance_controller/runs/browser_visual_evidence_stage9_acceptance-20260601_185914`。
+- 独立 verifier 显示 `required_artifact_glob_checks` 中 manifest、frames、GIF 三项均为 true。
+
+仍需关注：
+- 当前 GIF 导出是基于动作后截图帧，不是视频级屏幕录制；对 agent 验收已足够，但不是高帧率录屏。
+- Stage 10 需要继续处理失败恢复/fallback，避免录制证据存在但浏览器轨道选择错误或页面恢复策略错误。
+## 2026-06-01 Stage 10 回归风险：状态工具不能被 fallback 门禁误伤
+
+现象：
+- Stage 10 初版把 `BrowserProviderKind.UNAVAILABLE` 全部阻断，导致 `browser_tabs_context` 也无法执行。
+
+确认原因：
+- `browser_tabs_context` 是恢复/确认状态的只读工具，不能和点击、输入、提交等写动作使用同一阻断策略。
+- 旧 Stage 4 测试同时暴露出一个合同变化：读过 `browser_tabs_context` 只代表确认了标签页，不代表允许从插件降级到 CDP。
+
+处理结果：
+- `browser_tabs_context`、`browser_tabs`、`browser_provider_status`、`browser_extension_status`、`browser_plugin_status`、`browser_profile_status` 在 provider 不可用时仍允许执行旧只读 handler。
+- 写动作仍然必须在插件可用或显式 `allow_cdp_fallback=true` 时才执行。
+- 已把 `test_browser_tabs_context_stage4` 的允许写动作场景更新为“读 context + 显式 CDP fallback”。
+
+验证：
+- Stage 10 聚焦单测、Stage 4/Provider/Recovery/Recording/Status 回归和全量 544 tests 均通过。
+## 2026-06-03 Phase 32 Windows Native Observation Helper Risks
+
+已处理风险：
+- 旧风险：Phase29/31 只有静态 helper 和 Null helper，缺少真实 Windows native helper 接入点。已处理：新增 `WindowsNativeWindowObservationHelper` 和 provider 注入合同。
+- 旧风险：只读窗口 inventory 与真实屏幕读取边界容易混淆。已处理：新增独立环境变量 `LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_NATIVE_OBSERVE`，只开 inventory 不会自动截图或读取文本。
+- 旧风险：native helper 如果直接写死真实 API，测试和验收会触碰用户桌面。已处理：helper 支持注入 fake capture/text provider，Phase32 验收使用 fake provider。
+- 旧风险：native 文本可能把 password/token 等敏感内容写入响应或 metadata。已处理：继续复用 Phase29 evidence store 的敏感行过滤和长度限制。
+
+剩余风险：
+- `Win32GdiWindowCaptureProvider` 是 GDI `PrintWindow`/`BitBlt` fallback，不是完整 Windows.Graphics.Capture；部分 UWP、硬件加速、遮挡或权限场景可能截图失败或黑屏。
+- `Win32WindowTextProvider` 只读取 Win32 标题和子控件文本，不是完整 UIAutomationClient 文本树。
+- Phase32 尚未实现 DPI、多显示器、窗口遮挡、最小化窗口、焦点安全提示和 native helper 权限诊断。
+- Phase32 不扩大真实鼠标键盘动作；真实动作仍必须依赖 Phase30/31 锁、abort、窗口目标和 evidence chain。
+
+---
+
+## 2026-06-03 Phase 31 Windows Computer Use Lock/Abort/Evidence Risks
+
+已处理风险：
+- 旧风险：崩溃遗留的 desktop control lock 可能永久阻塞后续会话。已处理：`ComputerUseLockManager` 增加 `stale_after_seconds` 和陈旧 owner 恢复证据。
+- 旧风险：动作只有计划参数，没有动作前后现场证据。已处理：成功动作现在在执行前后各调用一次只读 `get_window_state`，并把 before/after evidence 绑定同一个 `audit_id`。
+- 旧风险：审计只在内存里，真实问题复盘时缺少磁盘证据。已处理：新增 `ComputerUseAuditStore`，保存 events JSONL 和 chain JSON。
+- 旧风险：`type_text` 原始文本可能泄露到审计文件。已处理：磁盘审计链使用递归脱敏，并保留 `text_sha256_16` 短哈希用于关联。
+- 旧风险：真实终端用户没有直接急停入口。已处理：新增 `/computer abort <reason>` 和 `/computer clear-abort`。
+- 本轮实测问题：`parse_lock_timestamp` 之前使用本地时区解析 UTC 字符串，东八区会把刚创建的锁误判为约 28800 秒前的陈旧锁。已处理：改为 `calendar.timegm(...)` 按 UTC 解析。
+
+剩余风险：
+- Phase31 的真实动作验证仍使用内存后端和静态窗口，不代表真实 SendInput 已成熟。
+- before/after evidence 当前依赖已有 `get_window_state` 合同；真实 Windows.Graphics.Capture 和 UIAutomationClient helper 仍未接入。
+- 真实窗口控制还需要 DPI、多显示器、窗口遮挡、焦点切换、动作回滚/重试策略和更严格 app allowlist。
+- 终端、Codex UI、安全/隐私设置、密码管理器、认证弹窗和 Windows Run 仍必须保持禁止自动化。
+
+---
+
+## 2026-06-01 ClaudeCode 浏览器源码对比风险记录
+
+Status: open observation.
+
+已确认边界：
+- ClaudeCode 本地仓库中 `claude-in-chrome` 的很多集成点可读，但核心浏览器工具实现来自外部包 `@ant/claude-for-chrome-mcp`。
+- ClaudeCode `computer-use` 的 OS 级真实鼠标键盘/截图能力源码显示为 macOS 路线，Windows 下不能直接等同为已可用的同能力。
+- learning_agent 已有 Chrome extension/native host scaffold，但 `manifest_installer.py` 源码只生成 manifest，不写 Windows 注册表；这说明生产安装体验仍弱于 ClaudeCode 的 `registerWindowsNativeHosts(...)` 路线。
+
+后续处理建议：
+- 若要声明“完全对齐 ClaudeCode 浏览器能力”，必须追加真实 Chrome 扩展安装、native host 注册、配对、站点权限、写动作、断线恢复和状态 UI 的完整端到端验收。
+
+## 2026-06-02 Phase 18 Chrome Extension E2E 真实连接边界
+
+Status: open observation.
+
+已确认事实：
+- Phase 18 新增 `/chrome extension-e2e-check` 后，真实可见终端验收截图显示 `manifest_ok=true`、`launcher_ok=true`、`pairing_completed=true`、`browser_prompt_queued=true`。
+- 同一截图明确显示 `real_extension_connected=false`、`real_extension_e2e=false`。
+- 这说明本机当前完成的是可审计 local protocol selftest，不是 Chrome extension UI 已实际连接 native host 的最终态。
+
+处理原则：
+- 后续报告不能把 `e2e_level=local_protocol_selftest` 说成真实扩展已连接。
+- 只有用户在 Chrome 中实际加载 extension，并让 native host 产生真实连接后，再次运行 `/chrome extension-e2e-check` 显示 `real_extension_connected=true`，才可以把该机器状态称为真实 extension E2E 已闭合。
+- Phase 23 最终矩阵必须保留这个字段，避免最终验收把 local selftest 和 real extension 连接混为一谈。
+## 2026-06-03 Phase 29 Windows Computer Use Observe Evidence Risks
+
+已处理风险：
+- 旧风险：`get_window_state` 只有几何占位，没有可审计文件证据。已处理：新增 evidence store，保存 metadata JSON 和截图 artifact。
+- 旧风险：UIA 文本如果直接返回，可能把 password/token/credential 等敏感内容送给模型。已处理：按行过滤敏感关键词，并限制响应摘要长度。
+- 旧风险：只看工具响应无法证明证据落盘。已处理：真实可见终端验收和独立 verifier 均检查固定 marker，额外文件检查确认 evidence 文件存在。
+- 旧风险：没有 native helper 时容易误报截图/UIA 已完成。已处理：`NullWindowObservationHelper` 和 status 都明确说明未配置真实 native helper。
+
+剩余风险：
+- Phase 29 尚未实现真实 Windows.Graphics.Capture 截图 helper，也未实现 UIAutomationClient 文本树读取。
+- 当前真实终端验收使用静态安全 helper 证明证据合同，不能当作真实桌面窗口截图能力已成熟的证明。
+- 真实截图接入后仍必须避免终端、Codex UI、安全设置、密码管理器、认证弹窗和 Windows Run。
+- 后续动作阶段必须先补 durable lock、abort flag、动作前后 evidence 和窗口相对坐标验证，不能直接开放宽泛鼠标键盘动作。
+
+---
+
+## 2026-06-03 Phase 33 Windows Native Diagnostics Risks
+
+已处理风险：
+- 旧风险：Phase32 状态只说 GDI/Win32 fallback，不能结构化说明 WGC/UIA 是否是首选缺口。已处理：新增 `phase33_windows_native_diagnostics` 诊断对象。
+- 旧风险：后端状态无法直接告诉 `/computer` 或其他 agent 当前 active provider 是谁。已处理：`WindowsComputerUseBackend.status()` 透传 `native_observation_diagnostics`。
+- 旧风险：用户可能误以为 native helper opt-in 等于真实动作扩展。已处理：诊断对象明确包含 `safe_observe_only=true` 和 `real_input_actions_expanded=false`。
+
+剩余风险：
+- Phase33 仍未接入真正 Windows.Graphics.Capture provider。
+- Phase33 仍未接入真正 UIAutomationClient 控件树 provider。
+- 当前依赖探测只是诊断，不代表依赖可用时已经自动接管观察流程。
+- 后续如果实现真实 WGC/UIA provider，仍必须做敏感文本过滤、窗口 allowlist、真实可见终端验收和独立 verifier。
+
+---
+
+## 2026-06-03 Phase 34 Windows UIAutomation Text Provider Risks
+
+已处理风险：
+- 旧风险：Phase33 只能诊断 UIA 缺口，默认文本读取仍停留在 Win32 标题/子控件 fallback。已处理：新增 UIA 优先文本 provider。
+- 旧风险：直接使用 UIA provider 时，如果依赖缺失可能导致无文本或异常。已处理：新增 `FallbackNativeWindowTextProvider`，失败时降级到 Win32 文本。
+- 旧风险：UIA 控件树可能输出过多文本。已处理：`WindowsUiautomationTextProvider` 包含 `max_depth` 和 `max_nodes` 上限。
+- 旧风险：UIA 文本可能包含敏感内容。已处理：Phase34 测试确认 UIA 文本进入 evidence store 后仍会过滤 `password` 行。
+
+剩余风险：
+- Phase34 没有强制安装真实 `uiautomation` 依赖；没有依赖时仍会降级到 Win32 fallback。
+- Phase34 验收使用 fake UIA module 证明 provider 合同和脱敏链路，不等同于已验证真实第三方应用完整 UIA 树。
+- 真实 UIA 读取不同应用时可能遇到权限、空控件树、虚拟控件或性能问题，后续需要用真实安全窗口做专门验收。
+- 终端、Codex UI、安全设置、密码管理器、认证弹窗和 Windows Run 仍必须禁止自动化。
+
+---
+
+## 2026-06-02 Phase 28 Windows Computer Use Read-Only Inventory Risks
+
+已处理风险：
+- 旧风险：Windows backend 只有协议占位，无法列出窗口和 app。已处理：新增 `windows_backend.py`，提供静态 inventory 和可选 Win32 只读枚举。
+- 旧风险：只读观察和真实动作共用同一个启用开关，容易让安全边界不清楚。已处理：新增 `LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_OBSERVE`，与真实动作开关分离。
+- 旧风险：真实桌面标题可能泄露到日志或被模型误选为自动化目标。已处理：Phase 28 测试和验收使用静态安全窗口；真实探针也会过滤空标题、终端、Codex、安全、密码和认证相关标题。
+- 旧风险：只读模式下仍可能误执行动作。已处理：`WindowsComputerUseBackend(real_actions_enabled=False)` 会明确拒绝鼠标、键盘和窗口动作。
+
+剩余风险：
+- Phase 28 的 Win32 ctypes 探针只能做基础窗口枚举，不能证明窗口内容可见、未遮挡、DPI 坐标准确或多显示器坐标完整。
+- `get_window_state` 还没有真实截图文件和 UI Automation 文本树，当前 evidence 仍是占位；Phase 29 必须补齐证据链后才能支持更可信的窗口状态判断。
+- 即使能列出真实窗口，也不能自动化终端、Codex UI、安全/隐私设置、密码管理器、认证弹窗或 Windows Run。
+- 后续若开启真实动作，必须先有窗口锁、目标确认、动作前后截图证据、撤销/中断策略和真实可见终端验收。
+
+---
+## 2026-06-03 Phase 35-42 Planning Tooling Notes
+
+Status: open observation.
+
+已确认事实：
+- 当前 shell 是 PowerShell，不支持 Bash 风格 `python - <<'PY'` heredoc。
+- 当前 PowerShell 的 `New-Item` 不接受 `-LiteralPath` 参数，创建目录时应使用 `-Path`。
+- 当前 Python 环境缺少 `uiautomation`、`comtypes`、`winrt/winsdk Windows.Graphics.Capture` 依赖。
+
+处理原则：
+- 后续运行 inline Python 应使用 PowerShell here-string：`@' ... '@ | python -`。
+- 后续创建目录使用 `New-Item -ItemType Directory -Force -Path ...`。
+- Phase 35 不能把 fake UIA module 验收当作真实 UIA 验收；依赖缺失时必须输出诚实诊断。
+
+---
+---
+
+## 2026-06-03 Phase 39 Windows Coordinates Risks
+
+Resolved risks:
+- Old risk: window-relative action coordinates could be treated as raw screen coordinates on high-DPI or multi-monitor desktops.
+- Handling: Phase39 routes action coordinates through `build_coordinate_context(...)`, records DPI scale and display-relative coordinates, and sends physical screen coordinates to the backend.
+- Old risk: negative monitor origins could be lost if code assumed every display starts at zero or above.
+- Handling: Phase39 tests cover a display with `left=-800`, proving negative logical coordinates stay intact.
+
+Remaining risks:
+- The coordinate model depends on `display` or `displays` metadata being available from the window inventory/provider. If a future real provider omits that metadata, Phase39 falls back safely but cannot know the exact monitor.
+- Phase39 does not expand real action permissions; the action surface still remains intentionally bounded by approval, lock, abort, forbidden target, and `actions_expanded=false` gates.
+---
+
+## 2026-06-03 Phase 40 Windows Abort Cleanup Risks
+
+Resolved risks:
+- Old risk: abort existed as a durable flag but lacked a user-visible runtime notification trail.
+- Handling: Phase40 records `computer_use_abort_requested` notifications whenever `/computer abort` or runtime abort is used.
+- Old risk: turn cleanup and lock release were available as low-level operations but not expressed as a session runtime lifecycle step.
+- Handling: Phase40 adds `cleanup_turn(...)` and `/computer cleanup [session_id]`, which release the selected session lock and record a cleanup notification.
+- Old risk: status UI could show lock/abort and approval, but not the runtime cleanup/notification layer.
+- Handling: `/computer status` now includes a `Computer Runtime` section with model, marker, counts, last notification, and `actions_expanded=false`.
+
+Remaining risks:
+- Phase40 notifications are intentionally small runtime records, not OS-level toast notifications. A later phase can decide whether to add Windows toast integration.
+- Cleanup does not clear abort automatically. This is intentional because clearing abort should remain an explicit recovery action.
+- Phase40 does not expand real desktop actions; all approval, lock, abort, forbidden-target, and `actions_expanded=false` gates remain active.
+
+---
+
+## 2026-06-03 Phase 41 Windows Image Results Risks
+
+Resolved risks:
+- Old risk: screenshot artifacts existed as paths inside generic window state data, so the model could miss them during long tool result handling.
+- Handling: Phase41 adds explicit `image_result` blocks and a `Computer Use Image Results` text section.
+- Old risk: screenshot artifact paths could be lost from session context because they were not registered as active artifacts.
+- Handling: `LearningAgent` now records Computer Use image artifact paths in `active_artifacts` and writes a `computer_use_image_result` observation.
+- Old risk: the same image block can appear at both top-level `data.image_results` and nested `state.image_results`, causing duplicate model-visible image lines.
+- Handling: `collect_image_result_blocks(...)` deduplicates by `artifact_path`.
+- Old risk: making image results model-visible could accidentally carry sensitive UIA text.
+- Handling: `image_result` blocks only include image metadata and paths, explicitly set `sensitive_text_included=false`, and tests check that `phase41-secret-must-not-leak` never appears in block/text/agent output.
+
+Remaining risks:
+- Phase41 makes screenshots easier for the model to reference, but it does not perform image OCR, visual reasoning, or UI element detection by itself.
+- The actual screenshot quality still depends on the underlying observation helper or future WGC/native provider.
+- Phase41 does not expand real desktop actions; approval, lock, abort, forbidden-target, and `actions_expanded=false` gates remain active.
+
+---
+
+## 2026-06-03 Phase 42 Windows Final Matrix Risks
+
+Resolved risks:
+- Old risk: Phase35-41 could each pass independently while the final Windows Computer Use acceptance story still missed a key capability.
+- Handling: Phase42 adds a matrix JSON and `final_matrix.py` runner that requires Phase35-41 coverage plus observe, evidence, approval, gated refusal, safe action, abort cleanup, and artifact visibility.
+- Old risk: a final aggregate run might accidentally trigger real UIA/WGC capture or real SendInput actions.
+- Handling: Phase42 injects safe dependency-missing checks for Phase35/36, uses Phase37 fake implementation coverage, and keeps `actions_expanded=false`.
+- Old risk: final acceptance could ignore Phase41 image artifact visibility.
+- Handling: Phase42 requires `artifact_visibility=true` and checks Phase41 `agent_artifact` plus sensitive text hidden.
+
+Remaining risks:
+- Phase42 does not install or verify missing native dependencies such as `uiautomation`, `comtypes`, or Windows.Graphics.Capture Python bindings.
+- Phase42 does not prove broad real Windows GUI automation is mature; it proves the current safety contracts are present, wired, and visible through real terminal acceptance.
+- Future work can add real dependency installation/native helper validation only after explicit user approval because it may touch system state.
+
+---
+
+## 2026-06-03 Phase 52 Status UI Compatibility Regression
+
+Resolved issue:
+- Symptom: Phase43 regression failed because `/computer status` no longer contained `Computer Native Capability Matrix` after the compact Phase51 renderer.
+- Root cause: Phase51 compressed the native section to `Computer Native` and displayed only the first four capabilities, so Phase43 marker and `windows_sendinput` were no longer visible.
+- Fix: `learning_agent/app/computer_status_renderer.py` now restores the Phase43 title and marker while keeping the compact Phase51 panel, and explicitly includes `windows_sendinput` in the visible capability subset.
+- Verification: Phase43 focused tests 4 OK; Phase51 focused tests 4 OK; Phase43-52 regression 39 OK.
+
+Remaining risk:
+- The status panel is still intentionally compact and does not show every capability line. For full detail, callers should use Phase43 matrix helpers or future detailed status commands.
+
+---
+
+## 2026-06-03 Phase 57 Real UIA Locator Risks
+
+Resolved risks:
+- Old risk: using Notepad as the safe UIA smoke target could expose existing user Notepad tab titles or unrelated document names.
+- Handling: Phase57 now opens a dedicated temporary WinForms window with a unique exact title such as `LearningAgent-Phase57-RealUiaLocatorSmoke-*`, and the smoke lookup exact-matches that unique title.
+- Old risk: PowerShell UIA could emit extremely large, NaN, or Infinity bounding values that fail JSON conversion.
+- Handling: the provider script clamps UIA bounds through `Convert-ToSafeInt`, so bad provider coordinates do not crash the whole run.
+- Old risk: helper v2 `read_uia_tree` could remain a placeholder while the standalone Phase57 module passed.
+- Handling: `WindowsNativeHelperV2Worker` now delegates `read_uia_tree` to `WindowsRealUiaLocatorRuntime` and reports `uia_locator_available` in status.
+- Old risk: UIA names and automation IDs could leak sensitive text.
+- Handling: Phase57 sanitizes each UIA text field through the existing `filter_accessibility_text` path and tests that `phase57-secret` is absent from the whole response.
+
+Remaining risks:
+- Phase57 depends on PowerShell/.NET UIAutomationClient being available on Windows; missing or restricted UIA access must be reported honestly and not converted into fake success.
+- Virtualized or owner-drawn controls can still produce incomplete trees; later high-level tools must treat locator confidence and candidate count as safety data, not decoration.
+- Phase57 intentionally keeps `actions_expanded=false`; Phase58 must not reuse the locator to perform writes without a fresh target guard, lock, and before/after evidence.
+
+---
+
+## 2026-06-03 Phase 58 Real SendInput Guard Risks
+
+Resolved risks:
+- Old risk: a changed `title_preview` could be hidden by an older `title` field during static inventory normalization, allowing a same-hwnd title drift test to pass incorrectly.
+- Handling: `windows_backend.normalize_window_record(...)` now prefers `title_preview` and falls back to `title`, matching the protocol model and Phase58 identity guard expectations.
+- Old risk: real `SendInput` mouse events could succeed while Unicode keyboard events silently returned 0, making the action path look partially alive without changing the safe TextBox.
+- Handling: the keyboard path now declares the full Win32 INPUT union shape, so `cbSize` matches the system expectation and Unicode text events are actually accepted.
+- Old risk: type_text results could leak raw input text into logs or event payloads.
+- Handling: Phase58 stores only `text_length`, `text_sha256_16`, and `text_redacted=true`; focused tests and real smoke verify the original text is absent from serialized output.
+- Old risk: denied targets could still have low-level side effects.
+- Handling: the target guard returns before event construction, and tests assert forbidden and changed targets keep `low_level_event_count=0` and an empty fake sender event list.
+
+Remaining risks:
+- Phase58 deliberately allows real input only in the dedicated `LearningAgent-Phase58-*` safe window; broad application control still requires later phases for lock/session policy, semantic high-level tools, and user-visible status integration.
+- Windows foreground restrictions can still affect real input reliability on locked, secure, or elevated desktops; future phases must keep before/after evidence mandatory instead of trusting SendInput return counts alone.
+
+---
+
+## 2026-06-03 Phase 59 Session Context Risks
+
+Resolved risks:
+- Old risk: approval, display, screenshot, hidden-window, last-action, last-error, and cleanup state were scattered across runtime, approval, terminal grants, and status rendering.
+- Handling: `ComputerUseSessionContextStore` now persists these fields under `learning_agent/memory/computer_use/session_state/` and `/computer status` reads the same source.
+- Old risk: cleanup could leave stale allowlist, grant flags, hidden windows, or action/error summaries in the next turn.
+- Handling: `cleanup_session(...)` clears these fields and marks `cleanup_completed=true`; focused tests assert the fields are reset.
+- Old risk: multiple sessions could overwrite each other while sharing the same workspace.
+- Handling: each sanitized session id maps to a separate JSON file, and tests assert cleaning `phase59-a` does not alter `phase59-b`.
+
+Remaining risks:
+- Phase59 is a state layer only; future phases must bind real tool calls to this context before broad production use.
+- The default context currently records only fields explicitly provided by callers; later tool layers must consistently call `bind_context(...)` and `update_app_state(...)` so the store remains authoritative.
+
+---
+
+## 2026-06-03 Phase 60 Persistent Grants Risks
+
+Resolved risks:
+- Old risk: `/computer grant` looked like an approval UX but only stored a terminal UI draft and did not participate in real action evaluation.
+- Handling: Phase60 adds `WindowsComputerUsePersistentGrantStore`; `/computer approve` now writes evaluable persistent grant records with app/window/display/action_scope/ttl/reason/grant_flags.
+- Old risk: granted desktop access could remain valid forever.
+- Handling: each grant stores `expires_at_epoch` and `evaluate(...)` returns `grant_expired` after TTL.
+- Old risk: users could not reliably revoke a production grant from the terminal.
+- Handling: `/computer revoke <app>` now revokes Phase60 persistent grants and also removes the old Phase51 terminal draft for compatibility.
+- Old risk: high-risk actions such as system keys and clipboard access could be blurred into normal desktopAction grants.
+- Handling: `approve(...)` refuses system key and clipboard scopes unless `systemKeyCombos`, `clipboardRead`, or `clipboardWrite` are explicitly present.
+- Old risk: approval choices were not easy to inspect in `/computer status`.
+- Handling: status now includes `Computer Persistent Grants` with active/revoked/expired counts and state/audit paths.
+
+Remaining risks:
+- Phase60 provides the grant lifecycle store and terminal UX, but high-level execution paths in later phases must consistently call `evaluate(...)` before using real action backends.
+- `scope=*` is supported but intentionally requires explicit high-risk flags; future UI should keep it visibly scary and time-limited.
+- Phase60 does not add global hotkey abort or streaming hooks; Phase61 owns that runtime safety layer.
+
+---
+
+## 2026-06-03 Phase 61 Abort Streaming Hooks Risks
+
+Resolved risks:
+- Old risk: an abort flag could be set while a real action was already close to low-level dispatch, leaving one final SendInput batch able to slip through.
+- Handling: `Phase61AbortAwareLowLevelSender` checks `ComputerUseLockManager.is_abort_requested()` immediately before forwarding low-level events and returns `low_level_event_count=0` on abort.
+- Old risk: exception, Ctrl+C, or model/tool interruption could bypass turn cleanup and leave locks or abort state behind.
+- Handling: `WindowsComputerUseAbortStreamingHooks.run_with_cleanup(...)` catches interruption-like exits, invokes runtime cleanup, records audit flush intent, and writes a streaming cleanup event.
+- Old risk: stale-lock recovery itself could become a new active lock owner.
+- Handling: Phase61 `recover_stale_lock(...)` now releases the recovered owner after verifying recovery and records `lock_released_after_recovery`.
+- Old risk: global hotkey work could be overstated as installed without an actually registered Windows hook.
+- Handling: Phase61 status honestly reports `global_hotkey_registered=false` and exposes `/computer abort` plus controller abort as fallback.
+
+Remaining risks:
+- A real Windows global hotkey or low-level keyboard hook is still not registered by default. Adding one later must be opt-in, revocable, and separately verified on a visible desktop.
+- High-level tools in Phase62 must consistently wrap write-capable senders with `Phase61AbortAwareLowLevelSender`; the hook exists now, but future callers must use it.
+- Streaming hooks currently persist JSONL events locally; future UI can improve live rendering, but the evidence path is already stable.
+
+---
+
+## 2026-06-03 Phase 62 High-Level Computer Tool Risks
+
+Resolved risks:
+- Old risk: high-level desktop tasks could bypass the low-level safety chain by directly implementing click/type orchestration.
+- Handling: `WindowsHighLevelComputerToolRuntime` routes write operations through Phase60 grant evaluation, the shared desktop lock, Phase58 target guard, and Phase61 abort-aware sender.
+- Old risk: read-only observation could accidentally take over the write lock and block or perturb active desktop-control sessions.
+- Handling: `run_read_only_batch(...)` accepts only read-only operations and focused tests assert an external write owner remains unchanged.
+- Old risk: high-level tool execution could be invisible in streaming/progress surfaces.
+- Handling: Phase62 mirrors `StreamingToolExecutor` lifecycle events and high-level operation progress into `phase62_progress_events.jsonl`.
+- Old risk: `find_control` could return only a raw node without explaining confidence or candidates.
+- Handling: Phase62 returns `uia_candidate_summary` with `matched`, `candidate_count`, `confidence`, `reason`, and a safe control summary.
+- Old risk: terminal users would not know high-level tools exist or where artifact/progress evidence lives.
+- Handling: `/computer high-level-tools` and `/computer status` now show the Phase62 marker, operation list, progress path, and artifact directory.
+
+Remaining risks:
+- Phase62 keeps `actions_expanded=false`; it proves high-level orchestration and safe chain integration, not broad real application control.
+- The Phase62 image artifact is a deterministic contract artifact for result plumbing; real Windows screenshot capture and pixel validation remain owned by Phase56.
+- Future model-facing schemas must expose high-level operations carefully so they cannot be used to bypass approval, lock, target guard, or abort hooks.
+## 2026-06-03 Phase 63 Controller Takeover Risks
+
+Resolved risks:
+- Old risk: external agents such as Codex could control and debug `learning_agent` only by remembering ad hoc commands.
+- Handling: `WindowsComputerUseControllerTakeoverDebugSurface.build_takeover_plan(...)` now returns a stable `controller.ps1` launch plan and explicitly preserves `start_oauth_agent.bat` as the visible terminal gate.
+- Old risk: controller failures were hard to hand off because `result.json`, event logs, readable summaries, and screenshots were scattered.
+- Handling: `read_acceptance_run(...)` summarizes those artifacts, and `export_evidence_package(...)` writes a compact package for external agent handoff.
+- Old risk: external controller abort could be implemented by directly mutating lock state.
+- Handling: Phase63 exposes `/computer abort <reason>` as the controller abort path and records `direct_lock_write_allowed=false`.
+- Old risk: HTTP or stdio control could be mistaken for the final acceptance gate.
+- Handling: Phase63 status and CLI token enforce `visible_terminal_required=true`, `http_loopback_only=true`, `token_required=true`, and `approval_bypass_allowed=false`.
+
+Remaining risks:
+- Phase63 is a debug/control surface, not a remote daemon. Any future HTTP/stdio expansion must keep loopback-only binding, token protection, and visible-terminal acceptance as the production gate.
+- Evidence package export summarizes artifact paths and key booleans; if future acceptance artifacts become richer, the summary schema should be extended rather than scraping logs ad hoc.
+- Phase64 must include Phase63 in the final parity-plus production matrix so controller takeover is verified alongside screenshot, UIA, SendInput, grants, abort hooks, and high-level tools.
+
+---
+
+## 2026-06-03 Phase 64 Final Parity Plus Matrix Risks
+
+Resolved risks:
+- Old risk: Phase53-63 could each pass in isolation while the overall Windows Computer Use capability still had no single final production gate.
+- Handling: `run_phase64_parity_plus_matrix_contract(...)` now executes and rolls up all Phase53-63 contracts into one final matrix with `phase_count=11`.
+- Old risk: Phase58's `actions_expanded=true` could be misread as unsafe global expansion.
+- Handling: Phase64 distinguishes `controlled_actions_expansion=true` from `uncontrolled_actions_expanded=false`; Phase58 is accepted only when target guard, persistent grants, abort hooks, and zero-event refusal are all present.
+- Old risk: final claims could rely on CLI/selftest instead of the user-mandated visible terminal gate.
+- Handling: Phase64 requires the scenario file, Phase63 visible terminal launch boundary, and final visible-terminal acceptance evidence.
+- Old risk: external controller takeover could silently bypass approval.
+- Handling: Phase64 requires `approval_bypass_blocked=true` from Phase63 and `high_risk_default=true` from Phase60.
+
+Remaining risks:
+- If a future phase adds another `actions_expanded=true` report, Phase64 or its successor must explicitly classify whether it is controlled or unsafe instead of letting it pass by default.
+- The final matrix proves the contracts and visible terminal scenario; deeper real-world app coverage still belongs to future targeted E2E scenarios.
+- Scenario token lines are intentionally strict. Any future token rename must update the module, tests, scenario JSON, and visible terminal verifier together.
+
+---
+---
+
+## 2026-06-03 Phase65-75 Humanlike Windows Operator Blueprint Risks
+
+Resolved planning risks:
+- Old risk: “控制所有应用” could be misunderstood as writing one fixed script per application.
+- Handling: the new blueprint requires a universal observe-plan-act-verify-recover loop and explicitly sets `per_app_scripts_required=false`.
+- Old risk: representative E2E could be too narrow and prove only text-entry tools.
+- Handling: Phase74 now includes a real Paint drawing scenario that exercises launch, focus, canvas recognition, color/tool selection, drag/continuous mouse paths, save, and visual verification.
+- Old risk: the Paint scenario could be cheated by directly generating an image file.
+- Handling: the blueprint requires real `mspaint.exe`, real mouse/keyboard actions, saved visual evidence, and `direct_image_file_cheat=false`.
+
+Remaining risks:
+- OCR/vision dependencies may be required for robust Paint and arbitrary app control; installing those dependencies requires explicit user confirmation.
+- Real Paint drawing introduces nondeterminism in UI layout, DPI scaling, and tool ribbon positions, so implementation must combine UIA, screenshot, and visual fallback rather than hard-coded coordinates.
+- “All normal apps” must still exclude password, payment, admin, terminal-danger, security, login, captcha, and private-data flows unless the user explicitly confirms the exact high-risk action.
+---
+
+## 2026-06-03 Phase65-75 Implementation Plan Risks
+
+Planning risks handled:
+- The implementation plan explicitly keeps OCR/vision dependency installation as a stop condition rather than an automatic install.
+- The plan separates generic action building from Phase72 real-app authorization, so new hotkey/drag/scroll primitives do not become uncontrolled desktop actions by themselves.
+- The Phase74 Paint Pikachu scenario requires real `mspaint.exe`, action logs, visual evidence, and `direct_image_file_cheat=false`.
+
+Remaining risks:
+- Phase74 real E2E can still be affected by DPI scaling, Paint ribbon layout, Windows version, language, and focus timing.
+- Phase72 must be implemented carefully; it is the point where authorized normal real app actions become possible.
+- If a later phase cannot complete visible terminal acceptance, that phase must remain not complete even when unit tests pass.
+
+---
+
+## 2026-06-03 Phase65-75 Blueprint Backup Tooling Note
+
+Resolved tooling issue:
+- Attempt: create the learning backup directory with `New-Item -ItemType Directory -Force -LiteralPath ...`.
+- Actual result: this Windows PowerShell environment reported `A parameter cannot be found that matches parameter name 'LiteralPath'`.
+- Confirmed cause: `New-Item` in the current shell accepts `-Path` for this usage, while later `Copy-Item` and `Get-ChildItem` still support `-LiteralPath`.
+- Resolution: recreated the directory with `New-Item -ItemType Directory -Force -Path ...` and copied all blueprint snapshots successfully.
+
+---
+
+## 2026-06-03 Phase65 Humanlike Operator Contract Risks
+
+Resolved risks:
+- Old risk: Phase65-75 could drift into per-application scripting rather than a universal humanlike operator architecture.
+- Handling: Phase65 now exposes `per_app_scripts_required=false` and `prompt_to_normal_windows_app=true` in the runtime contract and visible terminal scenario.
+- Old risk: future Paint Pikachu verification could be cheated by directly generating an image file.
+- Handling: Phase65 now exposes `direct_file_cheat_blocked=true` and keeps this token in tests, CLI, and the real terminal scenario.
+- Old risk: Phase65 could accidentally expand the real desktop action surface before observation, planning, authorization, and recovery layers are ready.
+- Handling: Phase65 keeps `actions_expanded=false`, and tests assert this boundary.
+
+Remaining risks:
+- Phase65 is a contract stage only; it does not yet observe screenshots/UIA, plan tasks, launch apps, or send real input.
+- Phase66 must carefully fuse screenshot, UIA, window state, and OCR/vision slot data without exposing sensitive raw text.
+- Every later runtime phase still needs focused tests, compile checks, CLI self-check, real visible terminal acceptance, and learning backup before being marked complete.
+
+---
+
+## 2026-06-03 Phase66 Observation Fusion Risks
+
+Resolved risks:
+- Old risk: screenshot, UIA, OCR/vision, and window state could remain scattered across separate reports, forcing later planners to guess which source is authoritative.
+- Handling: `WindowsObservationFusionRuntime.observe(...)` now returns one `FusedComputerObservation` with screenshot, UIA, OCR slot, and window state sections.
+- Old risk: future OCR/vision support could require changing the observation protocol later.
+- Handling: Phase66 adds `ocr_or_vision_slot=true` while honestly reporting `provider_available=false` and `install_attempted=false`.
+- Old risk: UIA or OCR raw sensitive text could enter model-visible output.
+- Handling: Phase66 filters UIA node fields, keeps `raw_text_included=false`, and tests that `phase66-secret` is not serialized.
+
+Resolved tooling issue:
+- First visible terminal controller run failed before prompt input because Windows would not focus the unique Phase66 terminal window.
+- Handling: the failed `LearningAgent-Phase66-ObservationFusion-210058` window was closed, and the second real visible run completed successfully at `learning_agent/acceptance_controller/runs/agent_capability_phase66_observation_fusion-20260603_210148/result.json`.
+
+Remaining risks:
+- Phase66 uses contract fake inputs for acceptance; it proves protocol fusion and sensitive-boundary behavior, not real-world app observation coverage.
+- OCR/vision dependencies remain uninstalled by design; installing or enabling them later requires explicit user confirmation.
+- Phase67 must avoid turning prompt planning into per-app scripts; it should generate generic task steps with checkpoints, expected results, and risk levels.
+
+---
+
+## 2026-06-03 Phase67 Prompt Task Planner Risks
+
+Resolved risks:
+- Old risk: the agent could receive a prompt like “画一个皮卡丘” but have no structured plan for launch, observe, draw, save, and verify.
+- Handling: `WindowsPromptTaskPlanner.plan(...)` now creates a Paint Pikachu representative plan with generic operation names and per-step expected results, risk levels, and checkpoints.
+- Old risk: prompt planning could drift into per-app coordinate scripts.
+- Handling: Phase67 explicitly returns `per_app_script=false`; Paint steps are semantic operations such as `identify_canvas`, `select_color`, `draw_body`, and `verify_visual_result`.
+- Old risk: password/payment/admin prompts could be planned like normal app tasks.
+- Handling: `classify_risk(...)` detects high-risk keywords and makes the first step `request_user_confirmation`.
+
+Remaining risks:
+- Phase67 is deterministic and rule-based for contract tests; future richer planning may need an LLM, but it must keep the same safety fields and visible-terminal acceptance.
+- Phase67 does not execute or verify real applications; Phase68 must prove closed-loop execution with observation before action and verification after write actions.
+- The Paint Pikachu plan is still a plan, not a drawing result. Real Paint control and visual verification remain Phase74 responsibilities.
+
+---
+
+## 2026-06-03 Phase68 Closed-Loop Executor Risks
+
+Resolved risks:
+- Old risk: the executor could perform actions without a fresh observation.
+- Handling: `WindowsClosedLoopComputerExecutor.run(...)` records `observed` before each action or verification step.
+- Old risk: write actions could succeed or fail silently.
+- Handling: every write action produces a `verified` event after `acted`.
+- Old risk: a failed verification could let the task continue blindly.
+- Handling: failed verification triggers `recovered`, then a new `observed` event, then another `verified` event.
+- Old risk: two write actions could form a blind coordinate chain without an intervening observation.
+- Handling: `blind_write_chain_detected(...)` detects that pattern, and the Phase68 contract proves the dangerous chain is blocked while normal closed-loop events remain allowed.
+
+Remaining risks:
+- Phase68 still uses injected fake observer, actor, verifier, and recoverer components for contract acceptance.
+- Phase68 does not launch, focus, click, type, drag, draw, or save artifacts in real Windows apps.
+- Phase69 must introduce safe app launch and focus without changing Windows settings, registry, UAC, or default apps.
+- Later real-action phases must keep target identity checks, user confirmation for high-risk actions, abort hooks, locks, evidence, and visible terminal acceptance.
+
+---
+
+## 2026-06-03 Phase69 App Window Control Risks
+
+Resolved risks:
+- Old risk: a prompt plan could say `launch_app` or `focus_window` without a safe, auditable launch contract.
+- Handling: `build_launch_plan(...)` now emits a `Start-Process` style plan with `changes_registry=false`, `changes_system_settings=false`, `requires_admin=false`, and `uses_shell_string=false`.
+- Old risk: app launch and focus tests could accidentally open or focus real user applications.
+- Handling: `Phase69RecordingLauncher` and `Phase69RecordingFocuser` are used for contract acceptance and visible terminal self-checks.
+- Old risk: after launching/focusing, the target window could drift to a terminal or another app and later actions would still continue.
+- Handling: `WindowsAppWindowControlRuntime.verify_target_identity(...)` compares window identity before and after, and blocks changed targets with `reason=target_window_identity_changed`.
+
+Remaining risks:
+- Phase69 intentionally does not open real apps in acceptance; it proves the contract layer, not real app lifecycle reliability.
+- Phase69 does not click, type, drag, draw, save files, or control Paint.
+- Phase70 must add generic click/type/control actions without bypassing Phase68 closed-loop ordering or Phase69 target identity checks.
+- Phase72 must still decide when normal real apps are authorized; high-risk apps and terminal/security/auth flows remain blocked unless explicitly confirmed by the user.
+
+---
+
+## 2026-06-03 Phase70 Generic Control Actions Risks
+
+Resolved risks:
+- Old risk: generic query click/type could bypass Phase57 locator and become blind coordinate clicking.
+- Handling: Phase70 uses `SemanticControlLocator.find(...)` before query click/type and refuses missing targets with zero events.
+- Old risk: typing could leak raw text into reports.
+- Handling: Phase70 reports only text length and SHA256 short hash, with `raw_text_included=false`.
+- Old risk: canvas-like targets without UIA controls had no generic action path.
+- Handling: Phase70 wraps visual points as synthetic controls and delegates through the high-level click interface.
+- Implementation bug found during verification: `_phase70_controls_from_observation(...)` recursed into default empty `{}` when `uia` was absent.
+- Handling: fixed recursion by only descending into an actual independent nested `uia` dict.
+
+Remaining risks:
+- Phase70 uses a recording high-level tool for contract acceptance; production real input still depends on injecting the Phase62-compatible runtime and later Phase72 authorization.
+- Phase70 does not cover hotkeys, menu navigation, scroll, drag, continuous mouse paths, drawing strokes, or Paint E2E.
+- Phase71 must add generic input action builders while preserving zero-event refusal for forbidden system hotkeys.
+
+---
+
+## 2026-06-03 Phase71 Generic Input Actions Risks
+
+Resolved risks:
+- Old risk: hotkey, menu, scroll, and drag support might jump straight to real SendInput without a policy boundary.
+- Handling: every Phase71 event is built with `real_dispatch_allowed=false`, and the default sender only records events.
+- Old risk: system-level hotkeys could open OS or security surfaces.
+- Handling: Phase71 blocks `ctrl+alt+delete`, `win+r`, `win+x`, `ctrl+shift+esc`, and all Windows-key combinations with zero events.
+- Old risk: drag actions could be represented as a single blind jump.
+- Handling: `build_drag_path(...)` preserves every path point and requires a start and end point before recording events.
+
+Remaining risks:
+- Phase71 is an event-construction layer only; it does not prove real hotkey/menu/scroll/drag behavior inside applications.
+- Phase72 must add user-authorized real-app safety evaluation before any Phase71 event can reach a real dispatcher.
+- Phase74 must still prove representative real app workflows, including Paint Pikachu, without direct image-file generation.
+
+---
+
+## 2026-06-03 Phase72 Real App Safety Boundary Risks
+
+Resolved risks:
+- Old risk: Phase70/71 generic actions could be interpreted as ready for arbitrary real-app dispatch without a final safety gate.
+- Handling: `WindowsRealAppSafetyBoundary.evaluate(...)` now requires Phase60 persistent grants before ordinary real-app actions can proceed.
+- Old risk: terminal, Codex UI, login/auth/captcha/payment/admin/security/private-data, Windows Run, or system management windows could be treated like normal app targets.
+- Handling: Phase72 classifies those windows as high risk and refuses them by default with `low_level_event_count=0`.
+- Old risk: stale approval fields or prompt-level hints could bypass durable authorization.
+- Handling: Phase72 detects `approval_bypass`, `force_allowed`, and allowed `previous_approval` style hints and returns `approval_bypass_blocked` unless a real persistent grant exists.
+- Old risk: an action authorized earlier could still fire after the user requested abort.
+- Handling: Phase72 checks a Phase61-compatible abort gate after authorization and immediately before low-level send, returning `abort_before_low_level_send` and zero events.
+
+Remaining risks:
+- Phase72 is a policy boundary and does not itself prove real SendInput behavior in Notepad, Explorer, browser, or Paint.
+- Phase72 depends on downstream dispatchers respecting `ready_for_low_level_send=true`.
+- Phase73 must add non-secret app memory without storing secrets, prompt text, terminal commands, auth data, payment data, or private user content.
+- Phase74 must still prove representative real app workflows, including Paint Pikachu, without direct image-file generation.
+
+---
+
+## 2026-06-03 Phase73 App Memory Risks
+
+Resolved risks:
+- Old risk: self-learning memory could store passwords, tokens, cookies, private text, payment data, authentication codes, or terminal commands.
+- Handling: `WindowsComputerUseAppMemoryStore.remember_app_hint(...)` rejects those inputs before state write and records only a short hash with `redacted=true` in audit.
+- Old risk: app memory could become a script recorder that replays hidden commands or coordinate macros.
+- Handling: Phase73 allows only safe hint types and rejects `script` plus terminal-command-like values such as PowerShell/CMD/Remove-Item.
+- Old risk: users could have no way to clear app-specific learning.
+- Handling: `revoke_app_memory(app)` marks only the target app's active hints revoked and `list_app_hints(app)` hides revoked hints.
+- Old risk: repeated safe hints could produce unbounded duplicates.
+- Handling: Phase73 uses a stable hint hash id and updates existing active hints instead of appending duplicates.
+
+Remaining risks:
+- Phase73 is a memory store only and does not prove that hints improve real workflows.
+- Downstream planners must treat app memory as advisory hints, not commands or hard-coded scripts.
+- Phase74 must prove representative workflows on controlled files/artifacts and must keep Paint Pikachu from cheating by direct image-file generation.
+
+---
+
+## 2026-06-04 Phase74 Representative E2E Risks
+
+Resolved risks:
+- Old risk: representative E2E could become only one toy workflow and fail to prove cross-app generality.
+- Handling: Phase74 matrix now covers Notepad, Explorer, Browser, standard window/dialog style, and Paint Pikachu.
+- Old risk: Paint Pikachu could be cheated by directly writing a PNG/JPEG instead of controlling Paint.
+- Handling: Phase74 stores `artifact_kind=interaction_evidence_json`, `direct_image_file_cheat=false`, and 13 drag-path drawing actions targeting `mspaint.exe`.
+- Old risk: browser or Explorer scenarios could touch private profile data or user folders.
+- Handling: Phase74 scenarios report `reads_private_profile=false`, `cookies_read=false`, `tokens_read=false`, and keep artifacts under a controlled matrix directory.
+- Old risk: window-style testing could change registry, Windows settings, or require admin.
+- Handling: Phase74 common safety fields force `changes_registry=false`, `changes_system_settings=false`, and `requires_admin=false` across scenarios.
+
+Remaining risks:
+- Phase74 safe contract does not open Paint live or dispatch real input; it proves the cross-app contract and interaction evidence shape.
+- A later live smoke, if requested, must be separately guarded by Phase72 authorization, Phase60 grants, Phase61 abort checks, and controlled artifact paths.
+- Phase75 must aggregate Phase65-74 honestly and avoid claiming arbitrary-app perfection beyond the current safety-gated contract coverage.
+
+---
+
+## 2026-06-04 Phase75 Humanlike Operator Matrix Risks
+
+Resolved risks:
+- Old risk: Phase65-74 could each pass while the overall Windows Computer Use story still had no single final gate.
+- Handling: Phase75 now aggregates all ten phase reports, requires `phase_count=10`, and fails if any source phase summary does not pass.
+- Old risk: final status could accidentally claim every app needs a custom script.
+- Handling: Phase75 requires `per_app_scripts_required=false` from the universal contract and prompt planner path.
+- Old risk: Paint Pikachu could be validated by direct image-file generation instead of humanlike drawing evidence.
+- Handling: Phase75 inherits Phase74's `direct_image_file_cheat=false`, `real_paint_app_control=true`, and `humanlike_drawing_actions=true` checks.
+- Old risk: an external controller could bypass approval or expand low-level actions without safety.
+- Handling: Phase75 requires `approval_bypass_blocked=true` and `uncontrolled_actions_expanded=false`.
+
+Remaining risks:
+- Phase75 is a safe-contract matrix and visible terminal acceptance gate; it does not perform live arbitrary-app operation.
+- Real Paint drawing, live Notepad/Explorer/browser dispatch, and broad production app control still require a separately authorized live-smoke or production dispatcher plan.
+- Future live dispatch must keep Phase60 grants, Phase61 abort, Phase72 safety boundary, target drift checks, controlled artifact paths, and zero-event refusal for unsafe windows.
+
+---
+
+## 2026-06-04 Phase76-89 Windows Production Live-Control Risks
+
+Resolved risks:
+- Old risk: the remaining ClaudeCode gap could stay as scattered modules without one production Host Adapter.
+- Handling: Phase76-89 adds `WindowsProductionComputerUseHostAdapter` as the unified coordination point for observation, input, permissions, clipboard, abort, cleanup, and tools.
+- Old risk: broad desktop control could accidentally expand into unsafe terminal/login/security windows.
+- Handling: `WindowsLiveControlPermissionGate` keeps representative allowlist checks and sentinel denial for terminal/auth/security-style targets.
+- Old risk: long text input could overwrite the user's clipboard.
+- Handling: `WindowsProductionClipboardGuard` saves, writes, verifies, uses, and restores clipboard content.
+- Old risk: Paint Pikachu acceptance could be faked by writing an image file.
+- Handling: Phase76-89 keeps `direct_image_file_cheat=false` and requires humanlike stroke evidence in the representative E2E matrix.
+- Old risk: the real visible terminal gate could be skipped.
+- Handling: `agent_capability_phase76_89_windows_live_control.json` passed through `start_oauth_agent.bat` via the acceptance controller.
+
+Remaining risks:
+- Phase76-89 acceptance runs in safe contract mode, not uncontrolled live arbitrary-app dispatch.
+- Real live Paint drawing and broad native app operation still need explicit user authorization, real desktop smoke scope, target identity checks, abort gate, cleanup gate, and controlled artifacts.
+- Future changes must avoid treating `claudecode_gap_closed=true` as permission to bypass Phase60 grants, Phase61 abort hooks, Phase72 safety boundaries, or visible terminal acceptance.
+
+---
+
+## 2026-06-04 Phase90 Live App Dispatcher Risks
+
+Resolved risks:
+- Old risk: Phase76-89 had production structure but no single dispatcher object that composed authorization, app launch, safety boundary, and input events.
+- Handling: Phase90 adds `WindowsLiveAppDispatcher`, which composes Phase60, Phase69, Phase71, and Phase72.
+- Old risk: authorization could be written for a different window identity than the launcher actually uses.
+- Handling: Phase90 aligns grant window ids to Phase69 recording launcher ids such as `phase69-window:notepad.exe`.
+- Old risk: dangerous apps such as PowerShell could enter the dispatcher path.
+- Handling: Phase90 blocks unsafe launch plans and verifies `dangerous_window_zero_events=true`.
+- Old risk: text input could leak raw text into reports.
+- Handling: Phase90 records text length and digest only and verifies `raw_text_hidden=true`.
+
+Remaining risks:
+- Phase90 still defaults to recording dispatch and does not prove live control of every real Windows application.
+- `LEARNING_AGENT_PHASE90_ENABLE_REAL_DISPATCH=1` must not be treated as enough by itself; real dispatch still needs target identity, permission grant, abort, cleanup, and visible terminal validation.
+- A future live Paint/Notepad smoke should be scoped to controlled files/windows and should keep zero-event refusal for unsafe or drifting targets.
+
+---
+
+## 2026-06-04 Phase91 Controlled Notepad Live Smoke Risks
+
+Resolved risks:
+- Old risk: Phase90 had a generic dispatcher but no dedicated Notepad file/window identity plan.
+- Handling: Phase91 adds a controlled file plan and dedicated Notepad identity with explicit `notepad.exe` binding.
+- Old risk: Notepad positive path could bypass the existing Phase90 dispatcher.
+- Handling: Phase91 positive path writes a Phase60-style grant through Phase90 and dispatches through the same controlled route.
+- Old risk: unauthorized or dangerous targets could appear successful because the positive Notepad path passed.
+- Handling: Phase91 verifies unauthorized Notepad and dangerous PowerShell remain zero-event refusals.
+- Old risk: users could misread the phase as default live desktop control.
+- Handling: Phase91 prints `real_notepad_smoke_executed=false` in the default token line and requires `LEARNING_AGENT_PHASE91_ENABLE_REAL_NOTEPAD_SMOKE=1` for the optional real path.
+
+Remaining risks:
+- Phase91 automated and visible-terminal default acceptance is safe-contract mode, not a proof that Notepad was physically opened and edited.
+- The optional real Notepad path still needs a separately authorized visible desktop smoke before it can be used as live-control evidence.
+- Future phases must keep target identity, explicit authorization, abort, cleanup, and raw-text hiding before expanding to more real apps.
+
+---
+
+## 2026-06-04 Phase92 Universal Windows Computer Use Mode Blueprint Risks
+
+Resolved risks:
+- Old risk: Phase90/91 could be misunderstood as a direction where every app needs a custom controller.
+- Handling: Phase92 blueprint explicitly rejects per-app controller architecture and requires `per_app_controller_required=false`.
+- Old risk: Notepad/Paint representative scenarios could become the product architecture.
+- Handling: Phase92 defines `representative_apps_are_acceptance_only=true` as a required success token.
+- Old risk: "Control all apps" could be interpreted as uncontrolled desktop input.
+- Handling: Phase92 keeps `default_real_actions_enabled=false`, `uncontrolled_actions_expanded=false`, and mandatory safety boundary checks.
+- Old risk: A generic mode could leak the user's raw prompt into reports or observation logs.
+- Handling: Phase92 stores prompt hash and length only, and tests verify raw prompt text is absent from reports and agent observations.
+- Old risk: High-risk Chinese prompts could bypass older English-heavy risk checks.
+- Handling: Phase92 adds Chinese and English high-risk keyword checks and verifies `high_risk_requires_confirmation=true`.
+
+Remaining risks:
+- Phase92 implements `UniversalWindowsComputerUseRuntime`, but default acceptance remains safe-contract mode.
+- Future implementation must keep avoiding hard-coded app workflows in the universal runtime.
+- Future real-app smoke phases must prove they use the universal runtime, not app-specific shortcuts.
+- Future live-control expansion must keep explicit authorization, target identity, abort, cleanup, and visible terminal acceptance before sending real input.
+
+---
+
+## 2026-06-04 Phase93 Universal Live Execution Gate Risks
+
+Resolved risks:
+- Old risk: the universal runtime could remain a static status report without an observe-plan-act-verify execution gate.
+- Handling: Phase93 adds `UniversalWindowsLiveExecutionGate` and composes Phase92, Phase68 closed-loop execution, Phase70/71 generic actions, Phase72 safety boundary, Phase60 grants, and the production host adapter.
+- Old risk: the architecture could slide back into one controller per local app.
+- Handling: Phase93 prints `no_per_app_controller=true` and `representative_apps_are_acceptance_only=true`.
+- Old risk: unsafe or drifting targets could look successful because only the positive path was tested.
+- Handling: Phase93 verifies unauthorized, unsafe, and target-drift refusals with zero low-level events.
+- Old risk: Phase93 was blocked by the `start_oauth_agent.bat` OAuth state mismatch, so Rule 17 acceptance could not pass.
+- Handling: after the OAuth/model chain repair, `agent_capability_phase93_universal_live_execution_gate-20260604_203855/result.json` passed with `completed=true`, `assertion_passed=true`, and `permission_sent_count=0`.
+
+Remaining risks:
+- Sandboxed shell commands cannot be trusted for atomic-write behavior because the shell sandbox rejects rename/delete operations; escalated CLI is required for realistic default-path verification.
+- Phase93's authorized positive path is recording-only; it does not physically click or scroll the user's desktop.
+- Future phases must not treat Phase93's acceptance as blanket permission for uncontrolled physical desktop input; any real dispatch expansion still needs explicit authorization, target identity, abort, cleanup, and visible terminal proof.
+
+---
+
+## 2026-06-04 Phase94 Authorized Real Dispatch Candidate Risks
+
+Resolved risks:
+- Old risk: Phase93 could prove only a recording-only loop after authorization.
+- Handling: Phase94 adds `WindowsAuthorizedRealDispatchCandidate`, which turns an authorized safe target into low-level mouse/keyboard/scroll event candidates and sends them to an injected low-level sender.
+- Old risk: an authorized action could send to a stale or missing target.
+- Handling: Phase94 runs an inventory target recheck before sender dispatch and verifies target drift produces zero low-level events.
+- Old risk: the target recheck initially treated missing `display_id` from static inventory normalization as a hard target change.
+- Handling: Phase94 now uses `app_id + window_id + title_sha256_16` as the hard identity and keeps `display_id` as audit context, so safe static snapshots do not false-refuse while real app/window/title drift still blocks.
+- Old risk: text input could leak raw user text into reports.
+- Handling: Phase94 stores text length and SHA256 digest only and verifies `raw_text_hidden=true`.
+- Old risk: users could misread this phase as default physical desktop control.
+- Handling: the default sender is recording-only, token output includes `real_dispatch_default_disabled=true` and `real_dispatch_performed=false`, and visible-terminal acceptance requires zero permission prompts.
+
+Remaining risks:
+- Phase94 does not physically control arbitrary Windows applications; it proves the authorized sender bridge in safe-contract mode.
+- A future physical SendInput phase must still require explicit environment opt-in, persistent grant, target identity recheck, high-risk refusal, abort before low-level send, cleanup, evidence, and real visible terminal acceptance.
+- The target identity rule should be revisited when a richer real inventory reliably preserves display metadata, but it must not become so strict that normalized snapshots false-refuse safe targets.
+
+## 2026-06-04 Runtime WinError 5 Replace/Unlink Failure During Phase95
+
+已处理风险：
+- 现象：Phase95 CLI self-check 在写 `persistent_grants.json` / `phase95_controlled_physical_sendinput_report.json` 时触发 `PermissionError [WinError 5] 拒绝访问`，失败点位于 `learning_agent/runtime/files.py` 的 `os.replace`。
+- 证据：最小 `atomic_write_json` 探针在 `learning_agent/memory/...` 和 `learning_agent/test/...` 下都复现 `os.replace` 拒绝，而普通 `write_text` 能成功。
+- 证据：单独 `FileLock` 探针显示锁文件创建成功，但 `Path.unlink()` 释放锁时同样触发 `WinError 5`。
+- 根因：当前 Windows/Codex workspace 允许普通写入，但拒绝 rename/replace/delete 这类文件系统操作；旧 runtime 同时依赖 `os.replace` 和“创建锁文件后删除锁文件”的模型。
+- 修复：`atomic_write_text()` 保留 replace + 重试作为首选路径；只有 PermissionError 重试耗尽后才直接写入目标文件兜底，并尽力清理临时文件。
+- 修复：Windows 下 `FileLock` 改用 `msvcrt.locking` 锁住固定字节区域，关闭句柄即可释放锁；mutex 文件可删除时清理，删不掉时保留为无害载体。
+- 验证：新增 runtime 红灯转绿，Phase95 CLI 自检转绿，全量 unittest 845 OK skipped=1。
+
+剩余风险：
+- 在拒绝删除的 workspace 中，临时文件或 mutex 文件可能残留；当前修复保证它们不阻塞主流程，但目录卫生需要后续如有权限再清理。
+- 直接写入兜底不是原子替换，只在 replace 被永久拒绝时启用；正常环境仍优先使用原子 replace。
+
+---
+
+## 2026-06-05 Phase101 Universal Computer Use Permission Mode Risks
+
+Resolved risks:
+- Old risk: the product design could drift back into per-application allowlists for every normal app.
+- Handling: Phase98-101 require `/computer use` normal mode to print `per_app_allowlist_required=false` and `ordinary_apps_allowed_by_risk_policy=true`, with focused tests and visible-terminal acceptance proving the user-facing command path.
+- Old risk: `/computer use --full` could look like a one-step privilege escalation.
+- Handling: Phase100 requires `risk=high`, strong confirmation, a short-lived token, wrong-token refusal, expired-token refusal, and high-risk target blocking even after full mode.
+- Old risk: visible-terminal acceptance plan originally described multiple `/computer` commands in one scenario, but the controller only sends one terminal input per scenario.
+- Handling: Phase101 uses four direct terminal command scenarios so each real prompt is typed into a visible `start_oauth_agent.bat` window and independently verified.
+
+Remaining risks:
+- `learning_agent.computer_use.__init__` currently does not export the newer Phase99 `UniversalWindowsLiveExecutionGate`, so legacy import style `from learning_agent.computer_use import UniversalWindowsLiveExecutionGate` can fail even though direct module imports and focused Phase99 tests pass. A future cleanup should update package exports without changing runtime behavior.
+- Phase101 validates permission mode behavior and policy gating, not unrestricted physical control of every Windows application. Any physical input expansion still needs explicit enablement, target identity recheck, high-risk refusal, abort/cleanup, and visible terminal acceptance.
+
+---
+
+## 2026-06-05 Phase102 Full Mode Execution Gate Risks
+
+Resolved risks:
+- Old risk: `UniversalWindowsLiveExecutionGate` always evaluated real actions as `"click"`, so `/computer use --full` could be confirmed but still have no execution-layer difference from normal mode.
+- Handling: Phase102 maps explicit launch prompts to `launch_app`, passes that action class into `evaluate_with_mode_session()`, and reports `full_mode_session_used=true` plus `full_mode_action_ready=true` only when full mode actually unlocks that action.
+- Old risk: observe steps went through the action path and could mask the real block/allow decision for the following write action.
+- Handling: observe/read/wait steps now return `observe_step_no_dispatch` with zero events and are skipped when selecting the true blocked action decision.
+- Old risk: package-level import `from learning_agent.computer_use import UniversalWindowsLiveExecutionGate` failed.
+- Handling: `learning_agent/computer_use/__init__.py` now exports `UniversalWindowsLiveExecutionGate`; Phase93 package-level regression passes.
+
+Remaining risks:
+- Phase102 intentionally keeps `launch_app` as recording-only. It proves full-mode action-class authorization, not physical app launching.
+- Future physical launch support must still add explicit target identity checks, abort/cleanup, high-risk refusal, rollback/user confirmation behavior, and a new visible terminal acceptance gate before claiming real desktop launch control.
+
+---
+
+## 2026-06-05 Phase103 Controlled App Launch Risks
+
+Resolved risks:
+- Old risk: Phase102 full-mode `launch_app` could only return a recording-only placeholder, so the execution gate still had no controlled app-launch backend path.
+- Handling: Phase103 adds `WindowsControlledAppLaunchCandidate`, reuses Phase69 safe launch plans, and lets `UniversalWindowsLiveExecutionGate` inject the candidate for full-mode launch actions.
+- Old risk: adding launch support could accidentally open local apps during tests or normal full-mode runs.
+- Handling: the default path requires `enable_real_launch=False`, reports `real_app_launch_disabled_by_default=true`, keeps `backend_launch_reaches_launcher=false`, and verifies `real_desktop_touched=false`.
+- Old risk: dangerous targets such as PowerShell could reach the launch backend.
+- Handling: Phase103 refuses unsafe Phase69 plans before backend dispatch and verifies `unsafe_launch_zero_events=true`.
+
+Remaining risks:
+- Phase103 does not claim unrestricted physical launch control. Optional real launch still needs explicit enablement, safe target selection, cleanup, high-risk refusal, user-facing policy, and future visible-terminal proof before being treated as production behavior.
+- Current prompt target extraction intentionally supports only safe representative ordinary apps (`notepad`, `mspaint`, `calc`) and defaults to `notepad`; broader app discovery should be a later phase with its own safety model.
+
+---
+
+## 2026-06-05 Phase105 Full Mode Controlled Real Launch Risks
+
+Resolved risks:
+- Old risk: Phase103 proved that full-mode `launch_app` could reach a controlled candidate, but the universal live execution path still always passed `enable_real_launch=false`.
+- Handling: Phase105 adds `controlled_real_launch_enabled` and `controlled_launch_test_file` to `UniversalWindowsLiveExecutionGate` and `_Phase93ClosedLoopActor`, and only passes `enable_real_launch=true` when the Phase105 gate is explicitly enabled.
+- Old risk: a future real launch could open an app without cleanup.
+- Handling: Phase105 real path uses `Phase105ControlledNotepadSmokeLaunchCandidate`, which delegates to Phase104 controlled Notepad smoke for unique test file creation, visible-window verification, process cleanup, verified-window cleanup, and residual-process checks.
+- Old risk: tests could accidentally open real apps.
+- Handling: Phase105 focused tests use `Phase105SpyLaunchCandidate` and the default contract uses `Phase103RecordingLaunchBackend`; real Notepad launch only runs when the double environment gate is enabled.
+- Old risk: a user could interpret `/computer use --full` as a blanket application launcher.
+- Handling: Phase105 real gate is currently Notepad-only and reports `uncontrolled_actions_expanded=false`; the acceptance scenario explicitly says not to open other apps or interact with user windows.
+
+Remaining risks:
+- Phase105 still proves only one controlled Notepad launch path. It does not provide unrestricted application discovery, arbitrary app launching, arbitrary window input, or blanket local-computer takeover.
+- Future broader launch support must add target identity, app classification, high-risk refusal, user-visible status, abort/cleanup, per-action evidence, and real visible terminal acceptance for each expanded surface.
+- A failed direct smoke or visible acceptance can leave a Notepad window if Windows refuses cleanup; every future real-launch phase should keep the residual-window check as a final verification step.
+
+---
+
+## 2026-06-05 Phase106 Interactive Full Launch Risks
+
+Resolved risks:
+- Old risk: Phase105 proved the full-mode controlled launch path only through a contract/helper entry, not through the actual `/computer` user command path.
+- Handling: Phase106 adds `/computer launch notepad`, which uses the active `ComputerUseModeSessionStore` and requires `/computer use --full-confirm` before reaching the Phase105 bridge.
+- Old risk: adding a launch command could accidentally become arbitrary app launch.
+- Handling: Phase106 is Notepad-only, returns `phase106_notepad_only_refused` for other targets, and reports `uncontrolled_actions_expanded=false`.
+- Old risk: default full mode could open a real application unexpectedly.
+- Handling: default Phase106 path keeps `controlled_real_launch_gate_passed=false`, `real_full_launch_attempted=false`, and `real_desktop_touched=false`; real Notepad launch requires both Phase106 environment gates.
+- Old risk: real acceptance could leave a Notepad process behind.
+- Handling: Phase106 real path reuses Phase104 visible-window verification and cleanup; post-acceptance process check reported `notepad_process_count=0`.
+
+Remaining risks:
+- Phase106 still proves only one controlled Notepad launch from the `/computer` command path. It does not provide arbitrary app discovery, arbitrary launch, arbitrary app input, or unrestricted desktop control.
+- Future broader app support must add target identity, classification, high-risk refusal, abort/cleanup, per-action audit evidence, and a real visible terminal acceptance gate for every expanded surface.
+
+---
+
+## 2026-06-05 Phase107 Interactive Launch Target Resolver Risks
+
+Resolved risks:
+- Old risk: `/computer launch <target>` only accepted a hard-coded Notepad path, so broader user phrases would be rejected without a reusable safety classifier.
+- Handling: Phase107 adds `resolve_interactive_launch_target()` with ordinary app aliases and stable target parsing fields.
+- Old risk: expanding target handling could accidentally route terminal or system settings targets into the launch path.
+- Handling: Phase107 refuses high-risk tokens such as PowerShell, CMD, terminal, registry, settings, admin, credential, and security-related targets before Universal gate routing.
+- Old risk: recognizing Calculator or Paint could be misunderstood as real launch support.
+- Handling: Phase107 marks Calculator and Paint as ordinary but `real_launch_supported=false`; command output keeps `real_full_launch_attempted=false` and `real_desktop_touched=false`.
+
+Remaining risks:
+- Phase107 still does not provide real launch support for Calculator or Paint.
+- Future broader app support must add per-app identity, visible-window verification, cleanup, residual-process checks, and real visible terminal acceptance before enabling real launch for any new app family.
+- High-risk token lists are conservative and string-based; later phases should evolve this into a stronger app identity and policy layer before supporting arbitrary installed applications.
+
+---
+
+## 2026-06-05 URG-4 Package Export Compression Issue
+
+Status: resolved in current working tree.
+
+Observation:
+- `learning_agent/computer_use/__init__.py` was compressed into two very long lines where import and `__all__.extend(...)` statements appeared after `#` comments.
+
+Impact:
+- Python treated those import and export statements as comments, making package-level Computer Use exports unreliable even though direct submodule imports still worked.
+
+Handling:
+- Rewrote `__init__.py` into executable multiline imports and `__all__` entries.
+- Preserved Phase98, `UniversalWindowsLiveExecutionGate`, URG-1, URG-2, and URG-3 exports.
+- Added URG-4 exports for `UniversalObservePlanActVerifyLoop` and its marker/CLI/contract helpers.
+## 2026-06-05 Task 3 Target Identity CLI Warning
+
+Observation:
+- Running `python -m learning_agent.computer_use.target_identity` emits a runpy warning because the `learning_agent.computer_use` package initialization imports modules that already load `target_identity`.
+
+Impact:
+- The warning does not affect the Task 3 API or script-mode CLI result, but it makes `python -m` output less clean for acceptance logs.
+
+Current handling:
+- Use `python learning_agent\computer_use\target_identity.py` for the Task 3 self-check until package-level eager imports are cleaned up in a broader package initialization refactor.
+
+Status:
+- Tracked as a low-risk packaging cleanliness issue, not a Task 3 functional blocker.
+---
+
+## 2026-06-05 URG-5 Canvas Change Observation Gap
+
+Status: resolved in current working tree.
+
+Observation:
+- The first URG-5 implementation sent generic drag-path low-level events, but the verifier still reported `canvas_changed_after_real_actions=false`.
+
+Root cause:
+- The observe-plan-act-verify loop did not pass its internal `real_dispatch_performed` flag into the next observation frame in this representative contract, so the Paint observation runtime could not see that the injected sender had already dispatched drag events.
+
+Handling:
+- `Phase120PaintObservationRuntime` now accepts the same representative drag sender used by `UniversalActionDslRuntime`.
+- The after-observation reads `drag_sender.real_desktop_touched` and marks the canvas state as changed only after the shared sender records low-level drag events.
+- Focused URG-5 tests and the visible terminal scenario now require `canvas_changed_after_real_actions=true`.
+
+Remaining risk:
+- URG-5/URG-6 are blueprint maturity contracts with representative low-level sender evidence. Future work that replaces the representative sender with uncontrolled physical desktop input must keep explicit authorization, target identity recheck, abort/cleanup, high-risk refusal, and visible terminal acceptance.
+
+## 2026-06-05 URG-6 Direct `python -m` Runpy Warning
+
+Status: tracked as a packaging cleanliness issue, not an URG-6 functional blocker.
+
+Observation:
+- Running `python -m learning_agent.computer_use.universal_final_maturity_matrix` prints the final `UNIVERSAL_REAL_GUI_COMPUTER_USE_READY` token and exits with code 0, but stderr also prints a runpy warning that the module was already present in `sys.modules`.
+
+Root cause:
+- `learning_agent/computer_use/__init__.py` eagerly imports URG-6 symbols for package-level exports, so `python -m` sees the submodule already imported before executing it as a script.
+
+Current handling:
+- The visible-terminal acceptance scenarios call the stable `main()` function through `python -c`, which avoids the warning and passed with `assertion.passed=true`.
+- A future package initialization cleanup can replace eager imports with lazy exports, but that refactor is outside the URG-5/URG-6 completion scope.
+
+## 2026-06-05 Isolated Worktree Baseline Import Failure
+
+Status: open environment risk.
+
+Observation:
+- Created isolated worktree `.worktrees/codex-computer-use-full-desktop-task-router` from commit `be71968`.
+- Focused baseline tests failed before new implementation because the clean worktree could not import `learning_agent.app.chrome_status_renderer`.
+- The main working directory contains many historical untracked files, including app/computer_use/test modules that current dirty-workspace tests depend on.
+
+Impact:
+- A clean git worktree from the current commit is not a faithful runnable baseline.
+- Subagent-driven implementation should not blindly commit or delete the unrelated historical untracked files.
+- Reviewers must distinguish this environment issue from new Task 1 implementation failures.
+
+Decision:
+- Proceed with subagent workflow on the current project state/forked worker context while preserving unrelated dirty files.
+- Treat the clean-worktree baseline failure as a repository hygiene risk to fix separately, not as part of the Desktop Task Router Task 1 scope.
+
+## 2026-06-06 `/computer maturity` Recording Evidence Overclaim
+
+Status: mitigated in source; visible terminal recheck pending.
+
+Observation:
+- The user screenshot showed `/computer maturity` printing `COMPUTER_USE_FULL_MATURE_OK` while also showing `maturity_known_limit_real_desktop_execution=false`, `real_desktop_touched=false`, and `low_level_event_count=0`.
+- The same screenshot showed a natural Paint/Pikachu prompt returning `computer_use_full_mode_required` before full-confirm and not opening real Paint.
+
+Root cause:
+- The terminal maturity command used the old `full_maturity_matrix.py` path, which could pass based on recording/representative evidence.
+- The default `ComputerUseDesktopTaskRuntime` did not inject any real execution loop, so `real_actions=True` had no production target after full mode confirmation.
+
+Handling:
+- Added `WindowsPaintPikachuRealExecutionLoop` and injected it into the default desktop task runtime.
+- Added `real_desktop_execution_loop_available` to the maturity matrix passed gate.
+- Added automated tests around the new controlled Paint real loop.
+
+Remaining risk:
+- The new Paint loop estimates the Paint canvas from the window rectangle because a robust Paint canvas UIA locator is not yet implemented.
+- True completion still requires controller-driven visible terminal validation that opens real Paint and confirms the drawing action in the user-visible session.
+
+## 2026-06-06 Paint/Pikachu Fragmented Drawing False Positive
+
+Status: resolved for the controlled Paint/Pikachu representative path.
+
+Observation:
+- A controller run could pass after opening real Paint, but the evidence screenshot showed only disconnected lines and did not look like Pikachu.
+- The earlier visual gate accepted a tiny number of non-background pixels, so a partial or fragmented drawing could be reported as success.
+
+Root cause:
+- The first long body outline could be sent before Paint finished switching to the pencil tool.
+- Long drag paths were not dense enough for reliable human-recognizable drawing.
+- The visual gate checked "some canvas pixels changed" instead of checking a recognizable distribution across ears, face/body, and tail regions.
+
+Handling:
+- Added a bounded low-level `pause` event after selecting the Paint pencil tool.
+- Densified drag paths and added a second-pass body outline.
+- Tightened screenshot verification to require recognizable region coverage.
+- Verified with real visible `start_oauth_agent.bat` controller run at `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260606_074109/result.json`.
+
+Residual risk:
+- The drawing is a black-line simple sketch, not a colored artistic illustration.
+- Paint canvas location is still estimated from the maximized window layout, so a future Windows Paint UI update could require replacing the heuristic with a real canvas locator.
+
+## 2026-06-06 `/computer use --full` Token UX Mismatch
+
+Status: resolved for the normal interactive path.
+
+Observation:
+- The user correctly pointed out that normal users will type `/computer use --full` and then the task prompt, not `/computer use --full-confirm <dynamic-token>`.
+
+Root cause:
+- The interactive full-mode command treated `/computer use --full` as a request generator and exposed a dynamic confirmation token as part of the ordinary UX.
+
+Handling:
+- `/computer use --full` now directly opens full mode for that explicit command.
+- Tests and visible-terminal scenario now reject the token-style flow for the normal Paint/Pikachu acceptance path.
+
+Verification:
+- Final real visible terminal acceptance passed at `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260606_081706/result.json` with `confirmation_token_count=0` and `full_confirm_count=0`.
+
+## 2026-06-06 Paint Owned Process Cleanup False Positive
+
+Status: resolved for the Paint/Pikachu real loop.
+
+Observation:
+- A prior visible-terminal validation could report cleanup success while the specific Paint PID from that run still existed.
+
+Root cause:
+- The global stop cleanup and the Paint launch registry were separate in-memory paths, so the launcher-owned `Popen` object was not being used to verify or terminate the actual Paint process.
+
+Handling:
+- Added `cleanup_owned_processes()` and `residual_owned_processes()` to `Phase110OwnedProcessRegistry`.
+- The Paint/Pikachu real loop now cleans and checks the owned Paint process after screenshot evidence and fails with `paint_pikachu_cleanup_failed` if cleanup is not proven.
+
+Verification:
+- Unit test verifies a registered process object is terminated.
+- Final real visible terminal acceptance at `learning_agent/acceptance_controller/runs/computer_use_full_paint_pikachu_strict-20260606_081706/result.json` reported `cleaned_process_count=1`, `residual_owned_process=false`, and PID 4536 was not running afterward.
+# 2026-06-06 Bug: Elephant Prompt Drew Pikachu In Computer Use Full
+
+- 修改代码+GenericPaintSubject：真实终端截图显示用户输入“请使用本机电脑画图软件画一个大象”后，报告仍为 `paint_pikachu_real_execution_finished`，画布也呈现皮卡丘特征；如果没有这条问题记录，后续容易把此类现象当成视觉误差。
+- 修改代码+GenericPaintSubject：源码确认根因是 `paint_pikachu_real_loop.py` 固定调用 `build_pikachu_drag_plan(canvas)`，不是文档、maturity 输出或用户 prompt 格式导致；如果没有这条根因记录，后续会继续误修提示词层。
+- 新增代码+GenericPaintSubject：修复方向是引入绘画对象识别和 subject-specific drag plan，目前明确支持 `pikachu` 与 `elephant`；如果没有这条修复记录，后续会误以为已经支持任意绘画对象。
+- 新增代码+GenericPaintSubject：未知对象现在应明确拒绝而不是 fallback 到皮卡丘；如果没有这条风险记录，未来扩展时可能再次出现“用户要 A，系统画 B”的成熟度误报。
+- 新增代码+GenericPaintSubject：后续若继续加入猫、狗、房子等对象，必须先加失败测试、独立 primitive、真实可见终端验收；如果没有这条经验约束，同类硬编码问题会重复发生。
+
+## 2026-06-06 Computer Use Full Paint Loop Wrong Production Wiring
+
+Resolved risk:
+- Symptom: after `/computer use --full`, natural desktop drawing prompts were routed into a Paint/Pikachu-specific execution loop, so prompts such as drawing an elephant still produced Pikachu-style behavior or depended on hardcoded drawing subjects.
+- Confirmed root cause: `LearningAgent._desktop_task_runtime_for_current_run()` default-created `WindowsPaintPikachuRealExecutionLoop` and injected it into `ComputerUseDesktopTaskRuntime`; `full_maturity_matrix.py` also treated Paint/Pikachu visible-terminal acceptance as production maturity evidence.
+- Fix: the default production runtime no longer injects `WindowsPaintPikachuRealExecutionLoop`; maturity reporting now marks the Paint/Pikachu path as a legacy fixture and does not emit `COMPUTER_USE_FULL_MATURE_OK` while the universal real desktop loop is not connected.
+- Regression guard: `test_default_agent_runtime_does_not_inject_paint_specific_loop` now fails if the Paint/Pikachu loop is reintroduced into the default agent runtime.
+- Visible-terminal evidence: `computer_use_full_universal_loop_slimming_strict.json` passed through the real `start_oauth_agent.bat` terminal path and confirmed `gui_action_count=0`, `low_level_event_count=0`, and `real_desktop_touched=false` for a normal drawing prompt after full mode.
+
+Remaining risk:
+- `/computer use --full` is now honest but not yet mature: the universal observe -> plan -> act -> verify loop still needs to be connected to real desktop execution before arbitrary user drawing/control requests can be fulfilled.
+- The old Paint/Pikachu files may remain in the tree as legacy fixtures or historical tests, but they must not be used as the default production path or as proof of universal Computer Use maturity.
+
+---
+## 2026-06-06 Computer Use Full Adapter Boundary Risk
+- 新增代码+UniversalDesktopAdapter：已确认根因不是缺少更多 Paint/Pikachu/大象特例，而是默认生产路径没有接到通用 computer-use loop；本阶段已接入通用 adapter。
+- 新增代码+UniversalDesktopAdapter：当前仍存在明确限制：adapter 使用 recording low-level sender，`real_desktop_touched=false`，所以不能把它宣传成成熟的真实桌面控制能力。
+- 新增代码+UniversalDesktopAdapter：后续治本方向必须是把通用 observation、planner、verified target、physical sender、安全 abort、视觉验证闭环逐步接实，而不是继续新增“画某个对象”的固定控制器。
+
+## 2026-06-06 Default Adapter Used Recording Observation
+- 修改代码+RealObservationAdapter：红测确认默认 `UniversalDesktopExecutionLoopAdapter` 内部仍是 `Phase119RecordingObservationRuntime`，所以 `/computer use --full` 虽然走通用 adapter，但还没有真实只读屏幕/窗口观察；如果没有这条问题记录，后续可能把 adapter 外壳误判成真实 computer use。
+- 修改代码+RealObservationAdapter：根因是 `UniversalDesktopExecutionLoopAdapter.__init__()` 只调用 `UniversalObservePlanActVerifyLoop(max_retries=0)`，没有显式注入 `UniversalRealObservationFrameRuntime`；如果没有这条根因记录，后续可能去错误修改 planner 或终端文案。
+- 新增代码+RealObservationAdapter：修复方向是默认注入真实只读 observation runtime，并在报告中单独暴露 `real_observation_runtime_used` 与 `read_only_real_observation_used`；如果没有这条修复记录，后续容易再次把录制 observation 当成真实观察。
+- 修改代码+RealObservationAdapter：剩余风险是该修复只补“眼睛”，物理 SendInput 派发仍未启用，不能声明 `/computer use --full` 成熟；如果没有这条风险记录，最终回答或 maturity 输出可能过度承诺。
+
+## 2026-06-06 Controlled Physical Sender Missing Target Identity
+- 修改代码+ControlledPhysicalAdapter：红测确认 `UniversalActionDslRuntime(low_level_sender=WindowsControlledPhysicalSendInputSender(...))` 原来会失败，因为 dispatcher 展开的低层事件没有 `target` 字段；如果没有这条问题记录，后续可能误以为 Phase95 本身坏了。
+- 修改代码+ControlledPhysicalAdapter：根因是目标身份只在 URG-2/URG-3 动作前复核层存在，进入 `WindowsSendInputDispatcher._expand_event()` 后被丢弃；如果没有这条根因记录，未来真实 SendInput 接线会再次缺少最后一跳目标门禁。
+- 新增代码+ControlledPhysicalAdapter：修复方向是 URG-3 在动作通过复核后给 dispatcher 事件附加脱敏 target，Phase47 展开所有低层事件时保留 target；如果没有这条修复记录，Phase95 会继续 `missing_target_identity`。
+- 修改代码+ControlledPhysicalAdapter：剩余风险是当前只证明 fake 后端可被触达且默认不触桌面，尚未启用真实 `WindowsSendInputLowLevelSender` 的默认生产物理派发；如果没有这条风险记录，后续 maturity 可能把受控桥接误报成真实控制成熟。
+
+---
+## 2026-06-06 Default Full Runtime Reintroduced Paint Special Bridge
+
+Status:
+- Fixed in source; visible terminal re-acceptance is being rerun after this record.
+
+Confirmed root cause:
+- `learning_agent/core/agent.py` default runtime constructor passed `enable_supported_paint_drawing=True` into `UniversalDesktopExecutionLoopAdapter`, which re-enabled the Paint/Pikachu/animal-specific bridge on the normal `/computer use --full` user path.
+
+Fix:
+- Default runtime now constructs `UniversalDesktopExecutionLoopAdapter()` without the supported Paint bridge flag.
+- Router regression tests now fail if the default path exposes `supported_paint_drawing_loop`, `supported_paint_drawing_enabled=true`, subject-specific planning, or bridge-used output.
+
+Risk:
+- Old direct Paint loop files may remain as legacy fixtures, but they must not be used as proof that `/computer use --full` is universal or mature.
+
+Acceptance evidence:
+- Real visible terminal re-acceptance passed at `learning_agent/acceptance_controller/runs/computer_use_full_universal_real_observation_strict-20260606_112108/result.json`.
+- The parsed final answer confirmed the default route did not use the Paint/Pikachu special bridge and did not claim subject-specific planning.
+
+---
+## 2026-06-06 Computer Use Full Missing Physical Dispatch Connection
+
+Status:
+- Source fixed; real visible terminal acceptance pending.
+
+Confirmed root cause:
+- `LearningAgent._desktop_task_runtime_for_current_run()` default-created `UniversalDesktopExecutionLoopAdapter()` without a controlled physical sender, so `/computer use --full` could observe and record but not intentionally send real mouse/keyboard through the universal path.
+- `UniversalObservePlanActVerifyLoop` did not propagate `real_dispatch_performed` from `UniversalActionDslRuntime.dispatch()`, so a true sender result could still be hidden at the top-level loop report.
+- `UniversalActionDslRuntime` counted events only by comparing `low_level_sender.low_level_events`, which works for recording senders but returns zero for real/controlled senders that report event count in their result.
+
+Fix:
+- Default full-mode runtime now constructs `WindowsSendInputLowLevelSender`, wraps it in `WindowsControlledPhysicalSendInputSender(default_enable_physical_dispatch=True)`, and injects that sender into `UniversalDesktopExecutionLoopAdapter`.
+- The loop now updates `self.real_dispatch_performed` from dispatch result fields and the action runtime state.
+- The action DSL now uses sender-reported `low_level_event_count` when present.
+
+Remaining risk:
+- Real physical dispatch alone is not equivalent to mature arbitrary Computer Use.
+- The universal route still needs robust real app launch/activation, natural-language visual planning, and observation-based correction before it can honestly satisfy requests like “draw any image with colors” in Paint.
+
+Follow-up correction:
+- User confirmed the Paint window in the real physical dispatch screenshot was opened by the user, not by the agent.
+- Therefore `computer_use_full_universal_real_physical_dispatch_strict-20260606_114300` is not valid evidence for "agent opened Paint and drew a line"; it only proves physical dispatch against an already visible Paint window.
+- Future acceptance must explicitly prove agent-owned launch/window ownership before physical drawing actions, otherwise the validation can repeat the same false positive.
+
+---
+## 2026-06-06 Universal Target Session Fabricated App Launch
+
+Status:
+- Fixed for the full-mode default path and verified by real visible terminal acceptance.
+
+Confirmed root cause:
+- `learning_agent/computer_use/universal_target_session.py` created fake `process_id`, fake `hwnd`, and a fake `Universal Target Session` window instead of calling the production generic launch backend.
+- `UniversalDesktopExecutionLoopAdapter` consumed that fake session, so previous physical dispatch could target a user-opened Paint window and still look superficially successful.
+
+Fix:
+- The real-launch mode now calls Phase110 production generic launch, waits for a visible window with the launched pid, and only marks the session ready when process ownership and window identity both verify.
+- The short desktop task token line now exposes `real_launch_performed`, `backend_launch_performed`, `process_started`, `owned_process_registered`, and `visible_window_verified`.
+- New strict visible-terminal scenario requires all of those launch fields before it can pass.
+
+Acceptance evidence:
+- `learning_agent/acceptance_controller/runs/computer_use_full_agent_owned_paint_launch_line_strict-20260606_120309/result.json` passed with `process_id=23472`, `window_id=hwnd:397860`, `real_launch_performed=true`, and `visible_window_verified=true`.
+
+Remaining risk:
+- The current planner still emits a fixed generic stroke; this is not arbitrary drawing maturity.
+
+---
+## 2026-06-06 Agent-Owned Paint Cleanup Residual Mismatch
+
+Status:
+- Open follow-up risk.
+
+Observed evidence:
+- After the successful strict launch acceptance, `Get-Process -Id 23472` still showed `mspaint.exe`.
+- The `/computer stop` output in the same run reported `owned_resource_cleanup_completed=true` and `residual_owned_process=false`.
+
+Risk:
+- Cleanup and residual reporting are not yet reliably tied to the Phase110 production launch registry used inside the universal target session.
+- This does not invalidate the agent-owned launch proof, but it means `/computer stop` cleanup evidence is currently over-optimistic for launched GUI apps.
+
+Suggested fix direction:
+- Persist or pass the owned launch registry from the real target session into `/computer stop` cleanup.
+- Add a visible-terminal cleanup scenario that verifies the launched pid is gone or explicitly reports a residual process.
+
+---
+## 2026-06-06 Visual Planner Semantic Drawing Gap
+
+Status:
+- Open product/architecture gap, not solved by this phase.
+
+Confirmed evidence:
+- Visible-terminal run `computer_use_full_visual_planner_paint_house_strict-20260606_123238` used the real full-mode route, launched Paint, connected the visual planner, and sent low-level mouse events.
+- The final screenshot `learning_agent/memory/computer_use/evidence/computer-window-20260606T043252Z-8d291c7f.bmp` shows central canvas strokes, but the output is a generic geometric face rather than the requested house.
+
+Risk:
+- If maturity only checks `visual_planner_connected=true` and `real_desktop_touched=true`, the project may again overclaim arbitrary drawing maturity.
+- The maturity matrix must continue reporting `visual_planner_mature=false` until the planner can derive task-specific visual plans and correct them from screenshots.
+
+Suggested fix direction:
+- Replace the current heuristic visual planner with a task-aware planner that converts user intent into editable drawing primitives, observes the screen after each batch, and replans until a verifier agrees the requested subject and requested operations are visible.
+- Keep Paint/Pikachu/elephant/house special cases out of the default `/computer use --full` path; those hardcoded routes caused the original design failure.
+
+---
+## 2026-06-06 Visual Planner Semantic Drawing Gap Update
+
+Status:
+- Partially fixed for house; still open for arbitrary subjects and correction.
+
+Fixed evidence:
+- The prior failure mode “房子 prompt 画成通用几何脸” is fixed for the strict house scenario.
+- Visible-terminal run `computer_use_full_visual_planner_paint_house_strict-20260606_124945` required and found `house_roof`、`house_body`、`house_door`、`house_window_left`、`house_window_right` in the real loop evidence.
+- Screenshot `computer-window-20260606T044959Z-83e975e8.bmp` visually shows a house rather than a generic face.
+
+Remaining risk:
+- Unknown subjects still fall back to generic geometry.
+- There is still no mature screenshot verifier that can say “this image semantically matches the prompt” and replan until it does.
+- Color/tool selection and multi-step correction are not yet mature.
+## 2026-06-06 修复：Computer Use full 语义规划被 run_prompt 黑盒 runtime 抢跑
+
+- 问题：`computer_use(operation=run_prompt, real_actions=true)` 会把整段自然语言 prompt 交给 Python desktop runtime 执行，导致模型主循环没有真正承担语义理解、观察、纠偏和工具选择职责。
+- 证据：新增红灯测试显示 system prompt 缺少 Computer Use full harness，且注入会爆炸的 `desktop_task_runtime.run_prompt()` 后，旧实现确实调用了该黑盒 runtime。
+- 根因：兼容工具面把 `mode/run_prompt` 当成模型可见能力暴露，并在 `_computer_use_mode()` 的 `real_actions` 分支直接调用 full desktop runtime。
+- 修复：模型可见 schema 收窄到 `status/observe/action`；`run_prompt` 真实动作分支改为返回 `model_loop_observe_action_required`；full 模式自然语言桌面任务加入模型主循环 harness。
+- 剩余风险：这次修复的是“语义规划归位”的顶层结构，不代表真实可见 Paint 画树验收已经完成；后续仍需在真实终端里验证模型能通过观察、动作、纠偏完成完整桌面任务。
+
+---
+## 2026-06-06 Bug 状态：Computer Use 截图只作为文本路径进入模型
+
+Root cause:
+- `LearningAgent` 原先只把 Computer Use 工具输出作为普通 tool result 文本放回 messages，截图 artifact 只是路径文字。
+- `CodexOAuthChatModel` 原先又把整个 messages JSON 压成一个 `input_text` prompt，因此即使上游出现图片块，也不会作为视觉输入发给模型。
+
+Fix:
+- 工具结果回灌层新增 Computer Use 图片 artifact -> `image_url` 消息。
+- OAuth/Responses 适配层新增 `image_url` -> `input_image` 转换，并清洗文本 prompt 里的 base64。
+
+Remaining risk:
+- 真实可见终端验收尚未完成，因此还不能说 `/computer use --full` 端到端成熟。
+
+---
+## 2026-06-06 修复：Computer Use BMP 截图被 Responses API 拒绝
+
+Root cause:
+- 真实可见 controller 场景中，Windows observe 生成的截图 artifact 是 BMP。
+- `LearningAgent` 之前把 BMP 原样转成 `data:image/bmp;base64,...`。
+- OAuth/Responses 适配层会把该 data URL 作为 `input_image` 发给模型，而 Responses API 不支持 BMP。
+
+Fix:
+- `LearningAgent` 新增模型图片载荷入口，源图是 BMP 时先用 Pillow 转成 PNG。
+- 新增回归测试确认 data URL 是 `image/png`，且解码后是真 PNG 文件头，不是简单改 MIME。
+
+Verification:
+- 新增测试先失败后通过。
+- `python -m unittest learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_windows_computer_use_image_results_phase41` 通过，54 tests OK。
+- `python -m py_compile learning_agent\core\agent.py learning_agent\models\adapters.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_models_codex_oauth.py` 通过。
+
+Remaining risk:
+- 需要重新跑真实可见终端 controller 画树场景，确认模型不再因为 BMP 输入失败，并继续观察下一层真实桌面执行问题。
+
+---
+## 2026-06-06 修复：Codex OAuth SSE 心跳流导致真实终端卡住
+
+Root cause:
+- controller 真实画树场景停在“模型调用：第 0 轮”，没有进入工具调用，也没有最终回答。
+- `CodexOAuthChatModel._read_sse_response_until_done()` 只在 `[DONE]`、`response.output_text.done` 或 `response.completed` 时退出。
+- 如果后端持续发送心跳、空行或未知事件，socket read timeout 不一定触发，总循环没有全局 deadline。
+
+Fix:
+- `CodexOAuthChatModel` 新增 SSE 总读取超时，默认 240 秒。
+- `from_env()` 新增 `CODEX_OAUTH_SSE_READ_TIMEOUT_SECONDS` 配置。
+- SSE 读取循环在每次读取下一行前检查总 deadline，并抛出可被中文 OAuth timeout 文案识别的 `TimeoutError`。
+
+Verification:
+- 新增心跳流测试先失败后通过。
+- `python -m unittest learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_windows_computer_use_image_results_phase41` 通过，55 tests OK。
+- `python -m py_compile learning_agent\core\agent.py learning_agent\models\adapters.py learning_agent\tests\test_windows_computer_use_image_results_phase41.py learning_agent\tests\test_models_codex_oauth.py` 通过。
+
+Remaining risk:
+- 需要重新跑真实可见终端 controller 场景，确认模型返回后是否会实际调用 `computer_observe`/`computer_action`。
+## 2026-06-06 Computer Use full 模式视觉与启动顺序问题
+
+- 现象：用户要求“使用本地电脑画图软件画一棵树/猫/大象”时，模型可能没有先打开本机画图软件，而是在已有旧窗口或用户手动打开的窗口上继续操作鼠标键盘。
+- 已确认原因 1：旧运行中截图 artifact 曾以 `.bmp` / `image/bmp` 形式进入工具输出，模型 API 对 BMP 支持不稳定，容易导致主循环实际没有可靠读取图片像素。
+- 已处理原因 1：evidence 源头新增 BMP->PNG 归一化，下游模型回灌仍保留 BMP->PNG 兜底，测试覆盖真实 PNG 字节和 data URL。
+- 已确认原因 2：原门禁只要求“动作前看过截图”，没有要求“本机应用任务先由 agent 自己 launch_app 绑定 agent-owned 窗口”，所以模型看过旧窗口后仍可能操作旧窗口。
+- 已处理原因 2：新增 AgentOwnedLaunchGate，full GUI 且存在 `target_app_hint` 的任务，在没有 agent-owned target_window 前拒绝鼠标键盘动作。
+- 剩余风险：真实可见终端验收仍可能因为模型循环过长、旧窗口漂移、最终回答超时而失败；不能仅凭单元测试声明成熟。
+## 2026-06-06 16:59 Bug: launch_app app_name 被中文任务句污染
+- 现象：真实可见终端验收中，模型调用 `computer_action launch_app` 时传入 `app_name="mspaint，非常熟练地画一棵树。..."`，同时传入 `target_app="mspaint"`；controller 旧逻辑优先使用 `app_name`，导致启动后端尝试启动不存在的长中文 exe。
+- 证据：`learning_agent/acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_165022/latest_run_readable.md` 中工具结果显示 `target_app`、`raw_target`、`canonical_target` 都变成整段中文任务说明，并返回“系统找不到指定的文件”。
+- 根因：`_launch_app_target_from_arguments` 字段顺序为 `app_name,target_app,app,target,text`，而 `_launch_app_clean_target_candidate` 没有拒绝中文句子标点，所以污染的 `app_name` 会盖过干净别名。
+- 修复：字段顺序改为 `target_app,app,target,app_name,text`，并拒绝包含 `，。；！？、` 的候选。
+- 回归：新增 `test_launch_app_prefers_clean_alias_when_app_name_contains_chinese_task_sentence` 覆盖真实失败形状，相关 70 个测试通过。
+
+## 2026-06-06 17:12 Bug: launch_app target_app 被混合语言任务句污染
+- 现象：第二次真实可见终端验收中，模型传入 `target_app="mspaint画图软件画一棵树."`，同时保留 `app="mspaint"` 和 `target="mspaint"`。
+- 根因：清洗函数没有识别“英文应用别名 + 中文任务说明 + 英文句点”的混合污染，导致优先级更高的 `target_app` 盖过干净字段。
+- 修复：清洗函数拒绝混合英文和中文字符的候选，拒绝非 `.exe` 的句点，拒绝英文句子标点。
+- 回归：新增 `test_launch_app_skips_polluted_target_app_and_uses_clean_app_field`，相关 71 个测试通过。
+
+## 2026-06-06 17:54 Bug: 真实终端 UI /computer use --full 卡在第 0 轮模型调用
+- 现象：真实可见终端场景 `computer_use_full_model_loop_paint_tree_real-20260606_174641` 中，controller 成功启动 `start_oauth_agent.bat` 并输入 `/computer clear-abort`、`/computer use --full`、`请使用本地电脑的画图软件画一棵树。`，但最终失败。
+- 证据：`result.json` 显示 `prompt_sent=true`、`prompt_received=true`、`prompt_lines_sent=3`，同时 `final_printed=false`、`final_answer_printed=false`。
+- 证据：`latest_run_readable.md` 停在“模型调用：第 0 轮”，没有任何 `computer_action launch_app`、`computer_observe`、`Computer Use Image Results`、`image/png` 或 `mspaint` 成功路径。
+- 边界：真实 provider 探针已证明 `codex-oauth + gpt-5.5` 能识别内嵌 PNG；因此本 bug 不能直接归因于 provider 不支持视觉。
+- 待确认根因：真实终端主循环的第 0 轮 `CodexOAuthChatModel.chat()` 为何没有在预期时间内返回工具调用、最终回答或 SSE deadline 错误；需要进一步查请求体大小、SSE 读取 deadline 是否被阻塞在 `readline()`、以及结构化输出/工具 schema 是否让后端长时间不完成。
+## 2026-06-06 19:40 Bug/Risk: latest_run_readable.md 可能混入旧 Computer Use run 片段
+
+- 现象：真实验收 run `computer_use_full_model_loop_paint_tree_real-20260606_193850` 的 copied `latest_run_readable.md` 前半段出现旧窗口 `mspaintapp:pid:33100` 和旧高轮次片段，但本次 `events.jsonl` 只显示新窗口 `mspaintapp:pid:46464` 的 launch 与 3 次 drag_path。
+- 当前判断：本次功能验收仍以 `events.jsonl`、`result.json` 和最新 PNG 截图为准，可以确认真实 Paint 画树通过；旧片段更像是 debug latest 文件在连续/重叠 run 下隔离不足。
+- 风险：如果后续只读 copied `latest_run_readable.md`，可能误判动作打到了旧窗口，或者把旧 run 的失败/动作算进本轮。
+- 建议治本方向：给 `latest_run_readable.md` 增加 run_id 级隔离或在 controller 归档时按本轮 `run_id` 过滤 debug events；不要再让共享 latest 文件作为唯一验收依据。
+
+## 2026-06-06 20:06 Fixed: 普通 full 用户路径不应要求 clear-abort
+
+- 现象：真实画树验收场景之前第一行是 `/computer clear-abort`，这属于开发者恢复命令，不符合普通用户只输入一次 `/computer use --full` 的习惯。
+- 根因：真实验收为了规避历史 abort 残留，把环境预处理命令放进了用户路径；这会误导产品设计，让用户承担内部状态恢复职责。
+- 修复：`/computer use --full` 现在自动检测并清理历史 abort，且输出 `abort_auto_cleared=true/false`；真实画树场景已删除 `/computer clear-abort`。
+- 验证：真实可见终端 run `computer_use_full_model_loop_paint_tree_real-20260606_200449` 只发送 2 行 prompt，`prompt_lines_sent=2`，没有 `clear-abort`，仍完成真实 Paint 画树。
+- 剩余边界：`/computer clear-abort` 仍保留为开发者/恢复命令；后续新验收场景不应把它列为普通用户必需输入。
+
+## 2026-06-06 Risk: 危险调试模式核心默认开启
+
+- 背景：用户明确要求当前调试开发阶段把危险调试模式默认开启，方便真实终端和真实桌面测试持续推进。
+- 变更：`dangerously_skip_permissions_enabled()` 在环境变量缺失、空值或未知值时默认返回 `True`，只有显式 `0/false/no/n/off` 才关闭。
+- 风险：默认开启会跳过人工权限确认，因此普通权限提示、拒绝、风险分级测试如果不显式关闭危险模式，会被自动放行路径污染。
+- 缓解：`McpRegistryTests.setUp()` 已默认设置 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=0`；危险模式专项测试单独设置为 `1`。
+- 产品边界：正式产品阶段不应把该策略当作最终安全默认，应改成显式 opt-in、配置项或带清晰 UI 风险提示的开发者模式。
+## 2026-06-06 Risk: 危险调试默认开启导致旧权限断言失败
+
+- 现象：本轮验证时误跑 `python -m unittest learning_agent.tests.test_terminal_process_summary learning_agent.tests.test_agent_events learning_agent.tests.test_observability_acceptance`，其中 `test_agent_events` 模块不存在，`test_observability_acceptance` 的两个权限断言失败。
+- 已确认：这两个权限断言失败与本轮 `ProcessSummaryUX` 修改无直接关系；失败原因是当前开发阶段按用户要求默认开启危险调试自动授权，旧测试仍期待 `input()` 被调用或权限拒绝文本出现。
+- 风险：后续如果把这类失败误判为过程摘要或 Computer Use 主循环问题，会把排查方向带偏。
+- 建议：后续修复权限类测试时，应在需要验证人工确认、拒绝、风险分级的测试里显式设置 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=0`，或者把断言更新为同时覆盖危险调试模式和安全模式。
+
+## 2026-06-06 Fixed: Process Summary 在长 Computer Use 循环中刷屏
+
+- 现象：用户真实终端截图中，每轮都重复显示“正在结合用户目标...”“已形成回复草案...”“准备调用 tool...”“危险调试模式已开启...”，导致看起来不像 Codex 风格过程摘要，而像事件日志墙。
+- 已确认根因 1：`TerminalProcessSummaryRenderer` 按每个 `model_request_started`、`model_message_completed`、`tool_call_started`、`tool_call_completed` 逐行打印，长绘图任务几十轮时必然刷屏。
+- 已确认根因 2：生产主循环的工具调用字典字段是 `tool_name`，而渲染器只读 `name`，所以真实终端会显示泛化的 `tool`。
+- 已确认根因 3：生产主循环的模型完成事件把工具调用放在 `payload["message"]["tool_calls"]`，而渲染器只读顶层 `tool_calls`，所以工具调用阶段会被误显示成“已形成回复草案”。
+- 已确认根因 4：`ask_permission_from_terminal_customer_mode()` 在危险调试默认开启时每次自动授权都打印提示，绘图的每次鼠标/截图动作都会重复出现同一句。
+- 修复：过程摘要层兼容 `tool_name` 和嵌套 `message.tool_calls`，并对模型轮次、桌面工具事件做节流；危险调试提示改为进程内只打印一次，审计事件仍每次记录。
+- 边界：该修复不等于绘图语义质量已达标；“水果拼盘画偏”仍需要继续查视觉规划、目标校验和屏幕反馈纠偏链路。
+
+## 2026-06-06 Fixed: acceptance JSON 事件污染真实用户终端
+
+- 现象：过程摘要节流后，真实可见终端仍显示大量 `::learning-agent-acceptance {...}` 原始 JSON，用户看到的仍像事件日志墙，不像 Codex 风格过程摘要。
+- 根因：`emit_acceptance_event()` 在写入 `events.jsonl` 后，无条件把同一条 JSON 事件打印到 `stdout`；controller 已经读取 JSONL 文件，因此 stdout 机器标记在当前设计中不是必需的人类 UI 内容。
+- 修复：新增 `LEARNING_AGENT_ACCEPTANCE_EVENT_STDOUT` 显式开关；默认只写 JSONL，不打印 stdout；只有设置 `1/true/yes/y/on` 时才恢复旧的终端机器标记。
+- 验证：真实可见 smoke `smoke-20260606_213116` 通过，最终截图无 `::learning-agent-acceptance`；事件日志仍完整，controller 正常完成。
+
+## 2026-06-06 Risk: Computer Use Paint 场景最终回答收束摘要不稳定
+
+- 现象：真实可见 Paint 树场景 `computer_use_full_model_loop_paint_tree_real-20260606_212818` 已真实启动并操作 `mspaintapp:pid:46744`，事件 payload 和 debug log 都包含 `launch_app`、`mspaint`、`real_desktop_touched`、`low_level_event_count`、`Computer Use Image Results`，但最终回答只有“已完成。”。
+- 影响：controller 的最终回答断言缺少 `computer_use/mspaint/screenshot/real_desktop_touched/low_level_event_count`，所以场景 `completed=false`。
+- 当前判断：这不是本轮 stdout 静默导致；事件日志仍完整，controller 能读到所有事件。问题在模型最终收束阶段没有稳定把工具证据摘要写给用户。
+- 建议治本方向：在 Computer Use full 收束层增加稳定的用户可见完成摘要，或把运行证据摘要作为模型最终回答上下文/后处理的一部分；不要靠模型自由发挥“已完成。”。
+## 2026-06-06 Fixed/Risk: Computer Use full 最终回答缺少真实执行证据
+
+- 现象：真实可见 Paint 树场景已经启动并操作 Paint，但模型最终只输出“已完成。”，controller 断言找不到 `computer_use/mspaint/screenshot/real_desktop_touched/low_level_event_count`，导致场景 `completed=false`。
+- 根因：`LearningAgent.run_events()` 最终回答路径完全信任模型文本，没有把本轮 `computer_use_action` / `computer_use_observe` 的证据稳定汇总进用户可见回答。
+- 修复：Computer Use full GUI 任务结束时，若最终回答缺少关键证据，就从 `self.observation_events` 汇总目标应用、窗口、截图、真实桌面触达、低层事件数和成功动作数，并追加到最终回答。
+- 边界：这只解决“证据摘要不稳定”的验收问题，不代表画图语义质量、视觉 verifier、纠偏能力已经成熟。
+
+## 2026-06-06 Fixed/Risk: 通用 observe-plan-act 观察层没有绑定 target_window
+
+- 现象：通用 loop 已经启动/绑定了目标窗口，但 observation runtime 只收到 `target_hint=mspaint`，因此在桌面上存在多个 Paint 窗口时可能观察到用户旧窗口或错误窗口。
+- 根因：`UniversalObservePlanActVerifyLoop._observe()` 没有把 session 中的 `target_window` 传给 `UniversalRealObservationFrameRuntime.observe()`。
+- 修复：`_observe(target, target_window=...)` 现在每轮传递已绑定窗口；真实观察 runtime 优先使用该窗口，只有缺失时才走 inventory 自动选择。
+- 剩余风险：更宽的 router fake sender 回归仍显示 `real_dispatch_performed=false`、`low_level_event_count=0`，说明后续还需要继续查 planner/action/verifier 到受控 sender 的链路。
+## 2026-06-06 Risk: Phase121 app catalog 接线后的剩余边界
+
+- 已确认本轮新增 app catalog 相关测试通过，Phase108/109 原有应用发现/启动候选合同仍通过。
+- 已知残留：更宽的 `test_windows_computer_use_full_desktop_task_router` 里仍有两个 `controlled_physical_backend_reached` / `real_dispatch_performed` fake sender 相关失败；该风险已在早前 memory 中记录，当前证据显示不是 Phase121 app catalog 直接引入。
+- 风险边界：如果后续只依赖 full router 大矩阵判断，可能把旧的受控 sender 注入链路问题误判成本轮 app catalog 回归；后续应单独定位 planner/action/verifier 到受控 sender 的链路。
+- 治本方向：Phase108 `generic_app_discovery.py` 已改为调用统一 `windows_app_inventory.py`；下一步不应再新增旧兼容入口，而应补真实 AppX/AUMID 枚举和 launch resolver 多后端能力。
+- 追加边界：app catalog 过滤仍是启发式清洗，不是完整 Windows 应用分类系统；最终验收清掉了已发现的终端/卸载/管理工具噪声，但后续遇到新的维护类快捷方式仍应用红测固化。
+## 2026-06-07 Risk: Windows App Inventory 仍缺真实 AppX/AUMID 枚举与启动解析
+
+- 现象：Windows 设置页“已安装的应用”会展示 UWP/AppX、MSIX、传统 Win32 等更广泛项目，而当前 `windows_app_inventory.py` 的真实枚举主要来自开始菜单、App Paths 和 Uninstall 注册表。
+- 已处理部分：inventory API 和测试已经支持 `launch_kind=appx` 的结构化候选，并能把 `launch_kind` 显示给模型，但真实 AppX/AUMID 枚举还没有接入。
+- 风险：如果用户要求打开仅以 AppX/AUMID 暴露的应用，模型可能在清单里看不到稳定候选，或者看到 Uninstall 低优先级产品名但没有真正可启动标识。
+- 治本方向：下一步应实现只读 AppX/AUMID 枚举源，并让 `computer_action launch_app` 的 resolver 根据 `launch_kind` 选择 exe、shortcut、appx 等不同启动后端。
+- 边界：本轮完成的是 ClaudeCode appNames 原则对齐和旧逻辑瘦身，不应被误报为 Windows 全量应用发现和启动链路已经完全成熟。
+
+## 2026-06-07 Fixed/Risk: 真实主循环应用清单仍混入系统/文档/SDK 噪声
+
+- 现象：真实可见终端 run `computer_use_full_model_loop_paint_tree_real-20260607_063223` 的 `latest_run_readable.md` 显示新 inventory 已进入模型主循环，但清单中仍有 `Task Manager`、`README`、`Python Module Docs`、`Tools for UWP Apps`、`Windows Software Development Kit` 等非普通应用本体。
+- 根因：第一版噪声词只覆盖 installer、command line、verifier、official website 等早期探针项，没有覆盖本机开始菜单里的系统管理入口、说明文件、模块文档和 SDK 元入口。
+- 修复：已把这些真实暴露项写入 Phase122 回归测试，并补充 exact blocklist / noise tokens；红测先失败后通过。
+- 边界：该过滤仍是启发式清洗，不是完整 Windows 应用分类系统；后续遇到新的维护/文档/系统工具入口仍应以真实 run 证据补回归，而不是凭主观猜测扩大过滤。
+
+## 2026-06-07 Fixed/Risk: 旧应用清单兼容入口造成误接风险
+
+- 现象：旧应用清单兼容文件继续留在正式源码时，后续开发者或压缩上下文容易误以为项目仍有两套应用清单接口。
+- 根因：上一阶段为了平滑迁移保留了兼容包装层，但用户明确要求源码瘦身，避免误接、记忆错位和接口歧义。
+- 修复：正式源码已删除旧兼容文件和旧测试文件，full 主循环、中文应用提示解析、Phase108 generic discovery 都只走 `windows_app_inventory.py`。
+- 验证：正式路径扫描没有旧模块导入、旧函数名或旧文件名残留；相关 11 个 unittest 通过；py_compile 和 diff check 通过。
+- 边界：这只是清理接口分叉风险；真实 AppX/AUMID 枚举、AppX 启动后端、复杂窗口纠偏仍是后续风险。
+# 2026-06-07 Risk: discover 工具不等于完整 Windows 应用启动体系
+
+- 当前 `computer_discover` 已能把统一 inventory 暴露给模型主循环，但它只是只读候选发现工具，不负责真实打开软件。
+- 如果后续把 discover 误解成“AppX/AUMID 已完成”或“任意 Windows 应用启动已成熟”，会再次出现设计误判。
+- 下一步仍需要基于真实 Windows 来源补 AppX/AUMID 枚举，并让 `computer_action launch_app` 的 resolver 根据 `launch_kind` 选择 exe、shortcut、appx 等不同启动后端。
+- 真实终端验收还需要确认模型在 `/computer use --full` 下会主动选择 `computer_discover` 或至少能利用应用清单，不应只凭单元测试声明最终完成。
+# 2026-06-07 Phase124 已修复：Phase108 把非 exe 启动身份误压成 exe
+
+- Symptom: `computer_discover` 已经能返回 `launch_kind` 和 `launch_id`，但 Phase108 仍调用旧的 `build_launch_plan(best_executable)`，导致 AppX/AUMID、Start Menu shortcut、uninstall registry record 都可能被误表达成 exe 启动计划。
+- Root cause confirmed in source: `_phase108_candidate_from_mapping()` 统一调用 `_phase108_executable_name(executable_source)`，`resolve_generic_app_launch_target()` 再用 `build_launch_plan(...)` 构造 Start-Process 风格计划。
+- Fix: 新增 `windows_launch_resolver.py`，并让 Phase108 使用 `resolve_windows_launch_plan()`；Phase108 现在保留 `best_candidate_launch_kind`、`best_candidate_launch_id` 和 resolver 后端。
+- Extra guard: Phase110 `build_generic_launch_request()` 现在只在 `launch_backend == "argv_no_shell"` 时回填 `executable`，避免 AppX/shortcut 被误塞进 Popen executable 槽。
+- Remaining risk: AppX/shortcut 真实启动 backend 尚未实现；目前会正确形成计划并被当前 Phase110 Popen 后端挡住。
+
+# 2026-06-07 Phase125 已修复：Phase110 非 argv 后端没有真实分发执行器
+
+- Symptom: Phase124 resolver 已能输出 `appx_aumid` 和 `start_menu_shortcut` 计划，但 Phase110 生产后端仍只有 `subprocess.Popen(argv)`，导致非 exe 应用无法进入正确 Windows 启动 API。
+- Root cause confirmed in source: `Phase110ProductionGenericLaunchBackend.launch()` 直接调用 `subprocess.Popen(request.argv(), shell=False)`，并且 `phase110_safe_launch_request()` 只接受 `Start-Process` + executable + argv。
+- Fix: `GenericLaunchRequest` 现在保留 `launch_backend`、`command_shape`、`aumid`、`shortcut_id`；`phase110_safe_launch_request()` 分别校验 `argv_no_shell`、`appx_aumid`、`start_menu_shortcut`；生产后端通过 `Phase110WindowsNativeLauncher` 分发到 `launch_argv()`、`launch_appx_aumid()`、`launch_start_menu_shortcut()`。
+- Verification: Phase125 focused tests and Phase124/108/110/113 relevant regressions passed; `python -m learning_agent.computer_use.generic_launch_backend` 输出 `authorized_appx_backend=true`、`authorized_shortcut_backend=true`、`multi_backend_dispatch_ready=true`；真实可见终端 run `learning_agent/acceptance_controller/runs/agent_capability_phase125_multi_backend_launch_executor-20260607_085931/result.json` 也已通过。
+- Remaining risk: 真实 ShellExecuteExW 对某些 AppX/shortcut 可能拿不到可靠 pid；后续窗口绑定层仍需要用真实观察结果补强 PID/window ownership verification。
+
+# 2026-06-07 Risk: full maturity 矩阵的受控物理 sender 注入路径旧失败
+
+- Symptom: wider regression `learning_agent.tests.test_windows_computer_use_full_maturity_matrix` currently fails because `controlled_physical_backend_reached_in_injected_path=false`.
+- Root cause evidence: matrix report shows Phase118 expands actions to low-level events including `pause`, but Phase95 controlled sender rejects `pause` as unsupported, so the fake physical backend is never reached.
+- Boundary: this is not caused by the Phase125 multi-backend launch executor; focused Phase125/Phase124/Phase108/Phase110/Phase113 tests pass.
+- Recommended next fix: add a proper low-level event handling contract for harmless `pause` events in the controlled sender path, or make the adapter sample avoid unsupported events. Do not hide the failure by loosening the matrix assertion.
+
+# 2026-06-07 Fixed/Risk: Phase95 受控物理 sender 拒绝通用 loop 的 pause 事件
+
+- Symptom: `test_windows_computer_use_full_maturity_matrix` exposed `controlled_physical_backend_reached_in_injected_path=false`.
+- Root cause confirmed in source and red test: `UniversalDesktopExecutionLoopAdapter` sends dispatcher-expanded events that include `pause`, but `PHASE95_SUPPORTED_LOW_LEVEL_TYPES` omitted `pause`, so `WindowsControlledPhysicalSendInputSender._validate_events()` rejected the whole batch before the fake backend could be reached.
+- Fix: added `pause` to Phase95 controlled sender supported low-level types and added a Phase95 regression test proving `set_foreground + pause + mouse_move` reaches the injected fake backend without touching the real desktop.
+- Verification: Phase95 pause red test turned green; full maturity matrix tests passed; visible terminal scenario `agent_capability_phase126_controlled_physical_pause_bridge-20260607_091253` passed with `controlled_physical_backend_reached_in_injected_path=true`.
+- Remaining boundary: this fixes the bridge/matrix bug only; it does not mean the visual planner can yet robustly observe, correct, erase, and complete arbitrary drawings.
+
+# 2026-06-07 Fixed/Risk: maturity 矩阵旧字段污染 `/computer use --full` 判断
+
+- Symptom: 只看 `visual_planner_mature=false` 或 `paint_pikachu_visible_terminal_acceptance=false` 会把当前模型主循环 Computer Use 误判成旧的专用 Paint/Pikachu 路线。
+- Root cause confirmed in source: `LearningAgent.run()` 当前没有调用旧 `_desktop_task_runtime_answer_from_prompt()` 预分类器，工具 schema 已暴露 `computer_discover`、`computer_observe`、`computer_action`，并且 Computer Use 截图会被转成模型可读 image block；但 `full_maturity_matrix.py` 顶层 token 还没有把这些当前架构事实明确输出。
+- Fix: maturity 矩阵新增 model-loop 架构报告，从 `TOOL_SCHEMAS` 和 `core/agent.py` AST 直接生成事实字段，避免继续靠旧字段或旧记忆判断。
+- Remaining boundary: 新字段证明“当前架构接线和工具面已经对齐模型主循环”，不证明任意绘图质量已经成熟；视觉纠偏和最终图像质量仍需真实可见终端多 prompt 验收。
+## 2026-06-07 Phase128：旧 maturity 字段可能误导开发者把视觉质量缺口当成整体能力失败
+
+- 问题：旧矩阵里 `visual_planner_mature=false` 容易被误读为 `/computer use --full` 整体不成熟，甚至误导开发者去重写或削弱已经接通的模型主循环、工具 schema 和截图回流能力。
+- 事实：源码显示模型主循环语义规划、`computer_discover`/`computer_action` 工具面、截图图片输入回流都已经存在；真正缺口是“视觉质量裁判”和“纠偏验收协议”还没有成熟。
+- 修复：矩阵新增分层字段，把通用软件控制基础、模型主循环基础、真实桌面证据门禁、视觉质量验收、纠偏验收拆开显示。
+- 风险控制：`passed=false` 现在主要由 `visual_quality_acceptance_passed=false` 和 `visual_correction_acceptance_passed=false` 阻塞，不再让旧 Paint/Pikachu fixture 或单个 `visual_planner_mature` 字段误导全局判断。
+
+# 2026-06-07 Risk/Fix: `/computer maturity` 过去不能证明已读取全部 Computer Use 源码结构
+
+- Symptom: 用户追问 maturity 矩阵是否会检查 OpenHarness 的 Computer Use 全部源码、整个设计结构和各源码文件；旧矩阵只能检查主链路、工具 schema 和部分 AST，不能证明 `learning_agent/computer_use/*.py` 全量被枚举和分层。
+- Root cause: maturity 矩阵没有源码 inventory/audit 子报告，容易让开发者继续靠旧记忆、文档或少数入口文件判断 `/computer use --full` 成熟度。
+- Fix: 新增 `computer_use_source_architecture_audit` 子报告，枚举 86 个 `computer_use` Python 文件，逐文件 AST 解析、架构层分类、必需设计层检查、主链路文件检查、旧样例污染扫描。
+- Guard: CLI 和真实终端场景现在检查 `computer_use_source_inventory_available=true`、`computer_use_all_source_files_parseable=true`、`computer_use_source_audit_coverage=true`、`computer_use_uncategorized_source_files_count=0`。
+- Boundary: 该审计明确输出 `computer_use_source_audit_static_only=true` 和 `computer_use_source_audit_semantic_complete=false`；它防止漏读源码结构，但不能替代真实可见终端交互验收、视觉质量验收或纠偏验收。
+## 2026-06-07 Phase130 Runtime Reachability Audit Gap
+- 问题：仅枚举 86 个 `computer_use/*.py` 文件会误导用户，以为所有文件都是当前 `/computer use --full` 核心链路。
+- 事实：源码扫描显示 `generic_app_discovery.py` 不是模型主循环 `computer_discover` 主入口，而是仍被旧交互命令和兼容合同引用的包装层。
+- 修复：新增运行时可达性审计，将旧桥、代表样例、验收矩阵和核心链路分开，并把 unknown=0 作为门禁。
+- 风险：该审计仍是静态源码审计，不能证明每条业务语义在真实桌面都完成；真实成熟仍要继续依赖可见终端和视觉质量/纠偏验收。
+
+## 2026-06-07 Risk/Boundary: Runtime trace 接通不等于任意 Computer Use 任务成熟
+- 风险：`computer_use_runtime_trace_available=true` 容易被误读成模型已经能稳定完成任意桌面任务，但它只证明“模型请求-工具调用-工具结果-工具内部摘要”可以被记录和查询。
+- 事实：当前 `/computer maturity` 仍显示 `visual_quality_acceptance_passed=false`、`visual_correction_acceptance_passed=false`、`computer_use_runtime_trace_semantic_complete=false`，所以整体成熟度不能说完成。
+- 控制：后续删除旧代码或升级视觉纠偏前，必须先看 runtime reachability 分类和真实终端 run 证据，不能只凭文件名、旧记忆或单个 maturity 字段判断。
+
+## 2026-06-07 Fixed: controller 聚焦窗口时空句柄导致真实终端验收失败
+- 现象：真实可见终端 controller 第一次跑 Phase131 场景时失败于 `Cannot convert argument "hWnd", with value: "", for "ShowWindowAsync" to type "System.IntPtr"`。
+- 根因：`Get-AgentWindowProcess` 查到窗口后，`Activate-AgentWindow` 没有在调用 Win32 聚焦 API 前重新刷新和二次检查句柄；Windows Terminal/cmd 启动窗口句柄存在短暂竞态。
+- 修复：调用 `ShowWindowAsync` 前刷新 `$TerminalWindow`，若句柄为 `[IntPtr]::Zero` 则等待、重新枚举窗口并进入下一轮聚焦尝试。
+- 验证：PowerShell 语法检查通过，真实可见终端 controller 和独立 verifier 均通过 Phase131 maturity 场景。
+
+## 2026-06-07 Fixed/Risk: Phase69/103/107/108/109 legacy compatibility files caused misrouting risk
+
+- Symptom: 项目里同时存在统一 resolver/backend 和旧 Phase 兼容文件时，后续开发者容易误接 `generic_app_discovery.py`、`interactive_launch_target.py` 等旧入口，导致模型主循环、discover 工具和 launch resolver 的真实路径被误判。
+- Root cause confirmed by source: 当前核心 discover/launch 设计已经转向 `windows_app_inventory.py`、`windows_launch_resolver.py`、`generic_launch_backend.py`，但旧文件名仍保留并被部分测试/交互 selfcheck 引用。
+- Fix: 删除第一批旧兼容文件，并把仍需要保留的兼容 API 做成统一模块里的薄别名或薄类；同步更新测试和真实终端场景 token，让验收指向当前统一入口。
+- Guard: 已跑生产旧模块引用扫描，排除 test/tests/runs 后没有生产代码继续导入旧模块路径；全量 Computer Use unittest 453 个通过。
+- Remaining risk: 这只是第一批瘦身。项目里仍可能存在“代表性样例”“历史验收”“兼容命令”这类容易误导的文件，需要下一批继续按 runtime reachability 分类迁移，而不是一次性粗暴删除。
+
+## 2026-06-07 Fixed/Risk: LearningAgent 主类残留旧预执行入口会让模型主循环设计被误接回旧 runtime
+
+- Symptom: `LearningAgent.run()` 已经不调用 `_desktop_task_runtime_answer_from_prompt()`，但函数本体仍在主类里，后续开发者或压缩后的上下文可能把它误当成当前 `/computer use --full` 自然语言入口。
+- Root cause confirmed by source: 该函数会在模型主循环前用 Python 分类器把普通桌面任务交给 `ComputerUseDesktopTaskRuntime.run_prompt()`，这与当前“模型看到自然语言、工具 schema、截图和工具结果后自己规划”的设计方向冲突。
+- Fix: 删除 `_desktop_task_runtime_answer_from_prompt()` 和只服务它的 `_format_desktop_task_runtime_answer()`；maturity 矩阵用 AST 验证旧函数本体不存在，并输出 `preloop_desktop_runtime_method_removed=true`。
+- Guard: 矩阵测试同时检查顶层字段、模型主循环子报告、AST 源码自检和 CLI token，避免只改打印不改真实源码事实。
+- Boundary: `_desktop_task_runtime_for_current_run()` 暂时保留，因为它仍被当前回归用于构造和验证默认 runtime 工厂；后续若要继续瘦身，应先迁移这部分验收职责再删除。
+
+## 2026-06-07 Note: acceptance controller ScenarioPath is relative to controller directory
+
+- Observation: Running controller with `-ScenarioPath .\learning_agent\acceptance_controller\scenarios\...` from repo root caused the script to search under `learning_agent\acceptance_controller\learning_agent\acceptance_controller\...`.
+- Boundary: This was a controller invocation path issue before agent startup, not a failure of `/computer use --full` or the Phase124 resolver scenario.
+- Working command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath .\scenarios\agent_capability_phase124_windows_launch_resolver.json`.
+## 2026-06-07 Fixed/Risk: LearningAgent 主类残留默认 runtime 工厂会继续误导 Computer Use 主线
+
+- Symptom: `_desktop_task_runtime_for_current_run()` 虽然不负责用户自然语言预执行，但仍挂在 `LearningAgent` 主类上，容易让后续开发者或上下文压缩后的 agent 误判为当前 `/computer use --full` 的主线入口。
+- Root cause confirmed by source and red test: 相关回归测试仍通过 `agent._desktop_task_runtime_for_current_run()` 构造默认 runtime，导致旧主类职责被测试继续固化。
+- Fix: 将默认 runtime 构造迁移为 `computer_use.desktop_task_runtime.build_default_desktop_task_runtime(workspace)`，删除 `LearningAgent._desktop_task_runtime_for_current_run()`，并让 maturity AST 同时验证旧主类方法不存在、新模块级工厂存在。
+- Guard: focused regression 47 OK、full Computer Use regression 453 OK、matrix probe 显示 `agent_runtime_factory_method_removed=True` 和 `default_desktop_task_runtime_factory_available=True`。
+- Remaining boundary: 这只解决主类职责瘦身和误接风险，不解决任意视觉任务质量、自动擦除纠偏和复杂软件工作流成熟度。
+## 2026-06-07 Phase135 Fixed risk: ordinary app inventory was capped at 50
+
+- 问题：普通应用 discover 库存层存在旧 50 个候选默认上限，用户后续安装的新普通应用可能因为排序靠后而不被 `/computer use --full` 默认发现；如果没有这条风险记录，后续可能再次把“上下文显示数量控制”误当成“应用发现范围限制”。
+- 根因：`windows_app_inventory.py` 的库存构建和 `core/agent.py::_computer_discover()` 的默认 `max_results=10` 共同造成默认查询不是全量；如果没有这条根因记录，修复可能只改 schema 或只改测试，实际入口仍会截断。
+- 修复：库存层和 query 层默认 `max_count=None`，discover 入口省略数量时不限制，schema 改为省略返回所有清洗后的普通应用候选；如果没有这条修复记录，后续读代码容易误判为仍有隐形上限。
+- 防回归：maturity 新增 `legacy_fifty_app_inventory_limit_removed=true`、`ordinary_launchable_apps_unlimited_inventory=true`、`computer_discover_default_unlimited_ordinary_apps=true`、`computer_discover_schema_default_unlimited_ordinary_apps=true`；如果没有这条防回归记录，`/computer maturity` 无法把旧限制回归变成显式失败。
+- 剩余风险：真实可见终端交互验收尚未在本条记录写入时完成，不能把本轮变更称为最终验收通过；如果没有这条剩余风险，最终回复可能违反真实终端验收门禁。
+## 2026-06-07 Phase135 acceptance closure
+
+- 已关闭风险：普通应用 discover 旧 50 上限已通过自动化测试、`/computer maturity` token 门禁、真实可见终端 controller 和独立 verifier 共同验证；如果没有这条关闭记录，后续可能继续把本轮问题当成未确认风险。
+- 保留边界：这只关闭“普通应用候选默认全量发现”的风险，不关闭视觉质量、视觉纠偏或任意 GUI 任务质量成熟风险；如果没有这条边界，后续可能把 app inventory 放开误读成整个 `/computer use --full` 已完全成熟。
+
+## 2026-06-07 Fixed/Risk: WeChat ordinary app launch failed in `/computer use --full`
+- 问题：用户输入“请帮我打开本机电脑微信”时，微信本应属于普通应用，但 full 模式可能停在 discover、不启动，或启动后因代理进程窗口 pid 不一致导致 `visible_window_verified=false`。
+- 根因：开始菜单候选与 AppX/可执行身份的别名没有合并；桌面任务 router 对“本机电脑微信”这类没有“软件/应用”泛词的真实中文说法识别不足；窗口归属探针只按启动 pid 绑定，无法处理微信这类代理/多进程窗口。
+- 修复：合并微信别名，抽取通用中文本地应用名，约束模型主循环 discover 后调用 `computer_action launch_app`，并增加代理窗口绑定审计字段。
+- 防回归：新增 phase136 微信 inventory/router/proxy-window 单测和真实 controller 场景，真实验收硬断言包含 `real_launch_performed=True`、`visible_window_verified=True`、`launch_backend=start_menu_shortcut`、`display_name=微信`。
+- 边界：此风险已对微信基础打开链路关闭，但复杂登录、账号输入和任意应用深层工作流仍需按应用/任务继续做真实终端验收。
+
+## 2026-06-07 Fixed/Risk: WeChat acceptance used debug log instead of production event evidence
+- 问题：微信 full 模式场景把 `real_launch_performed`、`visible_window_verified`、`launch_backend`、`display_name` 放在 `debug_log_contains`，这会让开发阶段看起来严格，但产品关闭调试日志后无法继续验收真实启动。
+- 根因：`computer_action` 的真实结果没有写入正式 acceptance event，controller 只能退而求其次搜索 `latest_run_readable.md`。
+- 修复：`LearningAgent._computer_action()` 新增 `computer_action_result` 事件，结构化 payload 从 `result.data` 抽取真实启动、窗口可见、启动后端和应用显示名；微信场景改为只检查正式事件 payload，`debug_log_checks` 为空。
+- 防回归：新增 observability 单测验证微信场景不再依赖 debug log，并验证 payload helper 能从嵌套 `phase108_report.launch_plan` 抽取 `start_menu_shortcut` 和 `微信`。
+- 真实验收：`computer_use_full_open_wechat_probe-20260607_160958/result.json` 通过，event payload checks 中 `"real_launch_performed":true`、`"visible_window_verified":true`、`"launch_backend":"start_menu_shortcut"`、`"display_name":"微信"` 全部为 true。
+
+## 2026-06-07 Fixed/Risk: Phase74 representative E2E matrix was exe-only after launch resolver became multi-backend
+- 问题：完整 Windows Computer Use 回归失败于 Phase74/75，`explorer_scenario=false`、`browser_scenario=false`、`representative_real_apps_passed=false`。
+- 根因：当前 `build_launch_plan("explorer")` 和 `build_launch_plan("msedge")` 会返回安全的 `start_menu_shortcut` 计划，但 Phase74 旧合同仍要求 `launch_plan.executable == explorer.exe/msedge.exe`。
+- 修复：Phase74 新增 resolver 目标身份匹配 helper，先验证 `safe_to_launch`、`resolver_used`、无注册表/系统设置/管理员/shell 字符串风险，再接受 exe、规范 app_name、display_name 或 shortcut_id 命中目标。
+- 防回归：Phase74/75 7 个测试恢复通过，完整 `python -m unittest discover -s learning_agent\tests -p "test_windows_computer_use_*.py"` 463 个测试通过。

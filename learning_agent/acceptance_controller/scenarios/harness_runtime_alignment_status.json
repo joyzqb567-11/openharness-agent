@@ -1,0 +1,35 @@
+{
+  "name": "harness_runtime_alignment_status",
+  "output_prefix": "harness_runtime_alignment_status",
+  "window_title_prefix": "LearningAgent-Controller-HarnessRuntime",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 30,
+  "success_marker": "HARNESS_RUNTIME_ALIGNMENT_READY",
+  "prompt_lines": [
+    "请执行一次 harness runtime 真实终端验收，最终回答必须包含固定标记：HARNESS_RUNTIME_ALIGNMENT_READY。",
+    "请只使用 read 工具读取 learning_agent/runtime/session_runtime.py、learning_agent/runtime/command_queue.py、learning_agent/runtime/task_registry.py、learning_agent/harness/cli.py，确认当前 agent.run 已经接入 session runtime、RuntimeCommandQueue、TaskRegistry 和 harness CLI。",
+    "不要使用 bash、write、edit 或浏览器工具；本场景只验证真实终端 agent 启动、源码可见、最终回答可观测，落盘结果由外部验收器读取 memory/harness 和 memory/runtime 确认。",
+    "最终回答请简短说明你看到的结果，并必须包含：HARNESS_RUNTIME_ALIGNMENT_READY、run_agent_with_harness_session、RuntimeCommandQueue、TaskRegistry、queue、tasks、events。"
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/runtime/session_runtime.py",
+    "learning_agent/runtime/command_queue.py",
+    "learning_agent/runtime/task_registry.py",
+    "learning_agent/harness/cli.py"
+  ],
+  "event_answer_contains": [
+    "HARNESS_RUNTIME_ALIGNMENT_READY",
+    "run_agent_with_harness_session",
+    "RuntimeCommandQueue",
+    "TaskRegistry",
+    "queue",
+    "tasks",
+    "events"
+  ]
+}

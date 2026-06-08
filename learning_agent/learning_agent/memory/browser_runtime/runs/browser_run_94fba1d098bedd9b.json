@@ -1,0 +1,24 @@
+{
+  "run_id": "browser_run_94fba1d098bedd9b",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_flow_run",
+  "status": "completed",
+  "current_stage_id": "browser_flow_run",
+  "completed_stage_ids": [
+    "browser_flow_run"
+  ],
+  "action_ids": [
+    "browser_run_94fba1d098bedd9b-action-1",
+    "browser_run_94fba1d098bedd9b-action-2"
+  ],
+  "observation_ids": [],
+  "summary": "browser_flow_run 完成\nflow_id=browser_flow_1780287611230\ncompleted=true\nskipped=\nwait_for_example_domain_checkpoint: success output=browser_wait 成功\npage_id=page-1\nURL：https://example.com/\n文本检查：固定等待 250 毫秒",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780287610867,
+  "updated_at_ms": 1780287611565
+}

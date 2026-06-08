@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_c4d6150236103a0b",
+  "prompt": "/chrome/chrome",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "/chrome/chrome",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Codex OAuth/API 调用失败：HTTP 400: {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'learning_agent_model_message': In context=('properties', 'tool_calls', 'items', 'anyOf', '7', 'properties', 'arguments', 'properties', 'submit', 'type', '4'), 'additionalProperties' is required to be supplied and to be false.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n}",
+      "started_at": "2026-06-02T11:42:25Z",
+      "completed_at": "2026-06-02T11:42:37Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T11:42:25Z",
+  "updated_at": "2026-06-02T11:42:37Z"
+}

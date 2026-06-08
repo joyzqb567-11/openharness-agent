@@ -1,0 +1,3 @@
+"""OS 级 Computer Use 能力包。"""  # 新增代码+OSComputerUse: 标记 computer_use 是可导入包；若没有这行代码，旧版 Python 运行方式可能无法稳定导入子模块。
+from learning_agent.computer_use.controller import ComputerUseActionResult, ComputerUseController, MemoryComputerUseBackend, UnavailableComputerUseBackend, WindowsComputerUseBackend, build_default_computer_use_backend  # 修改代码+Phase8ProductionEdges: 对外暴露控制器、测试后端、安全默认后端、Windows 后端和工厂；如果没有这行代码，调用方需要知道内部文件路径。
+__all__ = ["ComputerUseActionResult", "ComputerUseController", "MemoryComputerUseBackend", "UnavailableComputerUseBackend", "WindowsComputerUseBackend", "build_default_computer_use_backend"]  # 修改代码+Phase8ProductionEdges: 限定包的公开导出名称；如果没有这行代码，from package import * 会遗漏新增工厂或暴露内部杂项。

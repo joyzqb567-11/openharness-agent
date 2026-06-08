@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_c1178dcf53fa16fd",
+  "prompt": "Please run one Phase 92 universal Windows Computer Use mode acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_mode import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_OK, the final answer's last line must completely copy: PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_READY PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_OK single_universal_runtime=true prompt_to_any_normal_app=true per_app_controller_required=false representative_apps_are_acceptance_only=true generic_observe_plan_act_verify_loop=true uses_observation_fusion=true uses_prompt_task_planner=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapter=true high_risk_requires_confirmation=true unauthorized_window_zero_events=true target_drift_blocks_action=true raw_text_hidden=true default_real_actions_enabled=false uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 92 universal Windows Computer Use mode acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_mode import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_OK, the final answer's last line must completely copy: PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_READY PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_OK single_universal_runtime=true prompt_to_any_normal_app=true per_app_controller_required=false representative_apps_are_acceptance_only=true generic_observe_plan_act_verify_loop=true uses_observation_fusion=true uses_prompt_task_planner=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapter=true high_risk_requires_confirmation=true unauthorized_window_zero_events=true target_drift_blocks_action=true raw_text_hidden=true default_real_actions_enabled=false uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 92 universal Windows Computer Use mode acceptance completed successfully.\n\nPHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_READY PHASE92_UNIVERSAL_WINDOWS_COMPUTER_USE_OK single_universal_runtime=true prompt_to_any_normal_app=true per_app_controller_required=false representative_apps_are_acceptance_only=true generic_observe_plan_act_verify_loop=true uses_observation_fusion=true uses_prompt_task_planner=true uses_generic_action_layer=true uses_real_app_safety_boundary=true uses_production_host_adapt",
+      "started_at": "2026-06-04T03:23:17Z",
+      "completed_at": "2026-06-04T03:23:31Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T03:23:17Z",
+  "updated_at": "2026-06-04T03:23:31Z"
+}

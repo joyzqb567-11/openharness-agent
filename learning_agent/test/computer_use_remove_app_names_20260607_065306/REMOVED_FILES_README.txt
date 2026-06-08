@@ -1,0 +1,1 @@
+﻿本目录保存删除前后的学习快照：正式源码已删除 learning_agent/computer_use/app_names.py 和 learning_agent/tests/test_windows_computer_use_app_names_phase121.py；统一入口改为 windows_app_inventory.py。

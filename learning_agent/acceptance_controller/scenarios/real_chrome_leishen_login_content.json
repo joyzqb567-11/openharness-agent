@@ -1,0 +1,53 @@
+{
+  "name": "real_chrome_leishen_login_content",
+  "output_prefix": "real_chrome_leishen_login_content",
+  "window_title_prefix": "LearningAgent-Controller-Leishen",
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 20,
+  "success_marker": "REAL_CHROME_LEISHEN_LOGIN_CONTENT_OK",
+  "max_permission_sent_count": 0,
+  "prompt_lines": [
+    "Run a real visible Google Chrome login acceptance test. Start the final answer with REAL_CHROME_LEISHEN_LOGIN_CONTENT_OK only after the real browser steps have run.",
+    "Use only learning_agent tools through browser_connect_real_chrome. Do not use web_search, fetch_url, browser_launch_visible, independent Chromium, browser_evaluate, browser_console, browser_network, cookies, localStorage, sessionStorage, tokens, or authorization headers.",
+    "Turn 1: only read learning_agent/skills/tool_list.md. Next turn: only read learning_agent/skills/real_chrome/SKILL.md. Next turn: call browser_profile_status. Next turn: call browser_connect_real_chrome.",
+    "Call browser_connect_real_chrome with confirm_real_profile=true, debug_port=9340, user_data_dir=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\leishen_login_profile_v8, profile_directory=Default.",
+    "After connection succeeds, open http://gd-h5ly-web01.leishenhuyu.com/gt_h5ly/?r_plat=h5kunyou-1003007029&r_bid=1003007000&r_host=hskd-h5lianyun-sdk.leishenhuyu.com, wait 6000 ms, and call browser_snapshot once.",
+    "Immediately after that snapshot, call browser_flow_run once with stages_file=\"acceptance_controller/scenarios/real_chrome_leishen_login_flow.md\" and continue_on_error=false. Do not read the flow file with read or bash.",
+    "The account must be typed by browser_type_secret from LEARNING_AGENT_TEST_LOGIN_ACCOUNT. The password must be typed by browser_type_secret from LEARNING_AGENT_TEST_LOGIN_PASSWORD. Never print the account or password values.",
+    "Never click Quick Trial, Quick Register, or Forgot Password. Guest or visitor login is failure, not success.",
+    "Final answer must not include the account or password. Final answer must include REAL_CHROME_LEISHEN_LOGIN_CONTENT_OK, real_chrome_connected=true, browser_connect_real_chrome, browser_open, browser_snapshot, browser_flow_run, browser_click, browser_type_secret, browser_wait, browser_screenshot, and the visible page contents after the login attempt."
+  ],
+  "required_event_states": [
+    "permission_auto_approved",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "REAL_CHROME_LEISHEN_LOGIN_CONTENT_OK",
+    "real_chrome_leishen_login_flow.md",
+    "mcp__browser_automation__browser_profile_status",
+    "mcp__browser_automation__browser_connect_real_chrome",
+    "browser_connect_real_chrome 成功",
+    "real_chrome_connected=true",
+    "mcp__browser_automation__browser_open",
+    "browser_open 成功",
+    "gd-h5ly-web01.leishenhuyu.com",
+    "mcp__browser_automation__browser_snapshot",
+    "browser_snapshot 成功",
+    "mcp__browser_automation__browser_flow_run",
+    "browser_flow_run 完成",
+    "browser_click 成功",
+    "mcp__browser_automation__browser_type_secret",
+    "browser_type_secret 成功",
+    "browser_wait 成功",
+    "browser_screenshot 成功",
+    "leishen_after_account_login_v8.png"
+  ],
+  "event_answer_contains": [
+    "登录",
+    "[已脱敏]",
+    "修改密码"
+  ]
+}

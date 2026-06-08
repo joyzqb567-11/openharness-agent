@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_e4cf70165e8aa926",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已使用 Computer Use 在真实本机 Microsoft Paint 应用中完成操作。证据包括：\n\n- 多次 `computer_action` 返回成功，后端为 `windows_sendinput`，说明动作通过真实桌面输入注入执行。\n- 已有模型可见 screenshot，显示 Paint 画布上已出现绘制线条/轮廓。\n- 工具完成门槛提示 `computer_use_full_completion_ready`，并给出 `successful_real_action_count: 6`、`threshold: 6`。\n- 先前动作结果包含真实低层事件统计，例如 click 的 `low_level_event_count: 5`、drag_path 的 `low_level_event_count` 为 9、10、21 等，证明鼠标点击和拖拽确实发生在本机桌面上。\n- completion gate 明确要求不要继续调用鼠标键盘动作，避免过度加笔。\nComputer Use 真实执行摘要：\n- tool_path=computer_use; target_app=msp",
+      "started_at": "2026-06-06T15:46:30Z",
+      "completed_at": "2026-06-06T15:48:11Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T15:46:30Z",
+  "updated_at": "2026-06-06T15:48:11Z"
+}

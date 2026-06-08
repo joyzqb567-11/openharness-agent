@@ -1,0 +1,17 @@
+{
+  "action_id": "browser_run_86d130b38fe6c29a-action-1",
+  "run_id": "browser_run_86d130b38fe6c29a",
+  "stage_id": "browser_wait",
+  "tool_name": "browser_wait",
+  "arguments_redacted": {
+    "page_id": "page-1",
+    "milliseconds": 10,
+    "timeout_ms": 5000
+  },
+  "status": "completed",
+  "started_at_ms": 1780287776268,
+  "finished_at_ms": 1780287776284,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

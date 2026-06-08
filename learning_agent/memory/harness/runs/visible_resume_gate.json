@@ -1,0 +1,61 @@
+{
+  "run_id": "visible_resume_gate",
+  "prompt": "原始任务：真实终端恢复验收，请继续执行，不要重跑已完成阶段。",
+  "stages": [
+    {
+      "name": "completed_before_interrupt",
+      "prompt": "?????????????????",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "completed-before-interruption",
+      "started_at": "2026-05-31T10:01:30Z",
+      "completed_at": "2026-05-31T10:01:30Z"
+    },
+    {
+      "name": "resume_after_interrupt",
+      "prompt": "?????????????",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "needs_review",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "interrupted-before-visible-terminal",
+      "started_at": "2026-05-31T10:01:30Z",
+      "completed_at": ""
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "queued",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T10:01:30Z",
+  "updated_at": "2026-05-31T10:01:54Z"
+}

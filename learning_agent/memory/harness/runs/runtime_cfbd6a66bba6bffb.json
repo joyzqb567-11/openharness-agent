@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_cfbd6a66bba6bffb",
+  "prompt": "请执行一次 Phase 27 Windows Computer Use 协议验收：只验证 computer_observe 和未知窗口拒绝，不要移动鼠标，不要点击真实桌面，不要调用 computer_action，最终回答必须包含固定标记：PHASE27_COMPUTER_PROTOCOL_READY。 你必须调用终端工具执行这个只读命令验证协议：python -c \"from learning_agent.computer_use.controller import ComputerUseController, MemoryComputerUseBackend; c=ComputerUseController(backend=MemoryComputerUseBackend(windows=[{'app_id':'notepad','window_id':'win-1','title':'记事本'}])); r=c.observe({'action':'list_windows'}); assert r.ok; assert r.data['windows'][0]['window_id']=='win-1'; bad=c.execute({'action':'click','confirm_desktop_control':True,'window':{'app_id':'notepad','window_id':'ghost'},'x':1,'y':2}); assert not bad.ok; assert len(c.backend.actions)==0; print('PHASE27_COMPUTER_PROTOCOL_OK observe='+str(r.ok).lower()+' reject_unknown='+str((not bad.ok)).lower()+' backend_actions='+str(len(c.backend.actions)))\" 不要提前最终回答；只有终端命令成功输出 PHASE27_COMPUTER_PROTOCOL_OK 后，最终回答最后一行必须完整复制：PHASE27_COMPUTER_PROTOCOL_READY PHASE27_COMPUTER_PROTOCOL_OK observe=true reject_unknown=true backend_actions=0",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 27 Windows Computer Use 协议验收：只验证 computer_observe 和未知窗口拒绝，不要移动鼠标，不要点击真实桌面，不要调用 computer_action，最终回答必须包含固定标记：PHASE27_COMPUTER_PROTOCOL_READY。 你必须调用终端工具执行这个只读命令验证协议：python -c \"from learning_agent.computer_use.controller import ComputerUseController, MemoryComputerUseBackend; c=ComputerUseController(backend=MemoryComputerUseBackend(windows=[{'app_id':'notepad','window_id':'win-1','title':'记事本'}])); r=c.observe({'action':'list_windows'}); assert r.ok; assert r.data['windows'][0]['window_id']=='win-1'; bad=c.execute({'action':'click','confirm_desktop_control':True,'window':{'app_id':'notepad','window_id':'ghost'},'x':1,'y':2}); assert not bad.ok; assert len(c.backend.actions)==0; print('PHASE27_COMPUTER_PROTOCOL_OK observe='+str(r.ok).lower()+' reject_unknown='+str((not bad.ok)).lower()+' backend_actions='+str(len(c.backend.actions)))\" 不要提前最终回答；只有终端命令成功输出 PHASE27_COMPUTER_PROTOCOL_OK 后，最终回答最后一行必须完整复制：PHASE27_COMPUTER_PROTOCOL_READY PHASE27_COMPUTER_PROTOCOL_OK observe=true reject_unknown=true backend_actions=0",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 27 Windows Computer Use 协议验收通过。\n\nPHASE27_COMPUTER_PROTOCOL_READY PHASE27_COMPUTER_PROTOCOL_OK observe=true reject_unknown=true backend_actions=0",
+      "started_at": "2026-06-02T15:31:15Z",
+      "completed_at": "2026-06-02T15:31:26Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T15:31:15Z",
+  "updated_at": "2026-06-02T15:31:26Z"
+}

@@ -1,4 +1,4 @@
-﻿"Model, Codex CLI, and OAuth tests."  # Stage14: this file owns the models_codex_oauth test group.
+"Model, Codex CLI, and OAuth tests."  # Stage14: this file owns the models_codex_oauth test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.
@@ -116,6 +116,25 @@ class ModelsCodexOAuthTests(LearningAgentTestBase):  # Stage14: unittest discove
         self.assertNotIn("工具参数只能使用 path、content、text", body["instructions"])  # 新增代码+MCP参数适配回归: 断言旧错误指令不再出现；若省略: 模型可能仍被文字提示诱导传 text
         self.assertIn("不要输出不属于当前工具的参数", body["instructions"])  # 新增代码+OutputProtocolV2: 断言 OAuth prompt 明确禁止无关工具参数；若没有这行代码，真实 API 路径可能没有收到 Phase 2 指令
         self.assertNotIn("不属于本次工具的参数请写 null", body["instructions"])  # 新增代码+OutputProtocolV2: 断言旧共享 arguments 的 null 占位规则已移除；若没有这行代码，模型会同时收到新旧冲突指令
+    def test_oauth_request_sends_computer_use_screenshot_as_native_image_input(self) -> None:  # 新增代码+ComputerUseVisionLoop：函数段开始，验证 Computer Use 截图不会只变成文本日志；如果没有这个测试，模型主循环可能看不到真实屏幕像素，作者意图是锁住 ClaudeCode 式“截图进入模型”的边界，本段到断言 prompt 不包含 base64 原文结束。
+        model = CodexOAuthChatModel(model="gpt-5.5", token_store=FakeOAuthTokenStore(None))  # 新增代码+ComputerUseVisionLoop：创建不会联网的 OAuth 模型实例；如果没有这一行，测试无法调用真实请求体构造函数。
+        screenshot_url = "data:image/png;base64,cGhhc2U0MV92aXNpb25fbG9vcA=="  # 新增代码+ComputerUseVisionLoop：准备一段模拟截图 data URL；如果没有这一行，测试没有可被转换成 input_image 的图片输入。
+        messages = [  # 新增代码+ComputerUseVisionLoop：构造模型主循环会传入 OAuth 层的消息列表；如果没有这一行，测试无法复现 Computer Use 工具结果回灌场景。
+            {  # 新增代码+ComputerUseVisionLoop：第一条消息对象开始；如果没有这一行，Python 字典结构不完整。
+                "role": "user",  # 新增代码+ComputerUseVisionLoop：使用 user role 承载截图观察；如果没有这一行，Responses input 会缺少消息身份语义。
+                "content": [  # 新增代码+ComputerUseVisionLoop：使用多模态 content 数组；如果没有这一行，图片块无法和说明文本一起进入模型输入。
+                    {"type": "text", "text": "Computer Use screenshot pixels for the next observe-plan-act step."},  # 新增代码+ComputerUseVisionLoop：给图片补充简短文字说明；如果没有这一行，模型看到图片时缺少上下文来源。
+                    {"type": "image_url", "image_url": {"url": screenshot_url, "detail": "high"}},  # 新增代码+ComputerUseVisionLoop：模拟 agent.py 注入的截图图片块；如果没有这一行，测试不会覆盖真实视觉输入转换。
+                ],  # 新增代码+ComputerUseVisionLoop：content 数组结束；如果没有这一行，Python 列表语法不完整。
+            }  # 新增代码+ComputerUseVisionLoop：消息对象结束；如果没有这一行，Python 字典语法不完整。
+        ]  # 新增代码+ComputerUseVisionLoop：消息列表结束；如果没有这一行，测试输入无法传给请求体构造器。
+        body = model._build_responses_body(messages=messages, tools=[])  # 新增代码+ComputerUseVisionLoop：构造真实 OAuth Responses 请求体；如果没有这一行，测试只能检查中间结构而不能证明真实 API 边界。
+        content_blocks = body["input"][0]["content"]  # 新增代码+ComputerUseVisionLoop：读取真正发给 Responses API 的 content blocks；如果没有这一行，后续断言找不到检查对象。
+        image_blocks = [block for block in content_blocks if block.get("type") == "input_image"]  # 新增代码+ComputerUseVisionLoop：筛出原生图片输入块；如果没有这一行，测试无法判断图片是否真的被模型视觉通道接收。
+        self.assertEqual(image_blocks, [{"type": "input_image", "image_url": screenshot_url, "detail": "high"}])  # 新增代码+ComputerUseVisionLoop：断言截图以原生 input_image 形式发送；如果没有这一行，base64 图片可能继续只躺在文本里。
+        text_blocks = [block for block in content_blocks if block.get("type") == "input_text"]  # 新增代码+ComputerUseVisionLoop：筛出文本 prompt 块；如果没有这一行，测试无法检查 prompt 是否重复塞入大图 base64。
+        self.assertTrue(text_blocks)  # 新增代码+ComputerUseVisionLoop：断言结构化 prompt 仍然存在；如果没有这一行，修图像输入时可能误删工具 schema 和消息说明。
+        self.assertNotIn(screenshot_url, text_blocks[0]["text"])  # 新增代码+ComputerUseVisionLoop：断言 base64 图片不会重复写进文本 prompt；如果没有这一行，长截图会浪费 token 并干扰模型注意力。
     def test_codex_adapter_instructions_keep_contract_for_prompt_context_v1(self) -> None:  # 新增代码+PromptContextV1: 验证 Codex-facing instructions 保留 JSON 输出契约；若省略: 提示词升级可能破坏工具调用格式
         model = CodexOAuthChatModel(model="gpt-test", token_store=FakeOAuthTokenStore(None), post_json=lambda url, headers, body: {}, login_callback=lambda: CodexOAuthTokens(access_token="a", refresh_token="r", expires_at=0))  # 新增代码+PromptContextV1: 构造不会联网的 OAuth 模型；若省略: 测试可能触发真实登录或 HTTP 请求
         instructions = model._build_instructions()  # 新增代码+PromptContextV1: 读取 Codex 后端会收到的顶层 instructions；若省略: 无法检查输出契约是否仍稳定
@@ -127,7 +146,7 @@ class ModelsCodexOAuthTests(LearningAgentTestBase):  # Stage14: unittest discove
         self.assertIn("真实 Chrome", instructions)  # 修改代码+真实浏览器误判: 断言适配器 prompt 保留真实 Chrome 高风险硬约束；若没有这行代码，真实 profile workflow 可能只靠运行规则提示而被忽略
         self.assertIn("当前浏览器", instructions)  # 新增代码+真实浏览器误判: 断言适配器 prompt 覆盖当前浏览器/登录态路线；若没有这行代码，当前已登录窗口需求可能被普通浏览器替代
     def test_cli_run_response_can_emit_json_for_codex(self) -> None:  # 新增代码+CLI接口: 验证一次性 CLI 输出能被 Codex 解析；若没有这行代码，CLI 只能给人读而不适合自动化接收
-        payload_text = format_cli_run_response(answer="pong", output_json=True, workspace=Path("D:/demo"), visible_tools=["read", "bash"])  # 新增代码+CLI接口: 生成 JSON 模式输出；若没有这行代码，测试没有可解析的 CLI 返回样本
+        payload_text = format_cli_run_response(answer="pong", output_json=True, workspace=Path("H:/demo"), visible_tools=["read", "bash"])  # 修改代码+H盘路径示例: 使用 H 盘示例路径避免旧盘符误导后续排查；若没有这行代码，JSON 输出测试没有可解析的工作区样本
         payload = json.loads(payload_text)  # 新增代码+CLI接口: 用标准 JSON 解析验证输出严格可机器读取；若没有这行代码，字符串看似 JSON 但可能不可解析
         self.assertTrue(payload["ok"])  # 新增代码+CLI接口: 断言成功标记为真；若没有这行代码，Codex 无法快速判断命令是否成功
         self.assertEqual(payload["answer"], "pong")  # 新增代码+CLI接口: 断言最终回答进入 JSON；若没有这行代码，Codex 收不到 agent 的输出
@@ -445,6 +464,35 @@ class ModelsCodexOAuthTests(LearningAgentTestBase):  # Stage14: unittest discove
         self.assertIn("请读取 memory.md", str(calls[0]["body"]["input"]))  # 新增代码: 验证用户消息进入了 responses input
         self.assertEqual(message.tool_calls[0].name, "read_file")  # 新增代码: 验证 responses 输出被解析为内部工具调用
         self.assertEqual(message.tool_calls[0].arguments["path"], "memory.md")  # 新增代码: 验证工具参数被正确保留
+    def test_codex_oauth_model_retries_once_when_json_output_is_invalid(self) -> None:  # 新增代码+模型JSON恢复: 验证 OAuth 模型遇到坏 JSON 会自动修复重试一次；若没有这行代码，真实终端会反复停在“格式错误”。
+        calls: list[dict[str, object]] = []  # 新增代码+模型JSON恢复: 记录 fake HTTP 请求，方便断言确实发起了第二次模型调用；若没有这行代码，测试无法区分重试和单次成功。
+
+        def fake_post_json(url: str, headers: dict[str, str], body: dict[str, object]) -> dict[str, object]:  # 新增代码+模型JSON恢复: 定义可控响应函数；若没有这行代码，测试会触发真实网络请求。
+            calls.append({"url": url, "headers": headers, "body": body})  # 新增代码+模型JSON恢复: 保存请求体以检查修复提示；若没有这行代码，重试是否带上下文不可审计。
+            if len(calls) == 1:  # 新增代码+模型JSON恢复: 第一次模拟模型输出非法 JSON；若没有这行代码，无法复现本次真实验收失败。
+                return {"output_text": '{"decision_note":"坏输出","text":"","tool_calls":[{"name":"read_file","arguments":{"path":"memory.md"}'}  # 新增代码+模型JSON恢复: 返回缺少结尾括号的坏 JSON；若没有这行代码，解析器不会进入修复路径。
+            return {"output_text": '{"decision_note":"修复后请求工具","text":"","tool_calls":[{"name":"read_file","arguments":{"path":"memory.md"}}]}'}  # 新增代码+模型JSON恢复: 第二次返回合法工具调用；若没有这行代码，无法证明修复成功会继续任务。
+
+        token_store = FakeOAuthTokenStore(  # 新增代码+模型JSON恢复: 准备未过期 token，避免测试走刷新或网页登录分支；若没有这行代码，失败原因会被认证流程干扰。
+            CodexOAuthTokens(  # 新增代码+模型JSON恢复: 创建 token 数据对象；若没有这行代码，OAuth 模型没有可用凭据。
+                access_token="access-123",  # 新增代码+模型JSON恢复: 模拟 access token；若没有这行代码，请求头无法构造。
+                refresh_token="refresh-123",  # 新增代码+模型JSON恢复: 模拟 refresh token；若没有这行代码，token store 会被当成无效。
+                expires_at=9999999999999,  # 新增代码+模型JSON恢复: 设置远期过期时间；若没有这行代码，测试会先刷新 token。
+                account_id=None,  # 新增代码+模型JSON恢复: 本测试不需要账号头；若没有这行代码，构造函数参数不完整。
+            )  # 新增代码+模型JSON恢复: token 数据对象结束；若没有这行代码，Python 语法不完整。
+        )  # 新增代码+模型JSON恢复: token store 创建结束；若没有这行代码，Python 语法不完整。
+        model = CodexOAuthChatModel(  # 新增代码+模型JSON恢复: 创建 OAuth 模型并注入 fake HTTP；若没有这行代码，测试无法调用 chat。
+            model="gpt-5.5",  # 新增代码+模型JSON恢复: 指定模型名；若没有这行代码，请求体缺少可断言模型。
+            token_store=token_store,  # 新增代码+模型JSON恢复: 使用内存 token；若没有这行代码，测试会读写真实 token 文件。
+            post_json=fake_post_json,  # 新增代码+模型JSON恢复: 使用 fake HTTP；若没有这行代码，测试会联网。
+            login_callback=lambda: (_ for _ in ()).throw(RuntimeError("测试不应该触发网页登录")),  # 新增代码+模型JSON恢复: 误触发登录时立即失败；若没有这行代码，测试可能弹真实浏览器。
+        )  # 新增代码+模型JSON恢复: OAuth 模型创建结束；若没有这行代码，Python 语法不完整。
+        message = model.chat(messages=[{"role": "user", "content": "请读取 memory.md"}], tools=[])  # 新增代码+模型JSON恢复: 执行模型调用；若没有这行代码，修复逻辑不会运行。
+
+        self.assertEqual(len(calls), 2)  # 新增代码+模型JSON恢复: 断言第一次失败后只重试一次；若没有这行代码，可能出现无限重试或完全没有重试。
+        self.assertIn("上一轮模型输出不是合法 JSON", str(calls[1]["body"]["input"]))  # 新增代码+模型JSON恢复: 确认第二次请求携带修复提示；若没有这行代码，重试可能仍然重复坏输出。
+        self.assertEqual(message.tool_calls[0].name, "read_file")  # 新增代码+模型JSON恢复: 断言修复后工具调用被保留；若没有这行代码，自动修复可能只返回空文本。
+        self.assertEqual(message.tool_calls[0].arguments["path"], "memory.md")  # 新增代码+模型JSON恢复: 断言修复后的参数正确；若没有这行代码，工具可能拿不到目标文件。
     def test_codex_oauth_model_refreshes_expired_token_before_request(self) -> None:  # 新增代码: 测试 access token 过期时会先 refresh 再请求模型
         calls: list[dict[str, object]] = []  # 新增代码: 保存 fake HTTP 请求历史，方便确认调用顺序
 
@@ -720,6 +768,32 @@ class ModelsCodexOAuthTests(LearningAgentTestBase):  # Stage14: unittest discove
 
         self.assertFalse(fake_response.read_called)  # 新增代码+OAuth流读取: 验证没有整包读取；若省略: 无法防止长连接再次卡住
         self.assertEqual(parsed["output_text"], '{"text":"天气结果","tool_calls":[]}')  # 新增代码+OAuth流读取: 验证逐行读取仍能得到模型结构化文本；若省略: 只测不卡住不测结果正确
+
+    def test_codex_oauth_stream_reader_has_total_deadline_for_heartbeat_only_streams(self) -> None:  # 新增代码+OAuthSseDeadline: 函数段开始，验证 SSE 流只有心跳或未知事件时也会按总时长退出；如果没有这个测试，真实终端会继续卡在模型第 0 轮。
+        class FakeHeartbeatResponse:  # 新增代码+OAuthSseDeadline: 构造只返回心跳行的假响应；如果没有这个类，测试无法稳定复现后端不断发非完成事件的长连接。
+            def __init__(self) -> None:  # 新增代码+OAuthSseDeadline: 初始化假响应计数器；如果没有这段函数，测试无法证明读取循环确实持续了一段时间。
+                self.readline_count = 0  # 新增代码+OAuthSseDeadline: 记录 readline 被调用次数；如果没有这行代码，断言无法确认循环不是立即退出。
+
+            def readline(self) -> bytes:  # 新增代码+OAuthSseDeadline: 模拟 HTTPResponse.readline；如果没有这段函数，被测 SSE 读取器无法运行。
+                self.readline_count += 1  # 新增代码+OAuthSseDeadline: 每读取一次就增加计数；如果没有这行代码，无法观察 deadline 前循环推进。
+                return b": keep-alive\n"  # 新增代码+OAuthSseDeadline: 返回 SSE 心跳行但永远不给 done；如果没有这行代码，测试不会覆盖真实卡住条件。
+
+        class FakeClock:  # 新增代码+OAuthSseDeadline: 构造可控假时钟；如果没有这个类，测试需要真实等待超时，速度慢且不稳定。
+            def __init__(self) -> None:  # 新增代码+OAuthSseDeadline: 初始化当前时间；如果没有这段函数，假时钟没有起点。
+                self.now = 1000.0  # 新增代码+OAuthSseDeadline: 设置起始秒数；如果没有这行代码，time 函数没有返回值。
+
+            def time(self) -> float:  # 新增代码+OAuthSseDeadline: 提供和 time.monotonic 类似的接口；如果没有这段函数，被测函数无法注入时间来源。
+                self.now += 0.6  # 新增代码+OAuthSseDeadline: 每次读取时间都推进 0.6 秒；如果没有这行代码，deadline 永远不会到达。
+                return self.now  # 新增代码+OAuthSseDeadline: 返回推进后的时间；如果没有这行代码，调用方拿不到当前时间。
+
+        fake_response = FakeHeartbeatResponse()  # 新增代码+OAuthSseDeadline: 创建心跳响应；如果没有这行代码，测试没有被测输入。
+        fake_clock = FakeClock()  # 新增代码+OAuthSseDeadline: 创建可控时钟；如果没有这行代码，测试不能快速触发总截止。
+        model = CodexOAuthChatModel(model="gpt-5.5", token_store=FakeOAuthTokenStore(None), sse_read_timeout_seconds=1, monotonic=fake_clock.time)  # 新增代码+OAuthSseDeadline: 用 1 秒 deadline 创建模型；如果没有这行代码，测试会使用生产默认值而无法快速验证。
+
+        with self.assertRaisesRegex(TimeoutError, "SSE"):  # 新增代码+OAuthSseDeadline: 断言心跳流会抛出可识别的 SSE 超时；如果没有这行代码，读取器静默返回空文本也会误判通过。
+            model._read_sse_response_until_done(fake_response)  # 新增代码+OAuthSseDeadline: 调用生产 SSE 读取器；如果没有这行代码，测试没有执行真实逻辑。
+        self.assertGreater(fake_response.readline_count, 0)  # 新增代码+OAuthSseDeadline: 确认读取器确实尝试读取过流；如果没有这行代码，deadline 可能在读前误触发。
+    # 新增代码+OAuthSseDeadline: 函数段结束，test_codex_oauth_stream_reader_has_total_deadline_for_heartbeat_only_streams 到此结束；如果没有这个边界说明，用户不容易看出 SSE 总截止验收范围。
 
 
 if __name__ == "__main__":  # Stage14: allow running this test module directly.

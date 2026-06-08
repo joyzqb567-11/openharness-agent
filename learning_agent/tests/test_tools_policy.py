@@ -1,4 +1,4 @@
-﻿"Tool catalog, tool policy, atom tool, and output protocol tests."  # Stage14: this file owns the tools_policy test group.
+"Tool catalog, tool policy, atom tool, and output protocol tests."  # Stage14: this file owns the tools_policy test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.

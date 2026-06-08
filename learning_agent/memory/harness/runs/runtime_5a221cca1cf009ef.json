@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_5a221cca1cf009ef",
+  "prompt": "请执行一次 Browser Provider Router Stage 1 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ROUTER_STAGE1_READY。 你必须调用 bash 执行这个命令验证 provider router 协议层：python -c \"from learning_agent.browser.providers import BrowserProviderRouter, BrowserProviderHealth, BrowserProviderKind, build_provider_decision_event; r=BrowserProviderRouter(); h={BrowserProviderKind.CHROME_EXTENSION: BrowserProviderHealth.unavailable(BrowserProviderKind.CHROME_EXTENSION,'extension_not_connected'), BrowserProviderKind.REAL_CHROME_CDP: BrowserProviderHealth.available(BrowserProviderKind.REAL_CHROME_CDP)}; d=r.decide_provider(user_input='当前浏览器 login state', tool_name='browser_snapshot', arguments={}, provider_health=h, allow_cdp_fallback=True); p=build_provider_decision_event(d); assert d.provider==BrowserProviderKind.REAL_CHROME_CDP; assert p['schema_version']==1; assert p['reason_code']=='extension_unavailable_cdp_fallback_allowed'; assert p['metadata']['fallback_from']=='chrome_extension'; print('PROVIDER_ROUTER_STAGE1_OK provider='+p['provider']+' reason_code='+p['reason_code']+' schema_version='+str(p['schema_version'])+' fallback_from='+p['metadata']['fallback_from'])\" 不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ROUTER_STAGE1_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ROUTER_STAGE1_READY PROVIDER_ROUTER_STAGE1_OK provider=real_chrome_cdp reason_code=extension_unavailable_cdp_fallback_allowed schema_version=1 fallback_from=chrome_extension",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Browser Provider Router Stage 1 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_PROVIDER_ROUTER_STAGE1_READY。 你必须调用 bash 执行这个命令验证 provider router 协议层：python -c \"from learning_agent.browser.providers import BrowserProviderRouter, BrowserProviderHealth, BrowserProviderKind, build_provider_decision_event; r=BrowserProviderRouter(); h={BrowserProviderKind.CHROME_EXTENSION: BrowserProviderHealth.unavailable(BrowserProviderKind.CHROME_EXTENSION,'extension_not_connected'), BrowserProviderKind.REAL_CHROME_CDP: BrowserProviderHealth.available(BrowserProviderKind.REAL_CHROME_CDP)}; d=r.decide_provider(user_input='当前浏览器 login state', tool_name='browser_snapshot', arguments={}, provider_health=h, allow_cdp_fallback=True); p=build_provider_decision_event(d); assert d.provider==BrowserProviderKind.REAL_CHROME_CDP; assert p['schema_version']==1; assert p['reason_code']=='extension_unavailable_cdp_fallback_allowed'; assert p['metadata']['fallback_from']=='chrome_extension'; print('PROVIDER_ROUTER_STAGE1_OK provider='+p['provider']+' reason_code='+p['reason_code']+' schema_version='+str(p['schema_version'])+' fallback_from='+p['metadata']['fallback_from'])\" 不要提前最终回答；只有 bash 命令成功输出 PROVIDER_ROUTER_STAGE1_OK 后，最终回答最后一行必须完整复制：BROWSER_PROVIDER_ROUTER_STAGE1_READY PROVIDER_ROUTER_STAGE1_OK provider=real_chrome_cdp reason_code=extension_unavailable_cdp_fallback_allowed schema_version=1 fallback_from=chrome_extension",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "真实可见终端验收已通过。\n\nBROWSER_PROVIDER_ROUTER_STAGE1_READY PROVIDER_ROUTER_STAGE1_OK provider=real_chrome_cdp reason_code=extension_unavailable_cdp_fallback_allowed schema_version=1 fallback_from=chrome_extension",
+      "started_at": "2026-06-01T08:58:02Z",
+      "completed_at": "2026-06-01T08:58:18Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T08:58:02Z",
+  "updated_at": "2026-06-01T08:58:18Z"
+}

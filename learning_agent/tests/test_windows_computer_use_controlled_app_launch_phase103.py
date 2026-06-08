@@ -2,7 +2,7 @@ import tempfile  # 新增代码+Phase103ControlledAppLaunch：导入临时目录
 import unittest  # 新增代码+Phase103ControlledAppLaunch：导入项目现有 unittest 测试框架；如果没有这行代码，标准测试发现器找不到这些用例。
 from pathlib import Path  # 新增代码+Phase103ControlledAppLaunch：导入 Path 统一处理 Windows 路径；如果没有这行代码，临时目录路径拼接会更脆弱。
 
-from learning_agent.computer_use.controlled_app_launch import PHASE103_CONTROLLED_APP_LAUNCH_MARKER, PHASE103_CONTROLLED_APP_LAUNCH_OK_TOKEN, Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate, phase103_cli_line, run_phase103_controlled_app_launch_contract  # 新增代码+Phase103ControlledAppLaunch：导入 Phase103 受控应用启动候选接口；如果没有这行代码，测试无法证明 full 模式 launch_app 进入受控后端前的安全门。
+from learning_agent.computer_use.generic_launch_backend import PHASE103_CONTROLLED_APP_LAUNCH_MARKER, PHASE103_CONTROLLED_APP_LAUNCH_OK_TOKEN, Phase103RecordingLaunchBackend, WindowsControlledAppLaunchCandidate, phase103_cli_line, run_phase103_controlled_app_launch_contract  # 新增代码+Phase103ControlledAppLaunch：导入 Phase103 受控应用启动候选接口；如果没有这行代码，测试无法证明 full 模式 launch_app 进入受控后端前的安全门。
 from learning_agent.computer_use.mode_session import ComputerUseModeSessionStore  # 新增代码+Phase103ControlledAppLaunch：导入 mode store 用真实 token 流程确认 full 模式；如果没有这行代码，测试可能绕过用户二次确认设计。
 from learning_agent.computer_use.universal_live_execution import UniversalWindowsLiveExecutionGate  # 新增代码+Phase103ControlledAppLaunch：导入通用 live execution gate；如果没有这行代码，Phase103 只能测试底层模块而不能证明 full gate 已接入。
 

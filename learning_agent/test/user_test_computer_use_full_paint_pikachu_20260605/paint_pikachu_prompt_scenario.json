@@ -1,0 +1,22 @@
+{
+  "id": "user_test_paint_pikachu_task",
+  "name": "user_test_paint_pikachu_task",
+  "output_prefix": "user_test_paint_pikachu_task",
+  "window_title_prefix": "LearningAgent-UserPaintPikachuTask",
+  "max_seconds": 900,
+  "final_log_wait_seconds": 20,
+  "post_success_wait_seconds": 6,
+  "success_marker": "",
+  "prompt": "Ask the agent to draw Pikachu in the local Paint app.",
+  "prompt_lines": [
+    "请使用本地电脑的画图软件画一个皮卡丘。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [],
+  "max_permission_sent_count": 20
+}

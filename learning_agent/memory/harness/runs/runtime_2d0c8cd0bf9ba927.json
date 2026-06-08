@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_2d0c8cd0bf9ba927",
+  "prompt": "请打开本机电脑qq软件，然后输入账户：6892392",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请打开本机电脑qq软件，然后输入账户：6892392",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "抱歉，我目前无法继续完成“在本机 QQ 登录窗口输入账号”的桌面 GUI 操作。\n\n原因是：\n- 这属于真实桌面应用操作，需要 GUI/Computer Use 路线；\n- 当前可用工具里没有提供可操作桌面窗口的工具；\n- 使用 PowerShell/WScript/SendKeys 之类脚本模拟键盘输入已被系统策略拒绝。\n\n你可以手动打开 QQ，并在账号输入框中输入：6892392。",
+      "started_at": "2026-06-07T05:57:56Z",
+      "completed_at": "2026-06-07T05:59:11Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T05:57:56Z",
+  "updated_at": "2026-06-07T05:59:11Z"
+}

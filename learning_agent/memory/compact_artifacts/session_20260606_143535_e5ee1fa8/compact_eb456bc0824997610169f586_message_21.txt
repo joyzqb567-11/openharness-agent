@@ -1,0 +1,33 @@
+工具结果过长，已保存完整输出。
+Full output saved to: H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\debug_logs\tool_results\20260606_144513_bash_3b5ca9ecf9c7.txt
+原始字符数=12456，上下文内摘要字符数约=6031。
+上下文摘要：
+bash 成功：exit_code=0
+stdout:
+1: 2026-06-06 14:35:19 | permission_auto_approved | tool= | action=���� MCP server��browser_search, workspace_tools, browser_automation | err= | msg= | result=None
+2: 2026-06-06 14:35:19 | agent_ready_for_user_prompt | tool= | action= | err= | msg= | result=None
+3: 2026-06-06 14:35:24 | computer_status_printed | tool= | action= | err= | msg= | result=None
+4: 2026-06-06 14:35:24 | agent_ready_for_user_prompt | tool= | action= | err= | msg= | result=None
+5: 2026-06-06 14:35:30 | computer_status_printed | tool= | action= | err= | msg= | result=None
+6: 2026-06-06 14:35:30 | agent_ready_for_user_prompt | tool= | action= | err= | msg= | result=None
+7: 2026-06-06 14:35:35 | user_prompt_received | tool= | action= | err= | msg= | result=None
+8: 2026-06-06 14:36:38 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,   "x": 900,   "y": 500,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "title_preview": "Untitled - Paint",     "process_path_hash": "",     "captured_at": "2026-06-06T0 | err= | msg= | result=None
+9: 2026-06-06 14:37:05 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����press_key ������{   "action": "press_key",   "confirm_desktop_control": true,   "key": "T",   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "title_preview": "Untitled - Paint",     "process_path_hash": "",     "captured_at": "2026-06-06T06: | err= | msg= | result=None
+10: 2026-06-06 14:37:22 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,   "x": 525,   "y": 92,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "title_preview": "Untitled - Paint",     "process_path_hash": "",     "captured_at": "2026-06-06T06 | err= | msg= | result=None
+11: 2026-06-06 14:37:35 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����click ������{   "action": "click",   "confirm_desktop_control": true,   "x": 900,   "y": 500,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "title_preview": "Untitled - Paint",     "process_path_hash": "",     "captured_at": "2026-06-06T0 | err= | msg= | result=None
+12: 2026-06-06 14:37:35 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����type_text ������{   "action": "type_text",   "confirm_desktop_control": true,   "text_length": 102,   "text_sha256_16": "2aefb5f9e91f716c",   "text_redacted": true,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "title_preview": "Untitled  | err= | msg= | result=None
+13: 2026-06-06 14:37:57 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����type_text ������{   "action": "type_text",   "confirm_desktop_control": true,   "x": 900,   "y": 500,   "text_length": 84,   "text_sha256_16": "50e57449ccfc1557",   "text_redacted": true,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",     "tit | err= | msg= | result=None
+14: 2026-06-06 14:38:12 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����screenshot ������{   "action": "screenshot",   "confirm_desktop_control": true,   "x": 0,   "y": 0,   "text_length": 0,   "text_sha256_16": "",   "text_redacted": true,   "key": "",   "delta": 0,   "window": {     "app_id": "mspaintapp:pid:37384",     "window_id": "hwnd:72294",  | err= | msg= | result=None
+15: 2026-06-06 14:38:27 | permission_auto_approved | tool= | action=ִ�� OS Computer Use ���涯����clipboard_write ������{   "action": "clipboard_write",   "confirm_desktop_control": true,   "x": 0,   "y": 0,   "text_length": 84,   "text_sha256_16": "50e57449ccfc1557",   "text_redacted": true,   "key": "",   "delta": 0,   "window": {} } | err= | msg= | result=None
+16: 2026-06-06 14:39:09 | permission_au
+
+...[中间内容已保存到文件，未塞入模型上下文]...
+
+act=($payload.action -replace "`r?`n",' '); $errT | err= | msg= | result=None
+33: 2026-06-06 14:44:23 | permission_auto_approved | tool= | action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_143518/events.jsonl'; Get-Content $p | Select-Object -Last 120 | ForEach-Object { try { $j=$_ | ConvertFrom-Json; if($j.state -match 'fail|error|denied|completed|final|assert|timeout|stopped|success|result') {  | err= | msg= | result=None
+34: 2026-06-06 14:44:30 | permission_auto_approved | tool= | action=ִ�����$p='acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_143518/events.jsonl'; Get-Content $p | Select-Object -Last 40 ����Ŀ¼��H:\codexworkplace\sofeware\OpenHarness-main\learning_agent | err= | msg= | result=None
+35: 2026-06-06 14:44:47 | permission_auto_approved | tool= | action=ִ�����python - <<'PY' import json, pathlib p=pathlib.Path('acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_143518/events.jsonl') for i,line in enumerate(p.read_text(encoding='utf-8', errors='replace').splitlines(),1):     try:         j=json.loads(line)     except Exc | err= | msg= | result=None
+36: 2026-06-06 14:44:58 | permission_auto_approved | tool= | action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_143518/events.jsonl') lines = p.read_text(encoding='utf-8', errors='replace').splitlines() start = max(0, len(lines)-80) for i, line in enumerate(lines, 1):     if  | err= | msg= | result=None
+37: 2026-06-06 14:45:13 | permission_auto_approved | tool= | action=ִ�����$code = @' import json, pathlib p = pathlib.Path('acceptance_controller/runs/computer_use_full_model_loop_paint_tree_real-20260606_143518/events.jsonl') lines = p.read_text(encoding='utf-8', errors='replace').splitlines() start = max(0, len(lines)-80) for i, line in enumerate(lines, 1):     if  | err= | msg= | result=None
+
+stderr:

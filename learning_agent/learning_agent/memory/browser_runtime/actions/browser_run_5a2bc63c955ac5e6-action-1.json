@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_5a2bc63c955ac5e6-action-1",
+  "run_id": "browser_run_5a2bc63c955ac5e6",
+  "stage_id": "browser_open",
+  "tool_name": "browser_open",
+  "arguments_redacted": {
+    "url": "http://127.0.0.1:63155/index.html"
+  },
+  "status": "completed",
+  "started_at_ms": 1780404426461,
+  "finished_at_ms": 1780404427063,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

@@ -1,0 +1,1077 @@
+{
+  "scenario_id": "mspaint_pikachu_humanlike_drawing",
+  "target_process": "mspaint.exe",
+  "launch_plan": {
+    "app_name": "mspaint",
+    "executable": "mspaint.exe",
+    "arguments": [
+      "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_paint\\pikachu_via_mspaint.png"
+    ],
+    "launch_verb": "Start-Process",
+    "safe_to_launch": true,
+    "refusal_reason": "",
+    "changes_registry": false,
+    "changes_system_settings": false,
+    "requires_admin": false,
+    "uses_shell_string": false,
+    "actions_expanded": false
+  },
+  "planned_png_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\memory\\computer_use\\representative_e2e\\e2e_paint\\pikachu_via_mspaint.png",
+  "canvas_observed": true,
+  "draw_actions": [
+    {
+      "name": "body_outline",
+      "color": "yellow",
+      "element": "yellow_body",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 240,
+          "y": 220
+        },
+        {
+          "x": 210,
+          "y": 280
+        },
+        {
+          "x": 230,
+          "y": 350
+        },
+        {
+          "x": 300,
+          "y": 380
+        },
+        {
+          "x": 370,
+          "y": 350
+        },
+        {
+          "x": 390,
+          "y": 280
+        },
+        {
+          "x": 360,
+          "y": 220
+        },
+        {
+          "x": 300,
+          "y": 200
+        },
+        {
+          "x": 240,
+          "y": 220
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 240,
+          "y": 220,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 240,
+          "y": 220
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 210,
+          "y": 280,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 230,
+          "y": 350,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 300,
+          "y": 380,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 370,
+          "y": 350,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 390,
+          "y": 280,
+          "path_index": 5
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 360,
+          "y": 220,
+          "path_index": 6
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 300,
+          "y": 200,
+          "path_index": 7
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 240,
+          "y": 220,
+          "path_index": 8
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 240,
+          "y": 220
+        }
+      ],
+      "event_count": 11,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "left_ear",
+      "color": "yellow",
+      "element": "left_ear",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 250,
+          "y": 220
+        },
+        {
+          "x": 210,
+          "y": 130
+        },
+        {
+          "x": 235,
+          "y": 210
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 250,
+          "y": 220,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 250,
+          "y": 220
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 210,
+          "y": 130,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 235,
+          "y": 210,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 235,
+          "y": 210
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "right_ear",
+      "color": "yellow",
+      "element": "right_ear",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 350,
+          "y": 220
+        },
+        {
+          "x": 395,
+          "y": 130
+        },
+        {
+          "x": 365,
+          "y": 210
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 350,
+          "y": 220,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 350,
+          "y": 220
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 395,
+          "y": 130,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 365,
+          "y": 210,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 365,
+          "y": 210
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "left_ear_tip",
+      "color": "black",
+      "element": "black_ear_tips",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 210,
+          "y": 130
+        },
+        {
+          "x": 224,
+          "y": 164
+        },
+        {
+          "x": 230,
+          "y": 145
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 210,
+          "y": 130,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 210,
+          "y": 130
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 224,
+          "y": 164,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 230,
+          "y": 145,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 230,
+          "y": 145
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "right_ear_tip",
+      "color": "black",
+      "element": "black_ear_tips",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 395,
+          "y": 130
+        },
+        {
+          "x": 382,
+          "y": 164
+        },
+        {
+          "x": 375,
+          "y": 145
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 395,
+          "y": 130,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 395,
+          "y": 130
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 382,
+          "y": 164,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 375,
+          "y": 145,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 375,
+          "y": 145
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "left_eye",
+      "color": "black",
+      "element": "eyes",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 270,
+          "y": 260
+        },
+        {
+          "x": 274,
+          "y": 264
+        },
+        {
+          "x": 278,
+          "y": 260
+        },
+        {
+          "x": 274,
+          "y": 256
+        },
+        {
+          "x": 270,
+          "y": 260
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 270,
+          "y": 260,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 270,
+          "y": 260
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 274,
+          "y": 264,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 278,
+          "y": 260,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 274,
+          "y": 256,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 270,
+          "y": 260,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 270,
+          "y": 260
+        }
+      ],
+      "event_count": 7,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "right_eye",
+      "color": "black",
+      "element": "eyes",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 330,
+          "y": 260
+        },
+        {
+          "x": 334,
+          "y": 264
+        },
+        {
+          "x": 338,
+          "y": 260
+        },
+        {
+          "x": 334,
+          "y": 256
+        },
+        {
+          "x": 330,
+          "y": 260
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 330,
+          "y": 260,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 330,
+          "y": 260
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 334,
+          "y": 264,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 338,
+          "y": 260,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 334,
+          "y": 256,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 330,
+          "y": 260,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 330,
+          "y": 260
+        }
+      ],
+      "event_count": 7,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "mouth_smile",
+      "color": "black",
+      "element": "mouth",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 290,
+          "y": 300
+        },
+        {
+          "x": 300,
+          "y": 310
+        },
+        {
+          "x": 310,
+          "y": 300
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 290,
+          "y": 300,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 290,
+          "y": 300
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 300,
+          "y": 310,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 310,
+          "y": 300,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 310,
+          "y": 300
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "left_cheek",
+      "color": "red",
+      "element": "red_cheeks",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 250,
+          "y": 300
+        },
+        {
+          "x": 258,
+          "y": 308
+        },
+        {
+          "x": 266,
+          "y": 300
+        },
+        {
+          "x": 258,
+          "y": 292
+        },
+        {
+          "x": 250,
+          "y": 300
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 250,
+          "y": 300,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 250,
+          "y": 300
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 258,
+          "y": 308,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 266,
+          "y": 300,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 258,
+          "y": 292,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 250,
+          "y": 300,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 250,
+          "y": 300
+        }
+      ],
+      "event_count": 7,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "right_cheek",
+      "color": "red",
+      "element": "red_cheeks",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 350,
+          "y": 300
+        },
+        {
+          "x": 358,
+          "y": 308
+        },
+        {
+          "x": 366,
+          "y": 300
+        },
+        {
+          "x": 358,
+          "y": 292
+        },
+        {
+          "x": 350,
+          "y": 300
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 350,
+          "y": 300,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 350,
+          "y": 300
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 358,
+          "y": 308,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 366,
+          "y": 300,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 358,
+          "y": 292,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 350,
+          "y": 300,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 350,
+          "y": 300
+        }
+      ],
+      "event_count": 7,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "left_arm",
+      "color": "yellow",
+      "element": "arms",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 230,
+          "y": 300
+        },
+        {
+          "x": 190,
+          "y": 325
+        },
+        {
+          "x": 220,
+          "y": 330
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 230,
+          "y": 300,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 230,
+          "y": 300
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 190,
+          "y": 325,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 220,
+          "y": 330,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 220,
+          "y": 330
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "right_arm",
+      "color": "yellow",
+      "element": "arms",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 370,
+          "y": 300
+        },
+        {
+          "x": 410,
+          "y": 325
+        },
+        {
+          "x": 380,
+          "y": 330
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 370,
+          "y": 300,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 370,
+          "y": 300
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 410,
+          "y": 325,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 380,
+          "y": 330,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 380,
+          "y": 330
+        }
+      ],
+      "event_count": 5,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    },
+    {
+      "name": "lightning_tail",
+      "color": "yellow",
+      "element": "lightning_tail",
+      "operation": "drag_path",
+      "points": [
+        {
+          "x": 390,
+          "y": 310
+        },
+        {
+          "x": 450,
+          "y": 285
+        },
+        {
+          "x": 430,
+          "y": 330
+        },
+        {
+          "x": 490,
+          "y": 305
+        },
+        {
+          "x": 450,
+          "y": 360
+        }
+      ],
+      "events": [
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 390,
+          "y": 310,
+          "path_index": 0
+        },
+        {
+          "type": "mouse_down",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 390,
+          "y": 310
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 450,
+          "y": 285,
+          "path_index": 1
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 430,
+          "y": 330,
+          "path_index": 2
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 490,
+          "y": 305,
+          "path_index": 3
+        },
+        {
+          "type": "mouse_move",
+          "real_dispatch_allowed": false,
+          "x": 450,
+          "y": 360,
+          "path_index": 4
+        },
+        {
+          "type": "mouse_up",
+          "real_dispatch_allowed": false,
+          "button": "left",
+          "x": 450,
+          "y": 360
+        }
+      ],
+      "event_count": 7,
+      "continuous_mouse_path": true,
+      "humanlike_action": true,
+      "real_dispatch_allowed": false
+    }
+  ],
+  "draw_action_count": 13,
+  "colors": [
+    "black",
+    "red",
+    "yellow"
+  ],
+  "elements": [
+    "arms",
+    "black_ear_tips",
+    "eyes",
+    "left_ear",
+    "lightning_tail",
+    "mouth",
+    "red_cheeks",
+    "right_ear",
+    "yellow_body"
+  ],
+  "save_menu_events": [
+    {
+      "type": "menu_open",
+      "real_dispatch_allowed": false,
+      "path_length": 3,
+      "root": "File"
+    },
+    {
+      "type": "menu_item",
+      "real_dispatch_allowed": false,
+      "index": 0,
+      "label": "File"
+    },
+    {
+      "type": "menu_item",
+      "real_dispatch_allowed": false,
+      "index": 1,
+      "label": "Save As"
+    },
+    {
+      "type": "menu_item",
+      "real_dispatch_allowed": false,
+      "index": 2,
+      "label": "PNG picture"
+    },
+    {
+      "type": "menu_commit",
+      "real_dispatch_allowed": false,
+      "label": "PNG picture",
+      "path": "File > Save As > PNG picture"
+    }
+  ],
+  "save_hotkey_events": [
+    {
+      "type": "key_down",
+      "real_dispatch_allowed": false,
+      "key": "ctrl"
+    },
+    {
+      "type": "key_down",
+      "real_dispatch_allowed": false,
+      "key": "s"
+    },
+    {
+      "type": "key_up",
+      "real_dispatch_allowed": false,
+      "key": "s"
+    },
+    {
+      "type": "key_up",
+      "real_dispatch_allowed": false,
+      "key": "ctrl"
+    }
+  ],
+  "direct_image_file_cheat": false,
+  "artifact_kind": "interaction_evidence_json",
+  "real_smoke_requested": false,
+  "real_visible_app_invoked": false,
+  "real_paint_app_control": true,
+  "humanlike_drawing_actions": true,
+  "continuous_mouse_path": true,
+  "saved_visual_artifact": true,
+  "paint_canvas_not_blank": true,
+  "pikachu_visual_elements": true,
+  "scenario_passed": true,
+  "marker": "PHASE74_REPRESENTATIVE_E2E_READY",
+  "model": "phase74_windows_representative_e2e_matrix",
+  "created_at": "2026-06-03T22:28:58Z"
+}

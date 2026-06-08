@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_8e788be69c56ad1d",
+  "prompt": "Please run one Phase 56 Windows Computer Use real screenshot pipeline acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any real window except the project terminal command. The self-check may open its own temporary Notepad safe window and must clean it up. The final answer must include the fixed marker: PHASE56_WINDOWS_REAL_SCREENSHOT_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_screenshot_pipeline import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE56_WINDOWS_REAL_SCREENSHOT_OK and real_smoke=true, the final answer's last line must completely copy: PHASE56_WINDOWS_REAL_SCREENSHOT_READY PHASE56_WINDOWS_REAL_SCREENSHOT_OK pixel_guard=true artifact=true helper_v2_capture=true real_smoke=true raw_bytes_hidden=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 56 Windows Computer Use real screenshot pipeline acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any real window except the project terminal command. The self-check may open its own temporary Notepad safe window and must clean it up. The final answer must include the fixed marker: PHASE56_WINDOWS_REAL_SCREENSHOT_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_screenshot_pipeline import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE56_WINDOWS_REAL_SCREENSHOT_OK and real_smoke=true, the final answer's last line must completely copy: PHASE56_WINDOWS_REAL_SCREENSHOT_READY PHASE56_WINDOWS_REAL_SCREENSHOT_OK pixel_guard=true artifact=true helper_v2_capture=true real_smoke=true raw_bytes_hidden=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 56 Windows Computer Use real screenshot pipeline acceptance passed.\n\nPHASE56_WINDOWS_REAL_SCREENSHOT_READY PHASE56_WINDOWS_REAL_SCREENSHOT_OK pixel_guard=true artifact=true helper_v2_capture=true real_smoke=true raw_bytes_hidden=true actions_expanded=false",
+      "started_at": "2026-06-03T09:09:27Z",
+      "completed_at": "2026-06-03T09:09:36Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T09:09:27Z",
+  "updated_at": "2026-06-03T09:09:36Z"
+}

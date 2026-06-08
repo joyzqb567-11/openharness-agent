@@ -1,0 +1,27 @@
+{
+  "name": "harness_task_notification",
+  "output_prefix": "harness_task_notification",
+  "window_title_prefix": "LearningAgent-Controller-HarnessTaskNotify",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 30,
+  "success_marker": "HARNESS_TASK_NOTIFICATION_READY",
+  "prompt_lines": [
+    "请执行真实终端 harness task notification 回灌验收。",
+    "请不要调用 task_output、read_background_command 或 bash。请直接读取本轮模型输入开头自动注入的 task-notification 内容。",
+    "如果你看到了后台任务通知中的 TASK_NOTIFICATION_REAL_OK，请在最终回答中包含：HARNESS_TASK_NOTIFICATION_READY、TASK_NOTIFICATION_REAL_OK、task-notification、completed。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "TASK_NOTIFICATION_REAL_OK"
+  ],
+  "event_answer_contains": [
+    "HARNESS_TASK_NOTIFICATION_READY",
+    "TASK_NOTIFICATION_REAL_OK",
+    "task-notification",
+    "completed"
+  ]
+}

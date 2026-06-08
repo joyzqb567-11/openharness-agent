@@ -1,0 +1,44 @@
+{
+  "run_id": "browser_run_75cd09ff80b0f63f",
+  "prompt": "MCP browser tool call: browser_type",
+  "stages": [
+    {
+      "name": "browser_type",
+      "prompt": "Browser tool: browser_type",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser runtime verifier passed"
+      },
+      "checkpoint": "browser_type 成功\n输入完成\npage_id=page-1\n字符数：5",
+      "started_at": "2026-06-03T02:56:19Z",
+      "completed_at": "2026-06-03T02:56:19Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T02:56:19Z",
+  "updated_at": "2026-06-03T02:56:19Z"
+}

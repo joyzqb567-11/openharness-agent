@@ -1,0 +1,36 @@
+{
+  "id": "computer_use_discover_paint_candidate_real",
+  "name": "computer_use_discover_paint_candidate_real",
+  "output_prefix": "computer_use_discover_paint_candidate_real",
+  "window_title_prefix": "LearningAgent-ComputerDiscoverPaintCandidateReal",
+  "max_seconds": 240,
+  "final_log_wait_seconds": 10,
+  "post_success_wait_seconds": 3,
+  "success_marker": "",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, then ask the model to discover the local Paint app candidate without launching it.",
+  "capture_event_payload_regex": {},
+  "prompt_lines": [
+    "/computer use --full",
+    "请先帮我查找本机画图软件是否可用，并告诉我应该使用哪个 app_name，不要打开或操作软件。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "computer_discover",
+    "PHASE123_COMPUTER_DISCOVER_READY",
+    "not_hard_whitelist"
+  ],
+  "event_answer_contains": [
+    "mspaint"
+  ],
+  "event_payload_contains": [
+    "computer_discover",
+    "mspaint"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -1,0 +1,44 @@
+{
+  "run_id": "browser_run_f2a2dda9b9b32ecc",
+  "prompt": "MCP browser tool call: browser_plugin_status",
+  "stages": [
+    {
+      "name": "browser_plugin_status",
+      "prompt": "Browser tool: browser_plugin_status",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser runtime verifier passed"
+      },
+      "checkpoint": "browser_plugin_status\ncompatible=true\ncapabilities=visible_browser,page_recovery,visual_locate,coordinate_click,flow_run,flow_checkpoint,action_log,replay,site_grant,retry,observation_engine,screenshot_index,error_classifier,status_browser_runtime\nsession_mode=visible_chromium\nconnected=true\nvisible=true\nsession_headless=false\ntab_count=0\nactive_tab_id=\nvisible_browser=true\nheadless=false\ntool_count=31\naction_log=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\browse",
+      "started_at": "2026-06-01T11:35:29Z",
+      "completed_at": "2026-06-01T11:35:29Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T11:35:29Z",
+  "updated_at": "2026-06-01T11:35:29Z"
+}

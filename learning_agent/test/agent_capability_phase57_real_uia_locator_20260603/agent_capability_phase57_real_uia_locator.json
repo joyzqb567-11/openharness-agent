@@ -1,0 +1,57 @@
+{
+  "id": "agent_capability_phase57_real_uia_locator",
+  "name": "agent_capability_phase57_real_uia_locator",
+  "output_prefix": "agent_capability_phase57_real_uia_locator",
+  "window_title_prefix": "LearningAgent-Phase57-RealUiaLocator",
+  "max_seconds": 700,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY",
+  "prompt": "Please run the Phase57 Windows real UIA locator acceptance.",
+  "prompt_lines": [
+    "Please run one Phase 57 Windows Computer Use real UIA control tree and semantic locator acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any real window except the project terminal command. The self-check may open its own temporary dedicated safe window and must clean it up. The final answer must include the fixed marker: PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_uia_locator import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE57_WINDOWS_REAL_UIA_LOCATOR_OK and real_smoke=true, the final answer's last line must completely copy: PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY PHASE57_WINDOWS_REAL_UIA_LOCATOR_OK real_uia_tree=true semantic_locator=true helper_v2_uia=true safe_window_only=true real_smoke=true raw_text_hidden=true actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY",
+    "PHASE57_WINDOWS_REAL_UIA_LOCATOR_OK",
+    "real_uia_tree=true",
+    "semantic_locator=true",
+    "helper_v2_uia=true",
+    "safe_window_only=true",
+    "real_smoke=true",
+    "raw_text_hidden=true",
+    "actions_expanded=false"
+  ],
+  "event_answer_contains": [
+    "PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY",
+    "PHASE57_WINDOWS_REAL_UIA_LOCATOR_OK",
+    "real_uia_tree=true",
+    "semantic_locator=true",
+    "helper_v2_uia=true",
+    "safe_window_only=true",
+    "real_smoke=true",
+    "raw_text_hidden=true",
+    "actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PHASE57_WINDOWS_REAL_UIA_LOCATOR_READY",
+      "PHASE57_WINDOWS_REAL_UIA_LOCATOR_OK",
+      "real_uia_tree=true",
+      "semantic_locator=true",
+      "helper_v2_uia=true",
+      "safe_window_only=true",
+      "real_smoke=true",
+      "raw_text_hidden=true",
+      "actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

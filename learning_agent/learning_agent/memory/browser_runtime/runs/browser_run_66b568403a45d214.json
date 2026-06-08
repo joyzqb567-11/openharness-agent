@@ -1,0 +1,25 @@
+{
+  "run_id": "browser_run_66b568403a45d214",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_screenshot",
+  "status": "completed",
+  "current_stage_id": "browser_screenshot",
+  "completed_stage_ids": [
+    "browser_screenshot"
+  ],
+  "action_ids": [
+    "browser_run_66b568403a45d214-action-1"
+  ],
+  "observation_ids": [
+    "browser_observation_7a314acb370da964"
+  ],
+  "summary": "browser_screenshot 成功\npage_id=page-1\n文件：H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\test-page.png\n目录：H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\nobservation_id=browser_observation_7a314acb370da964",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780285849360,
+  "updated_at_ms": 1780285849453
+}

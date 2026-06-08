@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_86dc055b4b101502",
+  "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Codex CLI 返回格式错误：{\"decision_note\":\"微信启动已触达桌面但目标窗口绑定失败，需要只读观察当前窗口列表确认是否已出现微信窗口。\",\"text\":\"\",\"tool_calls\":[{\"name\":\"computer_observe\",\"arguments\":{\"action\":\"list_windows\"            \n     \n       \n\n\n\n    \n  \n  \n          \n  \n    \n  \n   \n    \n     \n  \n   \n  \n  \n  \n    \n  \n    \n  \n    \n  \n    \n  \n    \n  \n     \n  \n   \n  \n  \n  \n    \n  \n    \n  \n    \n  \n    \n  \n    \n  \n     \n  \n   \n  \n  \n  \n    \n  \n    \n  \n   \n     \n  \n   \n  \n  \n  \n    \n  \n    \n  \n    \n  \n    \n  \n    \n  \n     \n  \n   \n  \n  \n  \n    \n  \n   ",
+      "started_at": "2026-06-07T07:47:10Z",
+      "completed_at": "2026-06-07T07:54:10Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:47:10Z",
+  "updated_at": "2026-06-07T07:54:11Z"
+}

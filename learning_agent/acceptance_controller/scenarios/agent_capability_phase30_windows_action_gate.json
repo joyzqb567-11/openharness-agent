@@ -1,0 +1,37 @@
+{
+  "name": "agent_capability_phase30_windows_action_gate",
+  "output_prefix": "agent_capability_phase30_windows_action_gate",
+  "window_title_prefix": "LearningAgent-Phase30-WindowsActionGate",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE30_WINDOWS_ACTION_GATE_READY",
+  "prompt_lines": [
+    "请执行一次 Phase 30 Windows Computer Use 安全动作门禁验收：只使用内存后端和临时锁目录，验证 durable lock、abort flag、窗口相对坐标转换、文本脱敏和 action evidence，不要移动鼠标，不要点击真实桌面，最终回答必须包含固定标记：PHASE30_WINDOWS_ACTION_GATE_READY。",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"import json, tempfile; from pathlib import Path; from learning_agent.computer_use.controller import ComputerUseController, MemoryComputerUseBackend; from learning_agent.computer_use.lock import ComputerUseLockManager; secret='phase30-secret-password'; window={'app_id':'notepad.exe','window_id':'hwnd:3001','title_preview':'Phase30 Notepad','rect':{'left':10,'top':20,'right':310,'bottom':220}}; temp=tempfile.TemporaryDirectory(); lock=ComputerUseLockManager(base_dir=Path(temp.name)); backend=MemoryComputerUseBackend(windows=[window]); c=ComputerUseController(backend=backend, lock_manager=lock, owner_session_id='phase30-visible'); no_lock=c.execute({'action':'click','confirm_desktop_control':True,'window':window,'x':5,'y':7}); lock.acquire('phase30-visible', owner_label='visible-terminal'); click=c.execute({'action':'click','confirm_desktop_control':True,'window':window,'x':5,'y':7}); typed=c.execute({'action':'type_text','confirm_desktop_control':True,'window':window,'text':secret}); visible_logs=json.dumps({'click':click.data,'typed':typed.data,'audit':c.audit_log,'backend':backend.actions}, ensure_ascii=False); raw_text_hidden=secret not in visible_logs; evidence=click.data.get('action_evidence',{}); lock.request_abort('visible terminal abort'); abort=c.execute({'action':'click','confirm_desktop_control':True,'window':window,'x':1,'y':1}); assert (not no_lock.ok) and click.ok and typed.ok and (not abort.ok); assert backend.actions[0]['x']==15 and backend.actions[0]['y']==27; assert raw_text_hidden and evidence.get('policy_version')=='phase30_window_relative_action_gate_v1' and evidence.get('audit_id')==click.data.get('audit_id'); print('PHASE30_WINDOWS_ACTION_GATE_OK no_lock_blocked='+str((not no_lock.ok)).lower()+' coord='+str(backend.actions[0]['x'])+','+str(backend.actions[0]['y'])+' abort_blocked='+str((not abort.ok)).lower()+' raw_text_hidden='+str(raw_text_hidden).lower()+' evidence='+str(bool(evidence)).lower())\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE30_WINDOWS_ACTION_GATE_OK 后，最终回答最后一行必须完整复制：PHASE30_WINDOWS_ACTION_GATE_READY PHASE30_WINDOWS_ACTION_GATE_OK no_lock_blocked=true coord=15,27 abort_blocked=true raw_text_hidden=true evidence=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE30_WINDOWS_ACTION_GATE_OK",
+    "no_lock_blocked=true",
+    "coord=15,27",
+    "abort_blocked=true",
+    "raw_text_hidden=true",
+    "evidence=true"
+  ],
+  "event_answer_contains": [
+    "PHASE30_WINDOWS_ACTION_GATE_READY",
+    "PHASE30_WINDOWS_ACTION_GATE_OK",
+    "no_lock_blocked=true",
+    "coord=15,27",
+    "abort_blocked=true",
+    "raw_text_hidden=true",
+    "evidence=true"
+  ],
+  "max_permission_sent_count": 0
+}

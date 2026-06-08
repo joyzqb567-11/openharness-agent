@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_c60f933f6d1265c6",
+  "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请帮我打开本机电脑微信。看到微信窗口后就结束，不要登录，不要输入账号密码。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已打开本机电脑微信，并确认看到微信窗口；我没有点击“进入微信”，也没有输入账号或密码。\n\n摘要：\n- computer_use / app_id：qt51514qwindowicon:pid:26164（微信）\n- screenshot：computer-window-20260607T075604Z-9d182f99.png\n- real_desktop_touched：true\n- low_level_event_count：0",
+      "started_at": "2026-06-07T07:55:48Z",
+      "completed_at": "2026-06-07T07:56:09Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-07T07:55:48Z",
+  "updated_at": "2026-06-07T07:56:09Z"
+}

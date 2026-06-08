@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_252bd6d1e95483f8",
+  "prompt": "请执行一次真实可见终端里的浏览器运行层验收，最终回答必须包含固定标记：BROWSER_RUNTIME_ALIGNMENT_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 然后必须调用 browser_profile_status 和 browser_plugin_status，确认页面失败恢复、视觉定位、坐标点击、复杂流程、动作日志、任务回放、站点级授权和异常重试能力已经出现在真实运行工具状态里。 本轮不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 最终回答必须简短，并包含：BROWSER_RUNTIME_ALIGNMENT_READY、browser_profile_status、browser_plugin_status、page_recovery、visual_locate、coordinate_click、flow_run、action_log、replay、site_grant、retry。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次真实可见终端里的浏览器运行层验收，最终回答必须包含固定标记：BROWSER_RUNTIME_ALIGNMENT_READY。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/browser_automation/SKILL.md，第三步读取 learning_agent/skills/real_chrome/SKILL.md。 然后必须调用 browser_profile_status 和 browser_plugin_status，确认页面失败恢复、视觉定位、坐标点击、复杂流程、动作日志、任务回放、站点级授权和异常重试能力已经出现在真实运行工具状态里。 本轮不要连接真实 Chrome，不要打开登录网站，不要读取 cookies、localStorage、sessionStorage、token、password，不要执行 browser_evaluate。 最终回答必须简短，并包含：BROWSER_RUNTIME_ALIGNMENT_READY、browser_profile_status、browser_plugin_status、page_recovery、visual_locate、coordinate_click、flow_run、action_log、replay、site_grant、retry。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "BROWSER_RUNTIME_ALIGNMENT_READY\n已验收：browser_profile_status、browser_plugin_status。\n真实 Chrome 未连接；工具状态包含：page_recovery、visual_locate、coordinate_click、flow_run、action_log、replay、site_grant、retry。",
+      "started_at": "2026-05-31T12:40:38Z",
+      "completed_at": "2026-05-31T12:41:02Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T12:40:38Z",
+  "updated_at": "2026-05-31T12:41:02Z"
+}

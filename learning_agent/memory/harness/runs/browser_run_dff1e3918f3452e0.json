@@ -1,0 +1,135 @@
+{
+  "run_id": "browser_run_dff1e3918f3452e0",
+  "prompt": "MCP browser tool call: browser_flow_run",
+  "stages": [
+    {
+      "name": "open_example",
+      "prompt": "browser_open {}",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "failed",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [
+          "browser_harness_projection",
+          "browser_flow_checkpoint"
+        ],
+        "message": "browser_open 只支持 http:// 或 https:// URL。"
+      },
+      "checkpoint": "browser_open 只支持 http:// 或 https:// URL。",
+      "started_at": "",
+      "completed_at": "2026-06-01T11:35:29Z"
+    },
+    {
+      "name": "snapshot_example",
+      "prompt": "browser_snapshot {}",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "pending",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "",
+      "completed_at": ""
+    },
+    {
+      "name": "screenshot_example",
+      "prompt": "browser_screenshot {}",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "pending",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "",
+      "completed_at": ""
+    },
+    {
+      "name": "wait_checkpoint",
+      "prompt": "browser_wait {}",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "pending",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [],
+        "message": ""
+      },
+      "checkpoint": "",
+      "started_at": "",
+      "completed_at": ""
+    },
+    {
+      "name": "browser_flow_run",
+      "prompt": "Browser tool: browser_flow_run",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "failed",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser_flow_run 失败\nflow_id=browser_flow_1780313729338\ncompleted=false\nskipped=\nfailed_stage=open_example\nerror=browser_open 只支持 http:// 或 https:// URL。"
+      },
+      "checkpoint": "browser_flow_run 失败\nflow_id=browser_flow_1780313729338\ncompleted=false\nskipped=\nfailed_stage=open_example\nerror=browser_open 只支持 http:// 或 https:// URL。",
+      "started_at": "",
+      "completed_at": "2026-06-01T11:35:29Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "failed",
+  "current_stage_index": 4,
+  "endpoint_index": 0,
+  "failure_reason": "browser_flow_run 失败\nflow_id=browser_flow_1780313729338\ncompleted=false\nskipped=\nfailed_stage=open_example\nerror=browser_open 只支持 http:// 或 https:// URL。",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T11:35:29Z",
+  "updated_at": "2026-06-01T11:35:29Z"
+}

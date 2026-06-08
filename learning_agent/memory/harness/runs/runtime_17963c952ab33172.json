@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_17963c952ab33172",
+  "prompt": "Please run the URG-2 Universal Real GUI Computer Use target session and identity guard acceptance. Use only the project terminal self-check command in safe read-only contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE117_UNIVERSAL_TARGET_SESSION_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_target_session import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE117_UNIVERSAL_TARGET_SESSION_OK, the final answer's last line must completely copy: PHASE117_UNIVERSAL_TARGET_SESSION_READY PHASE117_UNIVERSAL_TARGET_SESSION_OK universal_target_session_ready=true generic_target_resolver_used=true representative_samples_session_ready=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true target_identity_bound=true target_identity_rechecked_before_each_action=true target_drift_zero_events=true agent_owned_or_user_authorized_window=true user_preexisting_window_preserved=true real_desktop_touched=false actions_expanded=false low_level_event_count=0",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run the URG-2 Universal Real GUI Computer Use target session and identity guard acceptance. Use only the project terminal self-check command in safe read-only contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE117_UNIVERSAL_TARGET_SESSION_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_target_session import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE117_UNIVERSAL_TARGET_SESSION_OK, the final answer's last line must completely copy: PHASE117_UNIVERSAL_TARGET_SESSION_READY PHASE117_UNIVERSAL_TARGET_SESSION_OK universal_target_session_ready=true generic_target_resolver_used=true representative_samples_session_ready=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true target_identity_bound=true target_identity_rechecked_before_each_action=true target_drift_zero_events=true agent_owned_or_user_authorized_window=true user_preexisting_window_preserved=true real_desktop_touched=false actions_expanded=false low_level_event_count=0",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "验证命令已成功完成，输出包含 PHASE117_UNIVERSAL_TARGET_SESSION_OK。\nPHASE117_UNIVERSAL_TARGET_SESSION_READY PHASE117_UNIVERSAL_TARGET_SESSION_OK universal_target_session_ready=true generic_target_resolver_used=true representative_samples_session_ready=true per_app_controller_required=false hardcoded_app_whitelist_required=false ordinary_apps_controlled_by_generic_runtime=true representative_apps_are_acceptance_only=true target_identity_bound=true target_identity_rechecked_before_each_action=true target_drift_z",
+      "started_at": "2026-06-05T13:38:42Z",
+      "completed_at": "2026-06-05T13:38:52Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T13:38:42Z",
+  "updated_at": "2026-06-05T13:38:52Z"
+}

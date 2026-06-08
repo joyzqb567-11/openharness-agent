@@ -1,0 +1,23 @@
+{
+  "run_id": "browser_run_221b88a22c60d9d5",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_plugin_status",
+  "status": "completed",
+  "current_stage_id": "browser_plugin_status",
+  "completed_stage_ids": [
+    "browser_plugin_status"
+  ],
+  "action_ids": [
+    "browser_run_221b88a22c60d9d5-action-1"
+  ],
+  "observation_ids": [],
+  "summary": "browser_plugin_status\ncompatible=true\ncapabilities=visible_browser,page_recovery,visual_locate,coordinate_click,flow_run,action_log,replay,site_grant,retry\nsession_mode=visible_chromium\nconnected=true\nvisible=true\nsession_headless=false\ntab_count=1\nactive_tab_id=browser_session_1_fa131c86-tab-1\nvisible_browser=true\nheadless=false\ntool_count=25\naction_log=H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\browser_action_log.jsonl\nstrict_site_permissions=false\ntools=brows",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780282751315,
+  "updated_at_ms": 1780282751324
+}

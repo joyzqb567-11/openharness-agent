@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f9332f163ff8b38e",
+  "prompt": "Please run one Phase 105 /computer use --full controlled real Windows Computer Use launch acceptance. This scenario is allowed to briefly open one controlled Notepad window for a unique project test file through the Phase105 full-mode path and then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE105_RUN_FULL_MODE_CONTROLLED_REAL_LAUNCH='1'; $env:LEARNING_AGENT_PHASE105_ENABLE_FULL_MODE_CONTROLLED_REAL_LAUNCH='1'; python -c \"from learning_agent.computer_use.universal_live_execution import phase105_main; raise SystemExit(phase105_main())\" Do not write the final answer early. Only after the terminal command prints PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK, the final answer's last line must completely copy: PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK default_off_zero_events=true full_gate_passes_enable_real_launch=true real_enable_gate_required=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 105 /computer use --full controlled real Windows Computer Use launch acceptance. This scenario is allowed to briefly open one controlled Notepad window for a unique project test file through the Phase105 full-mode path and then close only that verified controlled window. Do not interact with user windows, do not open any other app, do not click or type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE105_RUN_FULL_MODE_CONTROLLED_REAL_LAUNCH='1'; $env:LEARNING_AGENT_PHASE105_ENABLE_FULL_MODE_CONTROLLED_REAL_LAUNCH='1'; python -c \"from learning_agent.computer_use.universal_live_execution import phase105_main; raise SystemExit(phase105_main())\" Do not write the final answer early. Only after the terminal command prints PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK, the final answer's last line must completely copy: PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK default_off_zero_events=true full_gate_passes_enable_real_launch=true real_enable_gate_required=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "验证命令已成功完成，输出包含 PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK。\n\nPHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_READY PHASE105_FULL_MODE_CONTROLLED_REAL_LAUNCH_OK default_off_zero_events=true full_gate_passes_enable_real_launch=true real_enable_gate_required=true real_full_launch_attempted=true visible_window_verified=true cleanup_completed=true verified_window_cleanup_completed=true residual_owned_process=false real_desktop_touched=true uncontrolled_actions_expanded=false",
+      "started_at": "2026-06-05T03:36:29Z",
+      "completed_at": "2026-06-05T03:36:49Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-05T03:36:29Z",
+  "updated_at": "2026-06-05T03:36:49Z"
+}

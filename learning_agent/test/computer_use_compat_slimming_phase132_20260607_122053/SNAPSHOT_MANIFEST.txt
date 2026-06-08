@@ -1,0 +1,4 @@
+﻿本目录是本轮“Computer Use 第一批兼容旧模块瘦身”的学习快照。
+已迁移/瘦身的旧模块包括：app_window_control.py、controlled_app_launch.py、generic_app_discovery.py、generic_real_launch_candidate.py、interactive_launch_target.py。
+当前正式源码不应再把这些旧文件当成生产入口；旧能力已合并到 windows_launch_resolver.py 与 generic_launch_backend.py 等统一模块。
+本快照用于用户学习和后续追踪，不代表需要从这里运行代码。

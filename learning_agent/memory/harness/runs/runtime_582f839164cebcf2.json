@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_582f839164cebcf2",
+  "prompt": "请执行一次 Phase 36 Windows Computer Use Windows.Graphics.Capture provider 合同验收：这次只允许运行项目内 wgc_capture 模块；它必须诚实报告 WGC Python 绑定是否存在，必须说明 provider 合同已建立，当前没有真实 WGC 实现时必须 fallback_required=true；不要移动鼠标，不要点击真实桌面，不要读取任意用户窗口。最终回答必须包含固定标记：PHASE36_WINDOWS_WGC_PROVIDER_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.wgc_capture import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE36_WINDOWS_WGC_PROVIDER_OK 后，最终回答最后一行必须完整复制：PHASE36_WINDOWS_WGC_PROVIDER_READY PHASE36_WINDOWS_WGC_PROVIDER_OK dependency_reported=true capture_contract_ready=true fallback_required=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 36 Windows Computer Use Windows.Graphics.Capture provider 合同验收：这次只允许运行项目内 wgc_capture 模块；它必须诚实报告 WGC Python 绑定是否存在，必须说明 provider 合同已建立，当前没有真实 WGC 实现时必须 fallback_required=true；不要移动鼠标，不要点击真实桌面，不要读取任意用户窗口。最终回答必须包含固定标记：PHASE36_WINDOWS_WGC_PROVIDER_READY。 你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.wgc_capture import main; raise SystemExit(main())\" 不要提前最终回答；只有终端命令成功输出 PHASE36_WINDOWS_WGC_PROVIDER_OK 后，最终回答最后一行必须完整复制：PHASE36_WINDOWS_WGC_PROVIDER_READY PHASE36_WINDOWS_WGC_PROVIDER_OK dependency_reported=true capture_contract_ready=true fallback_required=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 36 Windows Computer Use Windows.Graphics.Capture provider 合同验收通过。\n\n已按要求仅运行项目内 `wgc_capture` 模块验证协议；命令成功退出，输出确认：\n- `PHASE36_WINDOWS_WGC_PROVIDER_OK`\n- `dependency_reported=true`\n- `capture_contract_ready=true`\n- `fallback_required=true`\n- `actions_expanded=false`\n\n模块诚实报告 WGC Python 绑定当前不存在，provider 合同已建立；当前没有真实 WGC 实现，因此需要 fallback。\n\nPHASE36_WINDOWS_WGC_PROVIDER_READY PHASE36_WINDOWS_WGC_PROVIDER_OK dependency_reported=true capture_contract_ready=true fallback_required=true actions_expanded",
+      "started_at": "2026-06-03T02:23:27Z",
+      "completed_at": "2026-06-03T02:23:47Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T02:23:27Z",
+  "updated_at": "2026-06-03T02:23:47Z"
+}

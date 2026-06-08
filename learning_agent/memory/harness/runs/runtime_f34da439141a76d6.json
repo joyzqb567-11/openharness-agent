@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f34da439141a76d6",
+  "prompt": "你好",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "你好",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "你好！有什么我可以帮你处理的吗？",
+      "started_at": "2026-06-06T00:27:46Z",
+      "completed_at": "2026-06-06T00:27:49Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T00:27:46Z",
+  "updated_at": "2026-06-06T00:27:49Z"
+}

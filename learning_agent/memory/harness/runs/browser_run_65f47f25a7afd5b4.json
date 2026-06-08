@@ -1,0 +1,44 @@
+{
+  "run_id": "browser_run_65f47f25a7afd5b4",
+  "prompt": "MCP browser tool call: browser_connect_real_chrome",
+  "stages": [
+    {
+      "name": "browser_connect_real_chrome",
+      "prompt": "Browser tool: browser_connect_real_chrome",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "failed",
+      "attempts": [],
+      "acceptance": {
+        "passed": false,
+        "checks": [
+          "browser_harness_projection",
+          "browser_runtime_run",
+          "browser_event_log",
+          "browser_action_executor"
+        ],
+        "message": "browser_connect_real_chrome 需要 confirm_real_profile=true，表示用户明确确认接入日常 Chrome profile。"
+      },
+      "checkpoint": "browser_connect_real_chrome 需要 confirm_real_profile=true，表示用户明确确认接入日常 Chrome profile。",
+      "started_at": "2026-06-03T03:26:54Z",
+      "completed_at": "2026-06-03T03:26:54Z"
+    }
+  ],
+  "endpoints": [
+    "browser-runtime"
+  ],
+  "status": "failed",
+  "current_stage_index": 0,
+  "endpoint_index": 0,
+  "failure_reason": "browser_connect_real_chrome 需要 confirm_real_profile=true，表示用户明确确认接入日常 Chrome profile。",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T03:26:54Z",
+  "updated_at": "2026-06-03T03:26:54Z"
+}

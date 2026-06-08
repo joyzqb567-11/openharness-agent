@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_013ccbfa44890761",
+  "prompt": "Please run one Phase 53 Windows Computer Use ClaudeCode parity gap matrix acceptance. Use only the project terminal self-check command. Do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE53_PARITY_GAP_MATRIX_READY. You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.parity_gap_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE53_PARITY_GAP_MATRIX_OK, the final answer's last line must completely copy: PHASE53_PARITY_GAP_MATRIX_READY PHASE53_PARITY_GAP_MATRIX_OK gap_count=12 owner_phases_complete=true real_provider_required=true non_fake_acceptance=true claudecode_source_reviewed=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 53 Windows Computer Use ClaudeCode parity gap matrix acceptance. Use only the project terminal self-check command. Do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE53_PARITY_GAP_MATRIX_READY. You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.parity_gap_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE53_PARITY_GAP_MATRIX_OK, the final answer's last line must completely copy: PHASE53_PARITY_GAP_MATRIX_READY PHASE53_PARITY_GAP_MATRIX_OK gap_count=12 owner_phases_complete=true real_provider_required=true non_fake_acceptance=true claudecode_source_reviewed=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 53 Windows Computer Use ClaudeCode parity gap matrix acceptance passed.\n\nPHASE53_PARITY_GAP_MATRIX_READY PHASE53_PARITY_GAP_MATRIX_OK gap_count=12 owner_phases_complete=true real_provider_required=true non_fake_acceptance=true claudecode_source_reviewed=true actions_expanded=false",
+      "started_at": "2026-06-03T08:34:19Z",
+      "completed_at": "2026-06-03T08:34:30Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T08:34:19Z",
+  "updated_at": "2026-06-03T08:34:30Z"
+}

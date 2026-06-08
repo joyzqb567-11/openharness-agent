@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_0929b198d67e97af",
+  "prompt": "请执行一次 deep compact/resume/status 真实终端验收，最终回答必须包含固定标记：COMPACT_RESUME_STATUS_DEEP_READY。 请只使用 read 工具读取 learning_agent/core/compact.py、learning_agent/core/reactive_compact.py、learning_agent/core/resume_loader.py、learning_agent/core/resume_repair.py、learning_agent/runtime/status_schema.py、learning_agent/runtime/status_events.py、learning_agent/runtime/status_snapshot.py、learning_agent/app/interactive.py、learning_agent/app/http_bridge.py、learning_agent/sdk/status.py、learning_agent/tools/schemas.py、learning_agent/tools/executor.py、learning_agent/tools/catalog.py。 不要使用 bash、write、edit 或浏览器工具；本场景只验证真实可见终端 agent 启动、源码可见、最终回答可观测，自动化测试已经另行验证 compact/resume/status 行为。 最终回答请简短说明你看到的结果，并必须包含：COMPACT_RESUME_STATUS_DEEP_READY、tool_output_snip、microcompact、context_collapse、reactive_compact_retry、ResumeRepairReport、resume_needs_review、STATUS_SCHEMA_VERSION、get_health、load_resume_report、resume_report、run_status、health_status、/events、/sessions、/compact。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 deep compact/resume/status 真实终端验收，最终回答必须包含固定标记：COMPACT_RESUME_STATUS_DEEP_READY。 请只使用 read 工具读取 learning_agent/core/compact.py、learning_agent/core/reactive_compact.py、learning_agent/core/resume_loader.py、learning_agent/core/resume_repair.py、learning_agent/runtime/status_schema.py、learning_agent/runtime/status_events.py、learning_agent/runtime/status_snapshot.py、learning_agent/app/interactive.py、learning_agent/app/http_bridge.py、learning_agent/sdk/status.py、learning_agent/tools/schemas.py、learning_agent/tools/executor.py、learning_agent/tools/catalog.py。 不要使用 bash、write、edit 或浏览器工具；本场景只验证真实可见终端 agent 启动、源码可见、最终回答可观测，自动化测试已经另行验证 compact/resume/status 行为。 最终回答请简短说明你看到的结果，并必须包含：COMPACT_RESUME_STATUS_DEEP_READY、tool_output_snip、microcompact、context_collapse、reactive_compact_retry、ResumeRepairReport、resume_needs_review、STATUS_SCHEMA_VERSION、get_health、load_resume_report、resume_report、run_status、health_status、/events、/sessions、/compact。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已完成只读源码可见性验收：看到 compact/resume/status 相关入口与终端/API/SDK/工具目录集成，包括 tool_output_snip、microcompact、context_collapse、reactive_compact_retry、ResumeRepairReport、resume_needs_review、STATUS_SCHEMA_VERSION、get_health、load_resume_report、resume_report、run_status、health_status，以及终端/API 路由 /events、/sessions、/compact。\n\n可见结果：compact.py 含工具输出裁剪与多层 compact；reactive_compact.py 含 reactive_compact_retry；resume_loader/resume_repair 含 ResumeRepairReport 与 resume_needs_review；status_schema/events/snapshot/sdk/http/inter",
+      "started_at": "2026-05-31T12:01:28Z",
+      "completed_at": "2026-05-31T12:01:46Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T12:01:28Z",
+  "updated_at": "2026-05-31T12:01:46Z"
+}

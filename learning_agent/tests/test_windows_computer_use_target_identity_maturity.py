@@ -97,7 +97,7 @@ class TargetIdentityMaturityTest(unittest.TestCase):  # 新增代码+TargetIdent
 
     # 新增代码+TargetIdentityMaturity：函数段落开始，test_phase109_launch_candidate_emits_drift_block_field 验证上游候选报告暴露 target_drift_blocks_action 字段；如果没有这个测试，Task 3 接到 Phase109 的线不完整。
     def test_phase109_launch_candidate_emits_drift_block_field(self) -> None:  # 新增代码+TargetIdentityMaturity：定义 Phase109 接线字段测试；如果没有这一行，蓝图中的 wire into launch candidate 没有自动检查。
-        phase109 = importlib.import_module("learning_agent.computer_use.generic_real_launch_candidate")  # 新增代码+TargetIdentityMaturity：导入 Phase109 通用真实启动候选；如果没有这一行，测试无法验证上游报告字段。
+        phase109 = importlib.import_module("learning_agent.computer_use.generic_launch_backend")  # 新增代码+TargetIdentityMaturity：导入 Phase109 通用真实启动候选；如果没有这一行，测试无法验证上游报告字段。
         report = phase109.prepare_phase109_generic_real_launch_candidate(raw_target="Obsidian", candidates=[{"display_name": "Obsidian", "executable": "Obsidian.exe", "installed_app_verified": True}], enable_real_launch=True)  # 新增代码+TargetIdentityMaturity：运行记录型显式启动候选；如果没有这一行，target_drift_blocks_action 是否上浮不可见。
         self.assertIn("target_drift_blocks_action", report)  # 新增代码+TargetIdentityMaturity：确认顶层报告有漂移阻断字段；如果没有这一行，上层动作循环无法读取阻断状态。
         self.assertFalse(report["target_drift_blocks_action"])  # 新增代码+TargetIdentityMaturity：确认稳定目标不会误报漂移；如果没有这一行，正常路径可能被错误阻断。

@@ -1,0 +1,16 @@
+{
+  "action_id": "browser_run_cdbc64e81e776a8c-action-1",
+  "run_id": "browser_run_cdbc64e81e776a8c",
+  "stage_id": "browser_screenshot",
+  "tool_name": "browser_screenshot",
+  "arguments_redacted": {
+    "filename": "test-page.png",
+    "full_page": true
+  },
+  "status": "completed",
+  "started_at_ms": 1780287333517,
+  "finished_at_ms": 1780287333597,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": "browser_observation_43c957ba9239e367"
+}

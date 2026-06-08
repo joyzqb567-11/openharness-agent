@@ -1,0 +1,161 @@
+工具结果过长，已保存完整输出。
+Full output saved to: H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\debug_logs\tool_results\20260601_071552_bash_56f84c9aff6f.txt
+原始字符数=12034，上下文内摘要字符数约=6031。
+上下文摘要：
+bash 成功：exit_code=0
+stdout:
+
+Path                                                      
+----                                                      
+H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : acceptance
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : acceptance
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 14:17:15
+CreationTimeUtc   : 2026/5/31 6:17:15
+LastAccessTime    : 2026/6/1 6:17:48
+LastAccessTimeUtc : 2026/5/31 22:17:48
+LastWriteTime     : 2026/5/31 14:17:21
+LastWriteTimeUtc  : 2026/5/31 6:17:21
+Attributes        : Directory
+Mode              : d-----
+BaseName          : acceptance
+Target            : {}
+LinkType          : 
+
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : acceptance_controller
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : acceptance_controller
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 8:49:14
+CreationTimeUtc   : 2026/5/31 0:49:14
+LastAccessTime    : 2026/6/1 6:57:34
+LastAccessTimeUtc : 2026/5/31 22:57:34
+LastWriteTime     : 2026/5/31 8:49:15
+LastWriteTimeUtc  : 2026/5/31 0:49:15
+Attributes        : Directory
+Mode              : d-----
+BaseName          : acceptance_controller
+Target            : {}
+LinkType          : 
+
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\app
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : app
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : app
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\app
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 8:49:15
+CreationTimeUtc   : 2026/5/31 0:49:15
+LastAccessTime    : 2026/6/1 6:44:11
+LastAccessTimeUtc : 2026/5/31 22:44:11
+LastWriteTime     : 2026/5/31 18:43:52
+LastWriteTimeUtc  : 2026/5/31 10:43:52
+Attributes        : Directory
+Mode              : d-----
+BaseName          : app
+Target            : {}
+LinkType          : 
+
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\browser
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : browser
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : browser
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\browser
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 8:49:15
+CreationTimeUtc   : 2026/5/31 0:49:15
+LastAccessTime    : 2026/6/1 6:57:34
+LastAccessTimeUtc : 2026/5/31 22:57:34
+LastWriteTime     : 2026/5/31 8:49:15
+LastWriteTimeUtc  : 2026/5/31 0:49:15
+Attributes        : Directory
+Mode         
+
+...[中间内容已保存到文件，未塞入模型上下文]...
+
+ft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : mcp
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : mcp
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\mcp
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 8:49:16
+CreationTimeUtc   : 2026/5/31 0:49:16
+LastAccessTime    : 2026/6/1 6:57:34
+LastAccessTimeUtc : 2026/5/31 22:57:34
+LastWriteTime     : 2026/5/31 8:49:16
+LastWriteTimeUtc  : 2026/5/31 0:49:16
+Attributes        : Directory
+Mode              : d-----
+BaseName          : mcp
+Target            : {}
+LinkType          : 
+
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent
+PSChildName       : memory
+PSDrive           : H
+PSProvider        : Microsoft.PowerShell.Core\FileSystem
+PSIsContainer     : True
+Name              : memory
+FullName          : H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\memory
+Parent            : learning_agent
+Exists            : True
+Root              : H:\
+Extension         : 
+CreationTime      : 2026/5/31 8:49:16
+CreationTimeUtc   : 2026/5/31 0:49:16
+LastAccessTime    : 2026/6/1 7:13:06
+LastAccessTimeUtc : 2026/5/31 23:13:06
+LastWriteTime     : 2026/5/31 21:12:51
+LastWriteTimeUtc  : 2026/5/31 13:12:51
+Attributes        : Directory
+Mode              : d-----
+BaseName          : memory
+Target            : {}
+LinkType          : 
+
+
+PSPath            : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\models
+PSParentPath      : Microsoft.PowerShell.Core\FileSystem::H:\codexworkplace\sofeware\OpenHarness-main\learn
+...[bash 输出过长，已截断，原始字符数=28367]...

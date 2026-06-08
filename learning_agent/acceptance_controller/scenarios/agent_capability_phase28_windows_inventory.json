@@ -1,0 +1,37 @@
+{
+  "name": "agent_capability_phase28_windows_inventory",
+  "output_prefix": "agent_capability_phase28_windows_inventory",
+  "window_title_prefix": "LearningAgent-Phase28-WindowsInventory",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "PHASE28_WINDOWS_INVENTORY_READY",
+  "prompt_lines": [
+    "请执行一次 Phase 28 Windows Computer Use 只读窗口 inventory 验收：只验证 list_windows、list_apps、get_window_state 和只读动作拒绝，不要读取真实敏感窗口标题，不要移动鼠标，不要点击真实桌面，最终回答必须包含固定标记：PHASE28_WINDOWS_INVENTORY_READY。",
+    "你必须调用终端工具执行这个只读命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.controller import ComputerUseController, WindowsComputerUseBackend; from learning_agent.computer_use.windows_backend import StaticWindowsWindowInventory; inv=StaticWindowsWindowInventory(raw_windows=[{'hwnd':12345,'pid':100,'process_name':'notepad.exe','class_name':'Notepad','title':'Notepad Phase28','rect':{'left':10,'top':20,'right':310,'bottom':220}},{'hwnd':67890,'pid':200,'process_name':'powershell.exe','class_name':'ConsoleWindowClass','title':'Windows PowerShell','rect':{'left':0,'top':0,'right':640,'bottom':480}}], captured_at='2026-06-02T00:00:00Z'); c=ComputerUseController(backend=WindowsComputerUseBackend(inventory=inv, real_actions_enabled=False)); w=c.observe({'action':'list_windows'}); a=c.observe({'action':'list_apps'}); s=c.observe({'action':'get_window_state','window':w.data['windows'][0]}); bad=c.execute({'action':'click','confirm_desktop_control':True,'window':w.data['windows'][0],'x':1,'y':1}); assert w.ok and a.ok and s.ok and (not bad.ok); print('PHASE28_WINDOWS_INVENTORY_OK windows='+str(len(w.data['windows']))+' filtered='+str(w.data['filtered_count'])+' apps='+str(len(a.data['apps']))+' width='+str(s.data['state']['screenshot_width'])+' actions_blocked='+str((not bad.ok)).lower())\"",
+    "不要提前最终回答；只有终端命令成功输出 PHASE28_WINDOWS_INVENTORY_OK 后，最终回答最后一行必须完整复制：PHASE28_WINDOWS_INVENTORY_READY PHASE28_WINDOWS_INVENTORY_OK windows=1 filtered=1 apps=1 width=300 actions_blocked=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE28_WINDOWS_INVENTORY_OK",
+    "windows=1",
+    "filtered=1",
+    "apps=1",
+    "width=300",
+    "actions_blocked=true"
+  ],
+  "event_answer_contains": [
+    "PHASE28_WINDOWS_INVENTORY_READY",
+    "PHASE28_WINDOWS_INVENTORY_OK",
+    "windows=1",
+    "filtered=1",
+    "apps=1",
+    "width=300",
+    "actions_blocked=true"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -1,0 +1,60 @@
+{
+  "observation_id": "browser_observation_43c957ba9239e367",
+  "run_id": "browser_run_cdbc64e81e776a8c",
+  "stage_id": "browser_run_cdbc64e81e776a8c-action-1",
+  "action_id": "browser_run_cdbc64e81e776a8c-action-1",
+  "url": "http://127.0.0.1:56951/index.html",
+  "title": "Browser Automation Demo",
+  "visible_text": "",
+  "screenshot_path": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_artifacts\\test-page.png",
+  "artifact_paths": [],
+  "console_summary": "log: page-ready",
+  "network_summary": "GET 200 http://127.0.0.1:56951/index.html",
+  "elements": [
+    {
+      "element_id": "1",
+      "role": "input",
+      "tag": "input",
+      "label": "",
+      "text": "",
+      "placeholder": "",
+      "selector": "input#name",
+      "visible": true,
+      "x": 8,
+      "y": 87,
+      "width": 177,
+      "height": 21,
+      "center_x": 97,
+      "center_y": 97,
+      "box": {
+        "x": 8,
+        "y": 87,
+        "width": 177,
+        "height": 21
+      }
+    },
+    {
+      "element_id": "2",
+      "role": "button",
+      "tag": "button",
+      "label": "Apply",
+      "text": "Apply",
+      "placeholder": "",
+      "selector": "button#apply",
+      "visible": true,
+      "x": 185,
+      "y": 87,
+      "width": 49,
+      "height": 21,
+      "center_x": 210,
+      "center_y": 97,
+      "box": {
+        "x": 185,
+        "y": 87,
+        "width": 49,
+        "height": 21
+      }
+    }
+  ],
+  "created_at_ms": 1780287333593
+}

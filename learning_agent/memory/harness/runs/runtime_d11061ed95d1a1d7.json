@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_d11061ed95d1a1d7",
+  "prompt": "请执行 Browser Fallback Recovery Stage 10 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_FALLBACK_RECOVERY_STAGE10_READY。 你必须调用 bash 执行这个命令，验证真实 Chrome 登录态任务不会静默降级、CDP 兜底必须显式授权、不可用 provider 会被阻断、tab context 会要求刷新、连续失败会停止：python -m unittest learning_agent.tests.test_browser_fallback_recovery_stage10 不要提前最终回答；只有命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_FALLBACK_RECOVERY_STAGE10_READY STAGE10_FALLBACK_RECOVERY_OK",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行 Browser Fallback Recovery Stage 10 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_FALLBACK_RECOVERY_STAGE10_READY。 你必须调用 bash 执行这个命令，验证真实 Chrome 登录态任务不会静默降级、CDP 兜底必须显式授权、不可用 provider 会被阻断、tab context 会要求刷新、连续失败会停止：python -m unittest learning_agent.tests.test_browser_fallback_recovery_stage10 不要提前最终回答；只有命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_FALLBACK_RECOVERY_STAGE10_READY STAGE10_FALLBACK_RECOVERY_OK",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "真实可见终端验收已完成：\n\n- 已调用 bash 执行：`python -m unittest learning_agent.tests.test_browser_fallback_recovery_stage10`\n- 测试结果：Ran 5 tests，OK\n- 覆盖验证项包括：真实 Chrome 登录态任务不会静默降级、CDP 兜底必须显式授权、不可用 provider 会被阻断、tab context 会要求刷新、连续失败会停止。\n\nBROWSER_FALLBACK_RECOVERY_STAGE10_READY STAGE10_FALLBACK_RECOVERY_OK",
+      "started_at": "2026-06-01T11:15:36Z",
+      "completed_at": "2026-06-01T11:15:51Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T11:15:36Z",
+  "updated_at": "2026-06-01T11:15:51Z"
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_bba4c0d977116d5a",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已在本地电脑的画图软件中画好一棵树：包含树干、树冠轮廓和内部枝干线条。\n\n摘要：\n- computer_use / desktop workflow：已使用 OS 级桌面控制工作流\n- app：mspaint（实际窗口 app_id：mspaintapp:pid:46464）\n- screenshot：已通过 computer_observe / computer_action 返回截图并观察最终效果\n- real_desktop_touched：true\n- low_level_event_count：约 60 次低层输入事件（主要为 3 次 drag_path 绘图动作，摘要中可见 24 + 26 + 10）",
+      "started_at": "2026-06-06T11:39:08Z",
+      "completed_at": "2026-06-06T11:40:24Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T11:39:08Z",
+  "updated_at": "2026-06-06T11:40:24Z"
+}

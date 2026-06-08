@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ba52c5a5fc3f3137",
+  "prompt": "请执行一次 Chrome Extension Site Permissions Stage 7 的真实可见终端验收，最终回答必须包含固定标记：CHROME_EXTENSION_STAGE7_READY。 你必须调用 bash 执行这个命令验证 Chrome 插件站点权限、origin 动作级授权、未授权拦截和 browser_site_grant 同步：python -m unittest learning_agent.tests.test_chrome_extension_site_permissions_stage7 不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：CHROME_EXTENSION_STAGE7_READY STAGE7_CHROME_EXTENSION_SITE_PERMISSIONS_OK",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Chrome Extension Site Permissions Stage 7 的真实可见终端验收，最终回答必须包含固定标记：CHROME_EXTENSION_STAGE7_READY。 你必须调用 bash 执行这个命令验证 Chrome 插件站点权限、origin 动作级授权、未授权拦截和 browser_site_grant 同步：python -m unittest learning_agent.tests.test_chrome_extension_site_permissions_stage7 不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：CHROME_EXTENSION_STAGE7_READY STAGE7_CHROME_EXTENSION_SITE_PERMISSIONS_OK",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Chrome Extension Site Permissions Stage 7 真实可见终端验收已通过。\n\n验证命令：\npython -m unittest learning_agent.tests.test_chrome_extension_site_permissions_stage7\n\n结果：Ran 4 tests，OK。\n\nCHROME_EXTENSION_STAGE7_READY STAGE7_CHROME_EXTENSION_SITE_PERMISSIONS_OK",
+      "started_at": "2026-06-01T10:22:48Z",
+      "completed_at": "2026-06-01T10:23:04Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-01T10:22:48Z",
+  "updated_at": "2026-06-01T10:23:04Z"
+}

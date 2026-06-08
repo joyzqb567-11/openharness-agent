@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_88f8a9cd362d0d43",
+  "prompt": "请执行一次 Phase 19 浏览器 provider 智能路由的真实可见终端验收，最终回答必须包含固定标记：PHASE19_BROWSER_ROUTING_READY。 你必须调用终端工具执行这个命令验证路由策略：python -c \"from learning_agent.browser.providers import BrowserProviderRouter, BrowserProviderHealth, BrowserProviderKind; r=BrowserProviderRouter(); h={BrowserProviderKind.CHROME_EXTENSION: BrowserProviderHealth.available(BrowserProviderKind.CHROME_EXTENSION, metadata={'paired': True, 'supported_tools': ['browser_snapshot']}), BrowserProviderKind.REAL_CHROME_CDP: BrowserProviderHealth.available(BrowserProviderKind.REAL_CHROME_CDP), BrowserProviderKind.VISIBLE_CHROMIUM: BrowserProviderHealth.available(BrowserProviderKind.VISIBLE_CHROMIUM)}; d1=r.decide_provider('使用我当前 Chrome 已登录账号截图', 'browser_snapshot', {}, h); d2=r.decide_provider('使用我当前 Chrome 已登录账号上传文件', 'browser_upload_file', {}, h); h[BrowserProviderKind.REAL_CHROME_CDP]=BrowserProviderHealth.unavailable(BrowserProviderKind.REAL_CHROME_CDP, 'cdp_blocked'); d3=r.decide_provider('使用我当前 Chrome 已登录账号上传文件', 'browser_upload_file', {}, h); assert d1.provider==BrowserProviderKind.CHROME_EXTENSION; assert d1.metadata['supported_tool'] is True; assert d2.provider==BrowserProviderKind.REAL_CHROME_CDP; assert d2.reason_code=='chrome_extension_tool_unsupported_real_chrome_cdp'; assert d3.provider==BrowserProviderKind.VISIBLE_CHROMIUM; assert d3.reason_code=='chrome_extension_tool_unsupported_visible_chromium'; print('PHASE19_ROUTING_OK extension='+d1.provider.value+' cdp='+d2.provider.value+' visible='+d3.provider.value+' reason2='+d2.reason_code+' reason3='+d3.reason_code)\" 不要提前最终回答；只有终端命令成功输出 PHASE19_ROUTING_OK 后，最终回答最后一行必须完整复制：PHASE19_BROWSER_ROUTING_READY PHASE19_ROUTING_OK extension=chrome_extension cdp=real_chrome_cdp visible=visible_chromium reason2=chrome_extension_tool_unsupported_real_chrome_cdp reason3=chrome_extension_tool_unsupported_visible_chromium",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 19 浏览器 provider 智能路由的真实可见终端验收，最终回答必须包含固定标记：PHASE19_BROWSER_ROUTING_READY。 你必须调用终端工具执行这个命令验证路由策略：python -c \"from learning_agent.browser.providers import BrowserProviderRouter, BrowserProviderHealth, BrowserProviderKind; r=BrowserProviderRouter(); h={BrowserProviderKind.CHROME_EXTENSION: BrowserProviderHealth.available(BrowserProviderKind.CHROME_EXTENSION, metadata={'paired': True, 'supported_tools': ['browser_snapshot']}), BrowserProviderKind.REAL_CHROME_CDP: BrowserProviderHealth.available(BrowserProviderKind.REAL_CHROME_CDP), BrowserProviderKind.VISIBLE_CHROMIUM: BrowserProviderHealth.available(BrowserProviderKind.VISIBLE_CHROMIUM)}; d1=r.decide_provider('使用我当前 Chrome 已登录账号截图', 'browser_snapshot', {}, h); d2=r.decide_provider('使用我当前 Chrome 已登录账号上传文件', 'browser_upload_file', {}, h); h[BrowserProviderKind.REAL_CHROME_CDP]=BrowserProviderHealth.unavailable(BrowserProviderKind.REAL_CHROME_CDP, 'cdp_blocked'); d3=r.decide_provider('使用我当前 Chrome 已登录账号上传文件', 'browser_upload_file', {}, h); assert d1.provider==BrowserProviderKind.CHROME_EXTENSION; assert d1.metadata['supported_tool'] is True; assert d2.provider==BrowserProviderKind.REAL_CHROME_CDP; assert d2.reason_code=='chrome_extension_tool_unsupported_real_chrome_cdp'; assert d3.provider==BrowserProviderKind.VISIBLE_CHROMIUM; assert d3.reason_code=='chrome_extension_tool_unsupported_visible_chromium'; print('PHASE19_ROUTING_OK extension='+d1.provider.value+' cdp='+d2.provider.value+' visible='+d3.provider.value+' reason2='+d2.reason_code+' reason3='+d3.reason_code)\" 不要提前最终回答；只有终端命令成功输出 PHASE19_ROUTING_OK 后，最终回答最后一行必须完整复制：PHASE19_BROWSER_ROUTING_READY PHASE19_ROUTING_OK extension=chrome_extension cdp=real_chrome_cdp visible=visible_chromium reason2=chrome_extension_tool_unsupported_real_chrome_cdp reason3=chrome_extension_tool_unsupported_visible_chromium",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "真实可见终端验收已通过，路由策略验证命令成功输出 PHASE19_ROUTING_OK。\n\nPHASE19_BROWSER_ROUTING_READY PHASE19_ROUTING_OK extension=chrome_extension cdp=real_chrome_cdp visible=visible_chromium reason2=chrome_extension_tool_unsupported_real_chrome_cdp reason3=chrome_extension_tool_unsupported_visible_chromium",
+      "started_at": "2026-06-02T12:48:03Z",
+      "completed_at": "2026-06-02T12:48:29Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T12:48:03Z",
+  "updated_at": "2026-06-02T12:48:29Z"
+}

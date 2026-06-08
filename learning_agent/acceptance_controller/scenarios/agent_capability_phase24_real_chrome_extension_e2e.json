@@ -1,0 +1,25 @@
+{
+  "name": "agent_capability_phase24_real_chrome_extension_e2e",
+  "output_prefix": "agent_capability_phase24_real_chrome_extension_e2e",
+  "window_title_prefix": "LearningAgent-Phase24-RealChromeExtension",
+  "max_seconds": 90,
+  "final_log_wait_seconds": 5,
+  "success_marker": "",
+  "prompt_lines": [
+    "/chrome real-extension-e2e-check"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "chrome_status_printed"
+  ],
+  "debug_log_contains": [],
+  "event_answer_contains": [],
+  "event_payload_contains": [
+    "real_extension_connected=true",
+    "paired=true",
+    "browser_prompt_queued=true",
+    "workspace_lock_ok=true",
+    "real_extension_e2e=true"
+  ],
+  "max_permission_sent_count": 0
+}

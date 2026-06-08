@@ -1,0 +1,31 @@
+browser_evaluate 成功
+page_id=page-1
+标题：皇上快点
+URL：https://gd-h5ly-web01.leishenhuyu.com/gt_h5ly/?r_plat=h5kunyou-1003007029&r_bid=1003007000&r_host=hskd-h5lianyun-sdk.leishenhuyu.com
+耗时毫秒：5
+结果截断：未截断
+结果文本：{"i":0,"tag":"div","id":"","cls":"egret-player","type":"","placeholder":"","text":"","visible":true,"box":{"x":0,"y":0,"w":1024,"h":758}}
+{"i":1,"tag":"div","id":"StageDelegateDiv","cls":"","type":"","placeholder":"","text":"","visible":false,"box":{"x":259,"y":0,"w":0,"h":0}}
+{"i":3,"tag":"textarea","id":"egretTextarea","cls":"","type":"","placeholder":"","text":"","visible":true,"box":{"x":259,"y":-100,"w":1,"h":12}}
+{"i":4,"tag":"input","id":"egretInput","cls":"","type":"text","placeholder":"","text":"","visible":true,"box":{"x":259,"y":-100,"w":1,"h":12}}
+{"i":5,"tag":"div","id":"gameloadresfaildiv","cls":"","type":"","placeholder":"","text":"网络异常\n                请检查网络或尝试wifi和流量互切\n            \n            \n                重试","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":6,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"网络异常\n                请检查网络或尝试wifi和流量互切\n            \n            \n                重试","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":7,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"网络异常\n                请检查网络或尝试wifi和流量互切","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":8,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"网络异常","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":9,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"请检查网络或尝试wifi和流量互切","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":10,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"重试","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":11,"tag":"div","id":"","cls":"","type":"","placeholder":"","text":"重试","visible":false,"box":{"x":0,"y":0,"w":0,"h":0}}
+{"i":12,"tag":"div","id":"","cls":"ow-wrap","type":"","placeholder":"","text":"账号登录\n\n快速试玩\n\n快速注册\n\n找回密码","visible":true,"box":{"x":0,"y":0,"w":1024,"h":758}}
+{"i":13,"tag":"div","id":"","cls":"ow-com-box ow-login-box","type":"","placeholder":"","text":"账号登录\n\n快速试玩\n\n快速注册\n\n找回密码","visible":true,"box":{"x":362,"y":229,"w":300,"h":300}}
+{"i":14,"tag":"div","id":"","cls":"ow-com-tit","type":"","placeholder":"","text":"账号登录","visible":true,"box":{"x":362,"y":229,"w":300,"h":40}}
+{"i":15,"tag":"input","id":"usernameval","cls":"","type":"text","placeholder":"手机号/用户名","text":"","visible":true,"box":{"x":377,"y":299,"w":270,"h":36}}
+{"i":16,"tag":"input","id":"passwordval","cls":"","type":"password","placeholder":"密码","text":"","visible":true,"box":{"x":377,"y":350,"w":270,"h":36}}
+{"i":17,"tag":"input","id":"","cls":"ow-sure-btn ow-login-btn","type":"button","placeholder":"","text":"登录","visible":true,"box":{"x":377,"y":401,"w":270,"h":40}}
+{"i":18,"tag":"div","id":"","cls":"ow-com-line2","type":"","placeholder":"","text":"","visible":true,"box":{"x":362,"y":456,"w":300,"h":1}}
+{"i":19,"tag":"div","id":"","cls":"ow-w100 ow-bot-nav","type":"","placeholder":"","text":"快速试玩\n\n快速注册\n\n找回密码","visible":true,"box":{"x":362,"y":467,"w":300,"h":56}}
+{"i":20,"tag":"a","id":"","cls":"","type":"","placeholder":"","text":"快速试玩","visible":true,"box":{"x":362,"y":467,"w":99,"h":56}}
+{"i":21,"tag":"span","id":"","cls":"","type":"","placeholder":"","text":"","visible":true,"box":{"x":392,"y":467,"w":40,"h":40}}
+{"i":22,"tag":"a","id":"","cls":"","type":"","placeholder":"","text":"快速注册","visible":true,"box":{"x":462,"y":467,"w":99,"h":56}}
+{"i":23,"tag":"span","id":"","cls":"","type":"","placeholder":"","text":"","visible":true,"box":{"x":492,"y":467,"w":40,"h":40}}
+{"i":24,"tag":"a","id":"","cls":"","type":"","placeholder":"","text":"找回密码","visible":true,"box":{"x":563,"y":467,"w":99,"h":56}}
+{"i":25,"tag":"span","id":"","cls":"","type":"","placeholder":"","text":"","visible":true,"box":{"x":592,"y":467,"w":40,"h":40}}

@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_ae347991d340ef3c",
+  "prompt": "Please run one Phase 61 Windows Computer Use abort, cleanup, hotkey fallback, and streaming hooks acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not register a global keyboard hook, and do not interact with any user window. The final answer must include the fixed marker: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.abort_streaming_hooks import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK, the final answer's last line must completely copy: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK abort_zero_events=true exception_cleanup=true stale_recovered=true streaming_hooks=true hotkey_fallback=true terminal_status=true actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 61 Windows Computer Use abort, cleanup, hotkey fallback, and streaming hooks acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not register a global keyboard hook, and do not interact with any user window. The final answer must include the fixed marker: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.abort_streaming_hooks import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK, the final answer's last line must completely copy: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK abort_zero_events=true exception_cleanup=true stale_recovered=true streaming_hooks=true hotkey_fallback=true terminal_status=true actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 61 Windows Computer Use abort, cleanup, hotkey fallback, and streaming hooks acceptance passed.\n\nPHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK abort_zero_events=true exception_cleanup=true stale_recovered=true streaming_hooks=true hotkey_fallback=true terminal_status=true actions_expanded=false",
+      "started_at": "2026-06-03T10:35:55Z",
+      "completed_at": "2026-06-03T10:36:06Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T10:35:55Z",
+  "updated_at": "2026-06-03T10:36:06Z"
+}

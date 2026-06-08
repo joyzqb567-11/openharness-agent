@@ -1,0 +1,27 @@
+{
+  "name": "browser_tool_surface_stage3_acceptance",
+  "output_prefix": "browser_tool_surface_stage3_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-ToolSurface",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "BROWSER_TOOL_SURFACE_STAGE3_READY",
+  "prompt_lines": [
+    "请执行一次 Browser Tool Surface Stage 3 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_TOOL_SURFACE_STAGE3_READY。",
+    "你必须调用 bash 执行这个命令验证模型单轨浏览器工具表面、provider-control 标记和 provider decision 事件：python -m unittest learning_agent.tests.test_browser_tool_surface_stage3",
+    "不要提前最终回答；只有 bash 命令成功并显示 OK 后，最终回答最后一行必须完整输出：BROWSER_TOOL_SURFACE_STAGE3_READY STAGE3_TOOL_SURFACE_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent.tests.test_browser_tool_surface_stage3",
+    "OK"
+  ],
+  "event_answer_contains": [
+    "BROWSER_TOOL_SURFACE_STAGE3_READY",
+    "STAGE3_TOOL_SURFACE_OK"
+  ]
+}

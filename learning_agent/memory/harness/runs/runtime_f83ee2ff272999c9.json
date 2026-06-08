@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f83ee2ff272999c9",
+  "prompt": "Please run one Phase 94 authorized Windows Computer Use real dispatch candidate acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE94_AUTHORIZED_REAL_DISPATCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.authorized_real_dispatch import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE94_AUTHORIZED_REAL_DISPATCH_OK, the final answer's last line must completely copy: PHASE94_AUTHORIZED_REAL_DISPATCH_READY PHASE94_AUTHORIZED_REAL_DISPATCH_OK phase93_recording_gap_closed_by_candidate=true authorized_real_dispatch_candidate_ready=true authorized_low_level_dispatch_reaches_sender=true real_dispatch_default_disabled=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_text_hidden=true real_dispatch_performed=false uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 94 authorized Windows Computer Use real dispatch candidate acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE94_AUTHORIZED_REAL_DISPATCH_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.authorized_real_dispatch import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE94_AUTHORIZED_REAL_DISPATCH_OK, the final answer's last line must completely copy: PHASE94_AUTHORIZED_REAL_DISPATCH_READY PHASE94_AUTHORIZED_REAL_DISPATCH_OK phase93_recording_gap_closed_by_candidate=true authorized_real_dispatch_candidate_ready=true authorized_low_level_dispatch_reaches_sender=true real_dispatch_default_disabled=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_text_hidden=true real_dispatch_performed=false uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 94 authorized Windows Computer Use real dispatch candidate acceptance self-check completed successfully.\nPHASE94_AUTHORIZED_REAL_DISPATCH_READY PHASE94_AUTHORIZED_REAL_DISPATCH_OK phase93_recording_gap_closed_by_candidate=true authorized_real_dispatch_candidate_ready=true authorized_low_level_dispatch_reaches_sender=true real_dispatch_default_disabled=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_text_hidden=true real_dispatch_pe",
+      "started_at": "2026-06-04T13:02:40Z",
+      "completed_at": "2026-06-04T13:02:51Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-04T13:02:40Z",
+  "updated_at": "2026-06-04T13:02:51Z"
+}

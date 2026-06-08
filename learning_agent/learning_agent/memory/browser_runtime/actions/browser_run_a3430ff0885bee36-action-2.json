@@ -1,0 +1,15 @@
+{
+  "action_id": "browser_run_a3430ff0885bee36-action-2",
+  "run_id": "browser_run_a3430ff0885bee36",
+  "stage_id": "browser_wait",
+  "tool_name": "browser_wait",
+  "arguments_redacted": {
+    "milliseconds": 250
+  },
+  "status": "completed",
+  "started_at_ms": 1780313741042,
+  "finished_at_ms": 1780313741301,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}

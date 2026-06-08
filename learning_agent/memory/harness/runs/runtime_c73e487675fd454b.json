@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_c73e487675fd454b",
+  "prompt": "请使用本地电脑的画图软件画一棵树。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请使用本地电脑的画图软件画一棵树。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Codex OAuth/API 调用失败：响应读取超时。这通常是网络或 Codex 后端流式响应超时，不一定是 OAuth 登录过期；请先重试。如果后续出现 HTTP 401/403 或 invalid_grant，再重新登录。原始错误：SSE stream read timed out after 60 seconds without a completion event",
+      "started_at": "2026-06-06T10:29:38Z",
+      "completed_at": "2026-06-06T10:31:40Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-06T10:29:38Z",
+  "updated_at": "2026-06-06T10:31:40Z"
+}

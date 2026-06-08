@@ -18,6 +18,7 @@ Stage 15 新增的运行时骨架：
 - `tools/hooks.py` / `tools/permissions.py` / `tools/executor.py`：Tool Executor v2、权限决策和 hook 生命周期。
 - `tools/orchestrator.py`：安全只读工具并发批处理。
 - `core/session.py`：session summary、resume 读取入口和最小 compact helper。
+- `harness/`：独立长任务 harness，提供持久化 run、队列租约、阶段验收、失败恢复、checkpoint、CLI enqueue/run 和状态输出。
 
 Stage 14 的硬清理目标是让用户和维护者看到的都是纯新架构：
 
@@ -105,6 +106,7 @@ learning_agent/
   app/                    命令行入口、交互终端、doctor、自检和 HTTP command bridge。
   browser/                真实浏览器意图识别、自然查询 harness、客户模式授权和截图路径策略。
   core/                   Agent 主循环、消息类型、运行配置和工具调度。
+  harness/                长任务持久化、队列租约、阶段验收、失败恢复和状态输出。
   mcp/                    MCP 配置加载、server 生命周期、工具发现和运行时适配。
   models/                 OpenAI、Codex CLI、Codex OAuth/API、FakeModel 等模型适配器。
   observability/          调试日志、权限事件、验收事件、最终回答事件、transcript JSONL 记录和读取。
@@ -130,6 +132,17 @@ Agent 思考循环或工具调用异常：
 - 配置对象看 `learning_agent/core/config.py`
 - 事件结构看 `learning_agent/core/events.py`
 - 会话恢复看 `learning_agent/core/session.py`
+
+长任务、断点恢复、任务队列或阶段验收异常：
+
+- 数据模型看 `learning_agent/harness/models.py`
+- 状态落盘和 JSONL 事件看 `learning_agent/harness/store.py`
+- 队列领取、租约和 heartbeat 看 `learning_agent/harness/queue.py`
+- 阶段 marker/artifact 验收看 `learning_agent/harness/verifier.py`
+- 临时失败恢复和 endpoint 轮换看 `learning_agent/harness/recovery.py`
+- 多阶段执行和 checkpoint 推进看 `learning_agent/harness/runner.py`
+- 真实 `LearningAgent.run()` 阶段适配看 `learning_agent/harness/agent_executor.py`
+- 状态文本和 CLI 看 `learning_agent/harness/status.py`、`learning_agent/harness/cli.py`
 
 模型返回异常、OAuth 失败、额度错误：
 
@@ -177,6 +190,7 @@ MCP server 启动、发现、调用异常：
 - Tool Executor v2 失败看 `learning_agent/tests/test_tool_executor_v2.py`
 - 工具并发编排失败看 `learning_agent/tests/test_tool_orchestrator.py`
 - session/resume/compact 失败看 `learning_agent/tests/test_sessions.py`
+- 长任务 harness 失败看 `learning_agent/tests/test_harness_long_task.py`
 - 浏览器意图失败看 `learning_agent/tests/test_browser_intent.py`
 - 浏览器 harness 失败看 `learning_agent/tests/test_browser_harness.py`
 - Prompt/context 失败看 `learning_agent/tests/test_prompts_context.py`
@@ -198,7 +212,35 @@ MCP server 启动、发现、调用异常：
 
 不要把新功能直接堆回 `core/agent.py`，除非它确实是主循环编排逻辑。
 
-## 7. 回归测试清单
+## 7. Compact/Resume 深度状态生态索引
+
+ClaudeCode 对齐后的 compact/resume 主线：
+
+- 多层 compact 核心看 `learning_agent/core/compact.py`。
+- prompt-too-long 一次性重试看 `learning_agent/core/reactive_compact.py`。
+- 恢复上下文加载看 `learning_agent/core/resume_loader.py`。
+- 恢复风险、缺失 tool_result、orphan tool_result、tombstone 看 `learning_agent/core/resume_repair.py`。
+- 主循环接入点看 `learning_agent/core/agent.py` 的 `run_events()`。
+
+状态生态入口：
+
+- 事件协议版本和类型看 `learning_agent/runtime/status_schema.py`。
+- 状态事件落盘和旧数据兼容看 `learning_agent/runtime/status_events.py`。
+- 状态快照聚合看 `learning_agent/runtime/status_snapshot.py`。
+- 终端渲染看 `learning_agent/app/status_renderer.py`。
+- 真实交互命令 `/status`、`/events`、`/sessions`、`/resume <session_id>`、`/compact` 看 `learning_agent/app/interactive.py`。
+- HTTP API `/status`、`/events`、`/runs`、`/sessions`、`/resume`、`/health` 看 `learning_agent/app/http_bridge.py`。
+- SDK 入口 `get_runs`、`get_sessions`、`get_health`、`load_resume_report`、`list_status_events`、`watch_status_events` 看 `learning_agent/sdk/status.py`。
+- 模型工具 `status_snapshot`、`event_tail`、`session_resume`、`compact_status`、`resume_report`、`run_status`、`health_status` 看 `learning_agent/tools/schemas.py`、`learning_agent/tools/executor.py`、`learning_agent/tools/catalog.py`。
+
+对应测试：
+
+- 多层 compact 和 reactive compact 看 `learning_agent/tests/test_compact_deep_alignment.py`。
+- 恢复修复报告看 `learning_agent/tests/test_resume_deep_alignment.py`。
+- 状态协议、SDK、旧数据兼容看 `learning_agent/tests/test_status_ecosystem_deep_alignment.py`。
+- HTTP、终端命令、模型状态工具综合验收看 `learning_agent/tests/test_compact_resume_status_ecosystem.py`。
+
+## 8. 回归测试清单
 
 轻量语法检查：
 
@@ -226,7 +268,7 @@ powershell -ExecutionPolicy Bypass -File learning_agent/acceptance_controller/co
 
 只有“代码修改完成 + 自动化测试通过 + 真实可见终端交互验收通过”，才能宣称本项目 agent 功能开发完成。
 
-## 8. 维护规则
+## 9. 维护规则
 
 - 新代码不要从 `learning_agent.learning_agent` 导入业务对象。
 - 新测试不要恢复旧聚合测试入口。

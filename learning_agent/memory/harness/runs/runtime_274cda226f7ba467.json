@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_274cda226f7ba467",
+  "prompt": "Please run one Phase 75 Windows Computer Use final Humanlike Windows Operator matrix acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.humanlike_operator_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK, the final answer's last line must completely copy: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK phase_count=10 prompt_to_any_normal_app=true humanlike_observe_act_verify_loop=true generic_windows_app_control=true per_app_scripts_required=false uia_ocr_vision_fusion=true mouse_keyboard_window_control=true failure_recovery=true representative_real_apps_passed=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false abort_safety=true high_risk_confirmation=true visible_terminal_gate=true approval_bypass_blocked=true uncontrolled_actions_expanded=false",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "Please run one Phase 75 Windows Computer Use final Humanlike Windows Operator matrix acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY. You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.humanlike_operator_matrix import main; raise SystemExit(main())\" Do not write the final answer early. Only after the terminal command prints PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK, the final answer's last line must completely copy: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK phase_count=10 prompt_to_any_normal_app=true humanlike_observe_act_verify_loop=true generic_windows_app_control=true per_app_scripts_required=false uia_ocr_vision_fusion=true mouse_keyboard_window_control=true failure_recovery=true representative_real_apps_passed=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false abort_safety=true high_risk_confirmation=true visible_terminal_gate=true approval_bypass_blocked=true uncontrolled_actions_expanded=false",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 75 Windows Computer Use final Humanlike Windows Operator matrix acceptance passed.\n\nPHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK phase_count=10 prompt_to_any_normal_app=true humanlike_observe_act_verify_loop=true generic_windows_app_control=true per_app_scripts_required=false uia_ocr_vision_fusion=true mouse_keyboard_window_control=true failure_recovery=true representative_real_apps_passed=true mspaint_pikachu_scenario=true real_paint_app_control=true huma",
+      "started_at": "2026-06-03T22:51:58Z",
+      "completed_at": "2026-06-03T22:52:10Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-03T22:51:58Z",
+  "updated_at": "2026-06-03T22:52:10Z"
+}

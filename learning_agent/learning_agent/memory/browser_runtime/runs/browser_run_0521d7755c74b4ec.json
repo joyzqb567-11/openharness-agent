@@ -1,0 +1,25 @@
+{
+  "run_id": "browser_run_0521d7755c74b4ec",
+  "session_id": "independent_chromium",
+  "prompt": "MCP browser tool call: browser_snapshot",
+  "status": "completed",
+  "current_stage_id": "browser_snapshot",
+  "completed_stage_ids": [
+    "browser_snapshot"
+  ],
+  "action_ids": [
+    "browser_run_0521d7755c74b4ec-action-1"
+  ],
+  "observation_ids": [
+    "browser_observation_65371bad3c1b818f"
+  ],
+  "summary": "browser_snapshot 成功\n标题：Browser Automation Demo\nURL：http://127.0.0.1:53719/index.html\n正文截断状态：未截断\nobservation_id=browser_observation_65371bad3c1b818f\n正文摘要：Browser Automation Demo Apply 等待输入\n可交互元素：\n1. <input> label='' selector=input#name visible=True box=8,87,177,21 center_x=97 center_y=97\n2. <button> label='Apply' selector=button#apply visible=True box=185,87,49,21 center_x=210 center_y=97",
+  "error_type": "",
+  "error_message": "",
+  "metadata": {
+    "source": "browser_automation_mcp_server",
+    "session_mode": "independent_chromium"
+  },
+  "created_at_ms": 1780324893525,
+  "updated_at_ms": 1780324893827
+}

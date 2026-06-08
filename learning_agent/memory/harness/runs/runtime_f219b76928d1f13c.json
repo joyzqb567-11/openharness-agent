@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_f219b76928d1f13c",
+  "prompt": "请执行一次 Phase 20 OS Computer Use 状态验收：检查 computer use 状态，不要移动鼠标，不要点击，不要调用 computer_action，最终回答必须包含固定标记：PHASE20_COMPUTER_USE_READY。 你必须调用终端工具执行这个只读命令验证默认安全门禁：python -c \"from learning_agent.computer_use.controller import ComputerUseController; c=ComputerUseController(); s=c.status(); assert s['backend']['real_actions_enabled'] is False; assert s['backend']['opt_in_env_var']=='LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE'; assert s['audit']['event_count']==0; print('PHASE20_COMPUTER_STATUS_OK real_actions_enabled='+str(s['backend']['real_actions_enabled']).lower()+' opt_in_env_var='+s['backend']['opt_in_env_var']+' audit_count='+str(s['audit']['event_count']))\" 不要提前最终回答；只有终端命令成功输出 PHASE20_COMPUTER_STATUS_OK 后，最终回答最后一行必须完整复制：PHASE20_COMPUTER_USE_READY PHASE20_COMPUTER_STATUS_OK real_actions_enabled=false opt_in_env_var=LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE audit_count=0",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次 Phase 20 OS Computer Use 状态验收：检查 computer use 状态，不要移动鼠标，不要点击，不要调用 computer_action，最终回答必须包含固定标记：PHASE20_COMPUTER_USE_READY。 你必须调用终端工具执行这个只读命令验证默认安全门禁：python -c \"from learning_agent.computer_use.controller import ComputerUseController; c=ComputerUseController(); s=c.status(); assert s['backend']['real_actions_enabled'] is False; assert s['backend']['opt_in_env_var']=='LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE'; assert s['audit']['event_count']==0; print('PHASE20_COMPUTER_STATUS_OK real_actions_enabled='+str(s['backend']['real_actions_enabled']).lower()+' opt_in_env_var='+s['backend']['opt_in_env_var']+' audit_count='+str(s['audit']['event_count']))\" 不要提前最终回答；只有终端命令成功输出 PHASE20_COMPUTER_STATUS_OK 后，最终回答最后一行必须完整复制：PHASE20_COMPUTER_USE_READY PHASE20_COMPUTER_STATUS_OK real_actions_enabled=false opt_in_env_var=LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE audit_count=0",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "Phase 20 OS Computer Use 状态验收通过：默认安全门禁确认 real_actions_enabled=false，opt-in 环境变量正确，审计事件数为 0。\nPHASE20_COMPUTER_USE_READY PHASE20_COMPUTER_STATUS_OK real_actions_enabled=false opt_in_env_var=LEARNING_AGENT_ENABLE_WINDOWS_COMPUTER_USE audit_count=0",
+      "started_at": "2026-06-02T12:58:46Z",
+      "completed_at": "2026-06-02T12:59:10Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-06-02T12:58:46Z",
+  "updated_at": "2026-06-02T12:59:10Z"
+}

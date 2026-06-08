@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_86807324426736b3",
+  "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "帮我查询3天后武汉的天气，并帮我做一下旅游攻略。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "已用可见浏览器查询核验：visible_browser=true，headless=false。\n\n实际动作：browser_launch_visible、browser_open、browser_snapshot。\n查询词包括：“2026年6月3日 武汉 天气 旅游攻略”、“武汉 3天 旅游攻略 黄鹤楼 东湖 湖北省博物馆”。\n\n## 3天后武汉天气（2026年6月3日，周三）\n\n搜索结果对 6月3日 武汉天气存在轻微差异：\n- 百度搜索摘要/东方天气结果：多云转阴，约 26～34℃，西南风 2级，空气质量良，降水概率不高。\n- 另有部分资讯提到：6月2日夜间至6月3日可能有中雨或阵雨，气温可能降至约 23～26℃。\n\n综合判断：\n- 武汉 6月初已进入偏湿热阶段，白天闷热概率较高。\n- 6月3日建议按“高温闷热 + 可能阵雨”准备。\n- 出发前一天务必再看中国天气网、中央气象台或本地气象台的临近预报。\n\n## 出行穿搭与物品建议\n\n- 穿搭：短袖、薄衬衫、速干衣、透气长裤或短裤。\n- 防晒：帽子、墨镜、防晒霜，武汉白天体感会比较热。\n- 防雨：带折叠伞或轻薄雨衣，尤其下午和傍晚。\n",
+      "started_at": "2026-05-31T13:53:59Z",
+      "completed_at": "2026-05-31T13:55:14Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T13:53:59Z",
+  "updated_at": "2026-05-31T13:55:14Z"
+}

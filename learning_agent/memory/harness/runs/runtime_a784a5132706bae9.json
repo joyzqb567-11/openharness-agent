@@ -1,0 +1,41 @@
+{
+  "run_id": "runtime_a784a5132706bae9",
+  "prompt": "请执行一次危险调试模式真实 Chrome 连接公开页面验收，最终回答必须在开头包含固定标记：REAL_CHROME_DANGEROUS_SKIP_CONNECT_OK。 本轮用户已明确同意调试测试，start_oauth_agent.bat 默认开启 LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1，因此不要等待人工权限确认。 用户已明确同意本轮为了验收而连接真实日常 Chrome profile 的高风险边界；本轮只能打开公开测试页面 https://example.com。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/real_chrome/SKILL.md。 读取规则后立刻调用 browser_profile_status；status 成功后的下一轮只调用 browser_connect_real_chrome，参数必须包含 confirm_real_profile=true。 如果当前日常 Chrome 已经普通运行且没有 CDP，危险调试模式允许 browser_connect_real_chrome 使用隔离 debug profile 启动真实 Google Chrome 测试窗口；这种模式必须说明不会读取用户登录态。 browser_connect_real_chrome 成功后的下一轮只调用 browser_open 打开 https://example.com；browser_open 成功后的下一轮只调用 browser_snapshot 读取这个公开页面内容。 本轮不要调用 browser_evaluate，不要读取 cookies、localStorage、sessionStorage、token、Authorization header、密码、已有标签页内容或插件内容。 如果 browser_connect_real_chrome 在危险调试隔离 profile 兜底后仍明确失败，请停止并如实说明失败，不要改用普通 browser_open 或独立 Chromium 冒充真实 Chrome。 最终回答必须包含：REAL_CHROME_DANGEROUS_SKIP_CONNECT_OK、real_chrome_connected=true、real_chrome_profile_scope、browser_profile_status、browser_connect_real_chrome、browser_open、browser_snapshot、https://example.com、LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1、隐私边界说明。",
+  "stages": [
+    {
+      "name": "interactive_turn",
+      "prompt": "请执行一次危险调试模式真实 Chrome 连接公开页面验收，最终回答必须在开头包含固定标记：REAL_CHROME_DANGEROUS_SKIP_CONNECT_OK。 本轮用户已明确同意调试测试，start_oauth_agent.bat 默认开启 LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1，因此不要等待人工权限确认。 用户已明确同意本轮为了验收而连接真实日常 Chrome profile 的高风险边界；本轮只能打开公开测试页面 https://example.com。 第一步读取 learning_agent/skills/tool_list.md，第二步读取 learning_agent/skills/real_chrome/SKILL.md。 读取规则后立刻调用 browser_profile_status；status 成功后的下一轮只调用 browser_connect_real_chrome，参数必须包含 confirm_real_profile=true。 如果当前日常 Chrome 已经普通运行且没有 CDP，危险调试模式允许 browser_connect_real_chrome 使用隔离 debug profile 启动真实 Google Chrome 测试窗口；这种模式必须说明不会读取用户登录态。 browser_connect_real_chrome 成功后的下一轮只调用 browser_open 打开 https://example.com；browser_open 成功后的下一轮只调用 browser_snapshot 读取这个公开页面内容。 本轮不要调用 browser_evaluate，不要读取 cookies、localStorage、sessionStorage、token、Authorization header、密码、已有标签页内容或插件内容。 如果 browser_connect_real_chrome 在危险调试隔离 profile 兜底后仍明确失败，请停止并如实说明失败，不要改用普通 browser_open 或独立 Chromium 冒充真实 Chrome。 最终回答必须包含：REAL_CHROME_DANGEROUS_SKIP_CONNECT_OK、real_chrome_connected=true、real_chrome_profile_scope、browser_profile_status、browser_connect_real_chrome、browser_open、browser_snapshot、https://example.com、LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1、隐私边界说明。",
+      "success_markers": [],
+      "required_artifacts": [],
+      "artifact_contains": {},
+      "json_schema_artifacts": {},
+      "expected_command_exit_codes": {},
+      "expected_event_sequence": [],
+      "acceptance_result_artifacts": [],
+      "max_attempts": 1,
+      "status": "completed",
+      "attempts": [],
+      "acceptance": {
+        "passed": true,
+        "checks": [
+          "run_completed"
+        ],
+        "message": "passed"
+      },
+      "checkpoint": "REAL_CHROME_DANGEROUS_SKIP_CONNECT_OK\n\nreal_chrome_connected=true\nreal_chrome_profile_scope=debug_profile_fallback\n\n本次已按要求完成危险调试模式真实 Chrome 公开页面验收，仅打开公开测试页面：https://example.com。\n\n执行链路：\n- 已读取 learning_agent/skills/tool_list.md\n- 已读取 learning_agent/skills/real_chrome/SKILL.md\n- browser_profile_status：成功；初始状态为 mode=independent_chromium，real_chrome_connected=false，headless=true，strict_site_permissions=false\n- browser_connect_real_chrome：成功；mode=real_chrome，real_chrome_connected=true，real_chrome_prof",
+      "started_at": "2026-05-31T14:31:55Z",
+      "completed_at": "2026-05-31T14:32:32Z"
+    }
+  ],
+  "endpoints": [
+    "default"
+  ],
+  "status": "completed",
+  "current_stage_index": 1,
+  "endpoint_index": 0,
+  "failure_reason": "",
+  "lease_worker": "",
+  "lease_until": 0.0,
+  "created_at": "2026-05-31T14:31:55Z",
+  "updated_at": "2026-05-31T14:32:32Z"
+}

@@ -1,0 +1,34 @@
+{
+  "name": "browser_visual_evidence_stage9_acceptance",
+  "output_prefix": "browser_visual_evidence_stage9_acceptance",
+  "window_title_prefix": "LearningAgent-Controller-BrowserVisualEvidence",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 6,
+  "success_marker": "BROWSER_VISUAL_EVIDENCE_STAGE9_READY",
+  "prompt_lines": [
+    "请执行一次 Browser Visual Evidence Stage 9 的真实可见终端验收，最终回答必须包含固定标记：BROWSER_VISUAL_EVIDENCE_STAGE9_READY。",
+    "你必须调用 bash 执行这个命令验证录制 store、统一录制工具、状态快照、终端渲染和 verifier glob 门禁：python -m unittest learning_agent.tests.test_browser_recording_stage9",
+    "然后必须继续调用 bash 执行这个命令，在真实项目 browser_artifacts 目录下生成可复验帧序列和 GIF：python -m learning_agent.browser.recording --selftest --workspace H:\\codexworkplace\\sofeware\\OpenHarness-main",
+    "不要提前最终回答；只有两个命令都成功、单测显示 OK、selftest 显示 STAGE9_RECORDING_SELFTEST_OK 后，最终回答最后一行必须完整输出：BROWSER_VISUAL_EVIDENCE_STAGE9_READY STAGE9_VISUAL_EVIDENCE_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent.tests.test_browser_recording_stage9",
+    "OK",
+    "STAGE9_RECORDING_SELFTEST_OK"
+  ],
+  "event_answer_contains": [
+    "BROWSER_VISUAL_EVIDENCE_STAGE9_READY",
+    "STAGE9_VISUAL_EVIDENCE_OK"
+  ],
+  "required_artifact_globs": [
+    "{project_root}/browser_artifacts/browser_recordings/stage9_selftest_*/recording_manifest.json",
+    "{project_root}/browser_artifacts/browser_recordings/stage9_selftest_*/frames/*.png",
+    "{project_root}/browser_artifacts/browser_recordings/stage9_selftest_*/stage9_selftest.gif"
+  ]
+}

@@ -1,4 +1,4 @@
-﻿"Browser execution, real Chrome helper, and search chain tests."  # Stage14: this file owns the browser_harness test group.
+"Browser execution, real Chrome helper, and search chain tests."  # Stage14: this file owns the browser_harness test group.
 from __future__ import annotations  # Stage14: keep annotations lazy after test split.
 import unittest  # Stage14: keep direct unittest execution available.
 from learning_agent.tests.support import *  # Stage14: import shared helpers and dependencies for copied tests.
@@ -218,6 +218,23 @@ class BrowserHarnessTests(LearningAgentTestBase):  # Stage14: unittest discovers
                     with self.assertRaisesRegex(RuntimeError, "Chrome 正在运行|先关闭当前 Chrome"):  # 新增代码+RealChrome运行中测试: 断言错误提示用户先关闭 Chrome；若省略: 错误文案不清楚也不会失败
                         server.browser_connect_real_chrome({"confirm_real_profile": True})  # 新增代码+RealChrome运行中测试: 传 true 越过确认边界进入运行中检查；若省略: 测试不到 Chrome 占用阻断
                     connect_mock.assert_not_called()  # 新增代码+RealChrome运行中测试: 确认阻断后没有启动真实连接；若省略: 可能一边报错一边继续碰真实 profile
+    def test_browser_connect_real_chrome_uses_debug_profile_fallback_in_dangerous_mode(self) -> None:  # 新增代码+危险调试Chrome: 验证危险模式下 Chrome 正在运行时会改用隔离调试 profile；若没有这行代码，真实可见验收会继续要求用户关闭日常 Chrome。
+        from learning_agent.browser_automation_mcp_server import BrowserAutomationServer  # 新增代码+危险调试Chrome: 导入被测 server 类；若没有这行代码，测试没有真实连接入口可调用。
+        server = BrowserAutomationServer(TEST_ROOT)  # 新增代码+危险调试Chrome: 创建隔离 server 实例；若没有这行代码，无法观察 browser_connect_real_chrome 的运行中分支。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+危险调试Chrome: 创建临时目录模拟隔离 profile 根目录；若没有这行代码，测试会污染真实 browser_artifacts。
+            debug_profile_dir = Path(raw_dir) / "debug-profile"  # 新增代码+危险调试Chrome: 指定本测试专用 debug profile 目录；若没有这行代码，后续无法断言目录被自动创建。
+            env = {"LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"}  # 新增代码+危险调试Chrome: 开启危险调试权限；若没有这行代码，运行中 Chrome 应该继续被安全阻断。
+            with mock.patch.dict(os.environ, env, clear=False):  # 新增代码+危险调试Chrome: 只在本测试内设置环境变量；若没有这行代码，测试会依赖开发者机器环境。
+                with mock.patch("learning_agent.browser_automation_mcp_server.ChromeProfileManager.chrome_is_running", return_value=True):  # 新增代码+危险调试Chrome: 模拟日常 Chrome 已经普通运行；若没有这行代码，无法稳定复现验收失败根因。
+                    with mock.patch("learning_agent.browser_automation_mcp_server.wait_for_cdp_endpoint", return_value=False):  # 新增代码+危险调试Chrome: 模拟没有可附着 CDP 端点；若没有这行代码，会走已有 CDP 分支而测不到兜底。
+                        with mock.patch("learning_agent.browser_automation_mcp_server.real_chrome_debug_profile_dir", return_value=debug_profile_dir):  # 新增代码+危险调试Chrome: 把兜底目录定向到临时目录；若没有这行代码，测试会创建真实 artifacts 目录。
+                            with mock.patch.object(server, "_connect_real_chrome_after_checks", return_value="browser_connect_real_chrome 成功") as connect_mock:  # 新增代码+危险调试Chrome: 只验证参数传递，不真的启动 Chrome；若没有这行代码，单测会碰用户桌面浏览器。
+                                result = server.browser_connect_real_chrome({"confirm_real_profile": True})  # 新增代码+危险调试Chrome: 执行被测入口；若没有这行代码，后续断言没有行为来源。
+            self.assertEqual(result, "browser_connect_real_chrome 成功")  # 新增代码+危险调试Chrome: 断言入口返回连接 helper 的结果；若没有这行代码，兜底执行结果可能被丢掉。
+            self.assertTrue(debug_profile_dir.exists())  # 新增代码+危险调试Chrome: 断言隔离 profile 目录被自动创建；若没有这行代码，真实启动仍会因目录不存在失败。
+            connect_arguments = connect_mock.call_args.args[0]  # 新增代码+危险调试Chrome: 读取传给连接 helper 的参数；若没有这行代码，无法确认是否真的改用隔离 profile。
+            self.assertEqual(connect_arguments["user_data_dir"], str(debug_profile_dir))  # 新增代码+危险调试Chrome: 断言 user_data_dir 指向隔离目录；若没有这行代码，兜底可能仍误抢日常 profile。
+            self.assertEqual(connect_arguments["_profile_scope"], "debug_profile_fallback")  # 新增代码+危险调试Chrome: 断言输出范围会说明这是 debug profile；若没有这行代码，用户可能误以为读取了登录态。
     def test_browser_connect_real_chrome_attaches_when_running_chrome_has_cdp(self) -> None:  # 新增代码+RealChrome已有CDP: 验证 Chrome 已运行且 9222 已提供 CDP 时应直接接管；若省略: 真实可见 Chrome 已开调试端口仍会被误拦截
         from learning_agent.browser_automation_mcp_server import BrowserAutomationServer  # 新增代码+RealChrome已有CDP: 导入被测 server 类；若省略: 测试没有真实连接入口可调用
         server = BrowserAutomationServer(TEST_ROOT)  # 新增代码+RealChrome已有CDP: 创建隔离 server 实例；若省略: 无法观察 browser_connect_real_chrome 的分支行为

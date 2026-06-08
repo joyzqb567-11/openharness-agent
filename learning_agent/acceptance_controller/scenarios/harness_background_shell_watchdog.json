@@ -1,0 +1,31 @@
+{
+  "name": "harness_background_shell_watchdog",
+  "output_prefix": "harness_background_shell_watchdog",
+  "window_title_prefix": "LearningAgent-Controller-HarnessBgShell",
+  "max_seconds": 480,
+  "final_log_wait_seconds": 35,
+  "success_marker": "HARNESS_BACKGROUND_SHELL_READY",
+  "prompt_lines": [
+    "请执行真实终端 background shell durable task 验收。如果第一轮只看到 read/write/edit/bash，这是正常的；第一步请用 read 读取 learning_agent/skills/long_running_work/SKILL.md 来加载长任务规则。",
+    "加载规则后，你必须调用 start_background_command 工具启动一个很短的后台命令，命令内容请使用当前 Python 执行：python -c \"print('BACKGROUND_SHELL_AUTO_DONE_OK', flush=True)\"。",
+    "请设置 label 为 harness-background-shell-real，不要调用 read_background_command，不要调用 task_output。",
+    "后台命令启动成功后，最终回答必须包含：HARNESS_BACKGROUND_SHELL_READY、start_background_command、harness-background-shell-real。"
+  ],
+  "required_event_states": [
+    "permission_required",
+    "permission_answered",
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "learning_agent/skills/long_running_work/SKILL.md",
+    "start_background_command",
+    "harness-background-shell-real"
+  ],
+  "event_answer_contains": [
+    "HARNESS_BACKGROUND_SHELL_READY",
+    "start_background_command",
+    "harness-background-shell-real"
+  ]
+}

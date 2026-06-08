@@ -1,0 +1,16 @@
+{
+  "action_id": "browser_run_5a85aae4d0b7ba3d-action-1",
+  "run_id": "browser_run_5a85aae4d0b7ba3d",
+  "stage_id": "browser_recover_page",
+  "tool_name": "browser_recover_page",
+  "arguments_redacted": {
+    "action": "reload",
+    "timeout_ms": 30000
+  },
+  "status": "completed",
+  "started_at_ms": 1780282751067,
+  "finished_at_ms": 1780282751135,
+  "error_type": "",
+  "error_message": "",
+  "observation_id": ""
+}
