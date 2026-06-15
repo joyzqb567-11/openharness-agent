@@ -130,7 +130,7 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
         middle_schema = tools_by_name["middle_click"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 middle_click 输入 schema；如果没有这一行，无法断言中键坐标字段。
         triple_schema = tools_by_name["triple_click"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 triple_click 输入 schema；如果没有这一行，无法断言三击坐标字段。
         mouse_down_schema = tools_by_name["left_mouse_down"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 left_mouse_down 输入 schema；如果没有这一行，无法断言左键按下坐标字段。
-        mouse_up_schema = tools_by_name["left_mouse_up"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 left_mouse_up 输入 schema；如果没有这一行，无法断言左键释放不要求坐标。
+        mouse_up_schema = tools_by_name["left_mouse_up"]["inputSchema"]  # 修改代码+ClaudeCodeParity：读取 left_mouse_up 输入 schema 并准备断言释放坐标合同；如果没有这一行，公开 schema 可能继续隐藏释放位置。
         self.assertEqual({"x", "y", "width", "height"}, set(zoom_schema["required"]))  # 新增代码+ClaudeCodeParity：断言 zoom 必填区域字段完整；如果没有这一行，width/height 可能再次变成可选导致合同漂移。
         self.assertTrue(tools_by_name["zoom"]["annotations"]["readOnlyHint"])  # 新增代码+ClaudeCodeParity：断言 zoom 是只读观察工具；如果没有这一行，安全提示可能错误标成会操作桌面。
         self.assertEqual({"keys"}, set(hold_key_schema["required"]))  # 新增代码+ClaudeCodeParity：断言 hold_key 必填 keys 数组而不是 singular key；如果没有这一行，公共合同会继续和 Windows runtime 漂移。
@@ -141,7 +141,7 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
         self.assertEqual({"x", "y"}, set(middle_schema["required"]))  # 新增代码+ClaudeCodeParity：断言中键点击必填坐标；如果没有这一行，中键工具可能在没有目标点时被调用。
         self.assertEqual({"x", "y"}, set(triple_schema["required"]))  # 新增代码+ClaudeCodeParity：断言三击必填坐标；如果没有这一行，三击工具可能在没有目标点时被调用。
         self.assertEqual({"x", "y"}, set(mouse_down_schema["required"]))  # 新增代码+ClaudeCodeParity：断言左键按下必填坐标；如果没有这一行，按下动作可能缺少落点。
-        self.assertEqual([], mouse_up_schema["required"])  # 新增代码+ClaudeCodeParity：断言左键释放没有必填参数；如果没有这一行，释放动作会错误要求坐标。
+        self.assertEqual({"x", "y"}, set(mouse_up_schema["required"]))  # 修改代码+ClaudeCodeParity：断言左键释放必填 x/y 坐标；如果没有这一行，模型不会知道释放点且证据链会丢坐标。
         self.assertIn("reason", mouse_up_schema["properties"])  # 新增代码+ClaudeCodeParity：断言左键释放仍保留可选 reason；如果没有这一行，工具调用目的无法记录。
         for action_name in {"hold_key", "left_click_drag", "middle_click", "triple_click", "left_mouse_down", "left_mouse_up"}:  # 新增代码+ClaudeCodeParity：遍历所有非只读 parity 动作；如果没有这一行，每个动作都要手写断言且容易漏掉。
             self.assertFalse(tools_by_name[action_name]["annotations"]["readOnlyHint"], action_name)  # 新增代码+ClaudeCodeParity：断言非只读动作不能标成 readOnly；如果没有这一行，模型和安全层可能误以为动作不会改变桌面。
@@ -194,12 +194,13 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
             ("mcp__computer-use__middle_click", {"x": 1, "y": 2}),  # 新增代码+ClaudeCodeParity：覆盖中键点击工具；如果没有这一项，中键桥接缺失不会暴露。
             ("mcp__computer-use__triple_click", {"x": 1, "y": 2}),  # 新增代码+ClaudeCodeParity：覆盖三击工具；如果没有这一项，三击桥接缺失不会暴露。
             ("mcp__computer-use__left_mouse_down", {"x": 1, "y": 2}),  # 新增代码+ClaudeCodeParity：覆盖左键按下工具；如果没有这一项，按下桥接缺失不会暴露。
-            ("mcp__computer-use__left_mouse_up", {"reason": "test-release"}),  # 新增代码+ClaudeCodeParity：覆盖左键释放工具；如果没有这一项，释放桥接缺失不会暴露。
+            ("mcp__computer-use__left_mouse_up", {"x": 1, "y": 2, "reason": "test-release"}),  # 修改代码+ClaudeCodeParity：按公开 schema 带坐标覆盖左键释放工具；如果没有这一项，释放桥接可能继续丢失 x/y。
         ]  # 新增代码+ClaudeCodeParity：结束 7 个 parity 工具调用清单；如果没有这一行，Python 列表语法不完整。
         results = [dispatch_computer_use_mcp_v2_tool(tool_name, arguments, context) for tool_name, arguments in tool_calls]  # 新增代码+ClaudeCodeParity：逐个通过真实 runtime 分发工具；如果没有这一行，测试只检查数据不检查运行路径。
         for result in results:  # 新增代码+ClaudeCodeParity：逐个检查工具结果；如果没有这一行，某个工具失败时不会被清晰定位。
             self.assertTrue(result["ok"], result)  # 新增代码+ClaudeCodeParity：断言每个 parity 工具都成功返回；如果没有这一行，缺桥接工具仍可能悄悄返回失败。
         self.assertEqual(["zoom", "hold_key", "left_click_drag", "middle_click", "triple_click", "left_mouse_down", "left_mouse_up"], host.calls)  # 新增代码+ClaudeCodeParity：断言 host 方法调用顺序精确匹配 7 个工具；如果没有这一行，工具可能调错方法或漏调方法。
+        self.assertEqual({"x": 1, "y": 2, "reason": "test-release"}, host.arguments[-1])  # 新增代码+ClaudeCodeParity：断言 left_mouse_up 桥接到 host 时保留坐标；如果没有这一行，runtime 可能成功但悄悄丢掉释放位置。
     # 新增代码+ClaudeCodeParity：函数段结束，test_new_parity_tools_dispatch_to_host_methods 到此结束；如果没有这个边界说明，用户不容易看出 host bridge 合同测试范围。
 
     # 新增代码+ComputerUseMcpV2RedTests：函数段开始，test_v2_server_selftest_reports_exact_surface 验证 server 自检使用 v2 工具面；如果没有这段测试，旧 server selftest 仍可能通过。
@@ -221,10 +222,12 @@ class _FakeV2Host:  # 新增代码+ComputerUseMcpV2RedTests：定义 fake Window
 class _FakeParityHost:  # 新增代码+ClaudeCodeParity：类段开始，记录 Task 2 新 parity 工具是否调到同名 host 方法；如果没有这个 fake host，测试会依赖真实桌面动作。
     def __init__(self) -> None:  # 新增代码+ClaudeCodeParity：函数段开始，初始化 fake host 调用记录；如果没有这段函数，测试无法判断调用顺序。
         self.calls: list[str] = []  # 新增代码+ClaudeCodeParity：保存已调用的方法名；如果没有这一行，host bridge 测试无法断言 7 个方法的顺序。
+        self.arguments: list[dict[str, Any]] = []  # 新增代码+ClaudeCodeParity：保存每次 host 调用的参数副本；如果没有这一行，测试无法证明 left_mouse_up 坐标被真实保留。
     # 新增代码+ClaudeCodeParity：函数段结束，__init__ 到此结束；如果没有这个边界说明，用户不容易看出 fake host 状态初始化范围。
 
     def _record(self, method_name: str, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，统一记录 fake host 调用并返回结构化成功；如果没有这段函数，每个 fake 方法都要重复记录逻辑。
         self.calls.append(method_name)  # 新增代码+ClaudeCodeParity：记录当前被调用的方法名；如果没有这一行，测试无法证明 runtime 调到了正确 host 方法。
+        self.arguments.append(dict(arguments))  # 新增代码+ClaudeCodeParity：记录参数快照用于检查坐标透传；如果没有这一行，host 调用成功也无法证明 x/y 没丢。
         return {"ok": True, "method": method_name, "arguments": dict(arguments)}  # 新增代码+ClaudeCodeParity：返回结构化成功 payload；如果没有这一行，runtime 可能把 None 当成未实现 host 方法。
     # 新增代码+ClaudeCodeParity：函数段结束，_record 到此结束；如果没有这个边界说明，用户不容易看出 fake host 记录逻辑范围。
 

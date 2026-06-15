@@ -80,7 +80,7 @@ def computer_use_mcp_tools() -> list[dict[str, Any]]:  # 新增代码+ComputerUs
         _tool("middle_click", "在指定坐标执行中键点击。", {**point, "reason": {"type": "string"}}, ["x", "y"]),  # 新增代码+ClaudeCodeParity：定义中键点击 schema；如果没有这行代码，公开工具名没有参数契约。
         _tool("triple_click", "在指定坐标执行三击。", {**point, "reason": {"type": "string"}}, ["x", "y"]),  # 新增代码+ClaudeCodeParity：定义三击 schema；如果没有这行代码，公开工具名没有参数契约。
         _tool("left_mouse_down", "在指定坐标按下左键但暂不释放。", {**point, "reason": {"type": "string"}}, ["x", "y"]),  # 新增代码+ClaudeCodeParity：定义左键按下 schema；如果没有这行代码，拆分鼠标动作没有参数契约。
-        _tool("left_mouse_up", "释放当前按下的左键。", {"reason": {"type": "string"}}),  # 新增代码+ClaudeCodeParity：定义左键释放 schema 且不要求坐标；如果没有这行代码，释放动作会错误要求额外坐标。
+        _tool("left_mouse_up", "释放当前按下的左键。", {**point, "reason": {"type": "string"}}, ["x", "y"]),  # 修改代码+ClaudeCodeParity：给左键释放 schema 公开并要求 x/y 坐标；如果没有这一行，模型不知道释放点且 controller 证据链会丢坐标。
         _tool("type", "向当前焦点输入文本。", {"text": {"type": "string"}, "reason": {"type": "string"}}, ["text"]),  # 新增代码+ComputerUseMcpV2：定义输入文本工具；如果没有这行代码，文本输入无法表达。
         _tool("key", "按下单个按键或快捷键。", {"keys": {"type": "array", "items": {"type": "string"}}, "reason": {"type": "string"}}, ["keys"]),  # 新增代码+ComputerUseMcpV2：定义按键工具；如果没有这行代码，快捷键无法表达。
         _tool("hold_key", "按住指定按键一段时间。", {"keys": {"type": "array", "items": {"type": "string"}}, "duration_seconds": {"type": "number"}, "reason": {"type": "string"}}, ["keys"]),  # 修改代码+ClaudeCodeParity：定义按住按键 schema 并对齐 Windows runtime 的 keys 数组；如果没有这行代码，公开合同会继续把 singular key 暴露给模型导致后续执行层读不到按键。
