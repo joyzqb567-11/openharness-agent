@@ -1,0 +1,17 @@
+"""Computer Use MCP v2 观察工具。"""  # 新增代码+ComputerUseMcpV2：说明本文件管理 observe/screenshot；如果没有这行代码，观察逻辑会混入动作执行。
+from __future__ import annotations  # 新增代码+ComputerUseMcpV2：延迟类型注解解析；如果没有这行代码，类型引用可能提前求值。
+
+from typing import Any  # 新增代码+ComputerUseMcpV2：导入通用 JSON 类型；如果没有这行代码，观察结果边界不清楚。
+
+from .result_blocks import success_result  # 新增代码+ComputerUseMcpV2：导入统一成功结果；如果没有这行代码，观察输出会漂移。
+from .types import ComputerUseMcpV2Context  # 新增代码+ComputerUseMcpV2：导入上下文；如果没有这行代码，host 观察能力无法注入。
+
+
+def observe(context: ComputerUseMcpV2Context, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ComputerUseMcpV2：函数段开始，执行 observe/screenshot；如果没有这段函数，模型无法获取桌面状态。
+    host_method = getattr(context.host, "observe", None) if context.host is not None else None  # 新增代码+ComputerUseMcpV2：读取 host 观察能力；如果没有这行代码，成熟截图后端无法接入。
+    raw_payload = host_method(arguments) if callable(host_method) else {"captured": False, "reason": "no_host_observer_bound"}  # 修改代码+ComputerUseMcpV2HostAdapter：先保存 host 原始观察结果；如果没有这一行，非字典结果会再次被 dict(...) 误转并崩溃。
+    payload = dict(raw_payload) if isinstance(raw_payload, dict) else {"captured": False, "reason": "host_observer_returned_non_dict", "host_result_type": type(raw_payload).__name__}  # 修改代码+ComputerUseMcpV2HostAdapter：只接受字典结果并给非字典结果稳定摘要；如果没有这一行，旧 controller 对象会让 observe 输出非 JSON 错误。
+    if callable(context.record_observation):  # 新增代码+ComputerUseMcpV2：检查是否存在 observation 回调；如果没有这行代码，None 回调会导致异常。
+        context.record_observation("computer_use_mcp_v2_observe", payload)  # 新增代码+ComputerUseMcpV2：把观察证据写回 agent；如果没有这行代码，主循环看不到观察结果。
+    return success_result(tool_name, payload, legacy_adapter_used=bool(payload.get("legacy_adapter_used", False)))  # 修改代码+ComputerUseMcpV2HostAdapter：返回观察摘要并透出旧 adapter 来源；如果没有这一行，observe 即使复用旧截图链也会被顶层误判。
+# 新增代码+ComputerUseMcpV2：函数段结束，observe 到此结束；如果没有这个边界说明，用户不容易看出观察范围。

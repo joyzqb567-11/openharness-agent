@@ -1,0 +1,396 @@
+"""Windows Computer Use 应用清单融合层。"""  # 新增代码+WindowsAppInventory：说明本模块是 Windows 版 ClaudeCode appNames 策略适配层；如果没有这一行，读者容易误以为这里直接执行桌面动作。
+from __future__ import annotations  # 新增代码+WindowsAppInventory：启用延迟类型注解；如果没有这一行，复杂类型在较旧解释路径下更容易解析失败。
+
+import os  # 新增代码+WindowsAppInventory：读取 Windows 开始菜单环境变量；如果没有这一行，真实枚举无法找到用户和公共开始菜单目录。
+import unicodedata  # 新增代码+WindowsAppInventory：检查 Unicode 字符类别；如果没有这一行，中文应用名和英文应用名无法共享安全字符规则。
+from pathlib import Path  # 新增代码+WindowsAppInventory：用 Path 处理 Windows 路径和快捷方式文件名；如果没有这一行，路径拼接会更脆弱。
+from typing import Any  # 新增代码+WindowsAppInventory：描述 JSON 风格候选字典；如果没有这一行，接口意图对初学者不够清楚。
+
+APP_INVENTORY_NAME_MAX_CHARS = 40  # 新增代码+WindowsAppInventory：限制单个应用显示名长度；如果没有这一行，异常长名称会污染模型上下文。
+APP_INVENTORY_ALLOWED_PUNCTUATION = set(" _.&'()+-")  # 新增代码+WindowsAppInventory：允许正常应用名常见标点；如果没有这一行，Visual Studio Code 等名字会被误删。
+APP_INVENTORY_SOURCE_PRIORITY = {"common_system_hint": 0, "start_menu": 10, "app_paths_registry": 20, "appx_package": 30, "running_window": 40, "uninstall_registry": 80, "generic_fallback": 90, "unknown": 99}  # 新增代码+WindowsAppInventory：定义多源去重优先级；如果没有这一行，卸载注册表记录可能覆盖真实可启动入口。
+APP_INVENTORY_BLOCKED_EXACT_NAMES = {"run", "computer management", "event viewer", "disk cleanup", "remote desktop connection", "steps recorder", "memory diagnostics tool", "odbc data sources (32-bit)", "odbc data sources (64-bit)", "iscsi initiator", "dfrgui", "magnify", "narrator", "on-screen keyboard", "voiceaccess", "livecaptions", "performance monitor", "print management", "recoverydrive", "resource monitor", "system configuration", "system information", "task scheduler", "task manager"}  # 修改代码+WindowsAppInventory：精确拦截系统/辅助/管理入口，并补充真实验收暴露的任务管理器；如果没有这一行，模型候选会混入不适合普通任务优先打开的系统工具。
+APP_INVENTORY_NOISE_TOKENS = ("helper", "agent", "service", "installer", "install", "uninstaller", "uninstall", "updater", "update", "redistributable", "background", "runtime broker", "documentation", "module docs", "release notes", "manuals", "readme", "help", "official website", "website", "sample desktop apps", "sample uwp apps", "tools for desktop apps", "tools for uwp apps", "app cert kit", "software development kit", "卸载", "修复", "官网", "配置")  # 修改代码+WindowsAppInventory：过滤后台组件、安装维护、运行库、网站入口、帮助文档、README、示例和 SDK 元入口噪声；如果没有这一行，模型可能打开文档/维护/工具集合而不是应用本体。
+APP_INVENTORY_HIGH_RISK_TOKENS = ("powershell", "pwsh", "cmd", "command prompt", "command line", "terminal", "bash", "verifier", "debuggable", "wt", "regedit", "registry", "control", "settings", "mmc", "taskmgr", "administrator", "administrative tools", "credential", "password", "security", "firewall", "defender", "services", "wsl", "system tools", "windows tools")  # 修改代码+WindowsAppInventory：过滤终端、命令行资料、调试验证和系统安全工具；如果没有这一行，模型可能把高风险或诊断工具当普通应用。
+APP_INVENTORY_KNOWN_ALIAS_BY_NAME = {"微信": ("weixin", "wechat"), "weixin": ("微信", "wechat"), "wechat": ("微信", "weixin")}  # 新增代码+WeChatLaunchRegression：补齐真实系统身份与用户常用叫法之间的别名桥；如果没有这一行，Get-StartApps 的 Weixin.exe 不能帮助用户输入 wechat 时找到微信。
+APP_INVENTORY_COMMON_HINTS = (  # 新增代码+WindowsAppInventory：常用系统应用兜底清单开始；如果没有这一行，枚举失败时 Paint 等基础工具缺少稳定提示。
+    {"display_name": "Paint", "app_name": "mspaint", "launch_id": "mspaint.exe", "launch_kind": "exe", "source": "common_system_hint", "aliases": ("画图", "画图软件", "paint", "mspaint", "mspaint.exe")},  # 新增代码+WindowsAppInventory：提供 Paint 稳定启动候选；如果没有这一行，中文画图任务可能继续传错 app 名。
+    {"display_name": "Notepad", "app_name": "notepad", "launch_id": "notepad.exe", "launch_kind": "exe", "source": "common_system_hint", "aliases": ("记事本", "notepad", "notepad.exe")},  # 新增代码+WindowsAppInventory：提供 Notepad 稳定启动候选；如果没有这一行，记事本文本任务可能缺少规范入口。
+    {"display_name": "Calculator", "app_name": "calc", "launch_id": "calc.exe", "launch_kind": "exe", "source": "common_system_hint", "aliases": ("计算器", "calculator", "calc", "calc.exe")},  # 新增代码+WindowsAppInventory：提供 Calculator 稳定启动候选；如果没有这一行，计算器任务可能在 AppX 和 exe 名之间摇摆。
+)  # 新增代码+WindowsAppInventory：常用系统应用兜底清单结束；如果没有这一行，Python 语法不完整。
+
+
+def _inventory_collapse_spaces(text: Any) -> str:  # 新增代码+WindowsAppInventory：函数段开始，压缩应用名空白；如果没有这段函数，去重和匹配会被多余空格干扰。
+    return " ".join(str(text or "").strip().split())  # 新增代码+WindowsAppInventory：返回压缩后的文本；如果没有这一行，同一应用的多个空格版本会被当成不同候选。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_collapse_spaces 到此结束；如果没有这个边界说明，用户不容易看出空白清洗范围。
+
+
+def _inventory_basename(value: Any) -> str:  # 新增代码+WindowsAppInventory：函数段开始，把路径或快捷方式名变成基名；如果没有这段函数，模型提示可能泄露完整本机路径。
+    text = str(value or "").strip().strip("\"'`")  # 新增代码+WindowsAppInventory：清除外层空白和引号；如果没有这一行，带引号路径会生成不稳定启动名。
+    if not text:  # 新增代码+WindowsAppInventory：检查空值；如果没有这一行，空字符串可能被当成有效路径。
+        return ""  # 新增代码+WindowsAppInventory：空值返回空；如果没有这一行，调用方无法识别缺少启动标识。
+    return text.replace("\\", "/").rsplit("/", 1)[-1].strip()  # 新增代码+WindowsAppInventory：只保留最后一段名称；如果没有这一行，用户目录和完整路径可能进入模型上下文。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_basename 到此结束；如果没有这个边界说明，用户不容易看出路径脱敏范围。
+
+
+def _inventory_app_name_from_launch_id(launch_id: Any, fallback: Any = "") -> str:  # 新增代码+WindowsAppInventory：函数段开始，生成模型可传的短 app_name；如果没有这段函数，模型可能继续使用长显示名或路径。
+    base = _inventory_basename(launch_id)  # 新增代码+WindowsAppInventory：先取启动标识基名；如果没有这一行，完整路径会影响 app_name。
+    stem = base[:-4] if base.lower().endswith(".exe") else base  # 新增代码+WindowsAppInventory：去掉 exe 后缀；如果没有这一行，mspaint 和 mspaint.exe 会混用。
+    safe = _inventory_collapse_spaces(stem or fallback).lower()  # 新增代码+WindowsAppInventory：压缩空白并转小写；如果没有这一行，大小写和多空格会破坏去重。
+    return safe.replace(" ", "") if safe and all(ord(char) < 128 for char in safe) else safe  # 新增代码+WindowsAppInventory：英文短名去空格便于启动；如果没有这一行，Visual Studio Code 可能生成带空格 app_name。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_app_name_from_launch_id 到此结束；如果没有这个边界说明，用户不容易看出 app_name 生成范围。
+
+
+def _inventory_has_safe_chars(text: str) -> bool:  # 新增代码+WindowsAppInventory：函数段开始，检查应用名字符是否安全；如果没有这段函数，恶意快捷方式名可能注入提示。
+    if any(char in "\r\n\t<>`{}[]|;" for char in text):  # 新增代码+WindowsAppInventory：拒绝会破坏提示结构的字符；如果没有这一行，多行应用名可能伪造指令。
+        return False  # 新增代码+WindowsAppInventory：命中危险字符直接拒绝；如果没有这一行，危险名称会继续流入模型提示。
+    for char in text:  # 新增代码+WindowsAppInventory：逐字符检查 Unicode 类别；如果没有这一行，中文和英文无法兼容过滤。
+        category = unicodedata.category(char)  # 新增代码+WindowsAppInventory：读取字符类别；如果没有这一行，无法区分文字数字和控制符。
+        if category[0] in {"L", "N", "M"} or char in APP_INVENTORY_ALLOWED_PUNCTUATION:  # 新增代码+WindowsAppInventory：允许文字、数字、组合标记和常见安全标点；如果没有这一行，正常应用名会被误删。
+            continue  # 新增代码+WindowsAppInventory：安全字符继续检查；如果没有这一行，循环逻辑无法表达通过。
+        return False  # 新增代码+WindowsAppInventory：未知或危险符号拒绝；如果没有这一行，提示注入面会扩大。
+    return True  # 新增代码+WindowsAppInventory：所有字符安全才通过；如果没有这一行，正常应用名也会被拒绝。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_has_safe_chars 到此结束；如果没有这个边界说明，用户不容易看出字符过滤范围。
+
+
+def sanitize_inventory_display_name(raw: Any) -> str:  # 新增代码+WindowsAppInventory：函数段开始，清洗模型可见显示名；如果没有这段函数，原始本机名称会直接进入 prompt。
+    text = _inventory_collapse_spaces(str(raw or "").strip().strip("\"'`"))  # 新增代码+WindowsAppInventory：清理引号和多余空白；如果没有这一行，同名应用会因为格式差异重复。
+    if not text or len(text) > APP_INVENTORY_NAME_MAX_CHARS:  # 新增代码+WindowsAppInventory：拒绝空名和超长名；如果没有这一行，异常名称会污染候选清单。
+        return ""  # 新增代码+WindowsAppInventory：非法长度返回空；如果没有这一行，调用方无法统一跳过。
+    if not _inventory_has_safe_chars(text):  # 新增代码+WindowsAppInventory：执行安全字符检查；如果没有这一行，换行/注入符号可能留下。
+        return ""  # 新增代码+WindowsAppInventory：不安全名称返回空；如果没有这一行，过滤层不会真正生效。
+    return text  # 新增代码+WindowsAppInventory：返回安全显示名；如果没有这一行，安全候选也会丢失。
+# 新增代码+WindowsAppInventory：函数段结束，sanitize_inventory_display_name 到此结束；如果没有这个边界说明，用户不容易看出显示名清洗范围。
+
+
+def _inventory_contains_token(tokens: tuple[str, ...], *values: Any) -> bool:  # 新增代码+WindowsAppInventory：函数段开始，统一匹配风险/噪声词；如果没有这段函数，多处过滤会重复且不一致。
+    haystack = " ".join(str(value or "").casefold() for value in values)  # 新增代码+WindowsAppInventory：合并候选字段为小写文本；如果没有这一行，只查显示名会漏掉启动标识里的风险。
+    return any(token.casefold() in haystack for token in tokens)  # 新增代码+WindowsAppInventory：任一关键词命中即返回真；如果没有这一行，调用方无法执行过滤判断。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_contains_token 到此结束；如果没有这个边界说明，用户不容易看出关键词过滤范围。
+
+
+def _inventory_safe_alias(value: Any) -> str:  # 新增代码+WeChatLaunchRegression：函数段开始，把候选身份中的别名清洗成模型可匹配短词；如果没有这段函数，路径片段和用户别名会直接污染清单。函数到 return 结束。
+    alias = _inventory_collapse_spaces(str(value or "").strip().strip("\"'`")).casefold()  # 新增代码+WeChatLaunchRegression：清理空白、引号并统一大小写；如果没有这一行，Weixin、weixin 和带引号的 weixin 会被当成不同别名。
+    if alias.endswith((".exe", ".lnk", ".appref-ms")):  # 新增代码+WeChatLaunchRegression：识别常见启动文件后缀；如果没有这一行，用户输入 weixin 时不会命中 weixin.exe 派生别名。
+        alias = alias.rsplit(".", 1)[0]  # 新增代码+WeChatLaunchRegression：去掉后缀保留人类常用短名；如果没有这一行，别名会停留在文件名形式。
+    if not alias or len(alias) > APP_INVENTORY_NAME_MAX_CHARS:  # 新增代码+WeChatLaunchRegression：拒绝空别名和异常长别名；如果没有这一行，坏路径片段可能进入模型上下文。
+        return ""  # 新增代码+WeChatLaunchRegression：非法别名返回空；如果没有这一行，调用方无法统一跳过无效别名。
+    if not _inventory_has_safe_chars(alias):  # 新增代码+WeChatLaunchRegression：复用应用名安全字符检查；如果没有这一行，路径分隔符或注入符号可能进入 alias。
+        return ""  # 新增代码+WeChatLaunchRegression：不安全别名返回空；如果没有这一行，安全过滤不会作用到派生别名。
+    return alias  # 新增代码+WeChatLaunchRegression：返回安全短别名；如果没有这一行，正常派生别名也会丢失。
+# 新增代码+WeChatLaunchRegression：函数段结束，_inventory_safe_alias 到此结束；如果没有这个边界说明，用户不容易看出别名清洗范围。
+
+
+def _inventory_aliases_from_launch_identity(display: Any, app_name: Any, launch_id: Any) -> tuple[str, ...]:  # 新增代码+WeChatLaunchRegression：函数段开始，从显示名、app_name 和启动标识中派生别名；如果没有这段函数，同一应用的 AppX/exe 身份无法帮助自然语言匹配。函数到 return 结束。
+    raw_values = [display, app_name, _inventory_basename(launch_id)]  # 新增代码+WeChatLaunchRegression：先收集不会泄露完整路径的核心身份；如果没有这一行，别名来源会分散且容易遗漏。
+    for part in str(launch_id or "").replace("\\", "/").split("/"):  # 新增代码+WeChatLaunchRegression：拆分启动标识里的路径片段；如果没有这一行，Weixin.exe 这种真实身份不会变成 weixin 别名。
+        raw_values.append(part)  # 新增代码+WeChatLaunchRegression：把每个路径片段加入候选别名池；如果没有这一行，派生函数只看最后文件名。
+    aliases: list[str] = []  # 新增代码+WeChatLaunchRegression：准备保存去重前的安全别名；如果没有这一行，函数无法逐步累积结果。
+    for value in raw_values:  # 新增代码+WeChatLaunchRegression：遍历原始身份文本；如果没有这一行，任何身份都不会被清洗成 alias。
+        alias = _inventory_safe_alias(value)  # 新增代码+WeChatLaunchRegression：把原始值清洗成安全短别名；如果没有这一行，路径符号和后缀会直接进入清单。
+        if alias:  # 新增代码+WeChatLaunchRegression：只处理有效别名；如果没有这一行，空字符串会参与后续映射。
+            aliases.append(alias)  # 新增代码+WeChatLaunchRegression：保留安全别名；如果没有这一行，display/app/path 派生结果会丢失。
+            aliases.extend(APP_INVENTORY_KNOWN_ALIAS_BY_NAME.get(alias, ()))  # 新增代码+WeChatLaunchRegression：补充已知中英文叫法桥接；如果没有这一行，weixin 不能稳定扩展到用户更常说的 wechat。
+    return tuple(dict.fromkeys(_inventory_safe_alias(alias) for alias in aliases if _inventory_safe_alias(alias)))  # 新增代码+WeChatLaunchRegression：返回去重后的安全别名元组；如果没有这一行，query/resolver 无法使用派生别名。
+# 新增代码+WeChatLaunchRegression：函数段结束，_inventory_aliases_from_launch_identity 到此结束；如果没有这个边界说明，用户不容易看出别名派生范围。
+
+
+def _inventory_merge_entries(primary: dict[str, Any], secondary: dict[str, Any]) -> dict[str, Any]:  # 新增代码+WeChatLaunchRegression：函数段开始，合并同名应用的非主来源别名但保留主启动后端；如果没有这段函数，开始菜单会赢得启动优先级却丢掉 AppX/exe 里的英文身份。函数到 return 结束。
+    merged = dict(primary)  # 新增代码+WeChatLaunchRegression：复制主候选避免原地污染调用方对象；如果没有这一行，测试注入候选或真实枚举缓存可能被意外改写。
+    merged_aliases = tuple(dict.fromkeys([*tuple(primary.get("aliases", ()) or ()), *tuple(secondary.get("aliases", ()) or ())]))  # 新增代码+WeChatLaunchRegression：把主候选和辅助候选的 alias 合并去重；如果没有这一行，低优先级来源提供的 weixin 会被丢掉。
+    merged["aliases"] = merged_aliases  # 新增代码+WeChatLaunchRegression：写回合并后的 alias；如果没有这一行，query/resolver 仍只能看到主候选旧别名。
+    merged["installed_app_verified"] = bool(primary.get("installed_app_verified", False) or secondary.get("installed_app_verified", False))  # 新增代码+WeChatLaunchRegression：只要任一来源证明已安装就保留已安装标记；如果没有这一行，合并可能削弱真实安装证据。
+    return merged  # 新增代码+WeChatLaunchRegression：返回合并后的主候选；如果没有这一行，build_windows_app_inventory 无法保存结果。
+# 新增代码+WeChatLaunchRegression：函数段结束，_inventory_merge_entries 到此结束；如果没有这个边界说明，用户不容易看出同名候选融合范围。
+
+
+def _inventory_entry_from_mapping(candidate: dict[str, Any], default_source: str = "unknown") -> dict[str, Any]:  # 新增代码+WindowsAppInventory：函数段开始，把任意来源候选规范成统一结构；如果没有这段函数，多源枚举会产生不同字段。
+    source = str(candidate.get("source") or default_source or "unknown").strip()  # 新增代码+WindowsAppInventory：读取来源名称；如果没有这一行，后续优先级和调试信息无法判断来源。
+    launch_kind = str(candidate.get("launch_kind") or ("appx" if source == "appx_package" else "exe")).strip()  # 新增代码+WindowsAppInventory：读取启动类型；如果没有这一行，resolver 不知道候选应该用 exe 还是 AppX。
+    display = sanitize_inventory_display_name(candidate.get("display_name") or candidate.get("name") or candidate.get("app_name") or candidate.get("launch_id") or candidate.get("executable"))  # 新增代码+WindowsAppInventory：清洗显示名；如果没有这一行，模型可见名字不受控。
+    launch_id = str(candidate.get("launch_id") or candidate.get("executable") or candidate.get("target") or candidate.get("path") or display).strip()  # 新增代码+WindowsAppInventory：读取启动标识但不直接展示原始路径；如果没有这一行，启动 resolver 没有目标。
+    app_name = str(candidate.get("app_name") or _inventory_app_name_from_launch_id(launch_id, fallback=display)).strip().lower()  # 新增代码+WindowsAppInventory：生成短 app_name；如果没有这一行，模型不知道调用 launch_app 时传什么。
+    explicit_aliases = tuple(_inventory_safe_alias(alias) for alias in candidate.get("aliases", ()) if _inventory_safe_alias(alias))  # 修改代码+WeChatLaunchRegression：清洗外部显式别名；如果没有这一行，手写 alias 可能携带空白、后缀或危险字符。
+    derived_aliases = _inventory_aliases_from_launch_identity(display, app_name, launch_id)  # 新增代码+WeChatLaunchRegression：从真实启动身份派生别名；如果没有这一行，Weixin.exe 不会帮助用户输入 wechat/weixin 时找到微信。
+    aliases = tuple(dict.fromkeys([*explicit_aliases, *derived_aliases]))  # 修改代码+WeChatLaunchRegression：合并显式别名和派生别名并去重；如果没有这一行，resolver 只能匹配单一来源的别名。
+    return {"display_name": display, "app_name": app_name, "launch_id": _inventory_basename(launch_id) if launch_kind in {"exe", "shortcut"} else launch_id, "launch_kind": launch_kind, "source": source, "aliases": aliases, "source_priority": APP_INVENTORY_SOURCE_PRIORITY.get(source, APP_INVENTORY_SOURCE_PRIORITY["unknown"]), "installed_app_verified": bool(candidate.get("installed_app_verified", source not in {"common_system_hint", "generic_fallback", "unknown"}))}  # 新增代码+WindowsAppInventory：返回统一候选字典；如果没有这一行，后续清洗、去重和格式化没有共同协议。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_entry_from_mapping 到此结束；如果没有这个边界说明，用户不容易看出候选规范化范围。
+
+
+def _inventory_is_model_visible_app(entry: dict[str, Any]) -> bool:  # 新增代码+WindowsAppInventory：函数段开始，判断候选是否应给模型看；如果没有这段函数，风险过滤和噪声过滤会散落各处。
+    if not entry.get("display_name") or not entry.get("app_name"):  # 新增代码+WindowsAppInventory：拒绝缺少核心字段的候选；如果没有这一行，模型会看到不可启动或不可读项。
+        return False  # 新增代码+WindowsAppInventory：核心字段缺失时不可见；如果没有这一行，坏候选会进入清单。
+    if str(entry.get("display_name", "")).casefold() in APP_INVENTORY_BLOCKED_EXACT_NAMES or str(entry.get("app_name", "")).casefold() in APP_INVENTORY_BLOCKED_EXACT_NAMES:  # 新增代码+WindowsAppInventory：精确拦截短系统工具名；如果没有这一行，Run 这类短词很难靠风险词稳定过滤。
+        return False  # 新增代码+WindowsAppInventory：命中精确黑名单则不可见；如果没有这一行，黑名单不会生效。
+    if _inventory_contains_token(APP_INVENTORY_HIGH_RISK_TOKENS, entry.get("display_name"), entry.get("app_name"), entry.get("launch_id")):  # 新增代码+WindowsAppInventory：检查终端/安全/系统工具风险；如果没有这一行，高风险工具会混入普通应用。
+        return False  # 新增代码+WindowsAppInventory：高风险候选不可见；如果没有这一行，模型可能选择终端工具。
+    if _inventory_contains_token(APP_INVENTORY_NOISE_TOKENS, entry.get("display_name"), entry.get("app_name"), entry.get("launch_id")):  # 新增代码+WindowsAppInventory：检查安装器、卸载器、帮助文档等噪声；如果没有这一行，维护入口会污染清单。
+        return False  # 新增代码+WindowsAppInventory：噪声候选不可见；如果没有这一行，模型可能选择错误入口。
+    return True  # 新增代码+WindowsAppInventory：通过所有检查后可见；如果没有这一行，正常应用也无法进入清单。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_is_model_visible_app 到此结束；如果没有这个边界说明，用户不容易看出可见性过滤范围。
+
+
+def build_windows_app_inventory(candidates: list[dict[str, Any]] | None = None, include_common: bool = True, max_count: int | None = None) -> list[dict[str, Any]]:  # 修改代码+FullOrdinaryAppInventory：函数段开始，融合全量普通 Windows 应用候选且默认不截断；如果没有这段函数，OpenHarness 只能在各处重复猜 app 名。
+    raw_items = list(APP_INVENTORY_COMMON_HINTS) if include_common else []  # 新增代码+WindowsAppInventory：按需加入常用系统应用兜底；如果没有这一行，枚举失败时 Paint 等常用目标缺少入口。
+    raw_items.extend(list(candidates) if candidates is not None else discover_windows_app_inventory_sources())  # 新增代码+WindowsAppInventory：追加注入候选或真实枚举候选；如果没有这一行，inventory 没有真实来源。
+    best_by_key: dict[str, dict[str, Any]] = {}  # 新增代码+WindowsAppInventory：准备按名称去重后的最佳候选；如果没有这一行，多源候选无法合并。
+    for item in raw_items:  # 新增代码+WindowsAppInventory：逐个处理候选；如果没有这一行，函数不会清洗任何来源。
+        if not isinstance(item, dict):  # 新增代码+WindowsAppInventory：防御非字典坏输入；如果没有这一行，坏候选会让流程崩溃。
+            continue  # 新增代码+WindowsAppInventory：跳过非法候选；如果没有这一行，非字典输入无法安全忽略。
+        entry = _inventory_entry_from_mapping(item)  # 新增代码+WindowsAppInventory：规范化候选；如果没有这一行，过滤和去重无法共享字段。
+        if not _inventory_is_model_visible_app(entry):  # 新增代码+WindowsAppInventory：过滤不可给模型看的风险/噪声项；如果没有这一行，清单会混入终端、卸载器等入口。
+            continue  # 新增代码+WindowsAppInventory：跳过不可见候选；如果没有这一行，过滤函数不会生效。
+        key = str(entry["display_name"]).casefold()  # 新增代码+WindowsAppInventory：用显示名作为跨来源产品去重键；如果没有这一行，卸载注册表和开始菜单同名项会重复。
+        current = best_by_key.get(key)  # 新增代码+WindowsAppInventory：读取当前最佳候选；如果没有这一行，无法比较来源优先级。
+        if current is None:  # 修改代码+WeChatLaunchRegression：第一次看到该显示名时直接保存；如果没有这一行，同名融合逻辑无法区分新增和比较。
+            best_by_key[key] = entry  # 新增代码+WindowsAppInventory：保存当前最佳候选；如果没有这一行，去重结果不会更新。
+            continue  # 新增代码+WeChatLaunchRegression：新候选保存后进入下一项；如果没有这一行，后面的优先级比较会重复处理同一条。
+        if int(entry["source_priority"]) < int(current["source_priority"]):  # 修改代码+WeChatLaunchRegression：新候选来源更可信时让新候选当主入口；如果没有这一行，低优先级记录可能覆盖开始菜单快捷方式。
+            best_by_key[key] = _inventory_merge_entries(entry, current)  # 新增代码+WeChatLaunchRegression：保存新主入口但合并旧候选别名；如果没有这一行，换主入口时会丢掉旧来源的 alias。
+        else:  # 新增代码+WeChatLaunchRegression：当前候选仍然更可信或同级时保留当前主入口；如果没有这一行，无法处理辅助来源别名。
+            best_by_key[key] = _inventory_merge_entries(current, entry)  # 新增代码+WeChatLaunchRegression：保留当前主入口并合并辅助候选别名；如果没有这一行，AppX/卸载记录里的英文身份不会进入最终清单。
+    sorted_entries = sorted(best_by_key.values(), key=lambda entry: (int(entry["source_priority"]), str(entry["display_name"]).casefold()))  # 修改代码+FullOrdinaryAppInventory：按来源优先级和名称排序但不默认截断；如果没有这一行，输出顺序会不稳定且新安装应用难以预测位置。
+    if max_count is None:  # 新增代码+FullOrdinaryAppInventory：没有显式数量限制时返回全量普通应用；如果没有这一行，第 51 个以后的普通应用仍可能被隐藏。
+        return sorted_entries  # 新增代码+FullOrdinaryAppInventory：返回完整清洗库存；如果没有这一行，普通应用全量放开目标无法实现。
+    try:  # 新增代码+FullOrdinaryAppInventory：兼容调用方传入字符串数字；如果没有这一行，旧调用传字符串数量会触发异常。
+        explicit_limit = max(1, int(max_count))  # 新增代码+FullOrdinaryAppInventory：把显式限制转换为至少 1 的整数；如果没有这一行，显式限制为 0 会返回空清单。
+    except (TypeError, ValueError):  # 新增代码+FullOrdinaryAppInventory：处理非法数量参数；如果没有这一行，模型或旧调用传错值会让库存构建崩溃。
+        return sorted_entries  # 新增代码+FullOrdinaryAppInventory：非法限制回退到全量库存；如果没有这一行，错误参数会继续隐藏普通应用。
+    return sorted_entries[:explicit_limit]  # 修改代码+FullOrdinaryAppInventory：只有调用方显式要求时才截取显示数量；如果没有这一行，兼容旧测试或 UI 小样本展示无法控制长度。
+# 修改代码+FullOrdinaryAppInventory：函数段结束，build_windows_app_inventory 到此结束；如果没有这个边界说明，用户不容易看出全量库存融合范围。
+
+
+def format_windows_app_inventory_for_model(apps: Any) -> str:  # 新增代码+WindowsAppInventory：函数段开始，把 inventory 转成模型提示；如果没有这段函数，主循环只能拿原始字典。
+    entries = build_windows_app_inventory(list(apps or []), include_common=False)  # 新增代码+WindowsAppInventory：格式化前重新清洗一次候选；如果没有这一行，外部脏数据可能绕过过滤。
+    if not entries:  # 新增代码+WindowsAppInventory：处理空清单；如果没有这一行，模型看不到明确状态。
+        return "Available desktop application candidates (cleaned model hints, not a hard whitelist): none."  # 新增代码+WindowsAppInventory：返回空清单提示；如果没有这一行，空结果可能被误解为异常。
+    parts = [f"{entry['display_name']} [app_name={entry['app_name']}, launch_kind={entry['launch_kind']}, source={entry['source']}]" for entry in entries]  # 新增代码+WindowsAppInventory：生成不含路径的候选片段；如果没有这一行，模型无法快速选择启动方式。
+    return "Available desktop application candidates (cleaned model hints, not a hard whitelist): " + "; ".join(parts) + "."  # 新增代码+WindowsAppInventory：返回 ClaudeCode 风格单行提示；如果没有这一行，主循环无法获得可读清单。
+# 新增代码+WindowsAppInventory：函数段结束，format_windows_app_inventory_for_model 到此结束；如果没有这个边界说明，用户不容易看出模型提示范围。
+
+
+def _inventory_match_texts(entry: dict[str, Any]) -> tuple[str, ...]:  # 新增代码+ComputerDiscoverTool：函数段开始，收集一个应用候选可被查询命中的文本；如果没有这段函数，discover 排序会和解析器各写各的规则。
+    texts: list[str] = []  # 新增代码+ComputerDiscoverTool：准备保存显示名、短名、启动名和别名；如果没有这一行，后续没有地方累计匹配字段。
+    for key in ("display_name", "app_name", "launch_id"):  # 新增代码+ComputerDiscoverTool：遍历候选核心字段；如果没有这一行，模型查询只能命中部分字段。
+        value = _inventory_collapse_spaces(entry.get(key, "")).casefold()  # 新增代码+ComputerDiscoverTool：把字段压缩并转成大小写无关文本；如果没有这一行，大小写或多空格会影响匹配。
+        if value:  # 新增代码+ComputerDiscoverTool：只保留非空字段；如果没有这一行，空字符串会污染精确匹配。
+            texts.append(value)  # 新增代码+ComputerDiscoverTool：加入可匹配文本；如果没有这一行，当前字段不会参与查询。
+    for alias in entry.get("aliases", ()):  # 新增代码+ComputerDiscoverTool：遍历候选别名；如果没有这一行，中文“画图”等用户习惯无法命中。
+        alias_text = _inventory_collapse_spaces(alias).casefold()  # 新增代码+ComputerDiscoverTool：规范化别名文本；如果没有这一行，别名大小写和空白会影响匹配。
+        if alias_text:  # 新增代码+ComputerDiscoverTool：只保留非空别名；如果没有这一行，空别名会干扰排序。
+            texts.append(alias_text)  # 新增代码+ComputerDiscoverTool：加入别名匹配范围；如果没有这一行，别名不会被 discover 看到。
+    return tuple(dict.fromkeys(texts))  # 新增代码+ComputerDiscoverTool：去重后返回稳定元组；如果没有这一行，同一文本重复出现会影响评分和输出稳定性。
+# 新增代码+ComputerDiscoverTool：函数段结束，_inventory_match_texts 到此结束；如果没有这个边界说明，用户不容易看出匹配文本范围。
+
+
+def _inventory_match_score(entry: dict[str, Any], normalized_query: str) -> int:  # 新增代码+ComputerDiscoverTool：函数段开始，给查询和应用候选计算匹配分；如果没有这段函数，discover 只能按清单顺序返回。
+    texts = _inventory_match_texts(entry)  # 新增代码+ComputerDiscoverTool：读取候选所有可匹配文本；如果没有这一行，评分没有输入数据。
+    if not normalized_query:  # 新增代码+ComputerDiscoverTool：处理空查询；如果没有这一行，列出全部候选会被当成全部不匹配。
+        return 10  # 新增代码+ComputerDiscoverTool：空查询给低但有效分；如果没有这一行，用户不传 query 时拿不到应用清单。
+    if normalized_query in texts:  # 新增代码+ComputerDiscoverTool：最高优先级匹配精确别名；如果没有这一行，“画图”不会稳定排到 Paint 前面。
+        return 100  # 新增代码+ComputerDiscoverTool：精确命中返回最高分；如果没有这一行，精确 app_name 和模糊文本没有区别。
+    if any(text.startswith(normalized_query) for text in texts):  # 新增代码+ComputerDiscoverTool：其次匹配前缀；如果没有这一行，用户输入应用名前半段时排序不稳定。
+        return 80  # 新增代码+ComputerDiscoverTool：前缀命中返回较高分；如果没有这一行，前缀和包含匹配无法区分。
+    if any(normalized_query in text for text in texts):  # 新增代码+ComputerDiscoverTool：再次匹配包含关系；如果没有这一行，用户输入部分词无法找到候选。
+        return 60  # 新增代码+ComputerDiscoverTool：包含命中返回中等分；如果没有这一行，模糊命中没有排序依据。
+    query_parts = tuple(part for part in normalized_query.split() if part)  # 新增代码+ComputerDiscoverTool：把多词查询拆成关键词；如果没有这一行，长查询里夹带应用名时无法弱命中。
+    if query_parts and any(any(part in text for text in texts) for part in query_parts):  # 新增代码+ComputerDiscoverTool：检查任一关键词是否命中；如果没有这一行，自然语言短句查询更容易返回空。
+        return 40  # 新增代码+ComputerDiscoverTool：关键词命中返回弱分；如果没有这一行，弱匹配无法进入候选。
+    return 0  # 新增代码+ComputerDiscoverTool：完全不匹配返回 0；如果没有这一行，无关应用也可能进入查询结果。
+# 新增代码+ComputerDiscoverTool：函数段结束，_inventory_match_score 到此结束；如果没有这个边界说明，用户不容易看出排序规则范围。
+
+
+def _inventory_public_candidate(entry: dict[str, Any], match_score: int) -> dict[str, Any]:  # 新增代码+ComputerDiscoverTool：函数段开始，把内部候选转成模型可见候选；如果没有这段函数，discover 可能泄露路径或内部优先级字段。
+    return {  # 新增代码+ComputerDiscoverTool：开始构造公开候选字典；如果没有这一行，工具返回没有稳定结构。
+        "display_name": str(entry.get("display_name", "")),  # 新增代码+ComputerDiscoverTool：返回用户可读应用名；如果没有这一项，模型和用户不知道候选是什么软件。
+        "app_name": str(entry.get("app_name", "")),  # 新增代码+ComputerDiscoverTool：返回 launch_app 可直接使用的短名；如果没有这一项，模型仍可能继续猜应用名。
+        "launch_kind": str(entry.get("launch_kind", "")),  # 新增代码+ComputerDiscoverTool：返回启动类型；如果没有这一项，后续 resolver 不知道 exe/shortcut/appx 后端。
+        "launch_id": str(entry.get("launch_id", "")),  # 新增代码+ComputerDiscoverTool：返回已脱敏启动标识；如果没有这一项，AppX/AUMID 或 exe 名无法交给后续 resolver。
+        "source": str(entry.get("source", "")),  # 新增代码+ComputerDiscoverTool：返回候选来源；如果没有这一项，模型不知道这是开始菜单、注册表还是兜底提示。
+        "installed_app_verified": bool(entry.get("installed_app_verified", False)),  # 新增代码+ComputerDiscoverTool：返回是否来自真实枚举；如果没有这一项，模型无法区分真实安装和公共兜底。
+        "match_score": int(match_score),  # 新增代码+ComputerDiscoverTool：返回匹配分便于调试排序；如果没有这一项，排查模型为什么选某个应用会更难。
+    }  # 新增代码+ComputerDiscoverTool：公开候选字典结束；如果没有这一行，Python 字典语法不完整。
+# 新增代码+ComputerDiscoverTool：函数段结束，_inventory_public_candidate 到此结束；如果没有这个边界说明，用户不容易看出路径脱敏输出范围。
+
+
+def query_windows_app_inventory(query: Any = "", candidates: list[dict[str, Any]] | None = None, include_common: bool = True, max_count: int | None = None) -> dict[str, Any]:  # 修改代码+FullOrdinaryAppInventory：函数段开始，按自然语言查询全量 Windows 普通应用候选；如果没有这段函数，Computer Use 缺少类似 ClaudeCode appNames 的 discover 工具入口。
+    query_text = _inventory_collapse_spaces(query)  # 新增代码+ComputerDiscoverTool：保留用户查询的可读版本；如果没有这一行，报告无法说明本次查了什么。
+    normalized_query = query_text.casefold()  # 新增代码+ComputerDiscoverTool：生成大小写无关查询；如果没有这一行，英文应用名查询大小写会影响结果。
+    try:  # 修改代码+FullOrdinaryAppInventory：尝试解析可选返回数量；如果没有这一行，模型传入字符串 max_results 可能让工具崩溃。
+        result_limit = int(max_count) if max_count not in (None, "") else None  # 修改代码+FullOrdinaryAppInventory：只有调用方显式传数量才限制返回条数；如果没有这一行，discover 仍会默认隐藏全量普通应用。
+    except (TypeError, ValueError):  # 修改代码+FullOrdinaryAppInventory：处理非法数量；如果没有这一行，坏参数会变成 Python traceback。
+        result_limit = None  # 修改代码+FullOrdinaryAppInventory：非法数量回退为不限制；如果没有这一行，错误参数可能继续造成普通应用漏查。
+    if result_limit is not None and result_limit < 1:  # 新增代码+FullOrdinaryAppInventory：处理小于 1 的显式限制；如果没有这一行，负数切片会产生意外结果。
+        result_limit = None  # 新增代码+FullOrdinaryAppInventory：小于 1 表示不限制返回；如果没有这一行，模型传 0 会误以为没有普通应用。
+    catalog = build_windows_app_inventory(candidates=candidates, include_common=include_common)  # 修改代码+FullOrdinaryAppInventory：从统一 inventory 读取全量清洗候选；如果没有这一行，discover 会继续只查前 50 个。
+    scored: list[tuple[int, dict[str, Any]]] = []  # 新增代码+ComputerDiscoverTool：准备保存匹配分和候选；如果没有这一行，无法排序。
+    for entry in catalog:  # 新增代码+ComputerDiscoverTool：遍历清洗后的应用候选；如果没有这一行，查询不会检查任何应用。
+        score = _inventory_match_score(entry, normalized_query)  # 新增代码+ComputerDiscoverTool：计算当前候选匹配分；如果没有这一行，结果无法按用户意图排序。
+        if score <= 0:  # 新增代码+ComputerDiscoverTool：跳过完全不匹配候选；如果没有这一行，查询结果会混入无关应用。
+            continue  # 新增代码+ComputerDiscoverTool：继续下一个候选；如果没有这一行，不匹配候选也会进入输出。
+        scored.append((score, entry))  # 新增代码+ComputerDiscoverTool：保存有效候选；如果没有这一行，排序列表始终为空。
+    scored.sort(key=lambda item: (-int(item[0]), int(item[1].get("source_priority", APP_INVENTORY_SOURCE_PRIORITY["unknown"])), str(item[1].get("display_name", "")).casefold()))  # 新增代码+ComputerDiscoverTool：按匹配分、来源优先级和名称排序；如果没有这一行，Paint 等精确候选不一定排第一。
+    visible_scored = scored if result_limit is None else scored[:result_limit]  # 修改代码+FullOrdinaryAppInventory：只在显式要求时截断返回结果；如果没有这一行，查询结果仍会被旧默认数量限制。
+    public_candidates = [_inventory_public_candidate(entry, score) for score, entry in visible_scored]  # 修改代码+FullOrdinaryAppInventory：转换全量或显式限制后的候选为模型可见结构；如果没有这一行，输出可能泄露内部字段。
+    return {"ok": True, "tool": "mcp__computer-use__request_access", "marker": "PHASE123_COMPUTER_DISCOVER_READY", "model": "phase123_windows_app_inventory_query", "query": query_text, "normalized_query": normalized_query, "max_results": result_limit, "result_count": len(public_candidates), "total_match_count": len(scored), "unlimited_results": result_limit is None, "candidates": public_candidates, "not_hard_whitelist": True, "next_step": "Use app_name with mcp__computer-use__open_application, then continue with mcp__computer-use__observe/screenshot and v2 atomic actions such as left_click/type/key/scroll/computer_batch."}  # 修改代码+ComputerUseMcpV2ResidualCleanup：返回 v2 MCP 工具路径而不是旧 computer_discover/computer_action；如果没有这一行，应用发现结果会把模型带回隐藏旧接口。
+# 修改代码+FullOrdinaryAppInventory：函数段结束，query_windows_app_inventory 到此结束；如果没有这个边界说明，用户不容易看出全量 discover 查询入口范围。
+
+
+def resolve_windows_app_name_hint(target_app_hint: Any, catalog: list[dict[str, Any]] | None = None) -> str:  # 修改代码+WindowsAppInventory：函数段开始，在统一 inventory 内解析用户友好应用提示；如果没有这段函数，中文应用名会失去稳定解析入口。
+    query = _inventory_collapse_spaces(target_app_hint).lower()  # 修改代码+WindowsAppInventory：规范化用户输入的应用提示；如果没有这一行，大小写和多余空格会导致别名匹配失败。
+    if not query:  # 修改代码+WindowsAppInventory：处理空应用提示；如果没有这一行，空字符串可能误参与候选匹配。
+        return ""  # 修改代码+WindowsAppInventory：空提示返回空启动名；如果没有这一行，调用方无法判断没有可解析应用。
+    entries = catalog if catalog is not None else build_windows_app_inventory(include_common=True)  # 修改代码+WindowsAppInventory：优先用传入清单，否则读取统一应用清单；如果没有这一行，解析器只能靠硬编码或真实环境单一路径。
+    for entry in entries:  # 修改代码+WindowsAppInventory：遍历候选应用；如果没有这一行，解析器无法检查任何候选。
+        aliases = set(str(alias).lower() for alias in entry.get("aliases", ()) if str(alias).strip())  # 修改代码+WindowsAppInventory：读取候选别名集合；如果没有这一行，中文“画图”等别名无法解析。
+        aliases.add(str(entry.get("display_name", "")).lower())  # 修改代码+WindowsAppInventory：把显示名加入匹配范围；如果没有这一行，用户输入可见名称可能无法命中。
+        aliases.add(str(entry.get("app_name", "")).lower())  # 修改代码+WindowsAppInventory：把 app_name 加入匹配范围；如果没有这一行，mspaint 这类短名无法命中。
+        aliases.add(str(entry.get("launch_id", "")).lower())  # 修改代码+WindowsAppInventory：把 launch_id 加入匹配范围；如果没有这一行，mspaint.exe 或 AppX 标识无法命中。
+        aliases.add(str(entry.get("executable", "")).lower())  # 修改代码+WindowsAppInventory：兼容旧候选里的 executable 字段；如果没有这一行，老测试数据或旧调用方的候选会匹配失败。
+        if query in aliases:  # 修改代码+WindowsAppInventory：检查是否精确命中任一别名；如果没有这一行，解析器永远不会返回结果。
+            return str(entry.get("app_name", "") or "").strip()  # 修改代码+WindowsAppInventory：返回模型应传给 launch_app 的稳定短名；如果没有这一行，调用方拿不到规范启动名。
+    return ""  # 修改代码+WindowsAppInventory：没有命中时返回空；如果没有这一行，调用方可能误用错误应用。
+# 修改代码+WindowsAppInventory：函数段结束，resolve_windows_app_name_hint 到此结束；如果没有这个边界说明，用户不容易看出应用提示解析范围。
+
+
+def _inventory_start_menu_roots() -> list[Path]:  # 新增代码+WindowsAppInventory：函数段开始，收集开始菜单目录；如果没有这段函数，真实枚举缺少 Windows 用户可见应用来源。
+    roots: list[Path] = []  # 新增代码+WindowsAppInventory：准备目录列表；如果没有这一行，无法累计多个来源。
+    appdata = os.environ.get("APPDATA", "")  # 新增代码+WindowsAppInventory：读取当前用户 AppData；如果没有这一行，用户级快捷方式会漏掉。
+    program_data = os.environ.get("ProgramData", "")  # 新增代码+WindowsAppInventory：读取公共 ProgramData；如果没有这一行，全局快捷方式会漏掉。
+    if appdata:  # 新增代码+WindowsAppInventory：只在变量存在时加入用户目录；如果没有这一行，空路径会误指当前目录。
+        roots.append(Path(appdata) / "Microsoft" / "Windows" / "Start Menu" / "Programs")  # 新增代码+WindowsAppInventory：加入用户开始菜单；如果没有这一行，当前用户安装应用发现率下降。
+    if program_data:  # 新增代码+WindowsAppInventory：只在变量存在时加入公共目录；如果没有这一行，空路径会造成误扫。
+        roots.append(Path(program_data) / "Microsoft" / "Windows" / "Start Menu" / "Programs")  # 新增代码+WindowsAppInventory：加入公共开始菜单；如果没有这一行，系统级应用发现率下降。
+    return roots  # 新增代码+WindowsAppInventory：返回目录列表；如果没有这一行，扫描函数没有输入。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_start_menu_roots 到此结束；如果没有这个边界说明，用户不容易看出目录来源。
+
+
+def _inventory_discover_start_menu(max_scan: int = 500) -> list[dict[str, Any]]:  # 新增代码+WindowsAppInventory：函数段开始，枚举开始菜单快捷方式；如果没有这段函数，Windows 可启动入口少一大块。
+    entries: list[dict[str, Any]] = []  # 新增代码+WindowsAppInventory：准备候选列表；如果没有这一行，扫描结果无法保存。
+    scanned = 0  # 新增代码+WindowsAppInventory：记录扫描数量；如果没有这一行，大目录上限无法执行。
+    for root in _inventory_start_menu_roots():  # 新增代码+WindowsAppInventory：遍历开始菜单目录；如果没有这一行，函数不会扫描任何目录。
+        if not root.exists():  # 新增代码+WindowsAppInventory：跳过不存在目录；如果没有这一行，某些 Windows 配置会抛错。
+            continue  # 新增代码+WindowsAppInventory：继续下个目录；如果没有这一行，不存在目录会中断扫描。
+        for shortcut in root.rglob("*"):  # 新增代码+WindowsAppInventory：递归读取快捷方式；如果没有这一行，子文件夹应用会漏掉。
+            if scanned >= max_scan:  # 新增代码+WindowsAppInventory：达到扫描上限时停止；如果没有这一行，异常大目录会拖慢 agent。
+                return entries  # 新增代码+WindowsAppInventory：返回已发现结果；如果没有这一行，上限不会生效。
+            scanned += 1  # 新增代码+WindowsAppInventory：推进扫描计数；如果没有这一行，上限判断不会变化。
+            if shortcut.suffix.lower() not in {".lnk", ".appref-ms"}:  # 新增代码+WindowsAppInventory：只保留快捷方式；如果没有这一行，普通文件可能被当成应用。
+                continue  # 新增代码+WindowsAppInventory：跳过非快捷方式；如果没有这一行，清单噪声会增加。
+            entries.append({"display_name": shortcut.stem, "launch_id": shortcut.stem, "launch_kind": "exe", "source": "start_menu", "installed_app_verified": True})  # 新增代码+WindowsAppInventory：保存脱敏开始菜单候选；如果没有这一行，开始菜单来源不会进入 inventory。
+    return entries  # 新增代码+WindowsAppInventory：返回开始菜单候选；如果没有这一行，调用方拿不到结果。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_discover_start_menu 到此结束；如果没有这个边界说明，用户不容易看出开始菜单枚举范围。
+
+
+def _inventory_discover_app_paths() -> list[dict[str, Any]]:  # 新增代码+WindowsAppInventory：函数段开始，枚举 App Paths 注册表；如果没有这段函数，不在开始菜单里的可执行别名会漏掉。
+    try:  # 新增代码+WindowsAppInventory：尝试导入 Windows 注册表模块；如果没有这一行，非 Windows 环境会直接崩溃。
+        import winreg  # type: ignore  # 新增代码+WindowsAppInventory：导入 winreg 做只读枚举；如果没有这一行，无法读取 App Paths。
+    except (ImportError, ModuleNotFoundError):  # 新增代码+WindowsAppInventory：兼容非 Windows 环境；如果没有这一行，跨平台测试会失败。
+        return []  # 新增代码+WindowsAppInventory：不可用时软降级为空；如果没有这一行，枚举失败会中断主流程。
+    entries: list[dict[str, Any]] = []  # 新增代码+WindowsAppInventory：准备候选列表；如果没有这一行，注册表结果无法保存。
+    roots = ((winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\App Paths"), (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\App Paths"))  # 新增代码+WindowsAppInventory：定义用户级和机器级 App Paths；如果没有这一行，只能枚举单一范围。
+    for hive, subkey in roots:  # 新增代码+WindowsAppInventory：遍历注册表根；如果没有这一行，不会读取任何 App Paths。
+        try:  # 新增代码+WindowsAppInventory：尝试打开注册表键；如果没有这一行，缺失键会中断流程。
+            with winreg.OpenKey(hive, subkey) as key:  # 新增代码+WindowsAppInventory：只读打开 App Paths；如果没有这一行，无法枚举子项。
+                index = 0  # 新增代码+WindowsAppInventory：初始化索引；如果没有这一行，循环没有起点。
+                while index < 500:  # 新增代码+WindowsAppInventory：限制最多读取 500 项；如果没有这一行，异常注册表可能拖慢启动。
+                    try:  # 新增代码+WindowsAppInventory：读取子项名；如果没有这一行，枚举结束无法安全处理。
+                        name = winreg.EnumKey(key, index)  # 新增代码+WindowsAppInventory：读取 exe 子项名；如果没有这一行，候选没有启动标识。
+                    except OSError:  # 新增代码+WindowsAppInventory：枚举结束时退出；如果没有这一行，正常结束会变成异常。
+                        break  # 新增代码+WindowsAppInventory：停止当前根扫描；如果没有这一行，循环无法结束。
+                    entries.append({"display_name": Path(name).stem, "launch_id": name, "launch_kind": "exe", "source": "app_paths_registry", "installed_app_verified": True})  # 新增代码+WindowsAppInventory：保存 App Paths 候选；如果没有这一行，注册表来源不会进入 inventory。
+                    index += 1  # 新增代码+WindowsAppInventory：推进索引；如果没有这一行，循环会卡住。
+        except OSError:  # 新增代码+WindowsAppInventory：忽略不存在或无权限键；如果没有这一行，普通用户权限可能让枚举失败。
+            continue  # 新增代码+WindowsAppInventory：继续下一个根；如果没有这一行，单个根失败会停止全部枚举。
+    return entries  # 新增代码+WindowsAppInventory：返回 App Paths 候选；如果没有这一行，调用方拿不到结果。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_discover_app_paths 到此结束；如果没有这个边界说明，用户不容易看出 App Paths 枚举范围。
+
+
+def _inventory_discover_uninstall_registry() -> list[dict[str, Any]]:  # 新增代码+WindowsAppInventory：函数段开始，枚举卸载注册表显示名；如果没有这段函数，设置页类产品记录无法作为辅助源。
+    try:  # 新增代码+WindowsAppInventory：尝试导入注册表模块；如果没有这一行，非 Windows 环境会崩溃。
+        import winreg  # type: ignore  # 新增代码+WindowsAppInventory：导入 winreg 读取 Uninstall 键；如果没有这一行，无法靠注册表补足设置页来源。
+    except (ImportError, ModuleNotFoundError):  # 新增代码+WindowsAppInventory：兼容非 Windows 环境；如果没有这一行，跨平台测试会失败。
+        return []  # 新增代码+WindowsAppInventory：不可用时返回空；如果没有这一行，枚举失败会中断主流程。
+    entries: list[dict[str, Any]] = []  # 新增代码+WindowsAppInventory：准备产品记录列表；如果没有这一行，扫描结果无法保存。
+    roots = ((winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Uninstall"), (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Uninstall"), (winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"))  # 新增代码+WindowsAppInventory：定义设置页常用卸载注册表来源；如果没有这一行，会漏掉 32 位或用户级安装记录。
+    for hive, subkey in roots:  # 新增代码+WindowsAppInventory：遍历卸载注册表根；如果没有这一行，不会读取任何产品记录。
+        try:  # 新增代码+WindowsAppInventory：尝试打开根键；如果没有这一行，缺失键会中断流程。
+            with winreg.OpenKey(hive, subkey) as key:  # 新增代码+WindowsAppInventory：只读打开卸载键；如果没有这一行，无法枚举子项。
+                index = 0  # 新增代码+WindowsAppInventory：初始化索引；如果没有这一行，循环没有起点。
+                while index < 1000:  # 新增代码+WindowsAppInventory：限制最多读取 1000 项；如果没有这一行，异常注册表可能拖慢 agent。
+                    try:  # 新增代码+WindowsAppInventory：读取产品子项；如果没有这一行，枚举结束无法安全处理。
+                        child = winreg.EnumKey(key, index)  # 新增代码+WindowsAppInventory：读取子项名；如果没有这一行，无法打开具体产品项。
+                    except OSError:  # 新增代码+WindowsAppInventory：枚举结束时退出；如果没有这一行，正常结束会被当成错误。
+                        break  # 新增代码+WindowsAppInventory：停止当前根扫描；如果没有这一行，循环无法结束。
+                    index += 1  # 新增代码+WindowsAppInventory：推进索引；如果没有这一行，循环会卡住。
+                    try:  # 新增代码+WindowsAppInventory：尝试打开产品子项；如果没有这一行，单个坏项会中断整个枚举。
+                        with winreg.OpenKey(key, child) as child_key:  # 新增代码+WindowsAppInventory：只读打开产品项；如果没有这一行，无法读取 DisplayName。
+                            display_name, _kind = winreg.QueryValueEx(child_key, "DisplayName")  # 新增代码+WindowsAppInventory：读取设置页显示名；如果没有这一行，卸载注册表来源没有可读名称。
+                    except OSError:  # 新增代码+WindowsAppInventory：忽略缺少 DisplayName 的项；如果没有这一行，普通组件项会导致异常。
+                        continue  # 新增代码+WindowsAppInventory：继续下一个产品项；如果没有这一行，单项失败会停止全部扫描。
+                    entries.append({"display_name": display_name, "launch_id": display_name, "launch_kind": "uninstall_record", "source": "uninstall_registry", "installed_app_verified": True})  # 新增代码+WindowsAppInventory：保存设置页类产品记录作为低优先级辅助源；如果没有这一行，设置页来源无法参与融合。
+        except OSError:  # 新增代码+WindowsAppInventory：忽略不存在或无权限根；如果没有这一行，普通用户权限可能让枚举失败。
+            continue  # 新增代码+WindowsAppInventory：继续下一个根；如果没有这一行，单个根失败会停止全部枚举。
+    return entries  # 新增代码+WindowsAppInventory：返回卸载注册表候选；如果没有这一行，调用方拿不到设置页辅助源。
+# 新增代码+WindowsAppInventory：函数段结束，_inventory_discover_uninstall_registry 到此结束；如果没有这个边界说明，用户不容易看出设置页辅助源范围。
+
+
+def discover_windows_app_inventory_sources() -> list[dict[str, Any]]:  # 新增代码+WindowsAppInventory：函数段开始，聚合真实 Windows 多源枚举；如果没有这段函数，调用方必须知道每个底层来源。
+    entries: list[dict[str, Any]] = []  # 新增代码+WindowsAppInventory：准备聚合列表；如果没有这一行，多个来源无法合并。
+    entries.extend(_inventory_discover_start_menu())  # 新增代码+WindowsAppInventory：加入开始菜单候选；如果没有这一行，可启动快捷方式来源会缺失。
+    entries.extend(_inventory_discover_app_paths())  # 新增代码+WindowsAppInventory：加入 App Paths 候选；如果没有这一行，注册表启动别名会缺失。
+    entries.extend(_inventory_discover_uninstall_registry())  # 新增代码+WindowsAppInventory：加入卸载注册表辅助候选；如果没有这一行，设置页类产品记录无法辅助补全。
+    return entries  # 新增代码+WindowsAppInventory：返回聚合原始候选；如果没有这一行，调用方拿不到任何真实枚举结果。
+# 新增代码+WindowsAppInventory：函数段结束，discover_windows_app_inventory_sources 到此结束；如果没有这个边界说明，用户不容易看出真实枚举入口。
+
+
+__all__ = ["build_windows_app_inventory", "discover_windows_app_inventory_sources", "format_windows_app_inventory_for_model", "query_windows_app_inventory", "resolve_windows_app_name_hint", "sanitize_inventory_display_name"]  # 修改代码+FullOrdinaryAppInventory：公开 API 中移除旧 50 上限常量并保留全量库存入口；如果没有这一行，外部可能继续依赖错误的 50 个候选限制。
+import json  # 新增代码+AppLaunchInventoryClosure：导入 JSON 解析工具，用来读取 Get-StartApps 输出的 AUMID 清单；如果没有这一行，AppX 应用只能靠猜名字。
+import subprocess  # 新增代码+AppLaunchInventoryClosure：导入子进程工具，用 argv 方式只读调用 PowerShell 枚举应用；如果没有这一行，库存层无法发现 AppX/AUMID 应用。
+def _inventory_discover_start_menu(max_scan: int = 500) -> list[dict[str, Any]]:  # 新增代码+AppLaunchInventoryClosure：函数段开始，覆盖旧开始菜单枚举并保留 shortcut 后端身份；如果没有这段函数，.lnk 会继续被误当 exe。
+    entries: list[dict[str, Any]] = []  # 新增代码+AppLaunchInventoryClosure：准备保存开始菜单候选；如果没有这一行，枚举结果无法返回给统一 inventory。
+    scanned = 0  # 新增代码+AppLaunchInventoryClosure：记录扫描数量，避免异常大目录拖慢 agent；如果没有这一行，max_scan 上限无法生效。
+    for root in _inventory_start_menu_roots():  # 新增代码+AppLaunchInventoryClosure：遍历用户级和公共开始菜单目录；如果没有这一行，真实安装应用的快捷方式来源会缺失。
+        if not root.exists():  # 新增代码+AppLaunchInventoryClosure：跳过不存在的开始菜单目录；如果没有这一行，某些 Windows 配置会抛出无意义错误。
+            continue  # 新增代码+AppLaunchInventoryClosure：继续扫描下一个目录；如果没有这一行，缺一个目录就会中断所有发现。
+        for shortcut in root.rglob("*"):  # 新增代码+AppLaunchInventoryClosure：递归扫描开始菜单入口；如果没有这一行，子文件夹里的应用不会被发现。
+            if scanned >= max_scan:  # 新增代码+AppLaunchInventoryClosure：检查扫描上限；如果没有这一行，异常目录会拖慢或卡住 agent。
+                return entries  # 新增代码+AppLaunchInventoryClosure：达到上限时返回已有结果；如果没有这一行，上限判断不会产生实际效果。
+            scanned += 1  # 新增代码+AppLaunchInventoryClosure：推进扫描计数；如果没有这一行，上限条件永远不会变化。
+            if shortcut.suffix.lower() not in {".lnk", ".appref-ms"}:  # 新增代码+AppLaunchInventoryClosure：只保留可由 ShellExecute 处理的应用入口；如果没有这一行，普通文件会混进应用清单。
+                continue  # 新增代码+AppLaunchInventoryClosure：跳过非快捷方式文件；如果没有这一行，库存会被文档和图片污染。
+            entries.append({"display_name": shortcut.stem, "app_name": _inventory_app_name_from_launch_id(shortcut.stem, fallback=shortcut.stem), "launch_id": shortcut.name, "launch_kind": "shortcut", "source": "start_menu", "installed_app_verified": True})  # 新增代码+AppLaunchInventoryClosure：保存 shortcut 候选并保留 .lnk 文件名；如果没有这一行，resolver 无法选择 start_menu_shortcut 后端。
+    return entries  # 新增代码+AppLaunchInventoryClosure：返回开始菜单候选列表；如果没有这一行，调用方拿不到发现结果。
+# 新增代码+AppLaunchInventoryClosure：函数段结束，_inventory_discover_start_menu 到此结束；如果没有这个边界说明，用户不容易看出 shortcut 覆盖范围。
+
+def _inventory_discover_appx_packages() -> list[dict[str, Any]]:  # 新增代码+AppLaunchInventoryClosure：函数段开始，枚举 Windows AppX/AUMID 启动入口；如果没有这段函数，商店应用和部分系统应用不会进入普通应用清单。
+    command = "Get-StartApps | Select-Object Name,AppID | ConvertTo-Json -Depth 2"  # 新增代码+AppLaunchInventoryClosure：定义只读 PowerShell 枚举命令；如果没有这一行，无法从系统获取 AUMID 清单。
+    try:  # 新增代码+AppLaunchInventoryClosure：包住外部枚举调用，避免 PowerShell 不可用时拖垮主流程；如果没有这一行，发现失败会中断整个 Computer Use。
+        completed = subprocess.run(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=8)  # 修改代码+AppLaunchInventoryClosure：用 UTF-8 加容错方式读取 Get-StartApps 输出，避免中文 Windows 默认编码把后台 reader 线程读崩；如果没有这一行，AppX 枚举可能因为单个异常字节失败并拖累普通应用发现。
+    except (OSError, subprocess.SubprocessError):  # 新增代码+AppLaunchInventoryClosure：捕获进程启动失败和超时失败；如果没有这一行，缺少 PowerShell 的机器会直接报错。
+        return []  # 新增代码+AppLaunchInventoryClosure：枚举失败时软降级为空；如果没有这一行，普通 exe/shortcut 发现也会被 AppX 失败拖垮。
+    try:  # 新增代码+AppLaunchInventoryClosure：尝试解析 JSON 输出；如果没有这一行，PowerShell 输出异常会让 inventory 崩溃。
+        payload = json.loads(str(completed.stdout or "[]"))  # 新增代码+AppLaunchInventoryClosure：把 Get-StartApps 输出转成 Python 数据；如果没有这一行，无法逐项提取 Name 和 AppID。
+    except json.JSONDecodeError:  # 新增代码+AppLaunchInventoryClosure：处理空输出或非 JSON 输出；如果没有这一行，系统局部异常会中断发现。
+        return []  # 新增代码+AppLaunchInventoryClosure：解析失败时返回空清单；如果没有这一行，坏输出会污染主流程。
+    rows = payload if isinstance(payload, list) else [payload]  # 新增代码+AppLaunchInventoryClosure：兼容 PowerShell 单项时返回对象；如果没有这一行，只安装一个 AppX 时会被误跳过。
+    entries: list[dict[str, Any]] = []  # 新增代码+AppLaunchInventoryClosure：准备保存 AppX 候选；如果没有这一行，解析结果无法返回。
+    for row in rows:  # 新增代码+AppLaunchInventoryClosure：遍历 StartApps 输出项；如果没有这一行，无法处理多个 AppX 应用。
+        if not isinstance(row, dict):  # 新增代码+AppLaunchInventoryClosure：跳过非字典脏数据；如果没有这一行，异常输出可能触发属性错误。
+            continue  # 新增代码+AppLaunchInventoryClosure：继续处理下一项；如果没有这一行，一个坏项会影响整个清单。
+        display = sanitize_inventory_display_name(row.get("Name"))  # 新增代码+AppLaunchInventoryClosure：清洗用户可见应用名；如果没有这一行，模型可能看到脏名称或危险字符。
+        aumid = str(row.get("AppID") or "").strip()  # 新增代码+AppLaunchInventoryClosure：读取完整 AUMID；如果没有这一行，AppX 后端没有可启动标识。
+        if not display or not aumid:  # 新增代码+AppLaunchInventoryClosure：拒绝缺少名称或 AUMID 的项；如果没有这一行，不可启动项会进入清单。
+            continue  # 新增代码+AppLaunchInventoryClosure：跳过不完整 AppX 项；如果没有这一行，resolver 会拿到空目标。
+        entries.append({"display_name": display, "app_name": _inventory_app_name_from_launch_id(display, fallback=display), "launch_id": aumid, "launch_kind": "appx", "source": "appx_package", "installed_app_verified": True})  # 新增代码+AppLaunchInventoryClosure：保存 AppX 候选并保留完整 AUMID；如果没有这一行，商店应用无法走 appx_aumid 后端。
+    return entries  # 新增代码+AppLaunchInventoryClosure：返回 AppX 候选列表；如果没有这一行，调用方拿不到 AUMID 发现结果。
+# 新增代码+AppLaunchInventoryClosure：函数段结束，_inventory_discover_appx_packages 到此结束；如果没有这个边界说明，用户不容易看出 AppX 枚举范围。
+
+def discover_windows_app_inventory_sources() -> list[dict[str, Any]]:  # 新增代码+AppLaunchInventoryClosure：函数段开始，覆盖旧聚合入口并加入 AppX 来源；如果没有这段函数，build_windows_app_inventory 仍不会看到 AUMID。
+    entries: list[dict[str, Any]] = []  # 新增代码+AppLaunchInventoryClosure：准备聚合所有真实来源；如果没有这一行，多来源结果无法合并。
+    entries.extend(_inventory_discover_start_menu())  # 新增代码+AppLaunchInventoryClosure：加入开始菜单 shortcut 候选；如果没有这一行，用户安装的软件快捷方式会缺失。
+    entries.extend(_inventory_discover_app_paths())  # 新增代码+AppLaunchInventoryClosure：加入 App Paths exe 候选；如果没有这一行，注册表别名可启动应用会缺失。
+    entries.extend(_inventory_discover_appx_packages())  # 新增代码+AppLaunchInventoryClosure：加入 AppX/AUMID 候选；如果没有这一行，商店应用和部分系统应用会缺失。
+    entries.extend(_inventory_discover_uninstall_registry())  # 新增代码+AppLaunchInventoryClosure：加入低优先级安装记录辅助源；如果没有这一行，部分只在设置页出现的软件无法作为辅助名称参与去重。
+    return entries  # 新增代码+AppLaunchInventoryClosure：返回聚合后的原始候选；如果没有这一行，主库存无法获得真实来源。
+# 新增代码+AppLaunchInventoryClosure：函数段结束，discover_windows_app_inventory_sources 到此结束；如果没有这个边界说明，用户不容易看出聚合入口范围。

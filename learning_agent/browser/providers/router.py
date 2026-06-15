@@ -2,6 +2,7 @@
 from __future__ import annotations  # 修改代码+Phase19BrowserRouting: 延迟解析类型注解，避免类之间引用顺序导致导入问题；如果没有这行代码，未来增加类型时更容易产生运行时错误。
 
 from ..intent import REAL_CHROME_INTENT_KEYWORDS  # 修改代码+Phase19BrowserRouting: 复用真实浏览器意图关键词；如果没有这行代码，router 和 intent.py 的判断规则会分裂。
+from ..profile_intent import detect_profile_intent  # 新增代码+DailyChromeProfile: 复用日常 Chrome profile 意图识别；如果没有这行代码，路由层无法把“已登录/我的 Chrome”转换成可审计 metadata。
 from .protocol import BrowserProviderDecision, BrowserProviderHealth, BrowserProviderKind  # 修改代码+Phase19BrowserRouting: 导入路由输入输出模型；如果没有这行代码，路由器无法返回稳定决策对象。
 
 
@@ -13,10 +14,12 @@ class BrowserProviderRouter:  # 修改代码+Phase19BrowserRouting: 定义统一
     def decide_provider(self, user_input: str, tool_name: str, arguments: dict[str, object] | None = None, provider_health: dict[BrowserProviderKind, BrowserProviderHealth] | None = None, allow_cdp_fallback: bool = False) -> BrowserProviderDecision:  # 修改代码+Phase19BrowserRouting: 根据意图、工具名和健康状态选择 provider；如果没有这段函数，工具层无法统一防误选。
         text = f"{user_input} {tool_name} {arguments or {}}"  # 修改代码+Phase19BrowserRouting: 合并用户输入、工具名和参数供关键词判断；如果没有这行代码，URL 和显式工具名无法参与路由。
         health = dict(provider_health or {})  # 修改代码+Phase19BrowserRouting: 复制健康状态避免污染调用方对象；如果没有这行代码，路由过程可能意外改写外部状态。
+        profile_intent = detect_profile_intent(user_input=user_input, tool_name=tool_name, arguments=arguments or {})  # 新增代码+DailyChromeProfile: 结构化识别日常 profile 需求；如果没有这行代码，后续连接层拿不到 requires_daily_profile 硬门禁信号。
+        profile_metadata = {"daily_profile_required": profile_intent.requires_daily_profile, "allows_debug_profile": profile_intent.allows_debug_profile, "profile_intent": profile_intent.profile_intent, "profile_intent_reason_codes": list(profile_intent.reason_codes)}  # 新增代码+DailyChromeProfile: 准备写入路由事件的脱敏 metadata；如果没有这行代码，日志和下游工具无法区分日常登录态与隔离调试。
         if self._has_marker(text, self.cdp_markers):  # 修改代码+Phase19BrowserRouting: 显式 CDP 请求优先；如果没有这行代码，调试端口任务可能走错插件。
             return self._available_or_unavailable(BrowserProviderKind.REAL_CHROME_CDP, health, tool_name, "用户明确要求 CDP 或真实 Chrome 调试端口。", "real_chrome_cdp_explicit_debug")  # 修改代码+Phase19BrowserRouting: 返回 CDP 决策或明确不可用；如果没有这行代码，显式调试请求没有稳定审计结果。
         if self._has_marker(text, self.current_chrome_markers):  # 修改代码+Phase19BrowserRouting: 当前 Chrome/登录态任务进入真实浏览器优先分支；如果没有这行代码，登录态任务可能默认走隔离 Chromium。
-            return self._decide_current_chrome_route(tool_name, health, allow_cdp_fallback)  # 新增代码+Phase19BrowserRouting: 把当前 Chrome 分支交给专用函数处理；如果没有这行代码，配对、工具能力和 fallback 逻辑会挤在主函数里难以维护。
+            return self._with_profile_metadata(self._decide_current_chrome_route(tool_name, health, allow_cdp_fallback), profile_metadata)  # 修改代码+DailyChromeProfile: 当前 Chrome 决策必须携带 profile 意图；如果没有这行代码，连接层可能继续不知道本次是否禁止 debug fallback。
         if self._has_marker(text, self.local_markers):  # 修改代码+Phase19BrowserRouting: 本地开发任务优先使用隔离可见 Chromium；如果没有这行代码，本地调试可能误碰真实 Chrome。
             return self._available_or_unavailable(BrowserProviderKind.VISIBLE_CHROMIUM, health, tool_name, "本地开发或 localhost 任务默认使用隔离可见 Chromium。", "visible_chromium_local_development")  # 修改代码+Phase19BrowserRouting: 返回本地开发 provider 决策；如果没有这行代码，本地任务路线不稳定。
         return self._available_or_unavailable(BrowserProviderKind.VISIBLE_CHROMIUM, health, tool_name, "公开网页或普通浏览器任务默认使用隔离可见 Chromium。", "visible_chromium_public_web")  # 修改代码+Phase19BrowserRouting: 返回公开网页默认 provider 决策；如果没有这行代码，普通浏览任务没有安全默认路线。
@@ -56,6 +59,11 @@ class BrowserProviderRouter:  # 修改代码+Phase19BrowserRouting: 定义统一
     def _health_paired(self, provider_health: BrowserProviderHealth) -> bool:  # 新增代码+Phase19BrowserRouting: 从健康 metadata 中读取插件配对状态；如果没有这段函数，事件 metadata 无法稳定暴露 paired 字段。
         metadata = provider_health.metadata or {}  # 新增代码+Phase19BrowserRouting: 读取 metadata 并兜底为空字典；如果没有这行代码，metadata 为 None 时会抛异常。
         return bool(metadata.get("paired", False))  # 新增代码+Phase19BrowserRouting: 返回布尔化配对状态；如果没有这行代码，事件日志可能出现不稳定类型。
+
+    def _with_profile_metadata(self, decision: BrowserProviderDecision, profile_metadata: dict[str, object]) -> BrowserProviderDecision:  # 新增代码+DailyChromeProfile: 给当前 Chrome 决策补充 profile 意图字段；如果没有这段函数，多条 return 都要手写合并 metadata 且容易漏字段。
+        merged_metadata = dict(decision.metadata or {})  # 新增代码+DailyChromeProfile: 复制原有 metadata 避免污染冻结决策对象；如果没有这行代码，原有 supported_tools 等审计字段可能被覆盖或外部改写。
+        merged_metadata.update(profile_metadata)  # 新增代码+DailyChromeProfile: 合并日常 profile 意图字段；如果没有这行代码，daily_profile_required 不会出现在路由结果里。
+        return BrowserProviderDecision(provider=decision.provider, reason=decision.reason, tool_name=decision.tool_name, reason_code=decision.reason_code, fallback_provider=decision.fallback_provider, requires_user_confirmation=decision.requires_user_confirmation, metadata=merged_metadata)  # 新增代码+DailyChromeProfile: 返回带合并 metadata 的新决策；如果没有这行代码，dataclass 冻结对象无法安全补字段。
 
     def _has_marker(self, text: str, markers: tuple[str, ...]) -> bool:  # 修改代码+Phase19BrowserRouting: 统一关键词匹配；如果没有这段函数，大小写和中英文规则会散落。
         lowered = text.lower()  # 修改代码+Phase19BrowserRouting: 转小写支持英文大小写匹配；如果没有这行代码，CDP/oauth 大小写变化可能漏判。

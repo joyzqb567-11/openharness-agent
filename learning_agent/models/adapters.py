@@ -305,17 +305,65 @@ class CodexCliChatModel:  # 作用: 通过本机 codex exec 调用 Codex/GPT-5.5
     @classmethod  # 修改代码+StrictSchema: 参数 schema 转换需要复用递归 strict 化 helper；若仍是 staticmethod: 无法调用 cls._strict_response_format_schema
     def _nullable_argument_schema(cls, argument_schema: Any) -> dict[str, Any]:  # 修改代码+StrictSchema: 让每个工具参数既保留原类型、递归满足 strict schema、又允许 null；若省略: Codex 后端会拒绝嵌套对象 schema
         if not isinstance(argument_schema, dict):  # 新增代码+MCP参数适配: 处理异常 MCP schema；若省略: 非字典 schema 会在 copy 或类型读取时出错
-            return {"type": ["string", "number", "integer", "boolean", "object", "array", "null"]}  # 新增代码+MCP参数适配: 给坏 schema 一个宽松但仍受控的可空类型；若省略: 坏参数会完全不可输出
+            return cls._fallback_nullable_argument_schema()  # 修改代码+StrictSchemaBareObject: 坏 schema 用 strict-safe anyOf 兜底；若没有这行代码，裸 object/array type 会被 OpenAI 拒绝。
         schema = copy.deepcopy(argument_schema)  # 新增代码+MCP参数适配: 复制原始参数 schema，避免修改工具注册表缓存；若省略: 输出 schema 转换会污染 MCP 工具 schema
         schema = cls._strict_response_format_schema(schema)  # 新增代码+StrictSchema: 递归补齐嵌套对象 required；若省略: todos.items 会因 missing id 被 Codex API 拒绝
         raw_type = schema.get("type")  # 新增代码+MCP参数适配: 读取原始 JSON Schema type；若省略: 无法判断如何加入 null
         if isinstance(raw_type, str):  # 新增代码+MCP参数适配: 处理普通单类型参数；若省略: string/integer 等参数不会自动允许 null
+            if raw_type in {"object", "array"}:  # 新增代码+StrictSchemaBareObject: object/array 可空要改用 anyOf；若没有这行代码，type=["object","null"] 仍可能触发 strict 后端拒绝。
+                return cls._nullable_complex_type_schema(schema, [raw_type, "null"])  # 新增代码+StrictSchemaBareObject: 用合法分支表达 object/array 或 null；若没有这行代码，metadata.type.0 这类错误会回归。
             schema["type"] = raw_type if raw_type == "null" else [raw_type, "null"]  # 新增代码+MCP参数适配: 在原类型外加入 null；若省略: 未用参数不能按严格 schema 写 null
         elif isinstance(raw_type, list):  # 新增代码+MCP参数适配: 处理已经是多类型的参数；若省略: 已有联合类型可能被覆盖
+            normalized_types = [type_name for type_name in raw_type if isinstance(type_name, str)]  # 新增代码+StrictSchemaBareObject: 清理 type 数组里的异常项；若没有这行代码，坏 MCP schema 可能把非字符串带进 anyOf。
+            if "object" in normalized_types or "array" in normalized_types:  # 新增代码+StrictSchemaBareObject: 识别 strict 后端不喜欢的复杂裸类型；若没有这行代码，submit.type.4 会继续出现。
+                return cls._nullable_complex_type_schema(schema, normalized_types)  # 新增代码+StrictSchemaBareObject: 把复杂联合类型转换成合法 anyOf；若没有这行代码，object/array 缺 items 或 additionalProperties 会被拒绝。
             schema["type"] = raw_type if "null" in raw_type else [*raw_type, "null"]  # 新增代码+MCP参数适配: 保留原联合类型并补 null；若省略: 无关工具参数写 null 会失败
         else:  # 新增代码+MCP参数适配: 处理没有 type 的参数 schema；若省略: enum/anyOf 等复杂 schema 可能缺少可空兜底
-            schema["type"] = ["string", "number", "integer", "boolean", "object", "array", "null"]  # 新增代码+MCP参数适配: 为无 type 参数提供通用可空类型；若省略: 模型输出可能被 schema 拒绝
+            return cls._fallback_nullable_argument_schema(schema.get("description"))  # 修改代码+StrictSchemaBareObject: 无 type 参数用 strict-safe anyOf 兜底；若没有这行代码，submit.type.4 会继续触发 HTTP 400。
         return schema  # 新增代码+MCP参数适配: 返回可空后的参数 schema；若省略: 调用方没有可加入 properties 的结果
+
+    @classmethod  # 新增代码+StrictSchemaBareObject: 复杂类型可空转换需要被 object、array 和联合类型共同复用；若没有这行代码，修复逻辑会散在多个分支。
+    def _nullable_complex_type_schema(cls, schema: dict[str, Any], raw_types: list[str]) -> dict[str, Any]:  # 新增代码+StrictSchemaBareObject: 把包含 object/array 的 type 联合改成 strict-safe anyOf；若没有这段函数，OpenAI 会继续拒绝裸复杂类型。
+        branches: list[dict[str, Any]] = []  # 新增代码+StrictSchemaBareObject: 保存 anyOf 的每个合法分支；若没有这行代码，后续无法逐个添加类型分支。
+        seen_types: set[str] = set()  # 新增代码+StrictSchemaBareObject: 记录已处理的类型避免重复分支；若没有这行代码，坏 MCP schema 可能生成重复 anyOf 项。
+        for type_name in raw_types:  # 新增代码+StrictSchemaBareObject: 遍历原始 type 联合中的每个类型；若没有这行代码，无法保留原 schema 允许的类型范围。
+            if type_name in seen_types:  # 新增代码+StrictSchemaBareObject: 跳过重复类型；若没有这行代码，anyOf 可能出现重复分支增加 schema 噪声。
+                continue  # 新增代码+StrictSchemaBareObject: 继续处理下一个类型；若没有这行代码，重复类型会继续向下生成分支。
+            seen_types.add(type_name)  # 新增代码+StrictSchemaBareObject: 标记当前类型已经处理；若没有这行代码，去重逻辑无法生效。
+            if type_name == "null":  # 新增代码+StrictSchemaBareObject: null 分支用于表达可选参数未使用；若没有这行代码，可选字段无法按 strict required-all 写 null。
+                branches.append({"type": "null"})  # 新增代码+StrictSchemaBareObject: 添加 null 分支；若没有这行代码，模型无法输出 null 表示省略可选参数。
+            elif type_name == "object":  # 新增代码+StrictSchemaBareObject: object 分支需要完整对象约束；若没有这行代码，对象参数会退化成裸字符串类型。
+                object_schema = copy.deepcopy(schema)  # 新增代码+StrictSchemaBareObject: 复制原 schema 给 object 分支使用；若没有这行代码，修改分支会污染调用方 schema。
+                object_schema["type"] = "object"  # 新增代码+StrictSchemaBareObject: 把 object 分支改成单一对象类型；若没有这行代码，分支仍会携带非法 type 列表。
+                object_schema.setdefault("properties", {})  # 新增代码+StrictSchemaBareObject: 确保 object 分支有 properties；若没有这行代码，strict 后端会要求额外字段边界。
+                object_schema.setdefault("required", [])  # 新增代码+StrictSchemaBareObject: 确保 object 分支有 required；若没有这行代码，strict 后端可能继续拒绝对象 schema。
+                object_schema["additionalProperties"] = False  # 新增代码+StrictSchemaBareObject: 禁止 object 分支自由字段；若没有这行代码，OpenAI strict 会报 additionalProperties 缺失。
+                branches.append(object_schema)  # 新增代码+StrictSchemaBareObject: 保存合法 object 分支；若没有这行代码，对象参数会被错误丢弃。
+            elif type_name == "array":  # 新增代码+StrictSchemaBareObject: array 分支需要 items；若没有这行代码，数组参数会退化成裸类型并可能报 missing items。
+                array_schema = copy.deepcopy(schema)  # 新增代码+StrictSchemaBareObject: 复制原 schema 给 array 分支使用；若没有这行代码，修改分支会污染调用方 schema。
+                array_schema["type"] = "array"  # 新增代码+StrictSchemaBareObject: 把 array 分支改成单一数组类型；若没有这行代码，分支仍会携带非法 type 列表。
+                if not isinstance(array_schema.get("items"), dict):  # 新增代码+StrictSchemaBareObject: 检查数组是否缺少 items；若没有这行代码，strict 后端可能报 array schema missing items。
+                    array_schema["items"] = cls._fallback_array_item_schema()  # 新增代码+StrictSchemaBareObject: 给开放数组补一个安全元素 schema；若没有这行代码，缺 items 的 MCP 参数仍会被拒绝。
+                branches.append(array_schema)  # 新增代码+StrictSchemaBareObject: 保存合法 array 分支；若没有这行代码，数组参数会被错误丢弃。
+            elif type_name in {"string", "number", "integer", "boolean"}:  # 新增代码+StrictSchemaBareObject: 保留常见标量分支；若没有这行代码，无 type 兜底会丢掉简单值能力。
+                branches.append({"type": type_name})  # 新增代码+StrictSchemaBareObject: 添加标量类型分支；若没有这行代码，模型无法输出对应简单值。
+        if "null" not in seen_types:  # 新增代码+StrictSchemaBareObject: 原类型不含 null 时补可空分支；若没有这行代码，可选参数无法用 null 表示未使用。
+            branches.append({"type": "null"})  # 新增代码+StrictSchemaBareObject: 添加 null 分支；若没有这行代码，strict required-all 策略会强制可选参数非空。
+        nullable_schema: dict[str, Any] = {"anyOf": branches or [{"type": "null"}]}  # 新增代码+StrictSchemaBareObject: 返回 anyOf 包装 schema；若没有这行代码，调用方拿不到 strict-safe 结果。
+        if isinstance(schema.get("description"), str):  # 新增代码+StrictSchemaBareObject: 保留原参数说明；若没有这行代码，模型看到的参数语义会变弱。
+            nullable_schema["description"] = schema["description"]  # 新增代码+StrictSchemaBareObject: 把说明放在外层属性上；若没有这行代码，anyOf 分支可能丢失可读提示。
+        return nullable_schema  # 新增代码+StrictSchemaBareObject: 返回可空复杂类型 schema；若没有这行代码，函数没有输出。
+
+    @classmethod  # 新增代码+StrictSchemaBareObject: 无 type 参数需要一个统一 strict-safe 兜底；若没有这行代码，多个分支会重复宽泛类型逻辑。
+    def _fallback_nullable_argument_schema(cls, description: Any = None) -> dict[str, Any]:  # 新增代码+StrictSchemaBareObject: 为未知参数生成可空但合法的通用 schema；若没有这段函数，坏 MCP schema 会继续污染 response_format。
+        schema = cls._nullable_complex_type_schema({"type": ["string", "number", "integer", "boolean", "object", "array", "null"]}, ["string", "number", "integer", "boolean", "object", "array", "null"])  # 新增代码+StrictSchemaBareObject: 用 anyOf 表达宽泛兜底；若没有这行代码，无 type 参数无法兼容多种值。
+        if isinstance(description, str):  # 新增代码+StrictSchemaBareObject: 判断原参数是否有说明；若没有这行代码，非字符串说明可能污染 schema。
+            schema["description"] = description  # 新增代码+StrictSchemaBareObject: 保留原参数说明；若没有这行代码，模型难以理解未知参数用途。
+        return schema  # 新增代码+StrictSchemaBareObject: 返回 strict-safe 兜底 schema；若没有这行代码，调用方拿不到结果。
+
+    @staticmethod  # 新增代码+StrictSchemaBareObject: 开放数组 items 兜底不依赖实例状态；若没有这行代码，数组补 items 逻辑会重复。
+    def _fallback_array_item_schema() -> dict[str, Any]:  # 新增代码+StrictSchemaBareObject: 生成数组元素的保守 strict-safe schema；若没有这段函数，缺 items 的数组会继续被 OpenAI 拒绝。
+        return {"anyOf": [{"type": "string"}, {"type": "number"}, {"type": "integer"}, {"type": "boolean"}, {"type": "null"}]}  # 新增代码+StrictSchemaBareObject: 只允许标量或 null 元素；若没有这行代码，开放数组会缺少 items 或引入嵌套裸 object。
 
     @classmethod  # 新增代码+StrictSchema: 递归 schema 规范化需要在类方法之间复用；若省略: 嵌套对象 strict 规则会散落在多个地方
     def _strict_response_format_schema(cls, schema: dict[str, Any]) -> dict[str, Any]:  # 新增代码+StrictSchema: 把工具参数 schema 转成 Codex Responses strict response_format 可接受的形状；若省略: 嵌套 properties 的 required 可能不完整

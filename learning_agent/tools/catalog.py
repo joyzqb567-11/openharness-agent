@@ -34,11 +34,11 @@ def _kernel_tool_names() -> set[str]:  # 修改代码+ToolSchemaSplit: 从独立
     return KERNEL_TOOL_NAMES if isinstance(KERNEL_TOOL_NAMES, set) else set()  # 修改代码+ToolSchemaSplit: 异常类型降级为空集合；若没有这行代码，内核工具判断可能直接报错。
 
 
-READ_ONLY_CONCURRENT_TOOL_NAMES: set[str] = {"read", "read_file", "todo_read", "read_background_command", "list_mcp_resources", "read_mcp_resource", "list_mcp_prompts", "read_mcp_prompt", "skill_list", "skill_load", "task_list", "task_get", "task_output", "list_peers", "read_peer_messages", "lsp_symbols", "lsp_definition", "lsp_diagnostics", "cron_list", "prompt_surface_report", "token_budget_report", "status_snapshot", "task_status", "session_list", "session_resume", "compact_status", "event_tail", "resume_report", "run_status", "health_status", "computer_status", "computer_observe", "computer_discover"}  # 修改代码+ComputerDiscoverTool：把 computer_discover 标记为只读并发安全工具；如果没有这行代码，应用发现会被误当成高风险桌面动作。
+READ_ONLY_CONCURRENT_TOOL_NAMES: set[str] = {"read", "read_file", "todo_read", "read_background_command", "list_mcp_resources", "read_mcp_resource", "list_mcp_prompts", "read_mcp_prompt", "skill_list", "skill_load", "task_list", "task_get", "task_output", "list_peers", "read_peer_messages", "lsp_symbols", "lsp_definition", "lsp_diagnostics", "cron_list", "prompt_surface_report", "token_budget_report", "status_snapshot", "task_status", "session_list", "session_resume", "compact_status", "event_tail", "resume_report", "run_status", "health_status", "read_trace", "read_state", "read_last_observation", "read_last_action_result", "assert_last_action", "mcp__computer-use__request_access"}  # 修改代码+ComputerUseMcpV2LegacyBlock：只保留 v2 MCP request_access 和调试读取工具的只读分类；如果没有这一行，旧 computer_status/request_access 等名称会继续出现在目录元数据里。
 DESTRUCTIVE_TOOL_NAMES: set[str] = {"write", "edit", "write_file", "append_memory", "todo_write", "notebook_edit", "task_stop", "task_update", "ack_peer_message", "team_delete", "exit_worktree", "cron_delete"}  # 新增代码+Stage15D: 集中列出会改变文件、状态或长期记录的工具；若没有这行代码，权限层无法突出危险操作。
 SHELL_TOOL_NAMES: set[str] = {"bash", "start_background_command"}  # 新增代码+Stage15D: 集中列出会执行系统命令的工具；若没有这行代码，命令类工具无法获得更高风险和超时元数据。
 INTERACTIVE_TOOL_PREFIXES: tuple[str, ...] = ("browser_",)  # 新增代码+Stage15D: 集中记录真实浏览器这类交互工具前缀；若没有这行代码，执行器无法知道这些工具可能依赖外部可见状态。
-COMPUTER_ACTION_TOOL_NAMES: set[str] = {"computer_action", "computer_use", "computer-use"}  # 修改代码+Phase49ComputerUseToolSurface: 单独列出会控制桌面的旧动作工具和统一兼容工具；若没有这行代码，兼容工具可能被误标成低风险。
+COMPUTER_ACTION_TOOL_NAMES: set[str] = set()  # 修改代码+ComputerUseMcpV2LegacyBlock：旧内置桌面动作名不再参与内置目录风险分类；如果没有这一行，computer_action/computer_use 仍会被当成模型可见内置工具处理。
 
 
 def builtin_tool_protocol_metadata(tool_name: str) -> dict[str, Any]:  # 新增代码+Stage15D: 为内置工具补齐 v3 协议元数据；若没有这行代码，catalog 只能保留旧 schema 和零散默认值。

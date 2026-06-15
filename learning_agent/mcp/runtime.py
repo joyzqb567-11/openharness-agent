@@ -166,7 +166,7 @@ class McpStdioClient:  # 新增代码+MCP stdio client: 定义最小 MCP stdio J
     @staticmethod  # 新增代码+浏览器超时: 默认超时策略只依赖配置，不需要 client 实例状态；若省略: registry 和直接构造会各写一套容易不一致
     def _default_request_timeout_seconds(config: McpServerConfig) -> float:  # 新增代码+浏览器超时: 统一决定 stdio client 默认请求超时；若省略: 慢浏览器工具无法和普通工具区分
         if config.transport == "stdio" and config.name == "browser_automation":  # 新增代码+浏览器超时: browser_automation 页面加载可能等待到 30000ms；若省略: 真实浏览器操作仍可能被 5 秒外层截断
-            return 35.0  # 新增代码+浏览器超时: 给 30000ms 页面超时额外保留通信余量；若省略: 全量测试和真实 browser_open 会偶发超时
+            return 90.0  # 修改代码+真实Chrome连接超时: 给真实 Chrome 启动、CDP 连接和慢页面更多外层余量；若没有这行代码，start_oauth_agent.bat 真实终端验收会偶发把 browser_automation 提前杀掉。
         return 5.0  # 新增代码+浏览器超时: 其他 stdio server 保持快速失败；若省略: 坏 server 会让 agent 等待过久
 
     def start(self) -> None:  # 新增代码+MCP stdio client: 启动子进程并完成 MCP 初始化握手；若省略: list_tools 和 call_tool 没有可用连接
@@ -946,6 +946,8 @@ class McpToolRegistry:  # 新增代码+MCP 工具注册表: 统一管理多个 M
 
     @staticmethod  # 新增代码+CapabilityPacks: MCP 能力包推断不依赖 registry 实例状态；若没有这行代码，MCP 工具分包规则无法复用和测试
     def _mcp_tool_capability_pack(server_name: str, original_name: str) -> str:  # 新增代码+CapabilityPacks: 根据 MCP server 和原始工具名推断能力包；若没有这行代码，外部工具无法参与 select_pack
+        if server_name == "computer-use":  # 新增代码+ComputerUseMCP：把独立 computer-use MCP server 归入桌面能力包；如果没有这一行，/computer use --full 只会加载旧内置兼容工具而找不到 mcp__computer-use__ 原子工具。
+            return "computer_use"  # 新增代码+ComputerUseMCP：返回现有 Computer Use 能力包名；如果没有这一行，tool_search select_pack:computer_use 无法批量启用新 MCP 工具。
         if server_name == "browser_automation" and "real_chrome" in original_name:  # 新增代码+CapabilityPacks: 真实 Chrome 工具归入专门高风险能力包；若没有这行代码，真实登录态流程会和普通浏览器混在一起
             return "real_chrome"  # 新增代码+CapabilityPacks: 返回真实 Chrome 能力包名；若没有这行代码，模型无法按真实浏览器需求加载正确工具组
         if server_name == "browser_automation":  # 新增代码+CapabilityPacks: 普通浏览器自动化工具归入浏览器能力包；若没有这行代码，browser_open/click 等工具缺少批量加载入口

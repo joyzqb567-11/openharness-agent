@@ -54,7 +54,7 @@ def _build_model_visible_input(drained_commands: list[RuntimeCommand], fallback_
     return fallback_user_input  # 新增代码+HarnessQueueDrain: 队列为空时使用调用方输入兜底；若没有这行代码，异常空队列会导致模型输入为空。
 
 
-def run_agent_with_harness_session(agent: Any, user_input: str, max_turns: int | None = None, event_callback: Callable[[Any], None] | None = None) -> str:  # 修改代码+ProcessSummaryUX: 增加可选事件回调供真实终端显示过程摘要；若没有这行代码，interactive.py 仍拿不到 run_events 流。
+def run_agent_with_harness_session(agent: Any, user_input: str, max_turns: int | None = None, event_callback: Callable[[Any], None] | None = None, conversation_history: Any | None = None) -> str:  # 修改代码+交互上下文: 增加可选 conversation_history 透传参数；若没有这行代码，interactive.py 保存的多轮历史会断在 harness runtime 入口。
     harness_store = HarnessStore(agent.workspace / "memory" / "harness")  # 新增代码+HarnessSessionRuntime: 使用 workspace 默认 harness 目录；若没有这行代码，真实运行状态没有固定位置。
     command_queue = RuntimeCommandQueue(agent.workspace / "memory" / "runtime")  # 新增代码+HarnessSessionRuntime: 使用 workspace 默认 runtime 队列目录；若没有这行代码，prompt 和通知无法统一排队。
     command = command_queue.enqueue_prompt(user_input)  # 新增代码+HarnessSessionRuntime: 先把用户输入持久化入队；若没有这行代码，模型请求前崩溃会丢 prompt。
@@ -73,7 +73,7 @@ def run_agent_with_harness_session(agent: Any, user_input: str, max_turns: int |
     final_answer = ""  # 新增代码+HarnessSessionRuntime: 保存最终回答文本；若没有这行代码，run_completed 后没有返回值。
     failed_text = ""  # 新增代码+HarnessSessionRuntime: 保存失败文本；若没有这行代码，异常路径无法写 failure_reason。
     try:  # 新增代码+HarnessSessionRuntime: 捕获事件流消费过程异常；若没有这行代码，状态可能卡在 running。
-        for event in agent.run_events(model_visible_input, max_turns=max_turns):  # 修改代码+HarnessQueueDrain: 用已 drain 的模型可见输入驱动事件流；若没有这行代码，task/resume 命令不会进入模型。
+        for event in agent.run_events(model_visible_input, max_turns=max_turns, conversation_history=conversation_history):  # 修改代码+交互上下文: 用已 drain 的模型可见输入和交互历史驱动事件流；若没有这行代码，第二轮短句仍只会看到当前输入。
             event_payload = event.to_json_dict() if hasattr(event, "to_json_dict") else {"event_type": getattr(event, "event_type", ""), "payload": getattr(event, "payload", {})}  # 新增代码+HarnessSessionRuntime: 把 AgentEvent 转成 JSON；若没有这行代码，harness event 无法保存结构化事件。
             harness_store.append_event(run.run_id, "agent_event", event_payload)  # 新增代码+HarnessSessionRuntime: 镜像 AgentEvent 到 harness 事件流；若没有这行代码，transcript 和 harness 仍是两套证据。
             if event_callback is not None:  # 新增代码+ProcessSummaryUX: 只在交互终端传入回调时转发事件；若没有这行代码，普通 API 调用会被迫承担终端 UI 行为。

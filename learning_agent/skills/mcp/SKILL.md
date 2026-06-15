@@ -15,4 +15,4 @@ description: Use when MCP servers, external tools, resources, prompts, auth meta
 边界：
 - MCP 是外部能力边界，不是模型直接拥有外部系统。
 - 先确认配置、权限和工具结果，再声称已访问外部资源。
-- 实际执行仍通过 `read / write / edit / bash` 以及运行时已接入的工具桥完成。
+- 实际执行默认通过 `read / write / edit` 完成；命令执行需要先按需加载 execution 能力后再使用 bash 或运行时已接入的工具桥完成。

@@ -1048,160 +1048,96 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [  # 作用: 告诉真实模型当前 agent
             },  # 新增代码+StatusToolsV2: parameters 定义结束；若没有这行代码，Python 字典结构不完整
         },  # 新增代码+StatusToolsV2: function 定义结束；若没有这行代码，工具定义结构不完整
     },  # 新增代码+StatusToolsV2: health_status 工具定义结束；若没有这行代码，工具列表语法不完整
-    {  # 新增代码+OSComputerUse: 新增 computer_status 工具定义开始；若没有这行代码，模型无法查看 OS Computer Use 后端状态。
-        "type": "function",  # 新增代码+OSComputerUse: OpenAI-compatible 工具类型固定写 function；若没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+OSComputerUse: function 内部描述工具名称、说明和参数；若没有这行代码，Computer Use 状态工具缺少标准定义结构。
-            "name": "computer_status",  # 新增代码+OSComputerUse: 工具名用于查询 OS Computer Use 状态；若没有这行代码，模型无法按名称调用状态入口。
-            "description": "查看 OS 级 Computer Use 后端是否可用、允许哪些桌面动作，以及为什么当前可用或不可用。",  # 新增代码+OSComputerUse: 告诉模型该工具只读查看桌面控制状态；若没有这行代码，模型可能直接尝试高风险动作。
-            "parameters": {  # 新增代码+OSComputerUse: JSON Schema 描述 computer_status 参数；若没有这行代码，工具定义不完整。
-                "type": "object",  # 新增代码+OSComputerUse: 参数必须是对象；若没有这行代码，工具调用结构不明确。
-                "properties": {},  # 新增代码+OSComputerUse: 状态查询当前不需要参数；若没有这行代码，schema 缺少 properties 字段。
-                "required": [],  # 新增代码+OSComputerUse: 状态查询允许无参数调用；若没有这行代码，模型必须传无意义字段。
-                "additionalProperties": False,  # 新增代码+OSComputerUse: 禁止模型传入无关参数；若没有这行代码，状态查询参数会被污染。
-            },  # 新增代码+OSComputerUse: parameters 定义结束；若没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+OSComputerUse: function 定义结束；若没有这行代码，工具定义结构不完整。
-    },  # 新增代码+OSComputerUse: computer_status 工具定义结束；若没有这行代码，工具列表语法不完整。
-    {  # 新增代码+Phase27ComputerUse: 新增 computer_observe 工具定义开始；如果没有这行代码，模型无法调用只读窗口观察协议。
-        "type": "function",  # 新增代码+Phase27ComputerUse: OpenAI-compatible 工具类型固定写 function；如果没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+Phase27ComputerUse: function 内部描述工具名称、说明和参数；如果没有这行代码，Computer Use 观察工具缺少标准定义结构。
-            "name": "computer_observe",  # 新增代码+Phase27ComputerUse: 工具名用于只读观察 OS 桌面窗口；如果没有这行代码，模型无法按名称调用观察入口。
-            "description": "只读观察 OS 级 Computer Use 桌面状态，例如列出应用、列出窗口、读取指定窗口状态。该工具不移动鼠标、不点击、不键入文本。",  # 新增代码+Phase27ComputerUse: 告诉模型该工具只读且无副作用；如果没有这行代码，模型可能误把观察和动作混在一起。
-            "parameters": {  # 新增代码+Phase27ComputerUse: JSON Schema 描述 computer_observe 参数；如果没有这行代码，工具定义不完整。
-                "type": "object",  # 新增代码+Phase27ComputerUse: 参数必须是对象；如果没有这行代码，工具调用结构不明确。
-                "properties": {  # 新增代码+Phase27ComputerUse: 声明允许的观察参数字段；如果没有这行代码，模型无法构造合法 observe 调用。
-                    "action": {"type": "string", "enum": ["list_apps", "list_windows", "get_active_window", "get_window_state"], "description": "要执行的只读观察动作。"},  # 新增代码+Phase27ComputerUse: 限定 observe 动作枚举；如果没有这行代码，click/type_text 可能混进只读工具。
-                    "window": {"type": "object", "description": "get_window_state 使用的可信窗口引用，必须来自 list_windows 或 get_active_window。", "properties": {"app_id": {"type": "string", "description": "应用身份。"}, "window_id": {"type": "string", "description": "窗口身份。"}, "title_preview": {"type": "string", "description": "窗口标题预览。"}, "process_path_hash": {"type": "string", "description": "进程路径哈希占位。"}, "captured_at": {"type": "string", "description": "窗口引用采集时间占位。"}}, "required": ["app_id", "window_id"], "additionalProperties": False},  # 新增代码+Phase27ComputerUse: 定义窗口引用结构；如果没有这行代码，get_window_state 无法稳定验证窗口身份。
-                },  # 新增代码+Phase27ComputerUse: properties 定义结束；如果没有这行代码，参数 schema 不完整。
-                "required": ["action"],  # 新增代码+Phase27ComputerUse: 观察动作名必须提供；如果没有这行代码，空 observe 可能进入工具层。
-                "additionalProperties": False,  # 新增代码+Phase27ComputerUse: 禁止模型传入无关参数；如果没有这行代码，只读观察参数会被污染。
-            },  # 新增代码+Phase27ComputerUse: parameters 定义结束；如果没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+Phase27ComputerUse: function 定义结束；如果没有这行代码，工具定义结构不完整。
-    },  # 新增代码+Phase27ComputerUse: computer_observe 工具定义结束；如果没有这行代码，工具列表语法不完整。
-    {  # 新增代码+ComputerDiscoverTool：新增 computer_discover 工具定义开始；如果没有这段代码，模型主循环无法像 ClaudeCode 一样先发现本机应用候选。
-        "type": "function",  # 新增代码+ComputerDiscoverTool：OpenAI-compatible 工具类型固定写 function；如果没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+ComputerDiscoverTool：function 内部描述工具名称、说明和参数；如果没有这行代码，工具定义结构不完整。
-            "name": "computer_discover",  # 新增代码+ComputerDiscoverTool：暴露只读应用发现工具名；如果没有这行代码，模型无法主动查询应用清单。
-            "description": "只读发现本机普通桌面应用候选，返回清洗后的 display_name、app_name、launch_kind、source；用于 launch_app 前选择目标应用，不移动鼠标、不点击、不键入文本。",  # 新增代码+ComputerDiscoverTool：告诉模型该工具负责应用候选发现且无副作用；如果没有这行代码，模型可能继续凭空猜 app 名或误以为这是启动工具。
-            "parameters": {  # 新增代码+ComputerDiscoverTool：JSON Schema 描述 computer_discover 参数；如果没有这行代码，模型不知道如何查询应用。
-                "type": "object",  # 新增代码+ComputerDiscoverTool：参数必须是对象；如果没有这行代码，工具调用结构不明确。
-                "properties": {  # 新增代码+ComputerDiscoverTool：声明允许的查询参数字段；如果没有这行代码，query/max_results 无法进入 schema。
-                    "query": {"type": "string", "description": "可选应用查询词，例如 画图、记事本、浏览器、Paint、VS Code；空值表示列出清洗后的候选。"},  # 新增代码+ComputerDiscoverTool：提供自然语言查询字段；如果没有这行代码，模型只能拿全量清单难以选择。
-                    "max_results": {"type": "integer", "description": "可选显示数量限制；省略表示返回所有清洗后的普通应用候选，不再设置 50 个候选上限。"},  # 修改代码+FullOrdinaryAppInventory：把数量字段改成显式限制而不是旧固定上限；如果没有这一行，模型会继续误以为普通应用发现只能看到前 50 个。
-                    "include_common": {"type": "boolean", "description": "可选，是否包含 Paint/Notepad/Calculator 等公共兜底候选，默认 true。"},  # 新增代码+ComputerDiscoverTool：允许保留公共兜底；如果没有这行代码，枚举失败时基础 Windows 应用可能查不到。
-                },  # 新增代码+ComputerDiscoverTool：properties 定义结束；如果没有这行代码，参数 schema 不完整。
-                "required": [],  # 新增代码+ComputerDiscoverTool：允许无参数列出候选；如果没有这行代码，模型必须传无意义 query。
-                "additionalProperties": False,  # 新增代码+ComputerDiscoverTool：禁止模型传入无关参数；如果没有这行代码，只读发现参数会被污染。
-            },  # 新增代码+ComputerDiscoverTool：parameters 定义结束；如果没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+ComputerDiscoverTool：function 定义结束；如果没有这行代码，工具定义结构不完整。
-    },  # 新增代码+ComputerDiscoverTool：computer_discover 工具定义结束；如果没有这行代码，工具列表语法不完整。
-    {  # 新增代码+OSComputerUse: 新增 computer_action 工具定义开始；若没有这行代码，模型无法请求 OS 桌面动作。
-        "type": "function",  # 新增代码+OSComputerUse: OpenAI-compatible 工具类型固定写 function；若没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+OSComputerUse: function 内部描述工具名称、说明和参数；若没有这行代码，Computer Use 动作工具缺少标准定义结构。
-            "name": "computer_action",  # 新增代码+OSComputerUse: 工具名用于执行 OS 级桌面动作；若没有这行代码，模型无法按名称调用动作入口。
-            "description": "执行 OS 级 Computer Use 动作。该工具高风险，必须传 confirm_desktop_control=true，并且仍会经过用户权限确认；提供 window 时 x/y 表示窗口相对坐标，控制器会转换为屏幕坐标。",  # 修改代码+Phase30ComputerUseActionGate: 告诉模型确认、权限和窗口相对坐标要求；若没有这行代码，模型可能误以为 x/y 永远是屏幕裸坐标。
-            "parameters": {  # 新增代码+OSComputerUse: JSON Schema 描述 computer_action 参数；若没有这行代码，模型不知道动作字段怎么传。
-                "type": "object",  # 新增代码+OSComputerUse: 参数必须是对象；若没有这行代码，工具调用结构不明确。
-                "properties": {  # 新增代码+OSComputerUse: 声明允许的动作参数字段；若没有这行代码，模型无法构造合法调用。
-                    "action": {"type": "string", "enum": ["screenshot", "launch_app", "move_mouse", "click", "double_click", "drag_path", "type_text", "press_key", "scroll"], "description": "要执行的桌面动作；launch_app 用于先打开本机普通应用，drag_path 用于按住鼠标沿 points 连续拖拽。"},  # 修改代码+ModelLoopLaunchAppTool: 暴露启动应用动作给模型主循环；如果没有这行代码，模型无法先打开 Paint 等本机软件再观察和操作。
-                    "confirm_desktop_control": {"type": "boolean", "description": "必须显式传 true，表示模型知道这是 OS 桌面控制。"},  # 新增代码+OSComputerUse: 要求显式确认；若没有这行代码，模型可能无意触发真实桌面操作。
-                    "app_name": {"type": "string", "description": "launch_app 使用的应用名，例如 mspaint、notepad 或 paint。"},  # 新增代码+ModelLoopLaunchAppTool: 给模型提供启动目标字段；如果没有这行代码，模型只能靠鼠标键盘猜测打开软件。
-                    "target_app": {"type": "string", "description": "app_name 的兼容别名，用于表达要启动的目标应用。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容不同模型的目标应用字段习惯；如果没有这行代码，工具调用容易因为字段名不同失败。
-                    "app": {"type": "string", "description": "app_name 的短别名。"},  # 新增代码+ModelLoopLaunchAppTool: 提供更短的应用名字段；如果没有这行代码，ClaudeCode 风格调用可能传不进目标。
-                    "target": {"type": "string", "description": "app_name 的通用别名。"},  # 新增代码+ModelLoopLaunchAppTool: 提供通用目标字段；如果没有这行代码，模型从自然语言抽出的 target 可能被 schema 拒绝。
-                    "x": {"type": "integer", "description": "可选 x 坐标；提供 window 时是窗口相对 x，没有 window 时是旧兼容屏幕 x。"},  # 修改代码+Phase30ComputerUseActionGate: 提供横坐标字段并说明坐标空间；若没有这行代码，鼠标动作可能点错目标。
-                    "y": {"type": "integer", "description": "可选 y 坐标；提供 window 时是窗口相对 y，没有 window 时是旧兼容屏幕 y。"},  # 修改代码+Phase30ComputerUseActionGate: 提供纵坐标字段并说明坐标空间；若没有这行代码，鼠标动作可能点错目标。
-                    "text": {"type": "string", "description": "type_text 使用的文本，控制器会限制长度。"},  # 新增代码+OSComputerUse: 提供文本输入字段；若没有这行代码，键入文本动作无法表达内容。
-                    "key": {"type": "string", "description": "press_key 使用的按键名，例如 ENTER、TAB、CTRL+L。"},  # 新增代码+OSComputerUse: 提供按键字段；若没有这行代码，按键动作无法表达目标键。
-                    "delta": {"type": "integer", "description": "scroll 使用的滚动距离，正负值表示方向。"},  # 新增代码+OSComputerUse: 提供滚动距离字段；若没有这行代码，滚动动作无法表达方向和幅度。
-                    "points": {"type": "array", "description": "drag_path 使用的窗口相对路径点列表；每个点包含 x/y，控制器会转换成屏幕坐标。", "items": {"type": "object", "properties": {"x": {"type": "integer", "description": "窗口相对 x。"}, "y": {"type": "integer", "description": "窗口相对 y。"}}, "required": ["x", "y"], "additionalProperties": False}},  # 新增代码+GenericDragPathToolSurface: 给模型提供连续拖拽点列表；如果没有这行代码，模型无法表达画线轨迹。
-                    "window": {"type": "object", "description": "可选可信窗口引用；如果提供，控制器会先验证它来自 computer_observe/list_windows。", "properties": {"app_id": {"type": "string", "description": "应用身份。"}, "window_id": {"type": "string", "description": "窗口身份。"}, "title_preview": {"type": "string", "description": "窗口标题预览。"}, "process_path_hash": {"type": "string", "description": "进程路径哈希占位。"}, "captured_at": {"type": "string", "description": "窗口引用采集时间占位。"}, "rect": {"type": "object", "description": "窗口矩形；有它才能把窗口相对坐标稳定转成屏幕坐标。", "properties": {"left": {"type": "integer"}, "top": {"type": "integer"}, "right": {"type": "integer"}, "bottom": {"type": "integer"}}, "additionalProperties": False}}, "required": ["app_id", "window_id"], "additionalProperties": False},  # 修改代码+GenericDragPathToolSurface: 允许窗口引用携带 rect 供路径坐标转换；如果没有这行代码，模型按 observe 返回的窗口传参时会丢失几何信息。
-                },  # 新增代码+OSComputerUse: properties 定义结束；若没有这行代码，参数 schema 不完整。
-                "required": ["action", "confirm_desktop_control"],  # 新增代码+OSComputerUse: 动作名和桌面控制确认必须提供；若没有这行代码，空动作可能进入工具层再失败。
-                "additionalProperties": False,  # 新增代码+OSComputerUse: 禁止模型传入无关参数；若没有这行代码，高风险动作参数会被污染。
-            },  # 新增代码+OSComputerUse: parameters 定义结束；若没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+OSComputerUse: function 定义结束；若没有这行代码，工具定义结构不完整。
-    },  # 新增代码+OSComputerUse: computer_action 工具定义结束；若没有这行代码，工具列表语法不完整。
-    {  # 新增代码+Phase49ComputerUseToolSurface: 新增 computer_use 兼容工具定义开始；如果没有这段代码，模型无法使用统一 Computer Use 工具入口。
-        "type": "function",  # 新增代码+Phase49ComputerUseToolSurface: OpenAI-compatible 工具类型固定写 function；如果没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+Phase49ComputerUseToolSurface: function 内部描述兼容工具名称、说明和参数；如果没有这行代码，工具定义结构不完整。
-            "name": "computer_use",  # 新增代码+Phase49ComputerUseToolSurface: 暴露下划线兼容工具名；如果没有这行代码，OpenAI 友好命名入口不存在。
-            "description": "兼容式 OS Computer Use 统一入口；模型主循环应使用 operation=status/observe/action，通过工具结果持续观察、规划和动作；旧 mode/run_prompt 仅保留兼容，不作为语义规划入口。",  # 修改代码+ModelLoopSemanticPlanner：把模型可见说明改成 observe/action 主循环；如果没有这行代码，模型会继续把 run_prompt 当成黑盒任务执行器。
-            "parameters": {  # 新增代码+Phase49ComputerUseToolSurface: JSON Schema 描述统一入口参数；如果没有这行代码，模型不知道 operation 和动作字段怎么传。
-                "type": "object",  # 新增代码+Phase49ComputerUseToolSurface: 参数必须是对象；如果没有这行代码，工具调用结构不明确。
-                "properties": {  # 新增代码+Phase49ComputerUseToolSurface: 声明兼容工具允许的参数字段；如果没有这行代码，operation/action/window 等字段无法进入 schema。
-                    "operation": {"type": "string", "enum": ["status", "discover", "observe", "action"], "description": "要执行的统一操作：status 查询状态，discover 只读发现应用候选，observe 只读观察，action 执行一个明确桌面动作；自然语言语义规划由模型主循环完成。"},  # 修改代码+ComputerDiscoverTool：把只读应用发现加入统一入口；如果没有这行代码，兼容工具无法表达 ClaudeCode 风格 discover 层。
-                    "op": {"type": "string", "enum": ["status", "discover", "observe", "action"], "description": "operation 的 ClaudeCode/MCP 风格别名；仅用于 status、discover、observe、action。"},  # 修改代码+ComputerDiscoverTool：同步把 discover 加入短别名枚举；如果没有这行代码，op=discover 会被 schema 拒绝。
-                    "query": {"type": "string", "description": "operation=discover 时使用的应用查询词，例如 画图、记事本、浏览器。"},  # 新增代码+ComputerDiscoverTool：给兼容入口提供 discover 查询词；如果没有这行代码，模型无法通过 computer_use 查询应用候选。
-                    "max_results": {"type": "integer", "description": "operation=discover 时可选显示数量限制；省略表示返回所有清洗后的普通应用候选。"},  # 修改代码+FullOrdinaryAppInventory：兼容入口同步取消默认 10；如果没有这一行，computer_use 入口仍会误导模型只查少量候选。
-                    "include_common": {"type": "boolean", "description": "operation=discover 时是否包含公共兜底应用候选，默认 true。"},  # 新增代码+ComputerDiscoverTool：给兼容入口提供公共兜底开关；如果没有这行代码，兼容 discover 无法控制基础应用兜底。
-                    "prompt": {"type": "string", "description": "旧兼容字段；模型主循环不要用它执行整段自然语言任务，应改用 observe/action 工具循环。"},  # 修改代码+ModelLoopSemanticPlanner：保留兼容字段但明确禁止语义黑盒；如果没有这行代码，旧客户端兼容和新模型策略边界会混淆。
-                    "real_actions": {"type": "boolean", "description": "是否请求真实桌面动作，默认 false；true 时仍需要权限确认和安全边界。"},  # 新增代码+Phase92UniversalComputerUse：显式暴露真实动作开关；如果没有这行代码，mode 可能被误解为默认会控制本机。
-                    "action": {"type": "string", "description": "observe 或 action 的具体动作，例如 list_windows、get_window_state、click、press_key。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供具体动作字段；如果没有这行代码，observe/action 不知道执行哪种子动作。
-                    "observe_action": {"type": "string", "description": "observe 子动作别名，例如 list_windows。"},  # 新增代码+Phase49ComputerUseToolSurface: 兼容 observe_action 字段；如果没有这行代码，观察动作别名无法被模型表达。
-                    "confirm_desktop_control": {"type": "boolean", "description": "operation=action 时必须显式传 true；仍会经过权限确认和 controller 门禁。"},  # 新增代码+Phase49ComputerUseToolSurface: 保留桌面控制显式确认；如果没有这行代码，高风险动作可能绕过确认语义。
-                    "confirmed": {"type": "boolean", "description": "confirm_desktop_control 的兼容别名。"},  # 新增代码+Phase49ComputerUseToolSurface: 兼容 confirmed 字段；如果没有这行代码，外部简单确认字段无法转发。
-                    "app_name": {"type": "string", "description": "operation=action 且 action=launch_app 时要启动的应用名。"},  # 新增代码+ModelLoopLaunchAppTool: 让统一入口能表达打开哪个软件；如果没有这行代码，computer_use 兼容工具无法启动应用。
-                    "target_app": {"type": "string", "description": "app_name 的兼容别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容目标应用字段；如果没有这行代码，模型可能传 target_app 却被 schema 拒绝。
-                    "app": {"type": "string", "description": "app_name 的短别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容短字段 app；如果没有这行代码，简短工具调用无法表达目标应用。
-                    "target": {"type": "string", "description": "app_name 的通用别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容通用 target 字段；如果没有这行代码，自然语言规划字段可能被拒绝。
-                    "x": {"type": "integer", "description": "可选 x 坐标；提供 window 时是窗口相对 x。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供横坐标字段；如果没有这行代码，点击和移动无法表达位置。
-                    "y": {"type": "integer", "description": "可选 y 坐标；提供 window 时是窗口相对 y。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供纵坐标字段；如果没有这行代码，点击和移动无法表达位置。
-                    "text": {"type": "string", "description": "type_text 或 clipboard_write 使用的文本；底层会继续脱敏和限制。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供文本字段；如果没有这行代码，文本动作无法表达内容。
-                    "key": {"type": "string", "description": "press_key 使用的按键名。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供按键字段；如果没有这行代码，按键动作无法表达目标键。
-                    "delta": {"type": "integer", "description": "scroll 使用的滚动距离。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供滚动字段；如果没有这行代码，滚动动作无法表达方向和幅度。
-                    "points": {"type": "array", "description": "drag_path 使用的窗口相对路径点列表。", "items": {"type": "object"}},  # 新增代码+GenericDragPathToolSurface: 在统一入口暴露拖拽路径点；如果没有这行代码，compat 工具无法表达连续画线。
-                    "window": {"type": "object", "description": "可选可信窗口引用；会原样转发到旧 Computer Use controller 校验。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供窗口引用字段；如果没有这行代码，兼容入口无法绑定目标窗口。
-                },  # 新增代码+Phase49ComputerUseToolSurface: properties 定义结束；如果没有这行代码，参数 schema 不完整。
-                "required": ["operation"],  # 新增代码+Phase49ComputerUseToolSurface: 要求明确 operation；如果没有这行代码，模型可能发出含糊统一调用。
-                "additionalProperties": False,  # 新增代码+Phase49ComputerUseToolSurface: 禁止无关参数污染兼容工具；如果没有这行代码，高风险动作参数会变得不可审计。
-            },  # 新增代码+Phase49ComputerUseToolSurface: parameters 定义结束；如果没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+Phase49ComputerUseToolSurface: function 定义结束；如果没有这行代码，工具定义结构不完整。
-    },  # 新增代码+Phase49ComputerUseToolSurface: computer_use 工具定义结束；如果没有这行代码，工具列表语法不完整。
-    {  # 新增代码+Phase49ComputerUseToolSurface: 新增 computer-use 兼容工具定义开始；如果没有这段代码，ClaudeCode 风格连字符工具名无法被兼容。
-        "type": "function",  # 新增代码+Phase49ComputerUseToolSurface: OpenAI-compatible 工具类型固定写 function；如果没有这行代码，模型接口不会识别这是可调用工具。
-        "function": {  # 新增代码+Phase49ComputerUseToolSurface: function 内部描述连字符兼容工具；如果没有这行代码，工具定义结构不完整。
-            "name": "computer-use",  # 新增代码+Phase49ComputerUseToolSurface: 暴露 ClaudeCode 风格连字符兼容工具名；如果没有这行代码，外部习惯的 computer-use 无法路由。
-            "description": "ClaudeCode 风格 OS Computer Use 兼容入口；参数与 computer_use 相同，模型主循环应使用 status/observe/action，旧 mode/run_prompt 仅保留兼容。",  # 修改代码+ModelLoopSemanticPlanner：把连字符工具说明改成主循环工具协议；如果没有这行代码，模型可能误选旧 prompt 黑盒。
-            "parameters": {  # 新增代码+Phase49ComputerUseToolSurface: JSON Schema 描述连字符工具参数；如果没有这行代码，模型不知道如何调用该别名。
-                "type": "object",  # 新增代码+Phase49ComputerUseToolSurface: 参数必须是对象；如果没有这行代码，工具调用结构不明确。
-                "properties": {  # 新增代码+Phase49ComputerUseToolSurface: 声明允许参数字段；如果没有这行代码，operation 和动作字段无法进入 schema。
-                    "operation": {"type": "string", "enum": ["status", "discover", "observe", "action"], "description": "要执行的统一操作：status、discover、observe 或 action；自然语言任务由模型主循环拆成多步工具调用。"},  # 修改代码+ComputerDiscoverTool：把 discover 加入 ClaudeCode 风格别名工具；如果没有这行代码，连字符入口无法表达应用发现层。
-                    "op": {"type": "string", "enum": ["status", "discover", "observe", "action"], "description": "operation 的短别名；仅用于 status、discover、observe、action。"},  # 修改代码+ComputerDiscoverTool：同步把 discover 加入短字段；如果没有这行代码，op=discover 会被拒绝。
-                    "query": {"type": "string", "description": "operation=discover 时使用的应用查询词，例如 画图、记事本、浏览器。"},  # 新增代码+ComputerDiscoverTool：给连字符兼容入口提供 discover 查询词；如果没有这行代码，ClaudeCode 风格调用无法查询应用候选。
-                    "max_results": {"type": "integer", "description": "operation=discover 时可选显示数量限制；省略表示返回所有清洗后的普通应用候选。"},  # 修改代码+FullOrdinaryAppInventory：连字符兼容入口同步取消默认 10；如果没有这一行，ClaudeCode 风格别名仍会保留旧截断语义。
-                    "include_common": {"type": "boolean", "description": "operation=discover 时是否包含公共兜底应用候选，默认 true。"},  # 新增代码+ComputerDiscoverTool：给连字符兼容入口提供公共兜底开关；如果没有这行代码，基础应用发现兜底不可控。
-                    "prompt": {"type": "string", "description": "旧兼容字段；模型主循环不要用它执行整段自然语言任务，应改用 observe/action 工具循环。"},  # 修改代码+ModelLoopSemanticPlanner：保留旧字段但明确降级；如果没有这行代码，外部兼容和模型策略会混在一起。
-                    "real_actions": {"type": "boolean", "description": "是否请求真实桌面动作，默认 false；true 时仍需要权限确认和安全边界。"},  # 新增代码+Phase92UniversalComputerUse：同步真实动作开关；如果没有这行代码，别名入口和下划线入口语义不一致。
-                    "action": {"type": "string", "description": "observe 或 action 的具体动作。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供具体动作字段；如果没有这行代码，别名入口无法表达子动作。
-                    "observe_action": {"type": "string", "description": "observe 子动作别名。"},  # 新增代码+Phase49ComputerUseToolSurface: 兼容 observe_action 字段；如果没有这行代码，观察动作别名无法转发。
-                    "confirm_desktop_control": {"type": "boolean", "description": "operation=action 时必须显式传 true。"},  # 新增代码+Phase49ComputerUseToolSurface: 保留高风险动作确认；如果没有这行代码，动作路径可能绕过确认语义。
-                    "confirmed": {"type": "boolean", "description": "confirm_desktop_control 的兼容别名。"},  # 新增代码+Phase49ComputerUseToolSurface: 兼容 confirmed 字段；如果没有这行代码，简化确认字段无法转发。
-                    "app_name": {"type": "string", "description": "action=launch_app 时要启动的应用名。"},  # 新增代码+ModelLoopLaunchAppTool: 让连字符兼容入口能打开应用；如果没有这行代码，computer-use 别名无法表达启动目标。
-                    "target_app": {"type": "string", "description": "app_name 的兼容别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容 target_app 字段；如果没有这行代码，模型传入目标应用可能被拒绝。
-                    "app": {"type": "string", "description": "app_name 的短别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容 app 短字段；如果没有这行代码，简短调用会失败。
-                    "target": {"type": "string", "description": "app_name 的通用别名。"},  # 新增代码+ModelLoopLaunchAppTool: 兼容 target 字段；如果没有这行代码，通用规划结果不能进入工具。
-                    "x": {"type": "integer", "description": "可选 x 坐标。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供横坐标字段；如果没有这行代码，鼠标动作无法表达位置。
-                    "y": {"type": "integer", "description": "可选 y 坐标。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供纵坐标字段；如果没有这行代码，鼠标动作无法表达位置。
-                    "text": {"type": "string", "description": "文本动作使用的文本。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供文本字段；如果没有这行代码，文本动作无法表达内容。
-                    "key": {"type": "string", "description": "press_key 使用的按键名。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供按键字段；如果没有这行代码，按键动作无法表达目标键。
-                    "delta": {"type": "integer", "description": "scroll 使用的滚动距离。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供滚动字段；如果没有这行代码，滚动动作无法表达方向。
-                    "points": {"type": "array", "description": "drag_path 使用的窗口相对路径点列表。", "items": {"type": "object"}},  # 新增代码+GenericDragPathToolSurface: 在连字符兼容入口暴露拖拽路径点；如果没有这行代码，ClaudeCode 风格别名无法表达连续鼠标拖拽。
-                    "window": {"type": "object", "description": "可选可信窗口引用。"},  # 新增代码+Phase49ComputerUseToolSurface: 提供窗口引用字段；如果没有这行代码，动作无法绑定目标窗口。
-                },  # 新增代码+Phase49ComputerUseToolSurface: properties 定义结束；如果没有这行代码，参数 schema 不完整。
-                "required": ["operation"],  # 新增代码+Phase49ComputerUseToolSurface: 要求明确 operation；如果没有这行代码，模型可能发出含糊别名调用。
-                "additionalProperties": False,  # 新增代码+Phase49ComputerUseToolSurface: 禁止无关参数；如果没有这行代码，别名工具参数会被污染。
-            },  # 新增代码+Phase49ComputerUseToolSurface: parameters 定义结束；如果没有这行代码，Python 字典结构不完整。
-        },  # 新增代码+Phase49ComputerUseToolSurface: function 定义结束；如果没有这行代码，工具定义结构不完整。
-    },  # 新增代码+Phase49ComputerUseToolSurface: computer-use 工具定义结束；如果没有这行代码，工具列表语法不完整。
+    {  # 新增代码+ComputerUseDebugTools: read_trace 调试工具定义开始；如果没有这一段代码，Computer Use debug 模式无法让模型读取最近运行轨迹。
+        "type": "function",  # 新增代码+ComputerUseDebugTools: OpenAI-compatible 工具类型固定写 function；如果没有这一行，模型接口不会识别 read_trace 是工具。
+        "function": {  # 新增代码+ComputerUseDebugTools: function 容器保存 read_trace 的名称、说明和参数；如果没有这一行，工具定义结构不完整。
+            "name": "read_trace",  # 新增代码+ComputerUseDebugTools: 暴露调试工具名 read_trace；如果没有这一行，debug 模式无法按名称读取 trace。
+            "description": "Computer Use 调试模式读取最近 runtime trace 事件；只读，不控制桌面，不读取项目文件。",  # 新增代码+ComputerUseDebugTools: 说明 read_trace 的只读边界；如果没有这一行，模型可能把它误当成通用 read。
+            "parameters": {  # 新增代码+ComputerUseDebugTools: JSON Schema 描述 read_trace 参数；如果没有这一行，模型不知道 limit 字段怎么传。
+                "type": "object",  # 新增代码+ComputerUseDebugTools: 参数必须是对象；如果没有这一行，参数形状会模糊。
+                "properties": {  # 新增代码+ComputerUseDebugTools: 声明 read_trace 允许字段；如果没有这一行，limit 无法进入 schema。
+                    "limit": {"type": "integer", "description": "最多返回最近多少条 trace，默认 20，最大 200。"},  # 新增代码+ComputerUseDebugTools: limit 控制返回数量；如果没有这一行，trace 可能一次撑爆上下文。
+                },  # 新增代码+ComputerUseDebugTools: read_trace 参数字段结束；如果没有这一行，Python 字典结构不完整。
+                "required": [],  # 新增代码+ComputerUseDebugTools: 允许无参数读取默认数量；如果没有这一行，模型必须每次显式传 limit。
+                "additionalProperties": False,  # 新增代码+ComputerUseDebugTools: 禁止无关参数；如果没有这一行，模型可能把文件 read 参数混进来。
+            },  # 新增代码+ComputerUseDebugTools: read_trace 参数 schema 结束；如果没有这一行，工具定义不完整。
+        },  # 新增代码+ComputerUseDebugTools: read_trace function 定义结束；如果没有这一行，schema 不完整。
+    },  # 新增代码+ComputerUseDebugTools: read_trace 工具定义结束；如果没有这一行，TOOL_SCHEMAS 列表语法不完整。
+    {  # 新增代码+ComputerUseDebugTools: read_state 调试工具定义开始；如果没有这一段代码，debug 模式无法读取 Computer Use 当前状态摘要。
+        "type": "function",  # 新增代码+ComputerUseDebugTools: OpenAI-compatible 工具类型固定写 function；如果没有这一行，模型接口不会识别 read_state 是工具。
+        "function": {  # 新增代码+ComputerUseDebugTools: function 容器保存 read_state 定义；如果没有这一行，工具结构不完整。
+            "name": "read_state",  # 新增代码+ComputerUseDebugTools: 暴露调试工具名 read_state；如果没有这一行，模型无法按名称读取状态。
+            "description": "Computer Use 调试模式读取当前桌面任务状态、工具作用域和最近事件数量；只读，不控制桌面。",  # 新增代码+ComputerUseDebugTools: 说明 read_state 的用途和边界；如果没有这一行，模型难以区分它和项目 read。
+            "parameters": {  # 新增代码+ComputerUseDebugTools: JSON Schema 描述 read_state 参数；如果没有这一行，include_events 无处表达。
+                "type": "object",  # 新增代码+ComputerUseDebugTools: 参数必须是对象；如果没有这一行，参数形状不稳定。
+                "properties": {  # 新增代码+ComputerUseDebugTools: 声明 read_state 字段；如果没有这一行，include_events 无法进入 schema。
+                    "include_events": {"type": "boolean", "description": "是否附带最近 observation/trace 摘要，默认 false。"},  # 新增代码+ComputerUseDebugTools: include_events 控制是否展开事件；如果没有这一行，状态读取可能默认太吵。
+                },  # 新增代码+ComputerUseDebugTools: read_state 参数字段结束；如果没有这一行，Python 字典结构不完整。
+                "required": [],  # 新增代码+ComputerUseDebugTools: 允许无参数读取状态；如果没有这一行，模型不能快速查看默认状态。
+                "additionalProperties": False,  # 新增代码+ComputerUseDebugTools: 禁止无关参数；如果没有这一行，调试状态工具会接收污染字段。
+            },  # 新增代码+ComputerUseDebugTools: read_state 参数 schema 结束；如果没有这一行，工具定义不完整。
+        },  # 新增代码+ComputerUseDebugTools: read_state function 定义结束；如果没有这一行，schema 不完整。
+    },  # 新增代码+ComputerUseDebugTools: read_state 工具定义结束；如果没有这一行，TOOL_SCHEMAS 列表语法不完整。
+    {  # 新增代码+ComputerUseDebugTools: read_last_observation 调试工具定义开始；如果没有这一段代码，debug 模式无法读取最近观察事件。
+        "type": "function",  # 新增代码+ComputerUseDebugTools: OpenAI-compatible 工具类型固定写 function；如果没有这一行，模型接口不会识别 read_last_observation。
+        "function": {  # 新增代码+ComputerUseDebugTools: function 容器保存 read_last_observation 定义；如果没有这一行，工具结构不完整。
+            "name": "read_last_observation",  # 新增代码+ComputerUseDebugTools: 暴露最近 observation 读取工具名；如果没有这一行，模型无法按名称取最近观察。
+            "description": "Computer Use 调试模式读取最近一条 observation，可按 kind 过滤；只读，不控制桌面。",  # 新增代码+ComputerUseDebugTools: 说明该工具读取 observation 而非项目文件；如果没有这一行，模型可能误用通用 read。
+            "parameters": {  # 新增代码+ComputerUseDebugTools: JSON Schema 描述 read_last_observation 参数；如果没有这一行，kind 过滤无法表达。
+                "type": "object",  # 新增代码+ComputerUseDebugTools: 参数必须是对象；如果没有这一行，参数形状不稳定。
+                "properties": {  # 新增代码+ComputerUseDebugTools: 声明 kind 字段；如果没有这一行，模型无法按事件类型筛选。
+                    "kind": {"type": "string", "description": "可选 observation kind 过滤，例如 computer_use_action。"},  # 新增代码+ComputerUseDebugTools: kind 用来筛选事件；如果没有这一行，大量事件时模型只能拿最后一条。
+                },  # 新增代码+ComputerUseDebugTools: read_last_observation 参数字段结束；如果没有这一行，Python 字典结构不完整。
+                "required": [],  # 新增代码+ComputerUseDebugTools: 允许无参数取最近一条；如果没有这一行，模型必须猜 kind。
+                "additionalProperties": False,  # 新增代码+ComputerUseDebugTools: 禁止无关参数；如果没有这一行，事件读取会被污染。
+            },  # 新增代码+ComputerUseDebugTools: read_last_observation 参数 schema 结束；如果没有这一行，工具定义不完整。
+        },  # 新增代码+ComputerUseDebugTools: read_last_observation function 定义结束；如果没有这一行，schema 不完整。
+    },  # 新增代码+ComputerUseDebugTools: read_last_observation 工具定义结束；如果没有这一行，TOOL_SCHEMAS 列表语法不完整。
+    {  # 新增代码+ComputerUseDebugTools: read_last_action_result 调试工具定义开始；如果没有这一段代码，debug 模式无法快速读取最近动作结果。
+        "type": "function",  # 新增代码+ComputerUseDebugTools: OpenAI-compatible 工具类型固定写 function；如果没有这一行，模型接口不会识别 read_last_action_result。
+        "function": {  # 新增代码+ComputerUseDebugTools: function 容器保存 read_last_action_result 定义；如果没有这一行，工具结构不完整。
+            "name": "read_last_action_result",  # 新增代码+ComputerUseDebugTools: 暴露最近动作结果读取工具名；如果没有这一行，模型无法按名称查看动作成败。
+            "description": "Computer Use 调试模式读取最近一次桌面动作或 MCP action 结果；只读，不控制桌面。",  # 新增代码+ComputerUseDebugTools: 说明该工具只读读取结果；如果没有这一行，模型可能把它当成动作工具。
+            "parameters": {  # 新增代码+ComputerUseDebugTools: JSON Schema 描述 read_last_action_result 参数；如果没有这一行，tool_name 过滤无法表达。
+                "type": "object",  # 新增代码+ComputerUseDebugTools: 参数必须是对象；如果没有这一行，参数形状不稳定。
+                "properties": {  # 新增代码+ComputerUseDebugTools: 声明 tool_name 字段；如果没有这一行，无法按特定动作工具过滤。
+                    "tool_name": {"type": "string", "description": "可选，只返回某个工具名对应的最近结果。"},  # 新增代码+ComputerUseDebugTools: tool_name 用于过滤结果；如果没有这一行，连续动作调试时可能拿错结果。
+                },  # 新增代码+ComputerUseDebugTools: read_last_action_result 参数字段结束；如果没有这一行，Python 字典结构不完整。
+                "required": [],  # 新增代码+ComputerUseDebugTools: 允许无参数读取最近结果；如果没有这一行，模型必须传过滤条件。
+                "additionalProperties": False,  # 新增代码+ComputerUseDebugTools: 禁止无关参数；如果没有这一行，结果读取会被污染。
+            },  # 新增代码+ComputerUseDebugTools: read_last_action_result 参数 schema 结束；如果没有这一行，工具定义不完整。
+        },  # 新增代码+ComputerUseDebugTools: read_last_action_result function 定义结束；如果没有这一行，schema 不完整。
+    },  # 新增代码+ComputerUseDebugTools: read_last_action_result 工具定义结束；如果没有这一行，TOOL_SCHEMAS 列表语法不完整。
+    {  # 新增代码+ComputerUseDebugTools: assert_last_action 调试工具定义开始；如果没有这一段代码，debug 模式无法用工具层断言最近动作结果。
+        "type": "function",  # 新增代码+ComputerUseDebugTools: OpenAI-compatible 工具类型固定写 function；如果没有这一行，模型接口不会识别 assert_last_action。
+        "function": {  # 新增代码+ComputerUseDebugTools: function 容器保存 assert_last_action 定义；如果没有这一行，工具结构不完整。
+            "name": "assert_last_action",  # 新增代码+ComputerUseDebugTools: 暴露最近动作断言工具名；如果没有这一行，debug 验证需要靠模型文字猜测。
+            "description": "Computer Use 调试模式断言最近动作结果是否符合预期；只读检查，不控制桌面。",  # 新增代码+ComputerUseDebugTools: 说明该工具是检查不是动作；如果没有这一行，模型可能误解为会重试动作。
+            "parameters": {  # 新增代码+ComputerUseDebugTools: JSON Schema 描述 assert_last_action 参数；如果没有这一行，期望值无法结构化表达。
+                "type": "object",  # 新增代码+ComputerUseDebugTools: 参数必须是对象；如果没有这一行，参数形状不稳定。
+                "properties": {  # 新增代码+ComputerUseDebugTools: 声明断言字段；如果没有这一行，expected_tool/expected_ok/contains 无法进入 schema。
+                    "expected_tool": {"type": "string", "description": "可选，期望最近结果对应的工具名。"},  # 新增代码+ComputerUseDebugTools: expected_tool 检查工具名；如果没有这一行，调试时可能断言到错误动作。
+                    "expected_ok": {"type": "boolean", "description": "可选，期望最近结果是否 ok。"},  # 新增代码+ComputerUseDebugTools: expected_ok 检查成功状态；如果没有这一行，无法快速判断动作失败是否符合预期。
+                    "contains": {"type": "string", "description": "可选，期望最近结果 JSON 文本中包含的片段。"},  # 新增代码+ComputerUseDebugTools: contains 检查结果文本；如果没有这一行，验证错误类别或 marker 不方便。
+                },  # 新增代码+ComputerUseDebugTools: assert_last_action 参数字段结束；如果没有这一行，Python 字典结构不完整。
+                "required": [],  # 新增代码+ComputerUseDebugTools: 允许无参数返回最近结果和默认通过状态；如果没有这一行，模型不能先探测结果。
+                "additionalProperties": False,  # 新增代码+ComputerUseDebugTools: 禁止无关参数；如果没有这一行，断言输入会被污染。
+            },  # 新增代码+ComputerUseDebugTools: assert_last_action 参数 schema 结束；如果没有这一行，工具定义不完整。
+        },  # 新增代码+ComputerUseDebugTools: assert_last_action function 定义结束；如果没有这一行，schema 不完整。
+    },  # 新增代码+ComputerUseDebugTools: assert_last_action 工具定义结束；如果没有这一行，TOOL_SCHEMAS 列表语法不完整。
 ]  # 作用: 工具 schema 列表结束
 
 
-KERNEL_TOOL_NAMES: set[str] = {  # 修改代码+极简工具面: 定义首轮必须可见的四个原子工具；若没有这行代码，模型首轮工具面会继续被旧内核工具撑大
+KERNEL_TOOL_NAMES: set[str] = {  # 修改代码+ComputerUseDebugTools: 定义基础常驻候选工具，最终是否可见还要经过 scope 过滤；如果没有这一行，debug 工具无法自动出现，bash 也可能重新混进默认工具面。
     "read",  # 新增代码+极简工具面: 保留读取原子工具；若没有这行代码，模型首轮无法读取代码、提示词和 skill 索引
     "write",  # 新增代码+极简工具面: 保留写入原子工具；若没有这行代码，模型首轮无法在确认后创建或覆盖文件
     "edit",  # 新增代码+极简工具面: 保留定点编辑原子工具；若没有这行代码，模型首轮只能用整文件覆盖完成小改动
-    "bash",  # 新增代码+极简工具面: 保留命令执行原子工具；若没有这行代码，模型首轮无法运行测试、搜索或脚本命令
-}  # 修改代码+极简工具面: 四原子工具集合结束；若没有这行代码，Python 集合语法不完整
+    "read_trace",  # 新增代码+ComputerUseDebugTools: 把调试 trace 工具放入内核候选，再由 scope 决定是否可见；如果没有这一行，debug 模式无法自动看到 read_trace。
+    "read_state",  # 新增代码+ComputerUseDebugTools: 把调试状态工具放入内核候选，再由 scope 决定是否可见；如果没有这一行，debug 模式无法自动看到 read_state。
+    "read_last_observation",  # 新增代码+ComputerUseDebugTools: 把最近 observation 工具放入内核候选；如果没有这一行，debug 模式无法自动读取最近观察事件。
+    "read_last_action_result",  # 新增代码+ComputerUseDebugTools: 把最近动作结果工具放入内核候选；如果没有这一行，debug 模式无法自动读取最近动作结果。
+    "assert_last_action",  # 新增代码+ComputerUseDebugTools: 把最近动作断言工具放入内核候选；如果没有这一行，debug 模式无法自动做结果断言。
+}  # 修改代码+ComputerUseDebugTools: 基础常驻候选工具集合结束；如果没有这一行，Python 集合语法不完整且工具池边界无法稳定构建。
 
 
 DYNAMIC_SKILL_CAPABILITY_PACKS: dict[str, tuple[str, ...]] = {  # 修改代码+长任务真实入口: 定义哪些动态 skill 读取后可以解锁对应工具能力包；若没有这行代码，read-based skill 只能加载提示词不能激活真实工具
@@ -1272,10 +1208,9 @@ BUILTIN_TOOL_CAPABILITY_PACKS: dict[str, str] = {  # 新增代码+CapabilityPack
     "resume_report": "long_running_work",  # 新增代码+StatusToolsV2: 把精简恢复报告归入长期工作包；若没有这行代码，模型恢复自查能力不会随长任务工具加载
     "run_status": "long_running_work",  # 新增代码+StatusToolsV2: 把 run 状态归入长期工作包；若没有这行代码，模型无法按包加载阶段定位能力
     "health_status": "long_running_work",  # 新增代码+StatusToolsV2: 把健康状态归入长期工作包；若没有这行代码，模型无法按包加载自查风险能力
-    "computer_status": "computer_use",  # 新增代码+OSComputerUse: 把 Computer Use 状态工具归入桌面控制包；若没有这行代码，状态入口无法随包加载。
-    "computer_observe": "computer_use",  # 新增代码+Phase27ComputerUse: 把 Computer Use 只读观察工具归入桌面控制包；如果没有这行代码，读取 skill 后模型仍看不到 observe 协议。
-    "computer_discover": "computer_use",  # 新增代码+ComputerDiscoverTool：把 Computer Use 应用发现工具归入桌面控制包；如果没有这行代码，/computer use --full 后模型仍看不到 discover。
-    "computer_action": "computer_use",  # 新增代码+OSComputerUse: 把 Computer Use 动作工具归入桌面控制包；若没有这行代码，桌面动作入口无法随包加载。
-    "computer_use": "computer_use",  # 新增代码+Phase49ComputerUseToolSurface: 把下划线兼容工具归入桌面控制包；如果没有这行代码，读取 Computer Use skill 后统一入口不会随包加载。
-    "computer-use": "computer_use",  # 新增代码+Phase49ComputerUseToolSurface: 把连字符兼容工具归入桌面控制包；如果没有这行代码，ClaudeCode 风格别名不会随包加载。
+    "read_trace": "computer_use",  # 新增代码+ComputerUseDebugTools: 把 trace 诊断工具归入 Computer Use 能力包；如果没有这一行，debug 模式的工具目录无法说明它属于桌面调试域。
+    "read_state": "computer_use",  # 新增代码+ComputerUseDebugTools: 把状态诊断工具归入 Computer Use 能力包；如果没有这一行，select_pack 和搜索结果会丢失分组信息。
+    "read_last_observation": "computer_use",  # 新增代码+ComputerUseDebugTools: 把最近 observation 读取归入 Computer Use 能力包；如果没有这一行，调试工具不会跟桌面能力归组。
+    "read_last_action_result": "computer_use",  # 新增代码+ComputerUseDebugTools: 把最近动作结果读取归入 Computer Use 能力包；如果没有这一行，调试验收无法按包理解该工具。
+    "assert_last_action": "computer_use",  # 新增代码+ComputerUseDebugTools: 把最近动作断言归入 Computer Use 能力包；如果没有这一行，debug 断言工具会像孤立工具一样难以发现。
 }  # 新增代码+CapabilityPacks: 能力包映射结束；若没有这行代码，Python 字典语法不完整
