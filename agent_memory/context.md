@@ -1639,3 +1639,9 @@ Do not overclaim:
 - `computer_action_result` 是当前 Computer Use 真实动作的正式 acceptance event，后续真实启动/窗口可见/启动后端/目标显示名验收应优先看它，不要再把 `latest_run_readable.md` 当产品级断言来源。
 - `computer_use_full_open_wechat_probe.json` 已经成为无 debug log 依赖的微信基础打开场景，`debug_log_contains=[]` 是刻意设计，不是漏写。
 - Phase74 代表性 E2E 矩阵需要和 `windows_launch_resolver.py` 多后端策略保持一致；普通应用可能由 `argv_no_shell`、`start_menu_shortcut` 或 AppX/AUMID 启动，验收不能只盯 `executable` 字段。
+
+## 2026-06-16 Task4 Computer Use MCP v2 SendInput ClaudeCode parity context
+- 修改代码+ClaudeCodeParity：Task4 只处理 `learning_agent/computer_use_mcp_v2/windows_runtime/` 主链路，不迁移旧 `learning_agent.computer_use` 包测试；如果没有这条上下文，后续可能误以为旧包兼容测试覆盖了 v2 MCP 主链路。
+- 修改代码+ClaudeCodeParity：v2 `WindowsSendInputExecutor` 现在把 `triple_click`、`mouse_down`、`mouse_up`、`hold_key` 纳入 `actions_supported`，并把它们规范化为 dispatcher 事件；如果没有这条上下文，public MCP tool 虽已映射但低层仍会拒绝。
+- 修改代码+ClaudeCodeParity：v2 `WindowsSendInputDispatcher` 现在展开三击、独立 down/up、hold_key 按住序列，并保留已有 target/foreground 安全链路；如果没有这条上下文，最后一跳 target 审计和 ClaudeCode parity 事件语义容易分裂。
+- 修改代码+ClaudeCodeParity：`hold_key` 安全策略同时读取 `keys` 数组和兼容 `key` 字符串，`win+r`、`ctrl+alt+delete` 等系统组合键仍要求 `systemKeyCombos`；如果没有这条上下文，后续可能只修 press_key 而重新放出 hold_key 风险。

@@ -3079,3 +3079,10 @@ Remaining risk:
 - 根因：当前 `build_launch_plan("explorer")` 和 `build_launch_plan("msedge")` 会返回安全的 `start_menu_shortcut` 计划，但 Phase74 旧合同仍要求 `launch_plan.executable == explorer.exe/msedge.exe`。
 - 修复：Phase74 新增 resolver 目标身份匹配 helper，先验证 `safe_to_launch`、`resolver_used`、无注册表/系统设置/管理员/shell 字符串风险，再接受 exe、规范 app_name、display_name 或 shortcut_id 命中目标。
 - 防回归：Phase74/75 7 个测试恢复通过，完整 `python -m unittest discover -s learning_agent\tests -p "test_windows_computer_use_*.py"` 463 个测试通过。
+
+## 2026-06-16 Fixed/Risk: v2 SendInput executor/dispatcher missed ClaudeCode parity actions
+- 问题：`computer_use_mcp_v2` public tools 和 session adapter 已暴露 `triple_click`、`mouse_down`、`mouse_up`、`hold_key`，但 `sendinput_executor.py` 仍只支持旧 7 个动作，dispatcher 也不会展开这些新规范事件；如果没有这条风险记录，后续可能只看 tool schema 误判低层已可执行。
+- 根因：动作面扩展停在上游 controller/action gate，未同步到 Windows SendInput executor/dispatcher 最后一跳；`hold_key` 安全检查也只沿用 `press_key` 的 `key` 字符串路径。
+- 修复：v2 executor/dispatcher 已补齐新动作规范化和低层展开，low-level sender 已用中键 flags，approval/security 已把 hold_key `keys` 数组纳入 `systemKeyCombos` 检查。
+- 防回归：新增 v2 Task4 unittest 覆盖新动作支持、低层事件序列、middle button flags、危险/普通 hold_key 授权策略。
+- 剩余风险：未执行 AGENTS 规则 17 的真实可见终端交互验收，不能声明“开发完成/验收通过”；本轮也未改 standalone `mcp_executor.py` unsupported 分支。

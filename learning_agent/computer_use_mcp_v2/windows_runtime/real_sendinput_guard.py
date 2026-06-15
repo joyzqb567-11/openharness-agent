@@ -218,7 +218,10 @@ class WindowsSendInputLowLevelSender:  # 新增代码+Phase58RealSendInputGuard:
 
     def _send_mouse_button(self, button: str, down: bool) -> bool:  # 新增代码+Phase58RealSendInputGuard: 函数段开始，用 SendInput 发送鼠标按键；如果没有这段函数，click 无法走 SendInput 路径。
         import ctypes  # 新增代码+Phase58RealSendInputGuard: 延迟导入 ctypes；如果没有这行代码，无法构造 INPUT 结构。
-        flag = 0x0002 if button.lower() == "left" and down else 0x0004 if button.lower() == "left" else 0x0008 if down else 0x0010  # 新增代码+Phase58RealSendInputGuard: 选择左/右键按下抬起 flag；如果没有这行代码，SendInput 不知道执行哪个按钮动作。
+        normalized_button = str(button or "left").strip().lower()  # 新增代码+ClaudeCodeParity: 规范化鼠标按钮名称；如果没有这行代码，Middle、middle 或空值会走错 SendInput flag。
+        flag_pairs = {"left": (0x0002, 0x0004), "right": (0x0008, 0x0010), "middle": (0x0020, 0x0040)}  # 新增代码+ClaudeCodeParity: 显式列出左键、右键、中键 down/up flag；如果没有这行代码，middle_click 会被误当成右键。
+        down_flag, up_flag = flag_pairs.get(normalized_button, flag_pairs["left"])  # 新增代码+ClaudeCodeParity: 未知按钮安全回退到左键；如果没有这行代码，拼写错误可能触发右键或异常。
+        flag = down_flag if down else up_flag  # 修改代码+ClaudeCodeParity: 根据按下/抬起选择最终 flag；如果没有这行代码，SendInput 不知道本次按钮状态。
         extra_type = ctypes.c_ulonglong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_ulong  # 新增代码+Phase58RealSendInputGuard: 选择 ULONG_PTR 宽度；如果没有这行代码，64 位 Windows 结构大小可能错误。
         class MOUSEINPUT(ctypes.Structure):  # 新增代码+Phase58RealSendInputGuard: 定义 SendInput 鼠标结构；如果没有这个类，无法调用 SendInput。
             _fields_ = [("dx", ctypes.c_long), ("dy", ctypes.c_long), ("mouseData", ctypes.c_ulong), ("dwFlags", ctypes.c_ulong), ("time", ctypes.c_ulong), ("dwExtraInfo", extra_type)]  # 新增代码+Phase58RealSendInputGuard: 定义鼠标字段；如果没有这行代码，结构和 Win32 API 不匹配。

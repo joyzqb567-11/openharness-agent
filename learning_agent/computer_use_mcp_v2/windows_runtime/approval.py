@@ -51,6 +51,15 @@ def _app_key(window: Any) -> str:  # 新增代码+Phase38WindowsComputerApproval
 # 新增代码+Phase38WindowsComputerApproval: 函数段结束，_app_key 到此结束；如果没有这个边界说明，读者不容易看出 app 匹配规则范围。
 
 
+def _action_key_combo_text(arguments: dict[str, Any]) -> str:  # 新增代码+ClaudeCodeParity: 函数段开始，把 key 字符串和 keys 数组统一成组合键文本；如果没有这段函数，hold_key 的数组参数会绕过审批层系统键检查。
+    raw_keys = dict(arguments or {}).get("keys")  # 新增代码+ClaudeCodeParity: 优先读取 hold_key 的 keys 数组；如果没有这行代码，ClaudeCode parity 组合键列表无法参与风险判断。
+    if isinstance(raw_keys, list):  # 新增代码+ClaudeCodeParity: 判断 keys 是否为列表；如果没有这行代码，字符串 keys 可能被错误按字符处理。
+        cleaned = [_safe_text(item, 80).lower() for item in raw_keys if _safe_text(item, 80)]  # 新增代码+ClaudeCodeParity: 清洗键名并转小写；如果没有这行代码，大小写和空键会导致系统组合键漏检。
+        return "+".join(cleaned)  # 新增代码+ClaudeCodeParity: 拼成 ctrl+alt+delete 这样的风险 token 形态；如果没有这行代码，既有 SYSTEM_KEY_COMBO_TOKENS 无法复用。
+    return _safe_text(dict(arguments or {}).get("key", ""), 120).lower()  # 新增代码+ClaudeCodeParity: 回退读取旧 key 字符串；如果没有这行代码，press_key 和兼容 hold_key 字符串会失去检查。
+# 新增代码+ClaudeCodeParity: 函数段结束，_action_key_combo_text 到此结束；如果没有这个边界说明，初学者不容易看出组合键文本来源范围。
+
+
 def _classify_forbidden_target(window: Any) -> str | None:  # 新增代码+Phase38WindowsComputerApproval: 函数段开始，识别禁止自动化目标；如果没有这段函数，审批模型无法阻止终端和敏感窗口。
     summary = _target_summary(window)  # 新增代码+Phase38WindowsComputerApproval: 先生成安全摘要；如果没有这行代码，分类逻辑会直接依赖原始窗口对象。
     searchable = " ".join(summary.values()).lower()  # 新增代码+Phase38WindowsComputerApproval: 把摘要合并成可搜索文本；如果没有这行代码，关键词匹配要重复写多次。
@@ -62,8 +71,8 @@ def _classify_forbidden_target(window: Any) -> str | None:  # 新增代码+Phase
 
 
 def _required_flags_for_action(action: str, arguments: dict[str, Any]) -> list[str]:  # 新增代码+Phase38WindowsComputerApproval: 函数段开始，计算动作需要的额外 grant flags；如果没有这段函数，系统快捷键和普通点击无法区分。
-    key_text = _safe_text(arguments.get("key", ""), 120).lower()  # 新增代码+Phase38WindowsComputerApproval: 读取并规范化按键文本；如果没有这行代码，组合键判断会漏掉大小写变体。
-    if str(action) == "press_key" and any(token in key_text for token in SYSTEM_KEY_COMBO_TOKENS):  # 新增代码+Phase38WindowsComputerApproval: 判断是否是系统级组合键；如果没有这行代码，Ctrl+Alt+Delete 等危险键可能被普通授权放行。
+    key_text = _action_key_combo_text(dict(arguments or {}))  # 修改代码+ClaudeCodeParity: 同时读取 key 字符串和 hold_key keys 数组；如果没有这行代码，hold_key 危险数组会绕过 grant flag。
+    if str(action) in {"press_key", "hold_key"} and any(token in key_text for token in SYSTEM_KEY_COMBO_TOKENS):  # 修改代码+ClaudeCodeParity: press_key/hold_key 命中系统组合键都要求额外授权；如果没有这行代码，Win+R 或 Ctrl+Alt+Delete 可被普通授权放行。
         return ["systemKeyCombos"]  # 新增代码+Phase38WindowsComputerApproval: 要求显式系统组合键授权；如果没有这行代码，grant flag 不会真正生效。
     return []  # 新增代码+Phase38WindowsComputerApproval: 普通动作不需要额外 flag；如果没有这行代码，安全点击也会被错误拦截。
 # 新增代码+Phase38WindowsComputerApproval: 函数段结束，_required_flags_for_action 到此结束；如果没有这个边界说明，读者不容易看出 flag 计算范围。

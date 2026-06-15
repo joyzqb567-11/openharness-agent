@@ -37,6 +37,14 @@ def _safe_int(value: Any) -> int:  # 新增代码+Phase47WindowsSendInputDispatc
         return 0  # 新增代码+Phase47WindowsSendInputDispatcher: 坏值兜底为 0；如果没有这行代码，调用方需要到处兜底。
 # 新增代码+Phase47WindowsSendInputDispatcher: 函数段结束，_safe_int 到此结束；如果没有这个边界说明，读者不容易看出数值转换范围。
 
+
+def _phase47_safe_float(value: Any, default: float = 0.0) -> float:  # 新增代码+ClaudeCodeParity: 函数段开始，把 hold_key 时长安全转成浮点数；如果没有这段函数，绕过 executor 的坏事件会让 dispatcher 抛异常。
+    try:  # 新增代码+ClaudeCodeParity: 捕获无法转换的动态输入；如果没有这行代码，字符串坏值会中断整个发送流程。
+        return float(value)  # 新增代码+ClaudeCodeParity: 返回标准浮点秒数；如果没有这行代码，pause 事件拿不到可用时长。
+    except (TypeError, ValueError):  # 新增代码+ClaudeCodeParity: 处理 None 和非数字文本；如果没有这行代码，容错路径不可用。
+        return float(default)  # 新增代码+ClaudeCodeParity: 返回默认秒数；如果没有这行代码，调用方需要重复兜底。
+# 新增代码+ClaudeCodeParity: 函数段结束，_phase47_safe_float 到此结束；如果没有这个边界说明，初学者不容易看出时长转换范围。
+
 def _phase47_event_target(event: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ControlledPhysicalAdapter：函数段开始，从高层事件读取目标身份；如果没有这段函数，低层事件会丢失窗口边界，Phase95 受控 sender 会拒绝所有通用动作。
     target = event.get("target", {})  # 新增代码+ControlledPhysicalAdapter：读取高层事件里的 target 字段；如果没有这一行，后续不知道目标身份是否存在。
     return dict(target) if isinstance(target, dict) else {}  # 新增代码+ControlledPhysicalAdapter：只接受字典形态并复制返回；如果没有这一行，坏 target 可能污染低层 sender 或引发异常。
@@ -151,6 +159,17 @@ class WindowsSendInputDispatcher:  # 新增代码+Phase47WindowsSendInputDispatc
         if event_type == "double_click":  # 新增代码+Phase47WindowsSendInputDispatcher: 展开双击；如果没有这行代码，double_click 无法生成两次点击。
             button = str(event.get("button", "left"))  # 新增代码+Phase47WindowsSendInputDispatcher: 读取鼠标按键；如果没有这行代码，双击按键不稳定。
             return _phase47_attach_target([{"type": "mouse_move", "x": _safe_int(event.get("x")), "y": _safe_int(event.get("y"))}, {"type": "mouse_down", "button": button}, {"type": "mouse_up", "button": button}, {"type": "mouse_down", "button": button}, {"type": "mouse_up", "button": button}], target)  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的双击事件序列；如果没有这一行，真实最后一跳无法知道双击绑定哪个窗口。
+        if event_type == "triple_click":  # 新增代码+ClaudeCodeParity: 展开三击事件；如果没有这一行，ClaudeCode parity 的 triple_click 到低层会变成空动作。
+            button = str(event.get("button", "left") or "left")  # 新增代码+ClaudeCodeParity: 读取鼠标按钮并默认 left；如果没有这一行，三击按键类型会丢失。
+            return _phase47_attach_target([{"type": "mouse_move", "x": _safe_int(event.get("x")), "y": _safe_int(event.get("y"))}, {"type": "mouse_down", "button": button}, {"type": "mouse_up", "button": button}, {"type": "mouse_down", "button": button}, {"type": "mouse_up", "button": button}, {"type": "mouse_down", "button": button}, {"type": "mouse_up", "button": button}], target)  # 新增代码+ClaudeCodeParity: 返回移动加三次按下抬起；如果没有这一行，三击语义无法真实执行。
+        if event_type == "mouse_down":  # 新增代码+ClaudeCodeParity: 展开独立鼠标按下事件；如果没有这一行，拖拽起手动作无法进入低层 sender。
+            button = str(event.get("button", "left") or "left")  # 新增代码+ClaudeCodeParity: 读取鼠标按钮并默认 left；如果没有这一行，mouse_down 可能缺少按键。
+            events_for_button = ([{"type": "mouse_move", "x": _safe_int(event.get("x")), "y": _safe_int(event.get("y"))}] if "x" in event and "y" in event else []) + [{"type": "mouse_down", "button": button}]  # 新增代码+ClaudeCodeParity: 有坐标时先移动再按下；如果没有这一行，带坐标的 mouse_down 会丢失落点。
+            return _phase47_attach_target(events_for_button, target)  # 新增代码+ClaudeCodeParity: 返回带 target 的按下序列；如果没有这一行，最后一跳无法审计按下目标。
+        if event_type == "mouse_up":  # 新增代码+ClaudeCodeParity: 展开独立鼠标抬起事件；如果没有这一行，拖拽收尾动作无法进入低层 sender。
+            button = str(event.get("button", "left") or "left")  # 新增代码+ClaudeCodeParity: 读取鼠标按钮并默认 left；如果没有这一行，mouse_up 可能缺少按键。
+            events_for_button = ([{"type": "mouse_move", "x": _safe_int(event.get("x")), "y": _safe_int(event.get("y"))}] if "x" in event and "y" in event else []) + [{"type": "mouse_up", "button": button}]  # 新增代码+ClaudeCodeParity: 有坐标时先移动再抬起；如果没有这一行，带坐标的 mouse_up 会丢失释放点。
+            return _phase47_attach_target(events_for_button, target)  # 新增代码+ClaudeCodeParity: 返回带 target 的抬起序列；如果没有这一行，最后一跳无法审计释放目标。
         if event_type == "scroll":  # 新增代码+Phase47WindowsSendInputDispatcher: 展开滚轮；如果没有这行代码，scroll 无法生成低层滚轮事件。
             return _phase47_attach_target([{"type": "mouse_move", "x": _safe_int(event.get("x")), "y": _safe_int(event.get("y"))}, {"type": "mouse_wheel", "delta": _safe_int(event.get("delta"))}], target)  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的移动和滚轮事件；如果没有这一行，滚动动作无法被 Phase95 目标门禁复核。
         if event_type == "drag_path":  # 新增代码+DrawingPrimitives：展开通用绘图拖拽路径；如果没有这一行，皮卡丘等绘图 primitive 无法进入低层鼠标事件。
@@ -163,6 +182,10 @@ class WindowsSendInputDispatcher:  # 新增代码+Phase47WindowsSendInputDispatc
         if event_type == "hotkey":  # 新增代码+URG3ActionDSL：展开通用组合键动作；如果没有这一行，URG-3 的 hotkey 只能退化成多个普通按键，真实语义不完整。
             keys = [str(key).strip() for key in event.get("keys", []) if str(key).strip()]  # 新增代码+URG3ActionDSL：清洗组合键列表；如果没有这一行，空键名可能进入低层键盘事件。
             return _phase47_attach_target([{"type": "key_down", "key": key} for key in keys] + [{"type": "key_up", "key": key} for key in reversed(keys)], target) if keys else []  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的组合键事件；如果没有这一行，快捷键可能缺少最后一跳目标边界。
+        if event_type == "hold_key":  # 新增代码+ClaudeCodeParity: 展开按住组合键事件；如果没有这一行，hold_key 会被 dispatcher 当未知事件丢弃。
+            keys = [str(key).strip() for key in event.get("keys", []) if str(key).strip()]  # 新增代码+ClaudeCodeParity: 清洗 keys 数组；如果没有这一行，空键名会进入低层 key_down/key_up。
+            duration_seconds = max(0.0, min(30.0, _phase47_safe_float(event.get("duration_seconds", 0.0), 0.0)))  # 修改代码+ClaudeCodeParity: 再次安全解析并夹紧按住秒数；如果没有这一行，绕过 executor 的调用可能传入过长或非法暂停。
+            return _phase47_attach_target([{"type": "key_down", "key": key} for key in keys] + [{"type": "pause", "seconds": duration_seconds}] + [{"type": "key_up", "key": key} for key in reversed(keys)], target) if keys else []  # 新增代码+ClaudeCodeParity: 返回按下、暂停、逆序抬起序列；如果没有这一行，组合键按住语义不完整。
         if event_type == "text":  # 新增代码+Phase47WindowsSendInputDispatcher: 展开文本输入摘要；如果没有这行代码，type_text 无法进入低层 sender。
             return _phase47_attach_target([{"type": "unicode_text", "text_length": _safe_int(event.get("text_length")), "text_sha256_16": str(event.get("text_sha256_16", "")), "text_redacted": True}], target)  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的脱敏 unicode 文本摘要；如果没有这一行，文本事件无法进入受控 sender 的目标验证。
         return []  # 新增代码+Phase47WindowsSendInputDispatcher: 未知规范事件返回空；如果没有这行代码，未知事件可能误发。

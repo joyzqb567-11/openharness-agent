@@ -9,8 +9,11 @@ from typing import Any  # 新增代码+Phase37WindowsSendInputExecutor: 标注 J
 PHASE37_WINDOWS_SENDINPUT_EXECUTOR_MARKER = "PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY"  # 新增代码+Phase37WindowsSendInputExecutor: 定义 Phase37 真实终端验收稳定 marker；如果没有这行代码，验收器没有固定成功锚点。
 PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK_TOKEN = "PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK"  # 新增代码+Phase37WindowsSendInputExecutor: 定义 Phase37 CLI 成功 token；如果没有这行代码，debug log 无法确认命令确实执行。
 PHASE37_SENDINPUT_CONTRACT = "phase37_windows_sendinput_executor"  # 新增代码+Phase37WindowsSendInputExecutor: 定义执行器合同版本；如果没有这行代码，状态消费者无法区分旧 mouse_event 路径和新 SendInput 合同。
-PHASE37_SUPPORTED_ACTIONS = ("click", "double_click", "drag_path", "move_mouse", "press_key", "scroll", "type_text")  # 修改代码+GenericDragPathToolSurface: 把通用拖拽路径列为 SendInput 支持动作；如果没有这行代码，模型主循环即使规划出画线路径也会被执行器拒绝。
+PHASE37_SUPPORTED_ACTIONS = ("click", "double_click", "drag_path", "hold_key", "mouse_down", "mouse_up", "move_mouse", "press_key", "scroll", "triple_click", "type_text")  # 修改代码+ClaudeCodeParity: 把 ClaudeCode parity 新动作纳入 SendInput 支持集合；如果没有这行代码，v2 public tool 已映射的新动作仍会在低层 executor 被拒绝。
 PHASE37_TEXT_LIMIT = 2000  # 新增代码+Phase37WindowsSendInputExecutor: 限制单次文本输入长度；如果没有这行代码，模型可能把大段敏感内容或长文灌入桌面输入。
+PHASE37_HOLD_KEY_MAX_KEYS = 8  # 新增代码+ClaudeCodeParity: 限制 hold_key 一次最多按住 8 个键；如果没有这行代码，坏参数可能生成过长组合键序列拖慢或卡住真实输入。
+PHASE37_HOLD_KEY_MAX_KEY_LENGTH = 80  # 新增代码+ClaudeCodeParity: 限制 hold_key 单个键名长度；如果没有这行代码，异常长键名会污染日志并传到低层 sender。
+PHASE37_HOLD_KEY_MAX_DURATION_SECONDS = 30.0  # 新增代码+ClaudeCodeParity: 限制 hold_key 最长按住 30 秒；如果没有这行代码，模型或坏参数可能让真实键盘长时间保持按下。
 
 
 @dataclass(frozen=True)  # 新增代码+Phase37WindowsSendInputExecutor: 让动作结果不可变，避免审计结果事后被改写；如果没有这行代码，调用方可能无意污染执行事实。
@@ -26,6 +29,26 @@ def _safe_int(value: Any, default: int = 0) -> int:  # 新增代码+Phase37Windo
     except (TypeError, ValueError):  # 新增代码+Phase37WindowsSendInputExecutor: 处理 None、空字符串和非数字文本；如果没有这行代码，容错路径不可用。
         return int(default)  # 新增代码+Phase37WindowsSendInputExecutor: 返回默认整数兜底；如果没有这行代码，调用方拿不到稳定参数。
 # 新增代码+Phase37WindowsSendInputExecutor: 函数段结束，_safe_int 到此结束；如果没有这个边界说明，初学者不容易看出转换 helper 范围。
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:  # 新增代码+ClaudeCodeParity: 函数段开始，把模型参数安全转成浮点秒数；如果没有这段函数，hold_key 的 duration_seconds 遇到字符串或空值会崩溃。
+    try:  # 新增代码+ClaudeCodeParity: 捕获不能转换的输入；如果没有这行代码，坏时长会直接中断工具调用。
+        return float(value)  # 新增代码+ClaudeCodeParity: 返回标准浮点值；如果没有这行代码，dispatcher 无法得到可暂停的秒数。
+    except (TypeError, ValueError):  # 新增代码+ClaudeCodeParity: 处理 None、空字符串和非数字文本；如果没有这行代码，容错路径不可用。
+        return float(default)  # 新增代码+ClaudeCodeParity: 返回默认秒数兜底；如果没有这行代码，调用方拿不到稳定时长。
+# 新增代码+ClaudeCodeParity: 函数段结束，_safe_float 到此结束；如果没有这个边界说明，初学者不容易看出时长转换 helper 范围。
+
+
+def _hold_key_candidates(arguments: dict[str, Any]) -> list[str]:  # 新增代码+ClaudeCodeParity: 函数段开始，从 keys 数组或兼容 key 字符串提取按键；如果没有这段函数，hold_key 新旧参数会在多个分支重复处理。
+    raw_keys = arguments.get("keys")  # 新增代码+ClaudeCodeParity: 优先读取 ClaudeCode parity 的 keys 数组；如果没有这行代码，session adapter 传来的组合键数组会被忽略。
+    if isinstance(raw_keys, list):  # 新增代码+ClaudeCodeParity: 判断 keys 是否是列表；如果没有这行代码，字符串 keys 会被错误逐字符拆开。
+        return [str(item).strip() for item in raw_keys if str(item).strip()]  # 新增代码+ClaudeCodeParity: 清洗列表中的空键名；如果没有这行代码，dispatcher 会收到空 key_down 事件。
+    raw_key = str(arguments.get("key", "")).strip()  # 新增代码+ClaudeCodeParity: 读取旧兼容 key 字符串；如果没有这行代码，旧调用方的 hold_key 无法继续使用。
+    if not raw_key:  # 新增代码+ClaudeCodeParity: 判断旧 key 是否为空；如果没有这行代码，空 key 会被 split 成无意义列表。
+        return []  # 新增代码+ClaudeCodeParity: 返回空列表让调用方统一拒绝；如果没有这行代码，空 hold_key 可能被当作成功。
+    separator = "+" if "+" in raw_key else ","  # 新增代码+ClaudeCodeParity: 支持 ctrl+s 和 ctrl,s 两种轻量写法；如果没有这行代码，组合键字符串无法拆成可释放的多个键。
+    return [part.strip() for part in raw_key.split(separator) if part.strip()]  # 新增代码+ClaudeCodeParity: 拆分并清洗兼容 key 字符串；如果没有这行代码，dispatcher 只能看到一个无法识别的组合键文本。
+# 新增代码+ClaudeCodeParity: 函数段结束，_hold_key_candidates 到此结束；如果没有这个边界说明，初学者不容易看出 hold_key 参数来源范围。
 
 
 def _text_sha256_16(raw_text: Any) -> str:  # 新增代码+Phase37WindowsSendInputExecutor: 函数段开始，生成不泄露原文的短指纹；如果没有这段函数，文本输入审计无法安全关联。
@@ -110,6 +133,16 @@ class WindowsSendInputExecutor:  # 新增代码+Phase37WindowsSendInputExecutor:
         if action == "double_click":  # 新增代码+Phase37WindowsSendInputExecutor: 处理双击事件；如果没有这行代码，执行器无法覆盖高层双击动作。
             event = {"type": "double_click", "x": _safe_int(arguments.get("x")), "y": _safe_int(arguments.get("y")), "button": str(arguments.get("button", "left"))}  # 新增代码+Phase37WindowsSendInputExecutor: 生成双击事件；如果没有这行代码，底层实现不知道双击目标。
             return [event], {}, None  # 新增代码+Phase37WindowsSendInputExecutor: 返回双击事件；如果没有这行代码，double_click 分支无法执行。
+        if action == "triple_click":  # 新增代码+ClaudeCodeParity: 处理三击事件；如果没有这行代码，ClaudeCode parity 的 triple_click 会被 executor 拒绝或退化。
+            button = str(arguments.get("button", "left") or "left").strip() or "left"  # 新增代码+ClaudeCodeParity: 读取鼠标按钮并默认 left；如果没有这行代码，三击事件可能缺少按键信息。
+            event = {"type": "triple_click", "x": _safe_int(arguments.get("x")), "y": _safe_int(arguments.get("y")), "button": button}  # 新增代码+ClaudeCodeParity: 生成三击规范事件；如果没有这行代码，dispatcher 无法展开三次按下抬起。
+            return [event], {"button": button}, None  # 新增代码+ClaudeCodeParity: 返回三击事件和摘要；如果没有这行代码，execute 无法分发 triple_click。
+        if action in {"mouse_down", "mouse_up"}:  # 新增代码+ClaudeCodeParity: 处理独立鼠标按下和抬起；如果没有这行代码，拖拽类工具无法拆分 down/up 控制。
+            button = str(arguments.get("button", "left") or "left").strip() or "left"  # 新增代码+ClaudeCodeParity: 读取鼠标按钮并默认 left；如果没有这行代码，mouse_down/up 事件可能缺少按键信息。
+            event = {"type": action, "button": button}  # 新增代码+ClaudeCodeParity: 生成基础鼠标按键规范事件；如果没有这行代码，dispatcher 收不到 down/up 类型。
+            if "x" in arguments and "y" in arguments:  # 新增代码+ClaudeCodeParity: 仅在调用方提供坐标时保留移动目标；如果没有这行代码，无坐标 mouse_down 会被错误移动到 0,0。
+                event.update({"x": _safe_int(arguments.get("x")), "y": _safe_int(arguments.get("y"))})  # 新增代码+ClaudeCodeParity: 写入可选坐标；如果没有这行代码，mouse_up 带坐标的释放位置会丢失。
+            return [event], {"button": button, "has_coordinates": "x" in event and "y" in event}, None  # 新增代码+ClaudeCodeParity: 返回鼠标按键事件和摘要；如果没有这行代码，execute 无法分发 down/up。
         if action == "scroll":  # 新增代码+Phase37WindowsSendInputExecutor: 处理滚轮事件；如果没有这行代码，执行器无法滚动页面或列表。
             delta = _safe_int(arguments.get("delta", arguments.get("amount", 0)))  # 新增代码+Phase37WindowsSendInputExecutor: 读取滚动量并兼容 amount 字段；如果没有这行代码，模型不同命名会导致滚动失败。
             event = {"type": "scroll", "x": _safe_int(arguments.get("x")), "y": _safe_int(arguments.get("y")), "delta": delta}  # 新增代码+Phase37WindowsSendInputExecutor: 生成滚轮事件；如果没有这行代码，底层实现不知道滚动位置和方向。
@@ -132,6 +165,17 @@ class WindowsSendInputExecutor:  # 新增代码+Phase37WindowsSendInputExecutor:
                 return [], {}, self._refusal(action, "press_key 缺少 key 参数，未调用 SendInput。", {"missing": "key"})  # 新增代码+Phase37WindowsSendInputExecutor: 返回缺键名失败；如果没有这行代码，用户不知道如何修正参数。
             event = {"type": "key", "key": key}  # 新增代码+Phase37WindowsSendInputExecutor: 生成按键事件；如果没有这行代码，底层实现拿不到键名。
             return [event], {"key": key}, None  # 新增代码+Phase37WindowsSendInputExecutor: 返回按键事件和摘要；如果没有这行代码，execute 无法分发。
+        if action == "hold_key":  # 新增代码+ClaudeCodeParity: 处理按住组合键事件；如果没有这行代码，hold_key 会落到 type_text 分支或被拒绝。
+            keys = [key[:PHASE37_HOLD_KEY_MAX_KEY_LENGTH] for key in _hold_key_candidates(arguments)]  # 新增代码+ClaudeCodeParity: 清洗并限制每个键名长度；如果没有这行代码，过长键名会传入 dispatcher。
+            duration_seconds = _safe_float(arguments.get("duration_seconds", 0.0), 0.0)  # 新增代码+ClaudeCodeParity: 读取按住时长并默认 0 秒；如果没有这行代码，dispatcher 无法生成 pause。
+            if not keys:  # 新增代码+ClaudeCodeParity: 拒绝空 keys；如果没有这行代码，底层会收到没有按键的 hold_key。
+                return [], {}, self._refusal(action, "hold_key 缺少 keys/key 参数，未调用 SendInput。", {"missing": "keys"})  # 新增代码+ClaudeCodeParity: 返回缺 keys 拒绝；如果没有这行代码，用户不知道如何修正参数。
+            if len(keys) > PHASE37_HOLD_KEY_MAX_KEYS:  # 新增代码+ClaudeCodeParity: 拒绝过多按键；如果没有这行代码，坏参数可能产生不可控组合键。
+                return [], {}, self._refusal(action, f"hold_key keys 最多 {PHASE37_HOLD_KEY_MAX_KEYS} 个，未调用 SendInput。", {"key_count": len(keys)})  # 新增代码+ClaudeCodeParity: 返回按键数量拒绝；如果没有这行代码，用户不知道超出限制。
+            if duration_seconds < 0 or duration_seconds > PHASE37_HOLD_KEY_MAX_DURATION_SECONDS:  # 新增代码+ClaudeCodeParity: 检查按住时长范围；如果没有这行代码，真实键盘可能被长时间按住。
+                return [], {}, self._refusal(action, "hold_key duration_seconds 必须在 0 到 30 秒之间，未调用 SendInput。", {"duration_seconds": duration_seconds})  # 新增代码+ClaudeCodeParity: 返回时长拒绝；如果没有这行代码，用户不知道时长边界。
+            event = {"type": "hold_key", "keys": keys, "duration_seconds": duration_seconds}  # 新增代码+ClaudeCodeParity: 生成 hold_key 规范事件；如果没有这行代码，dispatcher 无法展开 key_down/pause/key_up。
+            return [event], {"keys": list(keys), "key_count": len(keys), "duration_seconds": duration_seconds}, None  # 新增代码+ClaudeCodeParity: 返回 hold_key 事件和摘要；如果没有这行代码，execute 无法分发组合键按住。
         text = str(arguments.get("text", ""))  # 新增代码+Phase37WindowsSendInputExecutor: 读取文本输入内容；如果没有这行代码，type_text 分支无法计算长度和指纹。
         if len(text) > self.max_text_length:  # 新增代码+Phase37WindowsSendInputExecutor: 检查文本长度上限；如果没有这行代码，超长文本可能污染真实输入目标。
             return [], {}, self._refusal(action, f"type_text 文本过长，最大 {self.max_text_length} 字符，未调用 SendInput。", {"text_length": len(text)})  # 新增代码+Phase37WindowsSendInputExecutor: 返回超长文本拒绝；如果没有这行代码，用户不知道被拒绝原因。

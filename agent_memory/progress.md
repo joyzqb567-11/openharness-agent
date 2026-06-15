@@ -6433,3 +6433,10 @@ Remaining:
 - 自动化验证通过：`test_observability_acceptance` 12 OK，Phase74/75 7 OK，完整 Windows Computer Use 回归 `463 OK`，修改文件 `py_compile` 通过。
 - 真实可见终端验收通过：`learning_agent/acceptance_controller/runs/computer_use_full_open_wechat_probe-20260607_160958/result.json` 显示 `completed=true`、`assertion.passed=true`、`debug_log_checks={}`，并确认正式事件字段全部为 true。
 - 学习副本已保存：`learning_agent/test/computer_use_structured_action_acceptance_phase137_20260607/`。
+
+## 2026-06-16 Task4 Computer Use MCP v2 SendInput ClaudeCode parity progress
+- 修改代码+ClaudeCodeParity：已新增 v2 专用红灯测试 `learning_agent/tests/test_computer_use_mcp_v2_sendinput_parity_task4.py`，首次运行 4 个失败分别覆盖 executor 不支持新动作、dispatcher 不展开新事件、中键误用右键 flag、hold_key 安全策略漏检；如果没有这条记录，后续无法证明不是测试后补。
+- 修改代码+ClaudeCodeParity：已实现 `sendinput_executor.py` 新动作支持、hold_key keys/key 兼容、keys 数量/键名长度/duration_seconds 限制；如果没有这条记录，public MCP tool 到 Windows SendInput 的最后链路仍会断。
+- 修改代码+ClaudeCodeParity：已实现 `sendinput_dispatcher.py` 新事件展开，并保留 target 和 set_foreground 预备事件；如果没有这条记录，真实窗口焦点和最后一跳审计容易被新动作绕开。
+- 修改代码+ClaudeCodeParity：已实现 `real_sendinput_guard.py` 中键 flags、`approval.py`/`security_policy.py` 的 hold_key 系统组合键授权检查；如果没有这条记录，中键会继续变右键，危险 hold_key 也可能普通授权放行。
+- 自动化验证通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_sendinput_parity_task4 learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope` 共 33 tests OK；`python -m py_compile` 覆盖 6 个改动文件通过；`git diff --check` 退出码 0 且仅有 CRLF 提示。
