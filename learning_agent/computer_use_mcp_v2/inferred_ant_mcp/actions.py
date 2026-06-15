@@ -1,13 +1,34 @@
 """Computer Use MCP v2 鼠标键盘动作。"""  # 新增代码+ComputerUseMcpV2：说明本文件管理真实桌面原子动作；如果没有这行代码，动作逻辑会混入 runtime。
 from __future__ import annotations  # 新增代码+ComputerUseMcpV2：延迟类型注解解析；如果没有这行代码，类型求值可能提前发生。
 
-import time  # 新增代码+ComputerUseMcpV2：导入时间模块用于双击间隔；如果没有这行代码，双击无法有最小间隔。
 from typing import Any  # 新增代码+ComputerUseMcpV2：导入通用 JSON 类型；如果没有这行代码，参数边界不清楚。
 
-from .coordinates import int_coordinate  # 新增代码+ComputerUseMcpV2：导入坐标清洗；如果没有这行代码，鼠标坐标可能因坏输入崩溃。
 from .errors import error_result  # 新增代码+ComputerUseMcpV2：导入失败结果；如果没有这行代码，动作失败格式会漂移。
 from .result_blocks import success_result  # 新增代码+ComputerUseMcpV2：导入成功结果；如果没有这行代码，动作成功格式会漂移。
 from .types import ComputerUseMcpV2Context  # 新增代码+ComputerUseMcpV2：导入上下文；如果没有这行代码，host 动作能力无法注入。
+
+MUTATING_ACTION_TOOL_NAMES = {  # 新增代码+ClaudeCodeParity：集中列出必须由 host 执行的桌面写动作；如果没有这个集合，无 host 分支会继续把真实动作伪装成安全成功。
+    "mouse_move",  # 新增代码+ClaudeCodeParity：鼠标移动会改变真实桌面光标位置；如果没有这一项，无 host mouse_move 可能继续假成功。
+    "left_click",  # 新增代码+ClaudeCodeParity：左键点击会触发真实桌面动作；如果没有这一项，无 host left_click 会继续假成功。
+    "double_click",  # 新增代码+ClaudeCodeParity：双击会触发真实桌面动作；如果没有这一项，无 host double_click 会继续假成功。
+    "right_click",  # 新增代码+ClaudeCodeParity：右键点击会触发真实桌面动作；如果没有这一项，无 host right_click 会继续假成功。
+    "type",  # 新增代码+ClaudeCodeParity：文本输入会改变真实应用内容；如果没有这一项，无 host type 会继续假成功。
+    "key",  # 新增代码+ClaudeCodeParity：按键会改变真实应用状态；如果没有这一项，无 host key 会继续假成功。
+    "scroll",  # 新增代码+ClaudeCodeParity：滚动会改变真实界面位置；如果没有这一项，无 host scroll 会继续假成功。
+    "hold_key",  # 新增代码+ClaudeCodeParity：按住按键属于真实键盘副作用；如果没有这一项，无 host hold_key 可能被误报成功。
+    "left_click_drag",  # 新增代码+ClaudeCodeParity：拖拽属于真实鼠标副作用；如果没有这一项，无 host left_click_drag 可能被误报成功。
+    "middle_click",  # 新增代码+ClaudeCodeParity：中键点击属于真实鼠标副作用；如果没有这一项，无 host middle_click 可能被误报成功。
+    "triple_click",  # 新增代码+ClaudeCodeParity：三击属于真实鼠标副作用；如果没有这一项，无 host triple_click 可能被误报成功。
+    "left_mouse_down",  # 新增代码+ClaudeCodeParity：左键按下会改变鼠标状态；如果没有这一项，无 host left_mouse_down 可能被误报成功。
+    "left_mouse_up",  # 新增代码+ClaudeCodeParity：左键释放会改变鼠标状态；如果没有这一项，无 host left_mouse_up 可能被误报成功。
+}  # 新增代码+ClaudeCodeParity：桌面写动作集合结束；如果没有这一行，Python 集合语法不完整。
+
+
+def _host_required_result(tool_name: str) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，生成缺少 host 时的明确失败结果；如果没有这段函数，各写动作会重复手写且容易漏 payload。
+    result = error_result(tool_name, f"host_required_for_desktop_action:{tool_name}", error_class="host_required")  # 新增代码+ClaudeCodeParity：创建统一 host_required 错误；如果没有这一行，模型无法区分缺 host 和未知工具。
+    result["payload"] = {"requires_host": True, "desktop_action_performed": False}  # 新增代码+ClaudeCodeParity：明确说明需要 host 且没有执行真实桌面动作；如果没有这一行，验收可能误判桌面已经被操作。
+    return result  # 新增代码+ClaudeCodeParity：返回带 payload 的失败结果；如果没有这一行，调用方拿不到错误对象。
+# 新增代码+ClaudeCodeParity：函数段结束，_host_required_result 到此结束；如果没有这个边界说明，用户不容易看出缺 host 失败格式范围。
 
 
 def _host_call(context: ComputerUseMcpV2Context, method_name: str, *args: Any, **kwargs: Any) -> dict[str, Any] | None:  # 新增代码+ComputerUseMcpV2：函数段开始，调用注入 host 方法；如果没有这段函数，每个动作都要重复 getattr/callable 判断。
@@ -49,16 +70,11 @@ def perform_action(context: ComputerUseMcpV2Context, tool_name: str, arguments: 
     payload = _host_call(context, tool_name, arguments)  # 新增代码+ComputerUseMcpV2：优先调用同名 host 方法；如果没有这行代码，成熟宿主无法接管原子动作。
     if payload is not None:  # 新增代码+ComputerUseMcpV2：检查 host 是否处理动作；如果没有这行代码，host 结果会被忽略。
         return _host_payload_result(tool_name, payload)  # 修改代码+McpHostFailureFix: 统一传播 host 成功或失败；如果没有这一行，left_click 被旧门禁拒绝时仍会显示 ok=true。
-    if tool_name in {"mouse_move", "left_click", "double_click", "right_click", "scroll"}:  # 新增代码+ComputerUseMcpV2：识别鼠标类动作；如果没有这行代码，鼠标动作会被误判未知。
-        x = int_coordinate(arguments.get("x"))  # 新增代码+ComputerUseMcpV2：读取 x 坐标；如果没有这行代码，鼠标动作没有横坐标。
-        y = int_coordinate(arguments.get("y"))  # 新增代码+ComputerUseMcpV2：读取 y 坐标；如果没有这行代码，鼠标动作没有纵坐标。
-        if tool_name == "double_click":  # 新增代码+ComputerUseMcpV2：识别双击动作；如果没有这行代码，双击不会包含间隔摘要。
-            time.sleep(0.05)  # 新增代码+ComputerUseMcpV2：提供最小双击间隔；如果没有这行代码，某些后端难以区分双击。
-        return success_result(tool_name, {"x": x, "y": y, "backend": "computer_use_mcp_v2_noop_safe"})  # 新增代码+ComputerUseMcpV2：返回安全摘要；如果没有这行代码，无 host 时鼠标动作会崩溃。
-    if tool_name == "type":  # 新增代码+ComputerUseMcpV2：识别文本输入；如果没有这行代码，type 会被误判未知。
-        text = str(arguments.get("text", ""))  # 新增代码+ComputerUseMcpV2：读取输入文本；如果没有这行代码，无法计算长度。
-        return success_result(tool_name, {"text_length": len(text), "backend": "computer_use_mcp_v2_noop_safe"})  # 新增代码+ComputerUseMcpV2：返回脱敏长度；如果没有这行代码，文本输入结果可能泄露全文或为空。
-    if tool_name == "key":  # 新增代码+ComputerUseMcpV2：识别按键动作；如果没有这行代码，key 会被误判未知。
-        return success_result(tool_name, {"keys": list(arguments.get("keys", []) or []), "backend": "computer_use_mcp_v2_noop_safe"})  # 新增代码+ComputerUseMcpV2：返回按键摘要；如果没有这行代码，模型无法确认按键已处理。
+    if tool_name in MUTATING_ACTION_TOOL_NAMES:  # 新增代码+ClaudeCodeParity：无 host 且工具是写动作时统一失败；如果没有这一行，真实桌面动作会继续 noop 假成功。
+        return _host_required_result(tool_name)  # 新增代码+ClaudeCodeParity：返回 host_required 且声明未操作桌面；如果没有这一行，验收无法区分失败和已执行。
+    if tool_name == "zoom":  # 新增代码+ClaudeCodeParity：显式处理 zoom 只读工具的无 host 场景；如果没有这一行，公开的 zoom 工具会被误报为 unknown_tool。
+        result = error_result("zoom", "zoom_unavailable_without_host", error_class="host_unavailable")  # 新增代码+ClaudeCodeParity：返回 zoom 缺少宿主实现的清晰错误；如果没有这一行，模型只能看到未知工具而不是缺后端。
+        result["payload"] = {"requires_host": True, "desktop_action_performed": False}  # 新增代码+ClaudeCodeParity：说明 zoom 没有修改桌面且需要 host 提供观察能力；如果没有这一行，读者会难以判断是否发生副作用。
+        return result  # 新增代码+ClaudeCodeParity：返回 zoom 无 host 错误；如果没有这一行，函数会继续落入 unknown_tool。
     return error_result(tool_name, f"unknown_v2_action:{tool_name}", error_class="unknown_tool")  # 新增代码+ComputerUseMcpV2：返回未知动作；如果没有这行代码，函数会隐式返回 None。
 # 新增代码+ComputerUseMcpV2：函数段结束，perform_action 到此结束；如果没有这个边界说明，用户不容易看出动作分发范围。

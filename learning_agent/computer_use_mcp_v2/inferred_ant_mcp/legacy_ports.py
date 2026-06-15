@@ -97,6 +97,34 @@ class ComputerUseMcpV2LegacyHostAdapter:  # 新增代码+ComputerUseMcpV2HostAda
         return self._call("scroll", arguments)  # 新增代码+ComputerUseMcpV2HostAdapter：执行旧滚动映射；如果没有这一行，真实滚轮链路不会被调用。
     # 新增代码+ComputerUseMcpV2HostAdapter：函数段结束，scroll 到此结束；如果没有这个边界说明，用户不容易看出滚动桥接范围。
 
+    def zoom(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 zoom 接到旧 session adapter；如果没有这段函数，agent-side zoom 会停在 v2 host 缺方法失败。
+        return self._call("zoom", arguments)  # 新增代码+ClaudeCodeParity：执行旧 zoom 映射；如果没有这一行，局部放大观察无法复用成熟 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，zoom 到此结束；如果没有这个边界说明，用户不容易看出 zoom 桥接范围。
+
+    def hold_key(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 hold_key 接到旧 session adapter；如果没有这段函数，按住键工具会在 agent-side 缺桥接。
+        return self._call("hold_key", arguments)  # 新增代码+ClaudeCodeParity：执行旧 hold_key 映射；如果没有这一行，长按键动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，hold_key 到此结束；如果没有这个边界说明，用户不容易看出 hold_key 桥接范围。
+
+    def left_click_drag(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 left_click_drag 接到旧 session adapter；如果没有这段函数，拖拽工具会在 agent-side 缺桥接。
+        return self._call("left_click_drag", arguments)  # 新增代码+ClaudeCodeParity：执行旧 left_click_drag 映射；如果没有这一行，拖拽动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，left_click_drag 到此结束；如果没有这个边界说明，用户不容易看出拖拽桥接范围。
+
+    def middle_click(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 middle_click 接到旧 session adapter；如果没有这段函数，中键点击会在 agent-side 缺桥接。
+        return self._call("middle_click", arguments)  # 新增代码+ClaudeCodeParity：执行旧 middle_click 映射；如果没有这一行，中键动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，middle_click 到此结束；如果没有这个边界说明，用户不容易看出中键桥接范围。
+
+    def triple_click(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 triple_click 接到旧 session adapter；如果没有这段函数，三击工具会在 agent-side 缺桥接。
+        return self._call("triple_click", arguments)  # 新增代码+ClaudeCodeParity：执行旧 triple_click 映射；如果没有这一行，三击动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，triple_click 到此结束；如果没有这个边界说明，用户不容易看出三击桥接范围。
+
+    def left_mouse_down(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 left_mouse_down 接到旧 session adapter；如果没有这段函数，左键按下会在 agent-side 缺桥接。
+        return self._call("left_mouse_down", arguments)  # 新增代码+ClaudeCodeParity：执行旧 left_mouse_down 映射；如果没有这一行，按下动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，left_mouse_down 到此结束；如果没有这个边界说明，用户不容易看出按下桥接范围。
+
+    def left_mouse_up(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，把 left_mouse_up 接到旧 session adapter；如果没有这段函数，左键释放会在 agent-side 缺桥接。
+        return self._call("left_mouse_up", arguments)  # 新增代码+ClaudeCodeParity：执行旧 left_mouse_up 映射；如果没有这一行，释放动作不会进入 session adapter。
+    # 新增代码+ClaudeCodeParity：函数段结束，left_mouse_up 到此结束；如果没有这个边界说明，用户不容易看出释放桥接范围。
+
     def open_application(self, _app_name: str, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ComputerUseMcpV2HostAdapter：函数段开始，把应用启动接到旧 launch_app；如果没有这段函数，open_application 会绕开旧窗口绑定。
         return self._call("open_application", arguments)  # 新增代码+ComputerUseMcpV2HostAdapter：执行旧应用启动映射；如果没有这一行，agent-owned 目标窗口不会被 controller 记录。
     # 新增代码+ComputerUseMcpV2HostAdapter：函数段结束，open_application 到此结束；如果没有这个边界说明，用户不容易看出应用启动桥接范围。
