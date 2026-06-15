@@ -14,7 +14,7 @@ except ModuleNotFoundError as error:  # 新增代码+Phase39WindowsCoordinates: 
     from computer_use_mcp_v2.windows_runtime.coordinates import PHASE39_COORDINATE_MODEL, build_coordinate_context  # 新增代码+Phase39WindowsCoordinates: 脚本模式下从本地包导入坐标模型；如果没有这行代码，bat 入口无法加载 Phase39 动作策略。
 
 POLICY_VERSION = "phase30_window_relative_action_gate_v1"  # 新增代码+Phase30ComputerUseActionGate: 固定本阶段策略版本；如果没有这行代码，未来审计无法区分不同策略产生的证据。
-COORDINATE_ACTIONS = {"move_mouse", "click", "double_click", "scroll", "drag_path"}  # 修改代码+GenericDragPathToolSurface: 把通用拖拽路径纳入坐标处理；如果没有这行代码，模型画线时窗口相对 points 会被误当屏幕坐标。
+COORDINATE_ACTIONS = {"move_mouse", "click", "double_click", "triple_click", "mouse_down", "mouse_up", "scroll", "drag_path"}  # 修改代码+ClaudeCodeParity: 把新增 parity 鼠标动作纳入坐标处理；如果没有这行代码，三击、按下、释放的窗口相对坐标不会转换也没有证据。
 TEXT_FIELD_NAME = "text"  # 新增代码+Phase30ComputerUseActionGate: 集中声明敏感文本字段名；如果没有这行代码，脱敏逻辑容易写出不一致字段。
 
 

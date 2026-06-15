@@ -256,7 +256,7 @@ def build_default_computer_use_backend(environ: dict[str, str] | None = None) ->
 
 
 class ComputerUseController:  # 新增代码+OSComputerUse: 在 agent 和后端之间提供安全控制层；若没有这段代码，真实桌面操作缺少统一确认和参数校验。
-    ALLOWED_ACTIONS: set[str] = {"screenshot", "launch_app", "move_mouse", "click", "double_click", "drag_path", "type_text", "press_key", "scroll"}  # 修改代码+ModelLoopLaunchAppTool: 允许模型主循环显式请求启动普通应用；如果没有这行代码，agent 只能误用用户已有窗口或盲点鼠标。
+    ALLOWED_ACTIONS: set[str] = {"screenshot", "launch_app", "move_mouse", "click", "double_click", "triple_click", "mouse_down", "mouse_up", "drag_path", "type_text", "press_key", "hold_key", "scroll"}  # 修改代码+ClaudeCodeParity: 允许 session adapter 新增 parity action 通过真实 v2 controller；如果没有这行代码，adapter 映射会在 allowed_actions 门禁处被拒绝。
     OBSERVE_ACTIONS: set[str] = {"list_apps", "list_windows", "get_active_window", "get_window_state"}  # 新增代码+Phase27ComputerUse: 限定只读观察动作集合；如果没有这行代码，observe 可能被滥用成任意桌面命令。
     MAX_TEXT_LENGTH: int = 2000  # 新增代码+OSComputerUse: 限制一次输入文本长度；若没有这行代码，模型可能一次性向桌面注入过长文本。
 
