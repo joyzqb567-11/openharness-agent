@@ -27,9 +27,16 @@ OPERATION_RAW_TOOL_NAMES: set[str] = {  # 新增代码+ComputerUseToolScopeTests
     "left_click",  # 新增代码+ComputerUseToolScopeTests: 新左键工具必须可见；如果没有这一项，模型会退回旧 click。
     "double_click",  # 新增代码+ComputerUseToolScopeTests: 双击工具必须可见；如果没有这一项，桌面任务缺常见动作。
     "right_click",  # 新增代码+ComputerUseToolScopeTests: 右键工具必须可见；如果没有这一项，上下文菜单任务无法执行。
+    "middle_click",  # 新增代码+ClaudeCodeParity: 中键工具必须在操作/debug 模式可见；如果没有这一项，ClaudeCode parity 的中键动作会被 scope 层误藏。
+    "triple_click",  # 新增代码+ClaudeCodeParity: 三击工具必须在操作/debug 模式可见；如果没有这一项，ClaudeCode parity 的三击动作会被 scope 层误藏。
+    "left_mouse_down",  # 新增代码+ClaudeCodeParity: 左键按下工具必须在操作/debug 模式可见；如果没有这一项，拆分鼠标按下动作无法进入模型工具池。
+    "left_mouse_up",  # 新增代码+ClaudeCodeParity: 左键释放工具必须在操作/debug 模式可见；如果没有这一项，拆分鼠标释放动作无法进入模型工具池。
     "type",  # 新增代码+ComputerUseToolScopeTests: 文本输入工具必须可见；如果没有这一项，浏览器/Office 输入无法执行。
     "key",  # 新增代码+ComputerUseToolScopeTests: 按键工具必须可见；如果没有这一项，快捷键和回车无法执行。
+    "hold_key",  # 新增代码+ClaudeCodeParity: 按住按键工具必须在操作/debug 模式可见；如果没有这一项，长按键盘动作无法进入模型工具池。
     "scroll",  # 新增代码+ComputerUseToolScopeTests: 滚动工具必须可见；如果没有这一项，网页和文档滚动无法执行。
+    "left_click_drag",  # 新增代码+ClaudeCodeParity: 左键拖拽工具必须在操作/debug 模式可见；如果没有这一项，拖拽只能依赖脆弱的多步组合。
+    "zoom",  # 新增代码+ClaudeCodeParity: 局部放大工具必须在操作/debug 模式可见；如果没有这一项，模型无法在 Computer Use 模式细看局部屏幕。
     "wait",  # 新增代码+ComputerUseToolScopeTests: 等待工具必须可见；如果没有这一项，界面加载无法等待。
     "read_clipboard",  # 新增代码+ComputerUseToolScopeTests: 读剪贴板工具必须可见；如果没有这一项，复制检查无法执行。
     "write_clipboard",  # 新增代码+ComputerUseToolScopeTests: 写剪贴板工具必须可见；如果没有这一项，粘贴文本路线不完整。
@@ -99,10 +106,10 @@ class ComputerUseToolScopeTests(unittest.TestCase):  # 新增代码+ComputerUseT
             self.assertFalse(legacy_names.intersection(names), sorted(legacy_names.intersection(names)))  # 新增代码+ComputerUseLegacyHidden: 断言旧 Computer Use 顶层入口不暴露给模型；如果没有这一行，第二阶段的 legacy hidden 约束没有测试门禁。
             self.assertNotIn("mcp__computer-use__click", names)  # 新增代码+ComputerUseToolScopeTests: 断言旧 click 不和 left_click 同轮暴露；如果没有这一行，同义点击工具会混用。
             self.assertNotIn("mcp__computer-use__clipboard", names)  # 新增代码+ComputerUseToolScopeTests: 断言旧 clipboard 不和 read/write_clipboard 同轮暴露；如果没有这一行，剪贴板工具会混用。
-            self.assertNotIn("mcp__computer-use__middle_click", names)  # 新增代码+ComputerUseToolScopeTests: 断言预留中键不默认暴露；如果没有这一行，低优先级工具会抢常规点击。
-            self.assertNotIn("mcp__computer-use__triple_click", names)  # 新增代码+ComputerUseToolScopeTests: 断言预留三击不默认暴露；如果没有这一行，未成熟工具会进入首选面。
-            self.assertNotIn("mcp__computer-use__left_mouse_down", names)  # 新增代码+ComputerUseToolScopeTests: 断言预留左键按下不默认暴露；如果没有这一行，未成熟拆分鼠标动作可能绕过 left_click_drag。
-            self.assertNotIn("mcp__computer-use__left_mouse_up", names)  # 新增代码+ComputerUseToolScopeTests: 断言预留左键释放不默认暴露；如果没有这一行，未成熟拆分鼠标动作可能和拖拽工具混用。
+            self.assertIn("mcp__computer-use__middle_click", names)  # 修改代码+ClaudeCodeParity: 断言中键工具已从预留改为公开；如果没有这一行，scope 层可能继续隐藏 ClaudeCode parity 工具。
+            self.assertIn("mcp__computer-use__triple_click", names)  # 修改代码+ClaudeCodeParity: 断言三击工具已从预留改为公开；如果没有这一行，scope 层可能继续隐藏 ClaudeCode parity 工具。
+            self.assertIn("mcp__computer-use__left_mouse_down", names)  # 修改代码+ClaudeCodeParity: 断言左键按下工具已从预留改为公开；如果没有这一行，拆分鼠标动作可能仍不可见。
+            self.assertIn("mcp__computer-use__left_mouse_up", names)  # 修改代码+ClaudeCodeParity: 断言左键释放工具已从预留改为公开；如果没有这一行，拆分鼠标动作可能仍不可见。
             self.assertNotIn("read_trace", names)  # 新增代码+ComputerUseToolScopeTests: 断言操作模式不暴露 debug 诊断工具；如果没有这一行，普通操作轮次会变吵。
     # 新增代码+ComputerUseToolScopeTests: 函数段结束，test_operation_mode_exposes_only_claudecode_mcp_surface 到此结束；如果没有这个边界说明，用户不容易看出操作模式测试范围。
 
@@ -163,7 +170,9 @@ class ComputerUseToolScopeTests(unittest.TestCase):  # 新增代码+ComputerUseT
             agent = self._build_agent(Path(raw_dir), "computer_use_debug")  # 新增代码+ComputerUseToolScopeTests: 构造 debug 模式 agent；如果没有这一行，测试没有主体。
             names = self._tool_names(agent)  # 新增代码+ComputerUseToolScopeTests: 读取当前可见工具名；如果没有这一行，后续断言没有输入。
             legacy_names = {"computer_status", "computer_observe", "computer_discover", "computer_action", "computer_use", "computer-use", "request_access"}  # 新增代码+ComputerUseLegacyHidden: 声明 debug 模式仍要隐藏的旧兼容入口；如果没有这一行，调试模式可能重新暴露旧工具面。
+            expected_names = {f"mcp__computer-use__{name}" for name in OPERATION_RAW_TOOL_NAMES}  # 新增代码+ClaudeCodeParity: 生成 debug 模式应包含的完整 operation parity 工具名；如果没有这一行，debug 模式只测 left_click 会漏掉新增 7 个工具。
             self.assertEqual([], self._duplicate_tool_names(agent))  # 新增代码+ComputerUseNoDuplicateSurface: 断言 debug 模式也没有重复工具名；如果没有这一行，调试工具池可能再次出现同名 MCP/内置混用。
+            self.assertTrue(expected_names.issubset(names), sorted(expected_names - names))  # 新增代码+ClaudeCodeParity: 断言 debug 模式暴露全部 operation parity 工具；如果没有这一行，debug 模式缺 zoom/hold_key 等工具不会失败。
             self.assertIn("mcp__computer-use__left_click", names)  # 新增代码+ComputerUseToolScopeTests: 断言 debug 模式仍能测试真实点击工具；如果没有这一行，调试模式无法覆盖真实动作。
             self.assertIn("read_trace", names)  # 新增代码+ComputerUseToolScopeTests: 断言 read_trace 在 debug 模式可见；如果没有这一行，运行轨迹调试不可用。
             self.assertIn("read_state", names)  # 新增代码+ComputerUseToolScopeTests: 断言 read_state 在 debug 模式可见；如果没有这一行，状态调试不可用。

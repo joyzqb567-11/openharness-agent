@@ -60,9 +60,16 @@ EXPECTED_RAW_TOOL_NAMES = {  # 新增代码+ComputerUseMcpV2RedTests：列出用
     "left_click",  # 新增代码+ComputerUseMcpV2RedTests：左键点击工具必须暴露；如果没有这一项，模型会退回旧 click 名称。
     "double_click",  # 新增代码+ComputerUseMcpV2RedTests：双击工具必须暴露；如果没有这一项，常见桌面打开动作无法表达。
     "right_click",  # 新增代码+ComputerUseMcpV2RedTests：右键点击工具必须暴露；如果没有这一项，右键菜单任务无法表达。
+    "middle_click",  # 新增代码+ClaudeCodeParity：中键点击工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，模型无法表达 ClaudeCode 已有的中键动作。
+    "triple_click",  # 新增代码+ClaudeCodeParity：三击工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，文本段落选择等三击动作会缺少原子入口。
+    "left_mouse_down",  # 新增代码+ClaudeCodeParity：左键按下工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，拖拽等拆分鼠标动作无法对齐 ClaudeCode 工具面。
+    "left_mouse_up",  # 新增代码+ClaudeCodeParity：左键释放工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，按下后的释放动作无法作为独立原子工具表达。
     "type",  # 新增代码+ComputerUseMcpV2RedTests：文本输入工具必须暴露；如果没有这一项，浏览器和 Office 输入无法执行。
     "key",  # 新增代码+ComputerUseMcpV2RedTests：按键工具必须暴露；如果没有这一项，Enter、Ctrl+S 等按键无法表达。
+    "hold_key",  # 新增代码+ClaudeCodeParity：按住按键工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，长按快捷键或按住修饰键的场景无法表达。
     "scroll",  # 新增代码+ComputerUseMcpV2RedTests：滚动工具必须暴露；如果没有这一项，长网页和文档无法操作。
+    "left_click_drag",  # 新增代码+ClaudeCodeParity：左键拖拽工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，模型只能把拖拽拆成不稳定的多步动作。
+    "zoom",  # 新增代码+ClaudeCodeParity：局部放大观察工具必须作为 ClaudeCode parity 公开工具暴露；如果没有这一项，模型无法请求细看屏幕局部区域。
     "wait",  # 新增代码+ComputerUseMcpV2RedTests：等待工具必须暴露；如果没有这一项，界面加载无法稳定等待。
     "read_clipboard",  # 新增代码+ComputerUseMcpV2RedTests：读剪贴板工具必须暴露；如果没有这一项，复制结果无法检查。
     "write_clipboard",  # 新增代码+ComputerUseMcpV2RedTests：写剪贴板工具必须暴露；如果没有这一项，长文本输入缺少稳妥路径。
@@ -90,9 +97,6 @@ FORBIDDEN_RAW_TOOL_NAMES = {  # 新增代码+ComputerUseMcpV2RedTests：列出 v
     "shell",  # 修改代码+ComputerUseMcpV2ToolSurfaceFence：禁止通用 shell 工具名作为 Computer Use MCP 原始工具；如果没有这一项，命令执行入口可能混入。
     "run_powershell",  # 修改代码+ComputerUseMcpV2ToolSurfaceFence：禁止历史 PowerShell 执行别名；如果没有这一项，shell 能力可能从旧名回流。
     "start_background_command",  # 修改代码+ComputerUseMcpV2ToolSurfaceFence：禁止后台命令工具名；如果没有这一项，长命令能力可能绕过 Computer Use 隔离。
-    "zoom",  # 新增代码+ComputerUseMcpV2RedTests：禁止蓝图外 zoom 工具；如果没有这一项，工具面会大于用户确认范围。
-    "hold_key",  # 新增代码+ComputerUseMcpV2RedTests：禁止蓝图外 hold_key 工具；如果没有这一项，工具面会偏离用户确认的 ClaudeCode 清单。
-    "left_click_drag",  # 新增代码+ComputerUseMcpV2RedTests：禁止蓝图外 left_click_drag 工具；如果没有这一项，批量动作和原子拖拽职责会混乱。
 }  # 新增代码+ComputerUseMcpV2RedTests：禁止工具名集合结束；如果没有这行代码，Python 集合语法不完整。
 
 
