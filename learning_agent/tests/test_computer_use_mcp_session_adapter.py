@@ -108,6 +108,37 @@ class ComputerUseMcpSessionAdapterTests(unittest.TestCase):  # 新增代码+McpS
         self.assertEqual("hwnd:100", controller.executed[0]["window"]["window_id"])  # 新增代码+McpObservedWindowRedTest: 断言窗口身份保持稳定；如果没有这一行，可能只注入了不完整目标。
     # 新增代码+McpObservedWindowRedTest: 函数段结束，test_observed_window_is_reused_by_following_left_click 到此结束；如果没有这个边界说明，用户不容易看出窗口复用测试范围。
 
+    def test_left_click_drag_maps_to_drag_path(self) -> None:  # 新增代码+ClaudeCodeParity: 函数段开始，验证 ClaudeCode 风格拖拽工具会映射到旧 drag_path；如果没有这个测试，拖拽可能只在表面 schema 存在却不能复用 controller。
+        adapter, controller, _recorder = _make_adapter()  # 新增代码+ClaudeCodeParity: 创建被测 adapter 和 fake controller；如果没有这一行，测试没有可观察的执行记录。
+        adapter.state.last_observed_window = {"app_id": "fake-app.exe", "window_id": "hwnd:100"}  # 新增代码+ClaudeCodeParity: 模拟已经观察到可信窗口；如果没有这一行，测试无法证明拖拽动作会复用 session 窗口。
+        result = adapter.call_atomic_tool("left_click_drag", {"start_x": 1, "start_y": 2, "end_x": 9, "end_y": 10, "duration_seconds": 0.2})  # 新增代码+ClaudeCodeParity: 调用模型可见的左键拖拽原子工具；如果没有这一行，映射行为不会被真正执行。
+        self.assertTrue(result["ok"], result)  # 新增代码+ClaudeCodeParity: 断言 adapter 返回成功；如果没有这一行，unsupported 或执行失败可能被后续字段断言遮住。
+        self.assertEqual("drag_path", controller.executed[0]["action"])  # 新增代码+ClaudeCodeParity: 断言工具名被转换成 controller 支持的 drag_path；如果没有这一行，旧 controller 可能收到不认识的 left_click_drag。
+        self.assertEqual([{"x": 1, "y": 2}, {"x": 9, "y": 10}], controller.executed[0]["points"])  # 新增代码+ClaudeCodeParity: 断言起点终点被转换为路径点数组；如果没有这一行，拖拽坐标可能丢失或顺序反了。
+        self.assertEqual({"app_id": "fake-app.exe", "window_id": "hwnd:100"}, controller.executed[0]["window"])  # 新增代码+ClaudeCodeParity: 断言拖拽复用了最近观察窗口；如果没有这一行，真实 full 模式可能因缺 window 被门禁拒绝。
+    # 新增代码+ClaudeCodeParity: 函数段结束，test_left_click_drag_maps_to_drag_path 到此结束；如果没有这个边界说明，用户不容易看出拖拽映射测试范围。
+
+    def test_new_mouse_tools_map_to_controller_actions(self) -> None:  # 新增代码+ClaudeCodeParity: 函数段开始，验证新增 parity 鼠标和 hold_key 工具映射到旧 controller action；如果没有这个测试，Task 1 暴露的工具可能继续返回 unsupported。
+        adapter, controller, _recorder = _make_adapter()  # 新增代码+ClaudeCodeParity: 创建同一个 adapter 会话；如果没有这一行，多工具顺序和窗口复用无法一起验证。
+        adapter.state.last_observed_window = {"app_id": "fake-app.exe", "window_id": "hwnd:100"}  # 新增代码+ClaudeCodeParity: 模拟 observe 后的可信窗口状态；如果没有这一行，测试无法确认新动作加入窗口复用集合。
+        results = [  # 新增代码+ClaudeCodeParity: 收集每个工具调用结果；如果没有这一行，后续无法统一断言所有新工具都成功。
+            adapter.call_atomic_tool("middle_click", {"x": 3, "y": 4}),  # 新增代码+ClaudeCodeParity: 调用中键点击；如果没有这一行，middle_click 的 button=middle 兼容映射不会被覆盖。
+            adapter.call_atomic_tool("triple_click", {"x": 3, "y": 4}),  # 新增代码+ClaudeCodeParity: 调用三击；如果没有这一行，unsupported 分支移除与否无法被测试发现。
+            adapter.call_atomic_tool("left_mouse_down", {"x": 3, "y": 4}),  # 新增代码+ClaudeCodeParity: 调用左键按下；如果没有这一行，mouse_down 映射可能继续缺失。
+            adapter.call_atomic_tool("left_mouse_up", {"reason": "unit test release"}),  # 新增代码+ClaudeCodeParity: 调用左键释放且不传坐标；如果没有这一行，释放动作可能错误要求 x/y。
+            adapter.call_atomic_tool("hold_key", {"keys": ["shift"], "duration_seconds": 0.1}),  # 新增代码+ClaudeCodeParity: 调用 required keys 数组形态的 hold_key；如果没有这一行，Task 1 新 schema 和 adapter 可能不一致。
+        ]  # 新增代码+ClaudeCodeParity: 结束工具调用列表；如果没有这一行，Python 列表语法不完整。
+        self.assertTrue(all(result["ok"] for result in results), results)  # 新增代码+ClaudeCodeParity: 断言所有新增工具都返回成功；如果没有这一行，单个 unsupported 可能被遗漏。
+        self.assertEqual(["click", "triple_click", "mouse_down", "mouse_up", "hold_key"], [item["action"] for item in controller.executed])  # 新增代码+ClaudeCodeParity: 断言每个工具按顺序映射到 controller action；如果没有这一行，工具名和动作名漂移不会被发现。
+        self.assertEqual("middle", controller.executed[0]["button"])  # 新增代码+ClaudeCodeParity: 断言 middle_click 固定使用中键；如果没有这一行，中键可能被默认左键吞掉。
+        self.assertEqual("left", controller.executed[1]["button"])  # 新增代码+ClaudeCodeParity: 断言 triple_click 使用左键；如果没有这一行，三击按钮语义可能缺失。
+        self.assertEqual("left", controller.executed[2]["button"])  # 新增代码+ClaudeCodeParity: 断言 mouse_down 使用左键；如果没有这一行，按下事件可能没有按钮字段。
+        self.assertEqual("left", controller.executed[3]["button"])  # 新增代码+ClaudeCodeParity: 断言 mouse_up 使用左键；如果没有这一行，释放事件可能不知道释放哪个按钮。
+        self.assertEqual(["shift"], controller.executed[4]["keys"])  # 新增代码+ClaudeCodeParity: 断言 hold_key 保留 keys 数组；如果没有这一行，ClaudeCode parity schema 的数组字段可能丢失。
+        self.assertEqual("shift", controller.executed[4]["key"])  # 新增代码+ClaudeCodeParity: 断言 hold_key 也提供兼容 key 字符串；如果没有这一行，旧 controller 只读 key 时可能失效。
+        self.assertTrue(all(item.get("window") == {"app_id": "fake-app.exe", "window_id": "hwnd:100"} for item in controller.executed))  # 新增代码+ClaudeCodeParity: 断言每个可复用动作都带上最近观察窗口；如果没有这一行，新动作可能在真实 full 模式被缺 window 门禁拦住。
+    # 新增代码+ClaudeCodeParity: 函数段结束，test_new_mouse_tools_map_to_controller_actions 到此结束；如果没有这个边界说明，用户不容易看出新增工具映射测试范围。
+
     def test_legacy_gate_rejection_text_is_wrapped_as_failure(self) -> None:  # 新增代码+McpObserveMapping: 验证旧门禁普通文本会被 MCP 包装为失败；如果没有这个测试，observe_before_action_required 可能再次被误标 ok=true。
         result = _wrap_legacy_text("mouse_move", "computer_action", "Computer Use full 模式已拒绝盲目桌面动作：observe_before_action_required")  # 新增代码+McpObserveMapping: 构造真实 full 模式盲动拒绝文本；如果没有这一行，测试没有失败文本输入。
         self.assertFalse(result["ok"])  # 新增代码+McpObserveMapping: 断言包装结果失败；如果没有这一行，模型可能把被拒绝动作当成功。
