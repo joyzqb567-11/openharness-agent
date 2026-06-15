@@ -23,7 +23,7 @@ TOP_LEVEL_FILE_AND_SHELL_TOOL_NAMES = {"read", "write", "edit", "bash", "read_fi
 COMPUTER_USE_OPERATION_RAW_TOOL_NAMES = {"request_access", "screenshot", "observe", "cursor_position", "mouse_move", "left_click", "double_click", "right_click", "middle_click", "triple_click", "left_mouse_down", "left_mouse_up", "type", "key", "hold_key", "scroll", "left_click_drag", "zoom", "wait", "read_clipboard", "write_clipboard", "open_application", "list_granted_applications", "computer_batch"}  # 修改代码+ClaudeCodeParity：列出 operation/debug 模式应暴露的 24 个 ClaudeCode parity Computer Use 工具；如果没有这一行，zoom/hold_key/left_click_drag 等公开 MCP 工具会继续被 scope 隐藏。
 COMPUTER_USE_DEBUG_BUILTIN_TOOL_NAMES = {"read_trace", "read_state", "read_last_observation", "read_last_action_result", "assert_last_action"}  # 新增代码+ClaudeCodeToolSurface：列出只在调试模式暴露的内置诊断工具；如果没有这行代码，调试能力会污染普通操作模式。
 COMPUTER_USE_LEGACY_RAW_TOOL_NAMES = {"click", "clipboard"}  # 新增代码+ClaudeCodeToolSurface：列出保留兼容但不在新模型工具面暴露的旧 MCP 名；如果没有这行代码，left_click 和 click 会同轮混用。
-COMPUTER_USE_RESERVED_RAW_TOOL_NAMES = set()  # 修改代码+ClaudeCodeParity：ClaudeCode parity 已要求原预留鼠标工具公开，因此保留空集合兼容旧判断；如果没有这一行，middle_click/triple_click/left_mouse_down/left_mouse_up 会继续被 scope 拦截。
+COMPUTER_USE_RESERVED_RAW_TOOL_NAMES = set()  # 修改代码+ClaudeCodeParity：Task 1 已把原预留 middle_click/triple_click/left_mouse_down/left_mouse_up 升级为公开工具，所以这里故意保留空集合来兼容旧分支；如果没有这一行，后续旧判断结构会缺少明确的“当前没有预留工具”信号。
 COMPUTER_USE_COMPAT_BUILTIN_TOOL_NAMES = {"computer_status", "computer_observe", "computer_discover", "computer_action", "computer_use", "computer-use", "request_access"}  # 新增代码+ClaudeCodeToolSurface：列出旧内置 Computer Use 兼容入口；如果没有这行代码，旧工具可能和独立 MCP 工具同轮竞争。
 
 

@@ -121,6 +121,32 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
         self.assertFalse(FORBIDDEN_RAW_TOOL_NAMES.intersection(raw_names))  # 新增代码+ComputerUseMcpV2RedTests：断言旧名和蓝图外工具不出现；如果没有这一行，重复暴露风险不会被直接指出。
     # 新增代码+ComputerUseMcpV2RedTests：函数段结束，test_v2_tool_surface_is_exact_and_shell_free 到此结束；如果没有这个边界说明，用户不容易看出工具面测试范围。
 
+    # 新增代码+ClaudeCodeParity：函数段开始，test_claudecode_parity_tool_schemas_lock_required_fields 用真实工具 schema 锁定 7 个 parity 工具的入参形状；如果没有这段测试，后续只改名字不改参数合同的漂移不会被发现。
+    def test_claudecode_parity_tool_schemas_lock_required_fields(self) -> None:  # 新增代码+ClaudeCodeParity：声明 parity schema 合同测试；如果没有这一行，unittest 不会执行新增工具的 schema 形状检查。
+        tools_by_name = {str(tool.get("name", "")): tool for tool in computer_use_mcp_tools()}  # 新增代码+ClaudeCodeParity：把工具列表变成按名称索引的字典；如果没有这一行，后续断言需要重复遍历并容易漏工具。
+        zoom_schema = tools_by_name["zoom"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 zoom 输入 schema；如果没有这一行，无法断言局部放大工具的必填字段。
+        hold_key_schema = tools_by_name["hold_key"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 hold_key 输入 schema；如果没有这一行，无法发现 key/keys 漂移。
+        drag_schema = tools_by_name["left_click_drag"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 left_click_drag 输入 schema；如果没有这一行，无法断言拖拽起点终点字段。
+        middle_schema = tools_by_name["middle_click"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 middle_click 输入 schema；如果没有这一行，无法断言中键坐标字段。
+        triple_schema = tools_by_name["triple_click"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 triple_click 输入 schema；如果没有这一行，无法断言三击坐标字段。
+        mouse_down_schema = tools_by_name["left_mouse_down"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 left_mouse_down 输入 schema；如果没有这一行，无法断言左键按下坐标字段。
+        mouse_up_schema = tools_by_name["left_mouse_up"]["inputSchema"]  # 新增代码+ClaudeCodeParity：读取 left_mouse_up 输入 schema；如果没有这一行，无法断言左键释放不要求坐标。
+        self.assertEqual({"x", "y", "width", "height"}, set(zoom_schema["required"]))  # 新增代码+ClaudeCodeParity：断言 zoom 必填区域字段完整；如果没有这一行，width/height 可能再次变成可选导致合同漂移。
+        self.assertTrue(tools_by_name["zoom"]["annotations"]["readOnlyHint"])  # 新增代码+ClaudeCodeParity：断言 zoom 是只读观察工具；如果没有这一行，安全提示可能错误标成会操作桌面。
+        self.assertEqual({"keys"}, set(hold_key_schema["required"]))  # 新增代码+ClaudeCodeParity：断言 hold_key 必填 keys 数组而不是 singular key；如果没有这一行，公共合同会继续和 Windows runtime 漂移。
+        self.assertEqual("array", hold_key_schema["properties"]["keys"]["type"])  # 新增代码+ClaudeCodeParity：断言 hold_key.keys 是数组；如果没有这一行，单字符串 key 漂移不会被测试发现。
+        self.assertIn("duration_seconds", hold_key_schema["properties"])  # 新增代码+ClaudeCodeParity：断言 hold_key 保留可选持续时间；如果没有这一行，长按时长参数可能被误删。
+        self.assertNotIn("duration_seconds", hold_key_schema["required"])  # 新增代码+ClaudeCodeParity：断言 hold_key 持续时间不是必填；如果没有这一行，模型可能被迫提供非必要时长。
+        self.assertEqual({"start_x", "start_y", "end_x", "end_y"}, set(drag_schema["required"]))  # 新增代码+ClaudeCodeParity：断言拖拽必填起点终点；如果没有这一行，拖拽工具可能缺少关键坐标。
+        self.assertEqual({"x", "y"}, set(middle_schema["required"]))  # 新增代码+ClaudeCodeParity：断言中键点击必填坐标；如果没有这一行，中键工具可能在没有目标点时被调用。
+        self.assertEqual({"x", "y"}, set(triple_schema["required"]))  # 新增代码+ClaudeCodeParity：断言三击必填坐标；如果没有这一行，三击工具可能在没有目标点时被调用。
+        self.assertEqual({"x", "y"}, set(mouse_down_schema["required"]))  # 新增代码+ClaudeCodeParity：断言左键按下必填坐标；如果没有这一行，按下动作可能缺少落点。
+        self.assertEqual([], mouse_up_schema["required"])  # 新增代码+ClaudeCodeParity：断言左键释放没有必填参数；如果没有这一行，释放动作会错误要求坐标。
+        self.assertIn("reason", mouse_up_schema["properties"])  # 新增代码+ClaudeCodeParity：断言左键释放仍保留可选 reason；如果没有这一行，工具调用目的无法记录。
+        for action_name in {"hold_key", "left_click_drag", "middle_click", "triple_click", "left_mouse_down", "left_mouse_up"}:  # 新增代码+ClaudeCodeParity：遍历所有非只读 parity 动作；如果没有这一行，每个动作都要手写断言且容易漏掉。
+            self.assertFalse(tools_by_name[action_name]["annotations"]["readOnlyHint"], action_name)  # 新增代码+ClaudeCodeParity：断言非只读动作不能标成 readOnly；如果没有这一行，模型和安全层可能误以为动作不会改变桌面。
+    # 新增代码+ClaudeCodeParity：函数段结束，test_claudecode_parity_tool_schemas_lock_required_fields 到此结束；如果没有这个边界说明，用户不容易看出 schema 合同测试范围。
+
     # 新增代码+ComputerUseMcpV2RedTests：函数段开始，test_v2_runtime_dispatch_marks_v2_and_avoids_legacy_adapter 验证执行路径不是旧 adapter；如果没有这段测试，工具名换了但底层仍可能走旧 computer_action。
     def test_v2_runtime_dispatch_marks_v2_and_avoids_legacy_adapter(self) -> None:  # 新增代码+ComputerUseMcpV2RedTests：声明 runtime 路由测试；如果没有这一行，执行路径合同没有自动化保护。
         trace_events: list[dict[str, Any]] = []  # 新增代码+ComputerUseMcpV2RedTests：保存 fake trace 事件；如果没有这一行，测试无法确认 runtime 写入 v2 证据。
