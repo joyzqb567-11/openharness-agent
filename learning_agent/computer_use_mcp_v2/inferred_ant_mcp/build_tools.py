@@ -56,6 +56,7 @@ FORBIDDEN_LEGACY_RAW_TOOL_NAMES = {  # 修改代码+ComputerUseMcpV2ToolSurfaceF
 }  # 修改代码+ComputerUseMcpV2ToolSurfaceFence：禁止工具名集合结束；如果没有这行代码，Python 集合语法不完整。
 SHELL_FORBIDDEN_TOOL_NAMES = {"bash", "powershell", "shell", "run_powershell", "start_background_command"}  # 新增代码+ComputerUseMcpV2：集中保存禁止进入 Computer Use MCP 的命令类工具名；如果没有这行代码，桌面 MCP 可能被误用成命令执行入口。
 SHELL_FORBIDDEN_ARGUMENT_NAMES = {"command", "powershell", "bash", "script", "executable"}  # 新增代码+ComputerUseMcpV2：集中保存禁止参数字段；如果没有这行代码，模型可能把命令塞进 batch 参数。
+REQUEST_ACCESS_BASE_DESCRIPTION = "请求受控桌面应用访问权限。推荐使用 ClaudeCode 字段 apps/reason/grantFlags；兼容旧 applications。"  # 新增代码+ClaudeCodeDynamicToolsList：集中保存 request_access 静态描述；如果没有这行代码，动态 inventory 注入失败时没有稳定回退文案。
 
 
 def _schema(properties: dict[str, Any] | None = None, required: list[str] | None = None) -> dict[str, Any]:  # 新增代码+ComputerUseMcpV2：函数段开始，生成封闭对象 schema；如果没有这段函数，每个工具都要重复写 schema 样板。
@@ -68,7 +69,15 @@ def _tool(name: str, description: str, properties: dict[str, Any] | None = None,
 # 新增代码+ComputerUseMcpV2：函数段结束，_tool 到此结束；如果没有这个边界说明，用户不容易看出单工具 schema 范围。
 
 
-def computer_use_mcp_tools() -> list[dict[str, Any]]:  # 新增代码+ComputerUseMcpV2：函数段开始，返回 v2 工具清单副本；如果没有这段函数，server 和测试没有统一工具面入口。
+def _request_access_description(app_inventory_hint: str = "") -> str:  # 新增代码+ClaudeCodeDynamicToolsList：函数段开始，生成可选动态 app inventory 描述；如果没有这段函数，tools/list 的动态提示会污染静态 schema 构造。
+    safe_hint = str(app_inventory_hint or "").strip()  # 新增代码+ClaudeCodeDynamicToolsList：清理动态 hint 文本；如果没有这行代码，None 或多余空白会进入工具描述。
+    if not safe_hint:  # 新增代码+ClaudeCodeDynamicToolsList：没有动态候选时使用静态描述；如果没有这行代码，空 hint 会多出无意义换行。
+        return REQUEST_ACCESS_BASE_DESCRIPTION  # 新增代码+ClaudeCodeDynamicToolsList：返回静态回退；如果没有这行代码，inventory 失败会让 request_access 描述为空或不稳定。
+    return REQUEST_ACCESS_BASE_DESCRIPTION + "\n" + safe_hint  # 新增代码+ClaudeCodeDynamicToolsList：把安全应用候选拼到描述末尾；如果没有这行代码，模型在 request_access 前看不到 Windows 已安装应用提示。
+# 新增代码+ClaudeCodeDynamicToolsList：函数段结束，_request_access_description 到此结束；如果没有这个边界说明，用户不容易看出动态描述拼接范围。
+
+
+def computer_use_mcp_tools(app_inventory_hint: str = "") -> list[dict[str, Any]]:  # 修改代码+ClaudeCodeDynamicToolsList：函数段开始，返回 v2 工具清单副本并允许 tools/list 注入安全应用提示；如果没有这段函数，server 和测试没有统一工具面入口。
     point = {"x": {"type": "integer", "description": "屏幕坐标 x。"}, "y": {"type": "integer", "description": "屏幕坐标 y。"}}  # 新增代码+ComputerUseMcpV2：复用坐标字段；如果没有这行代码，鼠标工具 schema 会重复且容易漂移。
     coordinate = {CLAUDECODE_COORDINATE_FIELD: {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2, "description": "ClaudeCode 风格屏幕坐标 [x, y]；兼容旧 x/y。"}}  # 新增代码+ClaudeCodeProtocolParity：定义 ClaudeCode 主坐标字段；如果没有这行代码，鼠标工具会继续主推 x/y。
     start_coordinate = {CLAUDECODE_START_COORDINATE_FIELD: {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2, "description": "ClaudeCode 风格拖拽起点 [x, y]；兼容旧 start_x/start_y。"}}  # 新增代码+ClaudeCodeProtocolParity：定义 ClaudeCode 拖拽起点字段；如果没有这行代码，拖拽 schema 无法对齐 ClaudeCode。
@@ -76,7 +85,7 @@ def computer_use_mcp_tools() -> list[dict[str, Any]]:  # 新增代码+ComputerUs
     app_object = {"type": "object", "properties": {"displayName": {"type": "string"}, "bundleId": {"type": "string"}}, "required": ["displayName"], "additionalProperties": True}  # 新增代码+ClaudeCodeProtocolParity：定义 ClaudeCode 授权 app 对象；如果没有这行代码，request_access 无法表达 displayName/bundleId。
     grant_flags = {"type": "object", "properties": {"clipboardRead": {"type": "boolean"}, "clipboardWrite": {"type": "boolean"}, "systemKeyCombos": {"type": "boolean"}}, "additionalProperties": False}  # 新增代码+ClaudeCodeProtocolParity：定义 ClaudeCode grant flags；如果没有这行代码，剪贴板和系统组合键权限没有 schema。
     tools = [  # 新增代码+ComputerUseMcpV2：开始构造工具列表；如果没有这行代码，函数没有可返回内容。
-        _tool("request_access", "请求受控桌面应用访问权限。推荐使用 ClaudeCode 字段 apps/reason/grantFlags；兼容旧 applications。", {CLAUDECODE_APPS_FIELD: {"type": "array", "items": app_object}, "applications": {"type": "array", "items": {"type": "string"}}, CLAUDECODE_GRANT_FLAGS_FIELD: grant_flags, "reason": {"type": "string"}}, [CLAUDECODE_APPS_FIELD, "reason"], read_only=True),  # 修改代码+ClaudeCodeProtocolParity：定义 ClaudeCode 风格授权申请 schema；如果没有这行代码，request_access 会继续主推旧 applications 字段。
+        _tool("request_access", _request_access_description(app_inventory_hint), {CLAUDECODE_APPS_FIELD: {"type": "array", "items": app_object}, "applications": {"type": "array", "items": {"type": "string"}}, CLAUDECODE_GRANT_FLAGS_FIELD: grant_flags, "reason": {"type": "string"}}, [CLAUDECODE_APPS_FIELD, "reason"], read_only=True),  # 修改代码+ClaudeCodeDynamicToolsList：定义 ClaudeCode 风格授权申请 schema并允许动态 app inventory 提示；如果没有这行代码，request_access.description 无法像 ClaudeCode 一样提示已安装应用。
         _tool("observe", "观察当前桌面状态。", {"reason": {"type": "string"}}, read_only=True),  # 新增代码+ComputerUseMcpV2：定义 observe 工具；如果没有这行代码，模型缺少观察入口。
         _tool("screenshot", "获取当前屏幕截图摘要。", {"reason": {"type": "string"}}, read_only=True),  # 新增代码+ComputerUseMcpV2：定义 screenshot 工具；如果没有这行代码，视觉状态无法获取。
         _tool("cursor_position", "读取当前鼠标指针位置。", {"reason": {"type": "string"}}, read_only=True),  # 新增代码+ComputerUseMcpV2：定义光标位置工具；如果没有这行代码，模型无法查询鼠标状态。
