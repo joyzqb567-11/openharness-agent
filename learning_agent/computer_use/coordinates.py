@@ -6,6 +6,7 @@ from typing import Any  # 新增代码+Phase39WindowsCoordinates: 引入通用 J
 PHASE39_WINDOWS_COORDINATES_MARKER = "PHASE39_WINDOWS_COORDINATES_READY"  # 新增代码+Phase39WindowsCoordinates: 固定 Phase39 验收 marker；如果没有这行代码，真实终端验收无法稳定匹配阶段完成信号。
 PHASE39_WINDOWS_COORDINATES_OK_TOKEN = "PHASE39_WINDOWS_COORDINATES_OK"  # 新增代码+Phase39WindowsCoordinates: 固定 Phase39 自检 OK token；如果没有这行代码，验收无法区分普通输出和自检成功。
 PHASE39_COORDINATE_MODEL = "phase39_windows_coordinate_model"  # 新增代码+Phase39WindowsCoordinates: 固定坐标模型版本；如果没有这行代码，审计证据无法说明坐标由哪套规则生成。
+SCREENSHOT_COORDINATE_MODEL = "claudecode_parity_screenshot_coordinate_mapping_v1"  # 新增代码+ClaudeCodeParityScreenshot: 定义截图坐标映射合同版本；如果没有这行代码，后续 zoom 和审计无法判断截图 scale 字段属于哪个稳定协议。
 PHASE39_ACTIONS_EXPANDED = False  # 新增代码+Phase39WindowsCoordinates: 明确本阶段只改坐标模型不扩大动作范围；如果没有这行代码，用户可能误解为新增了更多真实动作。
 
 
@@ -44,6 +45,24 @@ def rect_width(rect: dict[str, int]) -> int:  # 新增代码+Phase39WindowsCoord
 def rect_height(rect: dict[str, int]) -> int:  # 新增代码+Phase39WindowsCoordinates: 定义高度计算函数；如果没有这行代码，高度计算可能出现负值。
     return max(0, safe_int(rect.get("bottom")) - safe_int(rect.get("top")))  # 新增代码+Phase39WindowsCoordinates: 返回非负高度；如果没有这行代码，异常矩形会影响 DPI 推导。
 # 新增代码+Phase39WindowsCoordinates: 函数段结束，rect_height 到此结束；如果没有这个边界说明，读者不容易看出高度 helper 的范围。
+
+
+# 新增代码+ClaudeCodeParityScreenshot: 函数段开始，build_screenshot_coordinate_mapping 只描述“窗口逻辑坐标如何换成截图像素坐标”；如果没有这段函数，result、image_result 和 metadata 会各自猜 scale，作者意图是给后续 zoom 复用同一个稳定合同。
+def build_screenshot_coordinate_mapping(window: Any, screenshot_width: Any, screenshot_height: Any) -> dict[str, Any]:  # 新增代码+ClaudeCodeParityScreenshot: 定义截图坐标映射 helper；如果没有这行代码，evidence 层无法复用坐标模块的安全兜底规则。
+    raw_window = window if isinstance(window, dict) else {}  # 新增代码+ClaudeCodeParityScreenshot: 只信任 dict 窗口对象；如果没有这行代码，None 或字符串窗口会导致 rect 读取异常。
+    window_rect = rect_from_mapping(raw_window.get("rect", {}))  # 新增代码+ClaudeCodeParityScreenshot: 归一化窗口逻辑 rect；如果没有这行代码，scale 计算会直接依赖不稳定原始字段。
+    window_width = rect_width(window_rect)  # 新增代码+ClaudeCodeParityScreenshot: 计算窗口逻辑宽度；如果没有这行代码，scale_x 没有可靠分母。
+    window_height = rect_height(window_rect)  # 新增代码+ClaudeCodeParityScreenshot: 计算窗口逻辑高度；如果没有这行代码，scale_y 没有可靠分母。
+    pixel_width = max(0, safe_int(screenshot_width))  # 新增代码+ClaudeCodeParityScreenshot: 归一化截图像素宽度并避免负数；如果没有这行代码，坏 provider 尺寸可能污染 metadata。
+    pixel_height = max(0, safe_int(screenshot_height))  # 新增代码+ClaudeCodeParityScreenshot: 归一化截图像素高度并避免负数；如果没有这行代码，坏 provider 尺寸可能污染 metadata。
+    valid = window_width > 0 and window_height > 0 and pixel_width > 0 and pixel_height > 0  # 新增代码+ClaudeCodeParityScreenshot: 判断是否具备真实可换算尺寸；如果没有这行代码，零宽高会触发除零或产生误导 scale。
+    scale_x = round(pixel_width / window_width, 6) if valid else 1.0  # 新增代码+ClaudeCodeParityScreenshot: 计算窗口相对逻辑 x 到截图像素 x 的比例；如果没有这行代码，后续 zoom 无法精确换算横向坐标。
+    scale_y = round(pixel_height / window_height, 6) if valid else 1.0  # 新增代码+ClaudeCodeParityScreenshot: 计算窗口相对逻辑 y 到截图像素 y 的比例；如果没有这行代码，后续 zoom 无法精确换算纵向坐标。
+    fallback_reason = "" if valid else "invalid_window_rect_or_screenshot_size"  # 新增代码+ClaudeCodeParityScreenshot: 记录安全兜底原因；如果没有这行代码，审计时不知道为什么 scale 回落到 1.0。
+    window_logical_rect = {"left": window_rect["left"], "top": window_rect["top"], "right": window_rect["right"], "bottom": window_rect["bottom"], "width": window_width, "height": window_height}  # 新增代码+ClaudeCodeParityScreenshot: 输出带宽高的窗口逻辑 rect；如果没有这行代码，调用方需要重复计算窗口尺寸。
+    screenshot_pixel_rect = {"left": 0, "top": 0, "right": pixel_width, "bottom": pixel_height, "width": pixel_width, "height": pixel_height}  # 新增代码+ClaudeCodeParityScreenshot: 输出截图像素 rect；如果没有这行代码，模型只知道尺寸但不知道截图坐标原点。
+    return {"model": SCREENSHOT_COORDINATE_MODEL, "source": "window_rect_and_screenshot_size", "coordinate_space": "window_relative_logical_to_screenshot_pixel", "valid": valid, "fallback_reason": fallback_reason, "window_logical_rect": window_logical_rect, "screenshot_pixel_rect": screenshot_pixel_rect, "screenshot_pixel_size": {"width": pixel_width, "height": pixel_height}, "window_relative_logical_to_screenshot_pixel": {"source": "window_rect_and_screenshot_size", "coordinate_space": "window_relative_logical", "target_coordinate_space": "screenshot_pixel", "scale_x": scale_x, "scale_y": scale_y, "offset_x": 0.0, "offset_y": 0.0}}  # 新增代码+ClaudeCodeParityScreenshot: 返回完整映射合同；如果没有这行代码，result、图片块和 metadata 无法共享同一份 scale 说明。
+# 新增代码+ClaudeCodeParityScreenshot: 函数段结束，build_screenshot_coordinate_mapping 到此结束；如果没有这个边界说明，用户不容易看出截图映射 helper 的范围。
 
 
 # 新增代码+Phase39WindowsCoordinates: 函数段开始，scaled_rect 用于把逻辑矩形换算成物理矩形；如果没有这段函数，窗口状态无法报告物理边界。

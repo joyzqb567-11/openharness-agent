@@ -68,6 +68,32 @@ class WindowsComputerUseRealScreenshotPhase56Tests(unittest.TestCase):  # 新增
             self.assertNotIn("BM" + "\x00", serialized)  # 新增代码+Phase56RealScreenshotPipeline: 粗略断言 BMP 原始内容没有被直接塞进 JSON；如果没有这行代码，脱敏边界可能漏验。
     # 新增代码+Phase56RealScreenshotPipeline: 函数段结束，test_pipeline_writes_guarded_artifact_and_image_result_without_raw_bytes 到此结束；如果没有这个边界说明，初学者不容易看出 pipeline 成功测试范围。
 
+    def test_pipeline_exposes_screenshot_coordinate_scale_mapping(self) -> None:  # 新增代码+ClaudeCodeParityScreenshot: 函数段开始，验证截图像素尺寸和窗口逻辑尺寸不一致时会输出 scale；如果没有这个测试，坐标映射可能缺失但截图仍然看似成功。
+        with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+ClaudeCodeParityScreenshot: 创建临时 evidence 目录；如果没有这行代码，metadata 检查会污染真实证据目录。
+            bmp = build_phase56_test_bmp(800, 400, title_color=(20, 80, 160), body_color=(245, 245, 245), accent_color=(5, 5, 5))  # 新增代码+ClaudeCodeParityScreenshot: 构造 800x400 的有效截图；如果没有这行代码，scale_x/scale_y 的 2.0 样例没有像素输入。
+            provider = FakePhase56CaptureProvider("win32_gdi_printwindow", bmp, 800, 400)  # 新增代码+ClaudeCodeParityScreenshot: 准备返回 800x400 截图的 fake provider；如果没有这行代码，pipeline 会依赖真实桌面截图。
+            pipeline = WindowsRealScreenshotPipeline(providers=[provider], evidence_root=Path(raw_dir), platform="win32")  # 新增代码+ClaudeCodeParityScreenshot: 创建只使用 fake provider 的截图 pipeline；如果没有这行代码，测试无法稳定控制截图尺寸。
+            window = {"window_id": "hwnd:5601", "hwnd": 5601, "title": "Phase56 Scale Window", "rect": {"left": 10, "top": 20, "right": 410, "bottom": 220}}  # 新增代码+ClaudeCodeParityScreenshot: 构造 400x200 的窗口逻辑 rect；如果没有这行代码，scale 断言没有可靠分母。
+            result = pipeline.capture_window(window)  # 新增代码+ClaudeCodeParityScreenshot: 执行截图并触发 evidence 保存；如果没有这行代码，result/image_result/metadata 都不会生成映射。
+            metadata = json.loads(Path(result["evidence_path"]).read_text(encoding="utf-8"))  # 新增代码+ClaudeCodeParityScreenshot: 读取 metadata JSON；如果没有这行代码，测试无法确认审计文件也保存同一份映射。
+            result_mapping = result["screenshot_coordinate_mapping"]  # 新增代码+ClaudeCodeParityScreenshot: 读取 result 顶层映射；如果没有这行代码，后续断言会重复索引并不清楚被测对象。
+            image_mapping = result["image_results"][0]["screenshot_coordinate_mapping"]  # 新增代码+ClaudeCodeParityScreenshot: 读取第一张图片块映射；如果没有这行代码，模型看图时的坐标合同不会被验证。
+            metadata_mapping = metadata["screenshot_coordinate_mapping"]  # 新增代码+ClaudeCodeParityScreenshot: 读取 metadata 顶层映射；如果没有这行代码，离线审计路径不会被验证。
+            scale = result_mapping["window_relative_logical_to_screenshot_pixel"]  # 新增代码+ClaudeCodeParityScreenshot: 读取核心 scale 字段；如果没有这行代码，断言会和完整结构耦合过紧。
+
+            self.assertTrue(result["captured"])  # 新增代码+ClaudeCodeParityScreenshot: 断言截图成功；如果没有这行代码，失败结果也可能继续检查空 mapping。
+            self.assertEqual(result["screenshot_coordinate_model"], "claudecode_parity_screenshot_coordinate_mapping_v1")  # 新增代码+ClaudeCodeParityScreenshot: 断言 result 带稳定模型版本；如果没有这行代码，后续版本变更可能无声破坏坐标合同。
+            self.assertEqual(result_mapping["window_logical_rect"]["width"], 400)  # 新增代码+ClaudeCodeParityScreenshot: 断言窗口逻辑宽度是 400；如果没有这行代码，scale_x 的分母可能错误。
+            self.assertEqual(result_mapping["window_logical_rect"]["height"], 200)  # 新增代码+ClaudeCodeParityScreenshot: 断言窗口逻辑高度是 200；如果没有这行代码，scale_y 的分母可能错误。
+            self.assertEqual(result_mapping["screenshot_pixel_size"], {"width": 800, "height": 400})  # 新增代码+ClaudeCodeParityScreenshot: 断言截图像素尺寸是 800x400；如果没有这行代码，scale 的分子可能错误。
+            self.assertEqual(scale["scale_x"], 2.0)  # 新增代码+ClaudeCodeParityScreenshot: 断言横向 scale 为 2.0；如果没有这行代码，窗口逻辑坐标到截图像素的 x 换算可能回归。
+            self.assertEqual(scale["scale_y"], 2.0)  # 新增代码+ClaudeCodeParityScreenshot: 断言纵向 scale 为 2.0；如果没有这行代码，窗口逻辑坐标到截图像素的 y 换算可能回归。
+            self.assertEqual(image_mapping, result_mapping)  # 新增代码+ClaudeCodeParityScreenshot: 断言 image_result 使用同一份映射；如果没有这行代码，模型看到图片块时可能拿不到正确 scale。
+            self.assertEqual(metadata_mapping, result_mapping)  # 新增代码+ClaudeCodeParityScreenshot: 断言 metadata 顶层使用同一份映射；如果没有这行代码，审计文件可能和工具响应不一致。
+            self.assertEqual(metadata["screenshot"]["coordinate_mapping"], result_mapping)  # 新增代码+ClaudeCodeParityScreenshot: 断言 metadata.screenshot 分组也保存映射；如果没有这行代码，截图分组内的审计信息可能缺口。
+            self.assertEqual(metadata["image_results"][0]["screenshot_coordinate_mapping"], result_mapping)  # 新增代码+ClaudeCodeParityScreenshot: 断言 metadata 内的 image_result 也带映射；如果没有这行代码，离线审计看图片块时会缺 scale。
+    # 新增代码+ClaudeCodeParityScreenshot: 函数段结束，test_pipeline_exposes_screenshot_coordinate_scale_mapping 到此结束；如果没有这个边界说明，用户不容易看出截图 scale 测试范围。
+
     def test_pipeline_rejects_blank_capture_before_artifact_is_accepted(self) -> None:  # 新增代码+Phase56RealScreenshotPipeline: 函数段开始，验证空白截图不能变成通过 artifact；如果没有这个测试，fake/黑屏截图可能进入生产链。
         with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+Phase56RealScreenshotPipeline: 创建临时 evidence 目录；如果没有这行代码，失败路径可能污染真实 evidence。
             blank_bmp = build_phase56_test_bmp(160, 90, title_color=(0, 0, 0), body_color=(0, 0, 0), accent_color=(0, 0, 0))  # 新增代码+Phase56RealScreenshotPipeline: 构造全黑 BMP；如果没有这行代码，拒绝路径没有像素输入。
