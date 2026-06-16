@@ -64,3 +64,7 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已新增并通过测试：`test_computer_use_mcp_v2_claudecode_protocol_manifest`、`test_computer_use_mcp_v2_protocol_normalizer`。
 - 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope`，共 30 个测试通过。
 - 已通过 py_compile：`claudecode_protocol.py`、`protocol_normalizer.py`、`build_tools.py`、`runtime.py`。
+- Task 4 权限模型 parity 已完成：`ComputerUseMcpV2Context` 新增 `allowed_apps`、`grant_flags`、`sentinel_warnings`、`denied_apps`；`request_access` 支持 ClaudeCode 风格 `apps`、`grantFlags`、风险提示和拒绝记录；`list_granted_applications` 返回 `allowedApps`、`grantFlags`、`sentinelWarnings`、`deniedApps` 并保留旧 `grants` 兼容。
+- 已新增并通过测试：`test_computer_use_mcp_v2_permission_grants`，共 3 个测试通过。
+- 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope`，共 30 个测试通过。
+- 已通过 py_compile：`types.py`、`permissions.py`、`test_computer_use_mcp_v2_permission_grants.py`。
