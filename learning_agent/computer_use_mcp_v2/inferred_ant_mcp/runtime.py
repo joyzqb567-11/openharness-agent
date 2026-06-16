@@ -79,6 +79,7 @@ def _merge_lock_debug(result: dict[str, Any], lock_debug: dict[str, Any]) -> dic
 def cleanup_computer_use_mcp_v2_turn(context: ComputerUseMcpV2Context | None = None, reason: str = "turn cleanup") -> dict[str, Any]:  # 新增代码+ClaudeCodeLockParity：函数段开始，执行 ClaudeCode 风格 turn-end cleanup；如果没有这段函数，长任务结束后缺少统一释放锁入口。
     runtime_context = context or ComputerUseMcpV2Context()  # 新增代码+ClaudeCodeLockParity：缺省创建安全上下文；如果没有这行代码，纯测试调用 None 会崩溃。
     safe_reason = str(reason or "turn cleanup")  # 新增代码+ClaudeCodeLockParity：清理 reason 文本；如果没有这行代码，回调可能收到 None 或奇怪对象。
+    runtime_context.display_pinned_by_model = False  # 新增代码+ClaudeCodeDisplayParity：turn cleanup 只清理模型临时固定显示器状态；如果没有这行代码，displayPinnedByModel 会跨 turn 残留并误导后续观察。
     if callable(runtime_context.cleanup_after_turn):  # 新增代码+ClaudeCodeLockParity：优先使用完整 cleanup 回调；如果没有这行代码，host unhide/abort 清理等完整流程会被绕过。
         return _dict_result(runtime_context.cleanup_after_turn(safe_reason)) or {"cleanup_completed": True, "reason": safe_reason}  # 新增代码+ClaudeCodeLockParity：返回完整 cleanup 结果并兜底成功摘要；如果没有这行代码，调用方无法确认清理完成。
     if callable(runtime_context.release_computer_use_lock):  # 新增代码+ClaudeCodeLockParity：没有完整 cleanup 时使用释放锁兜底；如果没有这行代码，轻量上下文无法释放锁。
