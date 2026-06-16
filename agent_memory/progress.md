@@ -32,6 +32,35 @@
 
 Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：77 个相关测试通过，独立 probe 输出 `COMPUTER_USE_MCP_V2_READY`，新/改 Python 文件 py_compile 通过。真实可见终端验收已通过两次：worktree run `learning_agent/acceptance_controller/runs/agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_091911/result.json`，原项目精确 BAT 路径 run `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_092030\result.json`。
 
+## 主目录同步与 CodeGraph 重建（2026-06-16）
+
+- 用户确认选择“让主目录变成最新版项目”后，主目录 `codex/publish-main` 已从 `bf2bbb9` 快进到 `7c0542b`，与 `codex/computer-use-claudecode-parity` 的最新 computer use parity 提交对齐。
+- 合并前，主目录原有脏改动已保存到 stash：`stash@{Tue Jun 16 12:36:32 2026}: On codex/publish-main: pre-parity-main-dirty-20260616-claudecode-parity`。该 stash 未删除，后续如需找回旧工作区内容可以再检查。
+- 主目录旧 `.codegraph/` 曾被 CodeGraph MCP 进程锁住，`codegraph uninit -f .` 未能删除；随后停止锁进程、执行 `codegraph index -f .`，并清理残留锁。
+- 当前主目录 CodeGraph 状态：`Files 1,228`、`Nodes 47,762`、`Edges 95,043`，`codegraph status .` 显示 `[OK] Index is up to date`。
+- CodeGraph 抽样验证已能定位最新 computer use parity 符号：`_build_zoom_image_result`、`ZOOM_IMAGE_RESULT_MODEL`、`computer_use_mcp_tools`、`ComputerUseMcpSessionAdapter`。
+- 主目录验证已通过：关键文件 `py_compile` 通过；`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_tool_scope` 共 43 个测试通过；`computer_use_independent_mcp_server_probe.py` 输出 `COMPUTER_USE_MCP_V2_READY`，公开工具数为 24。
+- 用户指出 parity worktree 继续保留会干扰后续二次开发后，已删除 `.worktrees/computer-use-claudecode-parity` worktree，并删除已合并分支 `codex/computer-use-claudecode-parity`；主目录仍保留同一提交 `7c0542b`，所以这不是丢代码，而是清理重复源码副本。
+- 用户继续确认清理剩余 worktree 后，已删除 `.worktrees/codex-computer-use-full-desktop-task-router` 与 `.worktrees/stage15a-event-runtime`，并删除对应分支 `codex/computer-use-full-desktop-task-router`、`stage15a-event-runtime`；复核 `git worktree list --porcelain` 只剩主目录，`.worktrees/` 目录当前没有子目录。
+- 用户确认空的 `.worktrees/` 外壳目录也可以删除后，已删除 `H:\codexworkplace\sofeware\OpenHarness-main\.worktrees`，复核结果为目录不存在。
+
 ## 停止条件
 
 若无法打开、观察或向用户本地可见终端窗口输入内容，必须明确说明：真实可见终端交互验收未完成，不能声明开发完成。然后请求用户手动运行 `start_oauth_agent.bat` 并反馈输出或截图。
+
+## ClaudeCode 协议级对齐蓝图（2026-06-16）
+
+- 用户追问为什么不直接做“ClaudeCode 协议级完全对齐”，并确认需要把第 1 层协议层和第 2 层桥接层的补齐方案写成长期蓝图，避免上下文压缩后跑偏。
+- 已按 `superpowers:writing-plans` 规则创建实施蓝图：`docs/superpowers/plans/2026-06-16-computer-use-claudecode-protocol-parity.md`。
+- 蓝图明确：不推倒重写 Windows backend；通过 `inferred_ant_mcp` facade、protocol normalizer、ClaudeCode-compatible schema、权限 grant flags、content blocks、lock lifecycle、display state、dynamic tools/list 和 bridge wrapper 来对齐 ClaudeCode 可观察协议。
+- 蓝图要求后续每个实现任务都先用 CodeGraph 复核 OpenHarness 与 ClaudeCode 相关链路，再按红测、实现、验证、提交的顺序推进。
+- 蓝图的最终完成门禁仍然是：自动化测试通过、独立 MCP probe 输出 `COMPUTER_USE_MCP_V2_READY`、并完成 `start_oauth_agent.bat` 真实可见终端交互验收。
+
+## ClaudeCode 协议级对齐执行进度（2026-06-16）
+
+- Task 1-3 已完成第一组基础对齐：新增 `claudecode_protocol.py` 保存 ClaudeCode 字段、grant flags、sentinel 应用和 defers-lock 常量；新增 `protocol_normalizer.py` 把 `coordinate`、`start_coordinate`、`region`、`bundle_id`、`apps`、`actions`、`duration`、`text`、`direction/amount` 转成 Windows runtime 兼容字段。
+- `build_tools.py` 已改为 ClaudeCode-compatible 主字段：鼠标坐标主推 `coordinate`，拖拽主推 `start_coordinate` + `coordinate`，zoom 主推 `region`，open_application 主推 `bundle_id`，request_access 主推 `apps`/`grantFlags`，computer_batch 主推 `actions`；旧 `x/y`、`app_name`、`applications`、`steps` 等字段仍保留兼容。
+- `runtime.py` 已在分发入口先调用 `normalize_computer_use_arguments`，确保 agent-side 和 stdio-side 共用同一个协议转换边界。
+- 已新增并通过测试：`test_computer_use_mcp_v2_claudecode_protocol_manifest`、`test_computer_use_mcp_v2_protocol_normalizer`。
+- 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope`，共 30 个测试通过。
+- 已通过 py_compile：`claudecode_protocol.py`、`protocol_normalizer.py`、`build_tools.py`、`runtime.py`。

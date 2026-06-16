@@ -12,6 +12,7 @@ from .clipboard import read_clipboard, write_clipboard  # 新增代码+ComputerU
 from .errors import error_result  # 新增代码+ComputerUseMcpV2：导入统一失败结果；如果没有这行代码，runtime 失败格式会漂移。
 from .observation import observe  # 新增代码+ComputerUseMcpV2：导入观察工具；如果没有这行代码，observe/screenshot 无法执行。
 from .permissions import list_granted_applications, request_access  # 新增代码+ComputerUseMcpV2：导入权限工具；如果没有这行代码，授权类工具无法执行。
+from .protocol_normalizer import normalize_computer_use_arguments  # 新增代码+ClaudeCodeProtocolParity：导入 ClaudeCode 参数归一化入口；如果没有这行代码，runtime 会继续把 coordinate/region/bundle_id 当未知字段传下去。
 from .result_blocks import success_result  # 新增代码+ComputerUseMcpV2：导入统一成功结果；如果没有这行代码，wait 等工具会手写结果。
 from .telemetry import emit_acceptance, record_trace  # 新增代码+ComputerUseMcpV2：导入 trace 和验收事件；如果没有这行代码，执行证据链不会写入。
 from .types import ComputerUseMcpV2Context  # 新增代码+ComputerUseMcpV2：导入上下文并在本模块重导出；如果没有这行代码，测试和 wrapper 无法构造上下文。
@@ -25,7 +26,7 @@ def normalize_tool_name(tool_name: str) -> str:  # 新增代码+ComputerUseMcpV2
 def dispatch_computer_use_mcp_v2_tool(tool_name: str, arguments: dict[str, Any] | None, context: ComputerUseMcpV2Context | None = None) -> dict[str, Any]:  # 新增代码+ComputerUseMcpV2：函数段开始，执行一个 v2 MCP 工具；如果没有这段函数，server 和 agent-side wrapper 没有统一入口。
     runtime_context = context or ComputerUseMcpV2Context()  # 新增代码+ComputerUseMcpV2：缺省创建上下文；如果没有这行代码，独立 selftest 调用会失败。
     raw_name = normalize_tool_name(tool_name)  # 新增代码+ComputerUseMcpV2：规范工具名；如果没有这行代码，前缀名无法执行。
-    safe_arguments = dict(arguments or {})  # 新增代码+ComputerUseMcpV2：复制参数避免污染调用方对象；如果没有这行代码，batch 或工具可能改写原始输入。
+    safe_arguments = normalize_computer_use_arguments(raw_name, dict(arguments or {}))  # 修改代码+ClaudeCodeProtocolParity：先把 ClaudeCode 字段归一化为 Windows runtime 字段；如果没有这行代码，coordinate/region/bundle_id/apps/actions 无法稳定执行。
     record_trace(runtime_context, "tool_started", {"tool_name": raw_name, "arguments_keys": sorted(safe_arguments.keys())})  # 新增代码+ComputerUseMcpV2：记录开始事件；如果没有这行代码，trace 无法证明 v2 被调用。
     if raw_name in FORBIDDEN_LEGACY_RAW_TOOL_NAMES:  # 新增代码+ComputerUseMcpV2：硬拒绝旧接口和蓝图外接口；如果没有这行代码，隐藏工具可被直接调用。
         result = error_result(raw_name, f"legacy_or_forbidden_tool:{raw_name}", error_class="legacy_tool_forbidden")  # 新增代码+ComputerUseMcpV2：构造 legacy 拒绝；如果没有这行代码，模型不知道为什么被拒绝。
