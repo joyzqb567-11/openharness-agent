@@ -1,6 +1,6 @@
-# Computer Use ClaudeCode Protocol Parity Implementation Plan
+﻿# Computer Use ClaudeCode Protocol Parity Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 把 OpenHarness agent 的 Computer Use 第 1 层“协议层”和第 2 层“桥接层”尽可能对齐 ClaudeCode 的可观察 computer use 行为，同时保留 Windows in-tree runtime 作为底层执行层。
 
@@ -98,7 +98,7 @@ Modify:
 - Create: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/claudecode_protocol.py`
 - Modify: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py`
 
-- [ ] **Step 1: 写协议清单红测**
+- [x] **Step 1: 写协议清单红测**
 
 测试必须验证 OpenHarness 暴露的工具名覆盖当前 24 个工具，并且 forbidden legacy raw names 不会出现在 schema 中。
 
@@ -148,7 +148,7 @@ class ComputerUseMcpV2ClaudeCodeProtocolManifestTests(unittest.TestCase):
         self.assertFalse(names.intersection(FORBIDDEN_LEGACY_RAW_TOOL_NAMES))
 ```
 
-- [ ] **Step 2: 运行红测确认当前协议差异**
+- [x] **Step 2: 运行红测确认当前协议差异**
 
 Run:
 
@@ -158,7 +158,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_prot
 
 Expected: 至少 schema 字段 parity 测试失败，因为 `coordinate`、`region`、`bundle_id`、`apps` 还没有作为主字段完整暴露。
 
-- [ ] **Step 3: 在 `claudecode_protocol.py` 定义协议常量**
+- [x] **Step 3: 在 `claudecode_protocol.py` 定义协议常量**
 
 实现时每一行新代码都要按 AGENTS.md 规则添加中文注释，注释前缀使用 `新增代码+ClaudeCodeProtocolParity`。
 
@@ -184,7 +184,7 @@ CLAUDECODE_DEFERS_LOCK_TOOLS = {
 }
 ```
 
-- [ ] **Step 4: 提交 Task 1**
+- [x] **Step 4: 提交 Task 1**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/claudecode_protocol.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py learning_agent/tests/test_computer_use_mcp_v2_claudecode_protocol_manifest.py
@@ -200,7 +200,7 @@ git commit -m "test: lock computer use claudecode protocol manifest"
 - Modify: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/runtime.py`
 - Modify: `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`
 
-- [ ] **Step 1: 写 coordinate/region/bundle/apps 红测**
+- [x] **Step 1: 写 coordinate/region/bundle/apps 红测**
 
 ```python
 import unittest
@@ -240,7 +240,7 @@ class ComputerUseMcpV2ProtocolNormalizerTests(unittest.TestCase):
         self.assertEqual(normalized["app_name"], "notepad.exe")
 ```
 
-- [ ] **Step 2: 实现 normalizer**
+- [x] **Step 2: 实现 normalizer**
 
 实现要求：
 
@@ -254,11 +254,11 @@ class ComputerUseMcpV2ProtocolNormalizerTests(unittest.TestCase):
 - `apps` 映射为 `applications`，同时保留 `apps`。
 - `actions` 映射为 `steps`，同时保留 `actions`。
 
-- [ ] **Step 3: 在 runtime 分发入口使用 normalizer**
+- [x] **Step 3: 在 runtime 分发入口使用 normalizer**
 
 `dispatch_computer_use_mcp_v2_tool` 必须在任何权限、观察、动作、batch 分支之前调用 normalizer。这样所有后续模块只需要处理 normalized arguments。
 
-- [ ] **Step 4: 运行 normalizer 测试**
+- [x] **Step 4: 运行 normalizer 测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer
@@ -266,7 +266,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_protocol_normal
 
 Expected: PASS.
 
-- [ ] **Step 5: 提交 Task 2**
+- [x] **Step 5: 提交 Task 2**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/protocol_normalizer.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/runtime.py learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py learning_agent/tests/test_computer_use_mcp_v2_protocol_normalizer.py
@@ -280,7 +280,7 @@ git commit -m "feat: normalize claudecode computer use protocol arguments"
 - Modify: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py`
 - Test: `learning_agent/tests/test_computer_use_mcp_v2_claudecode_protocol_manifest.py`
 
-- [ ] **Step 1: 扩展 manifest 测试**
+- [x] **Step 1: 扩展 manifest 测试**
 
 检查 `left_click`、`mouse_move`、`zoom`、`open_application`、`request_access`、`computer_batch` 的 schema 主字段。
 
@@ -296,11 +296,11 @@ Expected schema fields:
 - `request_access`: `apps`, `reason`
 - `computer_batch`: `actions`
 
-- [ ] **Step 2: 修改 `build_tools.py`**
+- [x] **Step 2: 修改 `build_tools.py`**
 
 保留旧字段兼容但不要把旧字段作为主描述。schema 描述里必须明确 ClaudeCode 风格字段是推荐字段。
 
-- [ ] **Step 3: 确认 `tool_scope.py` 未暴露旧 raw 工具**
+- [x] **Step 3: 确认 `tool_scope.py` 未暴露旧 raw 工具**
 
 Run:
 
@@ -310,7 +310,7 @@ python -m unittest learning_agent.tests.test_computer_use_tool_scope
 
 Expected: PASS.
 
-- [ ] **Step 4: 提交 Task 3**
+- [x] **Step 4: 提交 Task 3**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py learning_agent/tests/test_computer_use_mcp_v2_claudecode_protocol_manifest.py
@@ -325,7 +325,7 @@ git commit -m "feat: expose claudecode-compatible computer use schemas"
 - Modify: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/permissions.py`
 - Create: `learning_agent/tests/test_computer_use_mcp_v2_permission_grants.py`
 
-- [ ] **Step 1: 写 app allowlist 和 grant flags 测试**
+- [x] **Step 1: 写 app allowlist 和 grant flags 测试**
 
 测试输入：
 
@@ -352,7 +352,7 @@ Expected:
 - `PowerShell` 被标记为 shell sentinel 风险应用。
 - `list_granted_applications` 返回 ClaudeCode-compatible 结构。
 
-- [ ] **Step 2: 实现 grant state**
+- [x] **Step 2: 实现 grant state**
 
 `ComputerUseMcpV2Context` 增加字段：
 
@@ -363,7 +363,7 @@ Expected:
 
 默认 `grant_flags` 使用 `clipboardRead=False`、`clipboardWrite=False`、`systemKeyCombos=False`。
 
-- [ ] **Step 3: 实现 sentinel 分类**
+- [x] **Step 3: 实现 sentinel 分类**
 
 Windows 风险类别：
 
@@ -373,7 +373,7 @@ Windows 风险类别：
 
 sentinel 只影响提示和审计，不直接替代用户授权。
 
-- [ ] **Step 4: 运行权限测试**
+- [x] **Step 4: 运行权限测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_permission_grants
@@ -381,7 +381,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_permission_gran
 
 Expected: PASS.
 
-- [ ] **Step 5: 提交 Task 4**
+- [x] **Step 5: 提交 Task 4**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/types.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/permissions.py learning_agent/tests/test_computer_use_mcp_v2_permission_grants.py
@@ -398,7 +398,7 @@ git commit -m "feat: align computer use permission grants with claudecode"
 - Modify: `learning_agent/computer_use_mcp_v2/windows_runtime/image_messages.py`
 - Create: `learning_agent/tests/test_computer_use_mcp_v2_result_blocks.py`
 
-- [ ] **Step 1: 写结果 block 测试**
+- [x] **Step 1: 写结果 block 测试**
 
 Expected result shape:
 
@@ -423,7 +423,7 @@ Expected result shape:
 }
 ```
 
-- [ ] **Step 2: 实现 text/image block helpers**
+- [x] **Step 2: 实现 text/image block helpers**
 
 `result_blocks.py` 增加：
 
@@ -431,11 +431,11 @@ Expected result shape:
 - `image_content_block(data: str, media_type: str) -> dict[str, Any]`
 - `success_result(..., content: list[dict[str, Any]] | None = None, debug: dict[str, Any] | None = None)`
 
-- [ ] **Step 3: 适配 screenshot 和 zoom**
+- [x] **Step 3: 适配 screenshot 和 zoom**
 
 `screenshot` 和 `zoom` 必须优先返回 content blocks。Windows artifact path 放进 `debug.artifact_path`，不要让模型只能通过文件路径理解截图。
 
-- [ ] **Step 4: 运行结果测试**
+- [x] **Step 4: 运行结果测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_result_blocks
@@ -443,7 +443,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_result_blocks
 
 Expected: PASS.
 
-- [ ] **Step 5: 提交 Task 5**
+- [x] **Step 5: 提交 Task 5**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/result_blocks.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/observation.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/actions.py learning_agent/computer_use_mcp_v2/windows_runtime/image_messages.py learning_agent/tests/test_computer_use_mcp_v2_result_blocks.py
@@ -461,7 +461,7 @@ git commit -m "feat: return claudecode-style computer use content blocks"
 - Modify: `learning_agent/computer_use_mcp_v2/windows_runtime/turn_cleanup.py`
 - Create: `learning_agent/tests/test_computer_use_mcp_v2_lock_lifecycle.py`
 
-- [ ] **Step 1: 写 defers-lock 测试**
+- [x] **Step 1: 写 defers-lock 测试**
 
 Expected:
 
@@ -471,7 +471,7 @@ Expected:
 - `left_click` acquire lock。
 - turn cleanup release lock。
 
-- [ ] **Step 2: 扩展 context callbacks**
+- [x] **Step 2: 扩展 context callbacks**
 
 `ComputerUseMcpV2Context` 增加：
 
@@ -483,7 +483,7 @@ Expected:
 
 没有 agent callback 时使用安全 no-op，并在结果 debug 中记录 `lock_backend: "unavailable"`。
 
-- [ ] **Step 3: 在 runtime 中执行 lock 语义**
+- [x] **Step 3: 在 runtime 中执行 lock 语义**
 
 分发前判断工具名：
 
@@ -491,7 +491,7 @@ Expected:
 - 其他 computer use 工具先 acquire lock。
 - acquire 失败时返回 `computer_use_lock_unavailable`，不要继续执行鼠标键盘。
 
-- [ ] **Step 4: 运行 lock 测试**
+- [x] **Step 4: 运行 lock 测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle
@@ -499,7 +499,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle
 
 Expected: PASS.
 
-- [ ] **Step 5: 提交 Task 6**
+- [x] **Step 5: 提交 Task 6**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/types.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/runtime.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/bind_session_context.py learning_agent/computer_use_mcp_v2/windows_runtime/session_runtime.py learning_agent/computer_use_mcp_v2/windows_runtime/turn_cleanup.py learning_agent/tests/test_computer_use_mcp_v2_lock_lifecycle.py
@@ -516,7 +516,7 @@ git commit -m "feat: align computer use lock lifecycle with claudecode"
 - Modify: `learning_agent/computer_use_mcp_v2/windows_runtime/coordinates.py`
 - Create: `learning_agent/tests/test_computer_use_mcp_v2_display_state.py`
 
-- [ ] **Step 1: 写 display state 测试**
+- [x] **Step 1: 写 display state 测试**
 
 Expected fields:
 
@@ -531,15 +531,15 @@ Expected behavior:
 - display resolve 后写入 `displayResolvedForApps`。
 - cleanup 不清空 `lastScreenshotDims`，但清理临时 pinned state。
 
-- [ ] **Step 2: 实现 context 字段和 callbacks**
+- [x] **Step 2: 实现 context 字段和 callbacks**
 
 OpenHarness 字段使用 Python snake_case 保存，返回给模型时使用 ClaudeCode camelCase。
 
-- [ ] **Step 3: 连接 Windows 坐标系统**
+- [x] **Step 3: 连接 Windows 坐标系统**
 
 `coordinates.py` 只暴露必要转换，不改变现有 DPI 和截图映射核心逻辑。
 
-- [ ] **Step 4: 运行 display 测试**
+- [x] **Step 4: 运行 display 测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_display_state
@@ -547,7 +547,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_display_state
 
 Expected: PASS.
 
-- [ ] **Step 5: 提交 Task 7**
+- [x] **Step 5: 提交 Task 7**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/inferred_ant_mcp/types.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/bind_session_context.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/observation.py learning_agent/computer_use_mcp_v2/windows_runtime/coordinates.py learning_agent/tests/test_computer_use_mcp_v2_display_state.py
@@ -562,7 +562,7 @@ git commit -m "feat: add claudecode-style computer use display state"
 - Modify: `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py`
 - Create: `learning_agent/tests/test_computer_use_mcp_v2_dynamic_tools_list.py`
 
-- [ ] **Step 1: 写 tools/list 测试**
+- [x] **Step 1: 写 tools/list 测试**
 
 Expected:
 
@@ -570,11 +570,11 @@ Expected:
 - `request_access.description` 包含 Windows app inventory 返回的安全应用名。
 - app inventory 超时时，`tools/list` 仍返回静态 schema，不崩溃。
 
-- [ ] **Step 2: 实现动态 description 注入**
+- [x] **Step 2: 实现动态 description 注入**
 
 `mcpServer.py` 在 `tools/list` 时调用 Windows app inventory，最多等待 1 秒。失败时记录 debug trace，返回静态描述。
 
-- [ ] **Step 3: 运行 dynamic tools/list 测试**
+- [x] **Step 3: 运行 dynamic tools/list 测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_dynamic_tools_list
@@ -582,7 +582,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_dynamic_tools_l
 
 Expected: PASS.
 
-- [ ] **Step 4: 提交 Task 8**
+- [x] **Step 4: 提交 Task 8**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/claudecode_bridge/mcpServer.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py learning_agent/tests/test_computer_use_mcp_v2_dynamic_tools_list.py
@@ -598,7 +598,7 @@ git commit -m "feat: inject windows app inventory into computer use tools list"
 - Modify: `learning_agent/mcp/agent_adapter.py`
 - Test: existing MCP server and adapter tests
 
-- [ ] **Step 1: 复核 wrapper 行为**
+- [x] **Step 1: 复核 wrapper 行为**
 
 Wrapper 必须负责：
 
@@ -608,7 +608,7 @@ Wrapper 必须负责：
 - 把 MCP content blocks 映射成 agent 模型可读 block。
 - 在 abort 或 turn end 时走 cleanup hook。
 
-- [ ] **Step 2: 补 tool rendering 字段名**
+- [x] **Step 2: 补 tool rendering 字段名**
 
 `toolRendering.py` 使用 ClaudeCode 字段名展示：
 
@@ -623,7 +623,7 @@ Wrapper 必须负责：
 - apps
 - actions
 
-- [ ] **Step 3: 运行 adapter 测试**
+- [x] **Step 3: 运行 adapter 测试**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_mcp_session_adapter
@@ -631,7 +631,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learni
 
 Expected: PASS.
 
-- [ ] **Step 4: 提交 Task 9**
+- [x] **Step 4: 提交 Task 9**
 
 ```powershell
 git add learning_agent/computer_use_mcp_v2/claudecode_bridge/wrapper.py learning_agent/computer_use_mcp_v2/claudecode_bridge/toolRendering.py learning_agent/mcp/agent_adapter.py
@@ -646,7 +646,7 @@ git commit -m "feat: align computer use bridge wrapper with claudecode"
 - Modify: `agent_memory/progress.md`
 - Modify: `agent_memory/bugs.md` only if new risks are found
 
-- [ ] **Step 1: 运行 py_compile**
+- [x] **Step 1: 运行 py_compile**
 
 ```powershell
 python -m py_compile learning_agent/computer_use_mcp_v2/inferred_ant_mcp/claudecode_protocol.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/protocol_normalizer.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/build_tools.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/runtime.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/permissions.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/observation.py learning_agent/computer_use_mcp_v2/inferred_ant_mcp/actions.py learning_agent/computer_use_mcp_v2/claudecode_bridge/wrapper.py learning_agent/computer_use_mcp_v2/claudecode_bridge/mcpServer.py
@@ -654,7 +654,7 @@ python -m py_compile learning_agent/computer_use_mcp_v2/inferred_ant_mcp/claudec
 
 Expected: command exits 0.
 
-- [ ] **Step 2: 运行 computer use 单测矩阵**
+- [x] **Step 2: 运行 computer use 单测矩阵**
 
 ```powershell
 python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_result_blocks learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle learning_agent.tests.test_computer_use_mcp_v2_display_state learning_agent.tests.test_computer_use_mcp_v2_dynamic_tools_list learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_tool_scope
@@ -662,7 +662,7 @@ python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learni
 
 Expected: all tests PASS.
 
-- [ ] **Step 3: 运行独立 MCP probe**
+- [x] **Step 3: 运行独立 MCP probe**
 
 ```powershell
 python learning_agent\acceptance_controller\probes\computer_use_independent_mcp_server_probe.py
@@ -674,7 +674,7 @@ Expected:
 COMPUTER_USE_MCP_V2_READY
 ```
 
-- [ ] **Step 4: 执行真实可见终端验收**
+- [x] **Step 4: 执行真实可见终端验收**
 
 必须启动：
 
@@ -696,11 +696,11 @@ Expected:
 - 输出中能看到 ClaudeCode-compatible 字段或结果摘要。
 - 若截图成功，结果包含模型可见 image content block 或对应 image message。
 
-- [ ] **Step 5: 更新文档和记忆**
+- [x] **Step 5: 更新文档和记忆**
 
 `docs/computer_use_mcp_v2_architecture.md` 记录最终协议链路。`agent_memory/progress.md` 记录通过的测试命令和真实终端 run 路径。若有无法本轮解决的风险，写入 `agent_memory/bugs.md`。
 
-- [ ] **Step 6: 提交 Task 10**
+- [x] **Step 6: 提交 Task 10**
 
 ```powershell
 git add docs/computer_use_mcp_v2_architecture.md agent_memory/progress.md agent_memory/bugs.md

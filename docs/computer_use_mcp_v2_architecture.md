@@ -51,7 +51,16 @@ computer_batch
 
 ## 运行时分发
 
-`runtime.py` 是唯一分发入口：
+`runtime.py` 是唯一分发入口。所有模型传入参数都会先经过 `protocol_normalizer.py`，再进入权限、观察、动作或 batch 分支。这个 normalizer 是 ClaudeCode-facing 字段和 Windows runtime 字段之间的唯一转换边界：
+
+- `coordinate` 会镜像为 `x`、`y`。
+- `start_coordinate` 会镜像为 `start_x`、`start_y`。
+- drag 工具里的 `coordinate` 会镜像为 `end_x`、`end_y`。
+- `region` 会镜像为 `x`、`y`、`width`、`height`。
+- `duration` 会镜像为 `duration_seconds`。
+- `bundle_id` 会镜像为 `app_name`。
+- `apps` 会镜像为 `applications`。
+- `actions` 会镜像为 `steps`。
 
 - `request_access` 和 `list_granted_applications` 进入 `permissions.py`。
 - `observe`、`screenshot`、`zoom` 进入 `observation.py`。
@@ -62,6 +71,34 @@ computer_batch
 - 鼠标、键盘、拖拽、长按等原子动作进入 `actions.py`。
 
 `batch.py` 会再次检查旧工具名、shell 工具名和危险参数，避免模型把禁止工具包在 batch 里绕过白名单。
+
+## ClaudeCode 协议状态
+
+协议常量集中在 `claudecode_protocol.py`。当前 v2 facade 已经具备 ClaudeCode 可观察协议里的主要状态：
+
+- 权限状态：`request_access` 支持 `apps`、`grantFlags`、sentinel 风险分类、拒绝记录；`list_granted_applications` 返回 `allowedApps`、`grantFlags`、`sentinelWarnings`、`deniedApps`，同时保留旧 `grants` 兼容。
+- 锁状态：`request_access` 和 `list_granted_applications` 只检查 lock，不获取 lock；观察和写动作会先 acquire lock；turn cleanup 会释放本轮持有的 desktop control lock。
+- display 状态：`selectedDisplayId`、`displayPinnedByModel`、`displayResolvedForApps`、`lastScreenshotDims` 用 Python snake_case 保存在 context，返回模型时使用 ClaudeCode camelCase。
+- 结果状态：`result_blocks.py` 支持 MCP text/image content blocks；截图和 zoom 可以返回模型可见 image block，同时把 Windows artifact path 放到 `debug.artifact_path`，便于排查。
+
+这些状态不改变 Windows backend 的截图、SendInput、UIA 或坐标核心实现；它们只让模型和 MCP 客户端看到更接近 ClaudeCode 的协议面。
+
+## tools/list 动态注入
+
+`claudecode_bridge/mcpServer.py` 在 `tools/list` 时会尝试读取 Windows 安全应用 inventory，并把候选应用追加到 `request_access.description`。读取最多等待 `1.0` 秒；超时或异常时返回静态 schema，并通过 runtime trace 记录 `computer_use_tools_list_app_inventory`。
+
+这和 ClaudeCode 的思路一致：模型在申请 access 前能看到“可以申请哪些应用”的提示，但工具 schema 本身仍保持稳定，避免 app inventory 失败影响 MCP server 可用性。
+
+## Bridge wrapper
+
+正式 agent 侧调用 `learning_agent/computer_use_mcp_v2/claudecode_bridge/wrapper.py`。这个 wrapper 当前负责四件事：
+
+- 绑定同一个 `ComputerUseMcpV2Context`，让权限、lock、display、截图 artifact 和 turn cleanup 都走 agent 主循环同一事实源。
+- 每次工具调用记录 `current_tool_use_context`，包括工具名、参数、`call_id` 和 session id。
+- 把 MCP `content` blocks 转成 agent model blocks；公开 JSON 里只放轻量摘要，完整 image block 保存在 agent 上，避免重复复制 base64。
+- 在 abort 或异常路径调用 `cleanup_agent_side_turn`，和主循环 finally cleanup 使用同一套 cleanup runtime。
+
+`toolRendering.py` 使用 ClaudeCode 可观察字段名渲染工具消息：`coordinate`、`start_coordinate`、`region`、`direction`、`amount`、`text`、`duration`、`bundle_id`、`apps`、`actions`。
 
 ## Windows 执行边界
 
@@ -89,6 +126,13 @@ computer_batch
 - 只读观察和写动作语义区分。
 - 无 host 写动作失败，不再 no-op 假成功。
 - 图片 artifact 和模型可见 image_result 链路。
+- ClaudeCode-compatible 主字段和旧 OpenHarness 字段双兼容。
+- app allowlist、grant flags、sentinel warnings 和 denied apps。
+- MCP text/image content blocks 与 Windows debug artifact 并存。
+- request/list defers-lock、观察/动作 acquire-lock、turn cleanup release-lock。
+- display state 的 camelCase 模型协议和 snake_case 内部状态。
+- `tools/list` 动态 Windows app inventory 注入。
+- agent-side wrapper 的 current tool use context、`call_id`、content block 映射和 abort cleanup hook。
 
 不能代码级对齐：
 

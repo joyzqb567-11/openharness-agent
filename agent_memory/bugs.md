@@ -22,4 +22,4 @@
 
 ## 验证备注
 
-最近一次聚焦测试 77 个通过；独立 selftest probe 和 py_compile 也通过。AGENTS 规则十七定义的真实可见终端交互验收已通过，原项目精确 BAT 路径 run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_092030\result.json`。
+最近一次完整 computer use 回归矩阵 84 个测试通过；独立 MCP probe 输出 `COMPUTER_USE_MCP_V2_READY`；关键 Python 文件 py_compile 通过。AGENTS 规则十七定义的真实可见终端交互验收已通过，原项目精确 BAT 路径 run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_165645\result.json`。
