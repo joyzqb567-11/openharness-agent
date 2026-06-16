@@ -175,6 +175,30 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
         self.assertIn("legacy", shell_result["reason"])  # 修改代码+ComputerUseMcpV2ToolSurfaceFence：断言 PowerShell 拒绝原因明确；如果没有这一行，排查时无法快速定位命令工具混入。
     # 新增代码+ComputerUseMcpV2RedTests：函数段结束，test_v2_batch_rejects_legacy_and_alias_tools 到此结束；如果没有这个边界说明，用户不容易看出 batch 安全测试范围。
 
+    # 新增代码+ClaudeCodeParity：函数段开始，test_v2_batch_reports_failure_when_parity_step_fails 验证 batch 顶层 ok 不会掩盖 parity 步骤失败；如果没有这段测试，computer_batch 可能把失败桌面动作包装成成功。
+    def test_v2_batch_reports_failure_when_parity_step_fails(self) -> None:  # 新增代码+ClaudeCodeParity：声明 batch parity 失败语义测试；如果没有这一行，unittest 不会执行顶层失败合同。
+        class _FailingHoldKeyHost:  # 新增代码+ClaudeCodeParity：类段开始，模拟 hold_key host 返回失败；如果没有这个 fake，测试无法稳定制造 parity 工具失败。
+            def __init__(self) -> None:  # 新增代码+ClaudeCodeParity：函数段开始，初始化调用记录；如果没有这段函数，测试无法确认 stop_on_error 是否停止后续步骤。
+                self.calls: list[str] = []  # 新增代码+ClaudeCodeParity：保存被调用的方法名；如果没有这一行，batch 停止语义无法断言。
+            # 新增代码+ClaudeCodeParity：函数段结束，_FailingHoldKeyHost.__init__ 到此结束；如果没有这个边界说明，用户不容易看出 fake 状态范围。
+            def hold_key(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，模拟新增 parity hold_key 失败；如果没有这段函数，runtime 会把 host 当成缺失能力。
+                self.calls.append("hold_key")  # 新增代码+ClaudeCodeParity：记录 hold_key 已执行；如果没有这一行，测试无法证明失败来自已执行步骤。
+                return {"ok": False, "reason": "task4_hold_key_rejected", "error_class": "task4_parity_failure", "arguments": dict(arguments)}  # 新增代码+ClaudeCodeParity：返回结构化失败；如果没有这一行，batch 顶层失败条件没有输入。
+            # 新增代码+ClaudeCodeParity：函数段结束，_FailingHoldKeyHost.hold_key 到此结束；如果没有这个边界说明，用户不容易看出 fake 失败范围。
+            def triple_click(self, arguments: dict[str, Any]) -> dict[str, Any]:  # 新增代码+ClaudeCodeParity：函数段开始，提供后续步骤用于验证 stop_on_error；如果没有这段函数，无法区分停止和缺方法。
+                self.calls.append("triple_click")  # 新增代码+ClaudeCodeParity：记录后续步骤执行；如果没有这一行，测试无法发现失败后仍继续执行。
+                return {"ok": True, "method": "triple_click", "arguments": dict(arguments)}  # 新增代码+ClaudeCodeParity：模拟后续步骤成功；如果没有这一行，batch 继续执行时没有可观察结果。
+            # 新增代码+ClaudeCodeParity：函数段结束，_FailingHoldKeyHost.triple_click 到此结束；如果没有这个边界说明，用户不容易看出 fake 后续动作范围。
+        # 新增代码+ClaudeCodeParity：类段结束，_FailingHoldKeyHost 到此结束；如果没有这个边界说明，用户不容易看出 batch fake host 的完整范围。
+        host = _FailingHoldKeyHost()  # 新增代码+ClaudeCodeParity：创建失败 fake host；如果没有这一行，batch 测试没有可控宿主。
+        context = ComputerUseMcpV2Context(host=host)  # 新增代码+ClaudeCodeParity：把 fake host 注入 v2 runtime；如果没有这一行，步骤会走 host_required 而不是 parity 失败。
+        result = dispatch_computer_use_mcp_v2_tool("computer_batch", {"actions": [{"tool": "hold_key", "arguments": {"keys": ["ctrl"], "duration_seconds": 0.1}}, {"tool": "triple_click", "arguments": {"x": 1, "y": 2}}]}, context)  # 新增代码+ClaudeCodeParity：执行先失败后成功的 batch；如果没有这一行，顶层 ok 语义没有可验证输出。
+        self.assertFalse(result["ok"], result)  # 新增代码+ClaudeCodeParity：断言 batch 顶层失败；如果没有这一行，失败步骤仍会被 success_result 掩盖。
+        self.assertEqual(1, result["payload"]["step_count"])  # 新增代码+ClaudeCodeParity：断言 stop_on_error 后只执行一个步骤；如果没有这一行，失败后继续真实动作的风险不会暴露。
+        self.assertFalse(result["payload"]["results"][0]["ok"])  # 新增代码+ClaudeCodeParity：断言步骤明细保留原失败；如果没有这一行，用户无法看到是哪一步失败。
+        self.assertEqual(["hold_key"], host.calls)  # 新增代码+ClaudeCodeParity：断言失败后没有执行 triple_click；如果没有这一行，stop_on_error 语义可能被破坏。
+    # 新增代码+ClaudeCodeParity：函数段结束，test_v2_batch_reports_failure_when_parity_step_fails 到此结束；如果没有这个边界说明，用户不容易看出 batch 失败语义测试范围。
+
     # 新增代码+ClaudeCodeParity：函数段开始，test_mutating_actions_fail_without_host 验证没有 host 的真实桌面动作必须明确失败；如果没有这段测试，无 host 假成功会继续误导模型和用户。
     def test_mutating_actions_fail_without_host(self) -> None:  # 新增代码+ClaudeCodeParity：声明无 host 写动作失败测试；如果没有这一行，unittest 不会执行无 host 安全合同。
         result = dispatch_computer_use_mcp_v2_tool("mcp__computer-use__left_click", {"x": 1, "y": 2}, ComputerUseMcpV2Context())  # 新增代码+ClaudeCodeParity：用没有 host 的上下文调用真实左键动作；如果没有这一行，测试无法复现 noop 假成功问题。

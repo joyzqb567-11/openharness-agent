@@ -184,7 +184,7 @@ class WindowsSendInputDispatcher:  # 新增代码+Phase47WindowsSendInputDispatc
             return _phase47_attach_target([{"type": "key_down", "key": key} for key in keys] + [{"type": "key_up", "key": key} for key in reversed(keys)], target) if keys else []  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的组合键事件；如果没有这一行，快捷键可能缺少最后一跳目标边界。
         if event_type == "hold_key":  # 新增代码+ClaudeCodeParity: 展开按住组合键事件；如果没有这一行，hold_key 会被 dispatcher 当未知事件丢弃。
             keys = [str(key).strip() for key in event.get("keys", []) if str(key).strip()]  # 新增代码+ClaudeCodeParity: 清洗 keys 数组；如果没有这一行，空键名会进入低层 key_down/key_up。
-            duration_seconds = max(0.0, min(30.0, _phase47_safe_float(event.get("duration_seconds", 0.0), 0.0)))  # 修改代码+ClaudeCodeParity: 再次安全解析并夹紧按住秒数；如果没有这一行，绕过 executor 的调用可能传入过长或非法暂停。
+            duration_seconds = max(0.0, min(2.0, _phase47_safe_float(event.get("duration_seconds", 0.0), 0.0)))  # 修改代码+ClaudeCodeParity: 再次安全解析并夹紧到 2 秒；如果没有这一行，绕过 executor 的调用会和 low-level pause 上限不一致。
             return _phase47_attach_target([{"type": "key_down", "key": key} for key in keys] + [{"type": "pause", "seconds": duration_seconds}] + [{"type": "key_up", "key": key} for key in reversed(keys)], target) if keys else []  # 新增代码+ClaudeCodeParity: 返回按下、暂停、逆序抬起序列；如果没有这一行，组合键按住语义不完整。
         if event_type == "text":  # 新增代码+Phase47WindowsSendInputDispatcher: 展开文本输入摘要；如果没有这行代码，type_text 无法进入低层 sender。
             return _phase47_attach_target([{"type": "unicode_text", "text_length": _safe_int(event.get("text_length")), "text_sha256_16": str(event.get("text_sha256_16", "")), "text_redacted": True}], target)  # 修改代码+ControlledPhysicalAdapter：返回带目标身份的脱敏 unicode 文本摘要；如果没有这一行，文本事件无法进入受控 sender 的目标验证。

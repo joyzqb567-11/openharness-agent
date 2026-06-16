@@ -3086,3 +3086,10 @@ Remaining risk:
 - 修复：v2 executor/dispatcher 已补齐新动作规范化和低层展开，low-level sender 已用中键 flags，approval/security 已把 hold_key `keys` 数组纳入 `systemKeyCombos` 检查。
 - 防回归：新增 v2 Task4 unittest 覆盖新动作支持、低层事件序列、middle button flags、危险/普通 hold_key 授权策略。
 - 剩余风险：未执行 AGENTS 规则 17 的真实可见终端交互验收，不能声明“开发完成/验收通过”；本轮也未改 standalone `mcp_executor.py` unsupported 分支。
+
+## 2026-06-16 Fixed/Risk: Task4 quality review found hold_key cleanup and batch masking gaps
+- 问题：`hold_key` 展开为 `key_down -> pause -> key_up` 后，low-level sender 线性执行，若第二个 key_down 或 pause 异常会留下已按下键；同时 `hold_key` 对外允许 30 秒但 low-level pause 最多 2 秒，`systemKeyCombos` 漏掉 `alt+f4/meta/super/cmd`，`computer_batch` 会把失败 step 包成顶层成功；如果没有这条风险记录，复审 FAIL 的核心原因会丢失。
+- 根因：Task4 首轮只补齐动作支持和普通风险检查，没有给低层按键状态机加异常补救，也没有把 batch 的 step-level ok 汇总回顶层 ok；如果没有这条根因记录，后续容易只在 dispatcher 层增加 key_up 而忽略异常路径。
+- 修复：low-level sender 现在跟踪成功按下的键并在异常时逆序补发 key_up，返回 cleanup 证据；`hold_key` 三层统一为 0..2 秒；approval/security token 补齐系统键别名；batch 顶层失败语义按已执行 steps 汇总。
+- 防回归：Task4 测试新增异常 cleanup fake sender、2 秒上限、`alt+f4/meta/super/cmd` 风险、普通 `ctrl+s` 不误报；v2 contract 测试新增 parity step 失败时 batch 顶层失败且 stop_on_error 生效。
+- 剩余风险：真实可见终端交互验收仍未在当前 Codex 环境执行，最终只能报告自动化验证和代码提交，不能声明 AGENTS 规则 17 下的真实终端验收通过。

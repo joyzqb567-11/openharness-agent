@@ -1645,3 +1645,9 @@ Do not overclaim:
 - 修改代码+ClaudeCodeParity：v2 `WindowsSendInputExecutor` 现在把 `triple_click`、`mouse_down`、`mouse_up`、`hold_key` 纳入 `actions_supported`，并把它们规范化为 dispatcher 事件；如果没有这条上下文，public MCP tool 虽已映射但低层仍会拒绝。
 - 修改代码+ClaudeCodeParity：v2 `WindowsSendInputDispatcher` 现在展开三击、独立 down/up、hold_key 按住序列，并保留已有 target/foreground 安全链路；如果没有这条上下文，最后一跳 target 审计和 ClaudeCode parity 事件语义容易分裂。
 - 修改代码+ClaudeCodeParity：`hold_key` 安全策略同时读取 `keys` 数组和兼容 `key` 字符串，`win+r`、`ctrl+alt+delete` 等系统组合键仍要求 `systemKeyCombos`；如果没有这条上下文，后续可能只修 press_key 而重新放出 hold_key 风险。
+
+## 2026-06-16 Task4 review hardening context
+- 修改代码+ClaudeCodeParity：`WindowsSendInputLowLevelSender.send_low_level()` 对键盘事件维护已成功按下的 key 栈，后续任一步异常时会逆序尽力补发 `key_up` 并返回 `keyboard_cleanup_attempted`、`keyboard_cleanup_released_count` 和 `pressed_key_cleanup`；如果没有这条上下文，后续开发者可能又把 hold_key 只当线性事件序列处理。
+- 修改代码+ClaudeCodeParity：`hold_key.duration_seconds` 的 executor 常量、dispatcher 夹紧和 low-level pause 都统一为 0..2 秒；如果没有这条上下文，后续可能再次出现对外报告 30 秒但真实只睡 2 秒的不一致。
+- 修改代码+ClaudeCodeParity：`systemKeyCombos` 风险 token 已覆盖 `alt+f4`、`meta+`、`super+`、`cmd+`，普通 `ctrl+s` 仍不触发高风险授权；如果没有这条上下文，跨平台别名可能重新绕过 Windows 系统键授权。
+- 修改代码+ClaudeCodeParity：`computer_batch` 顶层 `ok` 现在取决于已执行 step 是否全部成功，仍保留 step 明细和 `stop_on_error` 停止语义；如果没有这条上下文，batch 可能再次把失败 parity 工具包装成成功。

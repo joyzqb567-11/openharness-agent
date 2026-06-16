@@ -6440,3 +6440,8 @@ Remaining:
 - 修改代码+ClaudeCodeParity：已实现 `sendinput_dispatcher.py` 新事件展开，并保留 target 和 set_foreground 预备事件；如果没有这条记录，真实窗口焦点和最后一跳审计容易被新动作绕开。
 - 修改代码+ClaudeCodeParity：已实现 `real_sendinput_guard.py` 中键 flags、`approval.py`/`security_policy.py` 的 hold_key 系统组合键授权检查；如果没有这条记录，中键会继续变右键，危险 hold_key 也可能普通授权放行。
 - 自动化验证通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_sendinput_parity_task4 learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope` 共 33 tests OK；`python -m py_compile` 覆盖 6 个改动文件通过；`git diff --check` 退出码 0 且仅有 CRLF 提示。
+
+## 2026-06-16 Task4 quality review hardening progress
+- 修改代码+ClaudeCodeParity：已按红灯优先新增/更新测试，首次复跑 `test_computer_use_mcp_v2_sendinput_parity_task4` 与 `test_computer_use_mcp_v2_contract` 出现 1 个 error 和 3 个 failure，分别证明卡键 cleanup 缺失、2 秒上限不一致、Alt+F4/别名漏检、batch 顶层成功掩盖失败；如果没有这条记录，复审修复无法证明先有失败测试。
+- 修改代码+ClaudeCodeParity：已实现 low-level 异常 cleanup、`hold_key` 0..2 秒一致上限、`alt+f4/meta/super/cmd` 系统组合键识别、`computer_batch` 顶层失败语义；如果没有这条记录，Task4 复审 Important 项会继续挂起。
+- 修改代码+ClaudeCodeParity：小范围红灯测试已转绿，`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_sendinput_parity_task4 learning_agent.tests.test_computer_use_mcp_v2_contract` 共 14 tests OK；如果没有这条记录，后续无法区分本轮修复前后的自动化状态。

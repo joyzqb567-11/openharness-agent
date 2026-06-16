@@ -158,35 +158,62 @@ class WindowsSendInputLowLevelSender:  # 新增代码+Phase58RealSendInputGuard:
         sent_count = 0  # 新增代码+Phase58RealSendInputGuard: 初始化已处理事件计数；如果没有这行代码，结果无法说明动作规模。
         event_types: list[str] = []  # 新增代码+Phase58RealSendInputGuard: 保存事件类型摘要；如果没有这行代码，审计看不到发送了哪些动作族。
         left_button_down = False  # 新增代码+PaintDragMoveGuard：记录左键是否处于按下拖拽状态；如果没有这一行，sender 不知道何时不能再用 SetCursorPos 预先瞬移。
-        for event in list(events or []):  # 新增代码+Phase58RealSendInputGuard: 遍历低层事件；如果没有这行代码，sender 不会处理任何输入。
-            event_type = str(event.get("type", ""))  # 新增代码+Phase58RealSendInputGuard: 读取事件类型；如果没有这行代码，分支无法判断动作。
-            event_types.append(event_type)  # 新增代码+Phase58RealSendInputGuard: 记录事件类型；如果没有这行代码，结果缺少摘要。
-            if event_type == "set_foreground":  # 新增代码+Phase58RealSendInputGuard: 处理前台窗口切换；如果没有这行代码，文本可能发不到安全窗口。
-                sent_count += 1 if self._set_foreground(_phase58_safe_int(event.get("hwnd"))) else 0  # 新增代码+Phase58RealSendInputGuard: 将自建窗口置前；如果没有这行代码，安全窗口可能没有焦点。
-            elif event_type == "mouse_move":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标移动；如果没有这行代码，点击无法落到控件中心。
-                sent_count += 1 if self._set_cursor(_phase58_safe_int(event.get("x")), _phase58_safe_int(event.get("y")), use_set_cursor=not left_button_down) else 0  # 修改代码+PaintDragMoveGuard：拖拽按下期间不先 SetCursorPos；如果没有这一行，Paint 会把真实移动吃掉只留下短断线。
-            elif event_type == "mouse_down":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标按下；如果没有这行代码，click 动作不完整。
-                button = str(event.get("button", "left")).lower()  # 新增代码+PaintDragMoveGuard：读取按下的按钮；如果没有这一行，sender 无法只跟踪左键拖拽。
-                button_sent = self._send_mouse_button(button, down=True)  # 修改代码+PaintDragMoveGuard：发送鼠标按下并保存结果；如果没有这一行，状态更新无法和真实发送结果绑定。
-                sent_count += 1 if button_sent else 0  # 修改代码+PaintDragMoveGuard：按发送结果计数；如果没有这一行，低层事件数量会失真。
-                left_button_down = bool(left_button_down or (button == "left" and button_sent))  # 新增代码+PaintDragMoveGuard：左键按下成功后进入拖拽状态；如果没有这一行，后续移动仍会预先瞬移。
-            elif event_type == "mouse_up":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标抬起；如果没有这行代码，click 动作不完整。
-                button = str(event.get("button", "left")).lower()  # 新增代码+PaintDragMoveGuard：读取抬起的按钮；如果没有这一行，sender 无法判断是否退出左键拖拽。
-                button_sent = self._send_mouse_button(button, down=False)  # 修改代码+PaintDragMoveGuard：发送鼠标抬起并保存结果；如果没有这一行，状态更新会和真实发送脱节。
-                sent_count += 1 if button_sent else 0  # 修改代码+PaintDragMoveGuard：按发送结果计数；如果没有这一行，低层事件数量会失真。
-                left_button_down = False if button == "left" and button_sent else left_button_down  # 新增代码+PaintDragMoveGuard：左键抬起成功后退出拖拽状态；如果没有这一行，后续普通移动会被错误当成拖拽移动。
-            elif event_type == "unicode_text":  # 新增代码+Phase58RealSendInputGuard: 处理 Unicode 文本输入；如果没有这行代码，type_text 无法真实写入。
-                sent_count += self._send_unicode_text(str(event.get("text", "")))  # 新增代码+Phase58RealSendInputGuard: 逐字符发送 Unicode；如果没有这行代码，文本输入只有哈希没有真实效果。
-            elif event_type == "clipboard_text":  # 修改代码+Phase97ControlledNotepadLiveEdit: 处理受控剪贴板粘贴文本；如果没有这一行，Notepad 长文本会因逐键输入丢字而无法稳定验收。
-                sent_count += self._paste_clipboard_text(str(event.get("text", "")))  # 修改代码+Phase97ControlledNotepadLiveEdit: 临时写入剪贴板、粘贴并恢复；如果没有这一行，Phase97 不能可靠写入完整固定文本。
-            elif event_type in {"key_down", "key_up"}:  # 修改代码+Phase97ControlledNotepadLiveEdit: 让真实 sender 支持 Ctrl+S 这类按下/抬起事件；如果没有这一行，Phase97 保存快捷键会被真实后端忽略。
-                sent_count += 1 if self._send_virtual_key(str(event.get("key", "")), down=event_type == "key_down") else 0  # 修改代码+Phase97ControlledNotepadLiveEdit: 发送一个虚拟按键事件并计数；如果没有这一行，Notepad 只能收到文本但无法被 Ctrl+S 保存。
-            elif event_type == "pause":  # 新增代码+PaintStablePause：处理显式暂停事件；如果没有这一行，Paint 切换铅笔工具后可能还没准备好就收到第一条主体轮廓拖拽。
-                time.sleep(max(0.0, min(2.0, float(event.get("seconds", 0.1) or 0.1))))  # 新增代码+PaintStablePause：按事件要求短暂停顿且限制最长 2 秒；如果没有这一行，真实桌面节奏无法被受控调慢或可能被坏参数拖死。
-                sent_count += 1  # 新增代码+PaintStablePause：把暂停也记为已处理的低层步骤；如果没有这一行，报告里的动作数量会漏掉稳定 Paint 的关键步骤。
-            if event_type in {"set_foreground", "mouse_move", "mouse_down", "mouse_up", "key_down", "key_up"}:  # 修改代码+PaintStablePause：真实输入事件后加入极短节拍但显式 pause 走自己的时长；如果没有这一行，Paint 这类应用可能因为事件太密而不采样拖拽线条。
-                time.sleep(0.015)  # 新增代码+PaintPikachuRealLoop：等待 15 毫秒让前台应用处理输入队列；如果没有这一行，低层事件虽然成功发送但画布可能仍然空白。
-        return {"ok": sent_count > 0, "low_level_event_count": sent_count, "low_level_event_types": event_types, "sender": "windows_sendinput_low_level", "raw_text_included": False}  # 新增代码+Phase58RealSendInputGuard: 返回不含原文的发送摘要；如果没有这行代码，runtime 无法审计发送结果。
+        pressed_keys: list[str] = []  # 新增代码+ClaudeCodeParity: 跟踪已经成功按下但尚未抬起的键；如果没有这行代码，异常时不知道要释放哪些键。
+        keyboard_cleanup_attempted = False  # 新增代码+ClaudeCodeParity: 记录是否尝试异常释放；如果没有这行代码，调用方无法审计卡键防护是否启动。
+        keyboard_cleanup_released_count = 0  # 新增代码+ClaudeCodeParity: 记录异常释放成功数量；如果没有这行代码，调用方无法判断 cleanup 做了多少补救。
+        try:  # 新增代码+ClaudeCodeParity: 包住真实低层事件循环；如果没有这行代码，key_down 后异常会直接逃逸并可能留下卡键。
+            for event in list(events or []):  # 修改代码+ClaudeCodeParity: 遍历低层事件并允许异常 cleanup 接管；如果没有这行代码，sender 不会处理任何输入。
+                event_type = str(event.get("type", ""))  # 新增代码+Phase58RealSendInputGuard: 读取事件类型；如果没有这行代码，分支无法判断动作。
+                event_types.append(event_type)  # 新增代码+Phase58RealSendInputGuard: 记录事件类型；如果没有这行代码，结果缺少摘要。
+                if event_type == "set_foreground":  # 新增代码+Phase58RealSendInputGuard: 处理前台窗口切换；如果没有这行代码，文本可能发不到安全窗口。
+                    sent_count += 1 if self._set_foreground(_phase58_safe_int(event.get("hwnd"))) else 0  # 新增代码+Phase58RealSendInputGuard: 将自建窗口置前；如果没有这行代码，安全窗口可能没有焦点。
+                elif event_type == "mouse_move":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标移动；如果没有这行代码，点击无法落到控件中心。
+                    sent_count += 1 if self._set_cursor(_phase58_safe_int(event.get("x")), _phase58_safe_int(event.get("y")), use_set_cursor=not left_button_down) else 0  # 修改代码+PaintDragMoveGuard：拖拽按下期间不先 SetCursorPos；如果没有这一行，Paint 会把真实移动吃掉只留下短断线。
+                elif event_type == "mouse_down":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标按下；如果没有这行代码，click 动作不完整。
+                    button = str(event.get("button", "left")).lower()  # 新增代码+PaintDragMoveGuard：读取按下的按钮；如果没有这一行，sender 无法只跟踪左键拖拽。
+                    button_sent = self._send_mouse_button(button, down=True)  # 修改代码+PaintDragMoveGuard：发送鼠标按下并保存结果；如果没有这一行，状态更新无法和真实发送结果绑定。
+                    sent_count += 1 if button_sent else 0  # 修改代码+PaintDragMoveGuard：按发送结果计数；如果没有这一行，低层事件数量会失真。
+                    left_button_down = bool(left_button_down or (button == "left" and button_sent))  # 新增代码+PaintDragMoveGuard：左键按下成功后进入拖拽状态；如果没有这一行，后续移动仍会预先瞬移。
+                elif event_type == "mouse_up":  # 新增代码+Phase58RealSendInputGuard: 处理鼠标抬起；如果没有这行代码，click 动作不完整。
+                    button = str(event.get("button", "left")).lower()  # 新增代码+PaintDragMoveGuard：读取抬起的按钮；如果没有这一行，sender 无法判断是否退出左键拖拽。
+                    button_sent = self._send_mouse_button(button, down=False)  # 修改代码+PaintDragMoveGuard：发送鼠标抬起并保存结果；如果没有这一行，状态更新会和真实发送脱节。
+                    sent_count += 1 if button_sent else 0  # 修改代码+PaintDragMoveGuard：按发送结果计数；如果没有这一行，低层事件数量会失真。
+                    left_button_down = False if button == "left" and button_sent else left_button_down  # 新增代码+PaintDragMoveGuard：左键抬起成功后退出拖拽状态；如果没有这一行，后续普通移动会被错误当成拖拽移动。
+                elif event_type == "unicode_text":  # 新增代码+Phase58RealSendInputGuard: 处理 Unicode 文本输入；如果没有这行代码，type_text 无法真实写入。
+                    sent_count += self._send_unicode_text(str(event.get("text", "")))  # 新增代码+Phase58RealSendInputGuard: 逐字符发送 Unicode；如果没有这行代码，文本输入只有哈希没有真实效果。
+                elif event_type == "clipboard_text":  # 修改代码+Phase97ControlledNotepadLiveEdit: 处理受控剪贴板粘贴文本；如果没有这一行，Notepad 长文本会因逐键输入丢字而无法稳定验收。
+                    sent_count += self._paste_clipboard_text(str(event.get("text", "")))  # 修改代码+Phase97ControlledNotepadLiveEdit: 临时写入剪贴板、粘贴并恢复；如果没有这一行，Phase97 不能可靠写入完整固定文本。
+                elif event_type == "key_down":  # 修改代码+ClaudeCodeParity: 单独处理按下事件以便记录已按下状态；如果没有这行代码，异常 cleanup 无法知道哪些键需要释放。
+                    key = str(event.get("key", ""))  # 新增代码+ClaudeCodeParity: 读取键名供发送和状态跟踪共用；如果没有这行代码，发送和 cleanup 可能使用不一致的值。
+                    key_sent = self._send_virtual_key(key, down=True)  # 修改代码+ClaudeCodeParity: 发送按下事件并保存结果；如果没有这行代码，无法只跟踪真实成功按下的键。
+                    sent_count += 1 if key_sent else 0  # 修改代码+ClaudeCodeParity: 按发送结果计数；如果没有这行代码，低层事件数量会失真。
+                    if key_sent:  # 新增代码+ClaudeCodeParity: 只记录成功按下的键；如果没有这行代码，cleanup 可能释放从未按下的键。
+                        pressed_keys.append(key)  # 新增代码+ClaudeCodeParity: 把成功按下的键加入栈；如果没有这行代码，异常时无法逆序释放组合键。
+                elif event_type == "key_up":  # 修改代码+ClaudeCodeParity: 单独处理抬起事件以便同步按键状态；如果没有这行代码，正常 key_up 后 cleanup 还会误释放。
+                    key = str(event.get("key", ""))  # 新增代码+ClaudeCodeParity: 读取键名供发送和状态移除共用；如果没有这行代码，状态栈无法准确匹配抬起键。
+                    key_sent = self._send_virtual_key(key, down=False)  # 修改代码+ClaudeCodeParity: 发送抬起事件并保存结果；如果没有这行代码，状态更新无法和真实发送结果绑定。
+                    sent_count += 1 if key_sent else 0  # 修改代码+ClaudeCodeParity: 按发送结果计数；如果没有这行代码，低层事件数量会失真。
+                    if key_sent:  # 新增代码+ClaudeCodeParity: 只在抬起成功后更新状态；如果没有这行代码，失败的 key_up 会被误认为已释放。
+                        for pressed_index in range(len(pressed_keys) - 1, -1, -1):  # 新增代码+ClaudeCodeParity: 从栈尾查找最后一次按下的同名键；如果没有这行代码，重复键或组合键顺序会被误处理。
+                            if pressed_keys[pressed_index] == key:  # 新增代码+ClaudeCodeParity: 匹配当前抬起的键；如果没有这行代码，状态栈会删除错误键。
+                                pressed_keys.pop(pressed_index)  # 新增代码+ClaudeCodeParity: 移除已经成功抬起的键；如果没有这行代码，异常 cleanup 会重复释放已抬起按键。
+                                break  # 新增代码+ClaudeCodeParity: 找到最近同名键后停止；如果没有这行代码，重复键会被一次抬起清掉多个状态。
+                elif event_type == "pause":  # 新增代码+PaintStablePause：处理显式暂停事件；如果没有这一行，Paint 切换铅笔工具后可能还没准备好就收到第一条主体轮廓拖拽。
+                    time.sleep(max(0.0, min(2.0, float(event.get("seconds", 0.1) or 0.1))))  # 修改代码+ClaudeCodeParity: 按事件要求短暂停顿且限制最长 2 秒；如果没有这一行，真实行为会和 executor/dispatcher 的 2 秒上限不一致。
+                    sent_count += 1  # 新增代码+PaintStablePause：把暂停也记为已处理的低层步骤；如果没有这一行，报告里的动作数量会漏掉稳定 Paint 的关键步骤。
+                if event_type in {"set_foreground", "mouse_move", "mouse_down", "mouse_up", "key_down", "key_up"}:  # 修改代码+PaintStablePause：真实输入事件后加入极短节拍但显式 pause 走自己的时长；如果没有这一行，Paint 这类应用可能因为事件太密而不采样拖拽线条。
+                    time.sleep(0.015)  # 新增代码+PaintPikachuRealLoop：等待 15 毫秒让前台应用处理输入队列；如果没有这一行，低层事件虽然成功发送但画布可能仍然空白。
+        except Exception as error:  # 新增代码+ClaudeCodeParity: 捕获低层发送或 pause 异常；如果没有这行代码，按下后的异常会越过 cleanup 直接卡键。
+            keyboard_cleanup_attempted = bool(pressed_keys)  # 新增代码+ClaudeCodeParity: 只有存在未释放按键时才标记 cleanup；如果没有这行代码，结果会误报无键可释放也尝试了 cleanup。
+            cleanup_errors: list[str] = []  # 新增代码+ClaudeCodeParity: 保存 cleanup 期间的异常类型；如果没有这行代码，释放失败原因完全不可审计。
+            for cleanup_key in reversed(list(pressed_keys)):  # 新增代码+ClaudeCodeParity: 按组合键逆序尽力释放；如果没有这行代码，Ctrl+S 这类组合键会用错误顺序恢复。
+                try:  # 新增代码+ClaudeCodeParity: 单个 key_up 失败不阻断后续释放；如果没有这行代码，一个键释放失败会让其他键继续卡住。
+                    if self._send_virtual_key(cleanup_key, down=False):  # 新增代码+ClaudeCodeParity: 补发 key_up 并按真实结果计数；如果没有这行代码，cleanup 只是记录没有实际补救。
+                        keyboard_cleanup_released_count += 1  # 新增代码+ClaudeCodeParity: 增加成功释放计数；如果没有这行代码，调用方无法知道释放了几个键。
+                except Exception as cleanup_error:  # 新增代码+ClaudeCodeParity: 捕获 cleanup 自身异常；如果没有这行代码，补救失败会覆盖原始发送失败。
+                    cleanup_errors.append(type(cleanup_error).__name__)  # 新增代码+ClaudeCodeParity: 记录 cleanup 异常类型；如果没有这行代码，失败证据会丢失。
+            return {"ok": False, "decision": "low_level_exception", "reason": f"low_level_exception:{type(error).__name__}", "low_level_event_count": sent_count, "low_level_event_types": event_types, "sender": "windows_sendinput_low_level", "raw_text_included": False, "keyboard_cleanup_attempted": keyboard_cleanup_attempted, "keyboard_cleanup_released_count": keyboard_cleanup_released_count, "pressed_key_cleanup": {"attempted": keyboard_cleanup_attempted, "pending_key_count": len(pressed_keys), "released_count": keyboard_cleanup_released_count, "cleanup_errors": cleanup_errors}}  # 新增代码+ClaudeCodeParity: 返回异常和 cleanup 摘要；如果没有这行代码，调用方看不到卡键补救是否发生。
+        return {"ok": sent_count > 0, "low_level_event_count": sent_count, "low_level_event_types": event_types, "sender": "windows_sendinput_low_level", "raw_text_included": False, "keyboard_cleanup_attempted": False, "keyboard_cleanup_released_count": 0, "pressed_key_cleanup": {"attempted": False, "pending_key_count": len(pressed_keys), "released_count": 0, "cleanup_errors": []}}  # 修改代码+ClaudeCodeParity: 返回不含原文且包含键盘 cleanup 字段的发送摘要；如果没有这行代码，成功和失败结果字段不一致。
     # 新增代码+Phase58RealSendInputGuard: 函数段结束，WindowsSendInputLowLevelSender.send_low_level 到此结束；如果没有这个边界说明，初学者不容易看出真实发送范围。
 
     def _set_foreground(self, hwnd: int) -> bool:  # 新增代码+Phase58RealSendInputGuard: 函数段开始，把自建窗口置为前台；如果没有这段函数，文本可能打到旧焦点窗口。

@@ -14,7 +14,7 @@ OBSERVE_ACTIONS: tuple[str, ...] = ("screenshot", "capture", "observe", "observe
 DESKTOP_ACTIONS: tuple[str, ...] = ("move", "move_mouse", "click", "double_click", "triple_click", "scroll", "press_key", "hold_key", "type_text", "drag_path", "mouse_down", "mouse_up")  # 修改代码+ClaudeCodeParity: 把 ClaudeCode parity 写动作纳入 desktopAction；如果没有这行代码，新动作会只靠默认分支且状态语义不清晰。
 CLIPBOARD_READ_ACTIONS: tuple[str, ...] = ("clipboard_read", "read_clipboard", "get_clipboard")  # 新增代码+Phase48WindowsSecurityPolicy: 定义剪贴板读取动作集合；如果没有这行代码，读取剪贴板不会被单独授权。
 CLIPBOARD_WRITE_ACTIONS: tuple[str, ...] = ("clipboard_write", "write_clipboard", "set_clipboard", "paste", "paste_text")  # 新增代码+Phase48WindowsSecurityPolicy: 定义剪贴板写入动作集合；如果没有这行代码，写剪贴板可能被普通动作授权误放行。
-SYSTEM_KEY_COMBO_TOKENS: tuple[str, ...] = ("ctrl+alt+delete", "win+", "windows+", "alt+tab", "ctrl+shift+esc", "taskmgr")  # 新增代码+Phase48WindowsSecurityPolicy: 定义系统级组合键特征；如果没有这行代码，危险快捷键无法触发 systemKeyCombos 门禁。
+SYSTEM_KEY_COMBO_TOKENS: tuple[str, ...] = ("ctrl+alt+delete", "win+", "windows+", "meta+", "super+", "cmd+", "alt+tab", "alt+f4", "ctrl+shift+esc", "taskmgr")  # 修改代码+ClaudeCodeParity: 定义系统级组合键和 win 别名特征；如果没有这行代码，Alt+F4 或 meta/super/cmd 组合会绕过 systemKeyCombos 门禁。
 
 
 def _bool_token(value: bool) -> str:  # 新增代码+Phase48WindowsSecurityPolicy: 函数段开始，把布尔值转成稳定小写 token；如果没有这段函数，CLI 输出会出现 True/False 大小写漂移。

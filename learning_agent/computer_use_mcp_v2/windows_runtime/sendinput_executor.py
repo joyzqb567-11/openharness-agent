@@ -13,7 +13,7 @@ PHASE37_SUPPORTED_ACTIONS = ("click", "double_click", "drag_path", "hold_key", "
 PHASE37_TEXT_LIMIT = 2000  # 新增代码+Phase37WindowsSendInputExecutor: 限制单次文本输入长度；如果没有这行代码，模型可能把大段敏感内容或长文灌入桌面输入。
 PHASE37_HOLD_KEY_MAX_KEYS = 8  # 新增代码+ClaudeCodeParity: 限制 hold_key 一次最多按住 8 个键；如果没有这行代码，坏参数可能生成过长组合键序列拖慢或卡住真实输入。
 PHASE37_HOLD_KEY_MAX_KEY_LENGTH = 80  # 新增代码+ClaudeCodeParity: 限制 hold_key 单个键名长度；如果没有这行代码，异常长键名会污染日志并传到低层 sender。
-PHASE37_HOLD_KEY_MAX_DURATION_SECONDS = 30.0  # 新增代码+ClaudeCodeParity: 限制 hold_key 最长按住 30 秒；如果没有这行代码，模型或坏参数可能让真实键盘长时间保持按下。
+PHASE37_HOLD_KEY_MAX_DURATION_SECONDS = 2.0  # 修改代码+ClaudeCodeParity: 限制 hold_key 最长按住 2 秒并对齐 low-level pause；如果没有这行代码，报告 30 秒但真实只睡 2 秒会误导调用方。
 
 
 @dataclass(frozen=True)  # 新增代码+Phase37WindowsSendInputExecutor: 让动作结果不可变，避免审计结果事后被改写；如果没有这行代码，调用方可能无意污染执行事实。
@@ -173,7 +173,7 @@ class WindowsSendInputExecutor:  # 新增代码+Phase37WindowsSendInputExecutor:
             if len(keys) > PHASE37_HOLD_KEY_MAX_KEYS:  # 新增代码+ClaudeCodeParity: 拒绝过多按键；如果没有这行代码，坏参数可能产生不可控组合键。
                 return [], {}, self._refusal(action, f"hold_key keys 最多 {PHASE37_HOLD_KEY_MAX_KEYS} 个，未调用 SendInput。", {"key_count": len(keys)})  # 新增代码+ClaudeCodeParity: 返回按键数量拒绝；如果没有这行代码，用户不知道超出限制。
             if duration_seconds < 0 or duration_seconds > PHASE37_HOLD_KEY_MAX_DURATION_SECONDS:  # 新增代码+ClaudeCodeParity: 检查按住时长范围；如果没有这行代码，真实键盘可能被长时间按住。
-                return [], {}, self._refusal(action, "hold_key duration_seconds 必须在 0 到 30 秒之间，未调用 SendInput。", {"duration_seconds": duration_seconds})  # 新增代码+ClaudeCodeParity: 返回时长拒绝；如果没有这行代码，用户不知道时长边界。
+                return [], {}, self._refusal(action, "hold_key duration_seconds 必须在 0 到 2 秒之间，未调用 SendInput。", {"duration_seconds": duration_seconds})  # 修改代码+ClaudeCodeParity: 返回 2 秒时长拒绝；如果没有这行代码，用户会以为 30 秒长按仍被支持。
             event = {"type": "hold_key", "keys": keys, "duration_seconds": duration_seconds}  # 新增代码+ClaudeCodeParity: 生成 hold_key 规范事件；如果没有这行代码，dispatcher 无法展开 key_down/pause/key_up。
             return [event], {"keys": list(keys), "key_count": len(keys), "duration_seconds": duration_seconds}, None  # 新增代码+ClaudeCodeParity: 返回 hold_key 事件和摘要；如果没有这行代码，execute 无法分发组合键按住。
         text = str(arguments.get("text", ""))  # 新增代码+Phase37WindowsSendInputExecutor: 读取文本输入内容；如果没有这行代码，type_text 分支无法计算长度和指纹。

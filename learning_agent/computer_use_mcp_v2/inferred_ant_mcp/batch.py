@@ -26,6 +26,11 @@ def run_batch(context: ComputerUseMcpV2Context, arguments: dict[str, Any], dispa
         results.append(step_result)  # 新增代码+ComputerUseMcpV2：保存步骤结果；如果没有这行代码，最终报告为空。
         if stop_on_error and not bool(step_result.get("ok")):  # 新增代码+ComputerUseMcpV2：按策略遇错停止；如果没有这行代码，失败后可能继续真实动作。
             break  # 新增代码+ComputerUseMcpV2：停止后续步骤；如果没有这行代码，stop_on_error 不生效。
-    return success_result("computer_batch", {"results": results, "step_count": len(results)})  # 新增代码+ComputerUseMcpV2：返回批量摘要；如果没有这行代码，模型无法读取批量结果。
+    all_steps_ok = all(bool(step.get("ok")) for step in results)  # 修改代码+ClaudeCodeParity：汇总已执行步骤是否全部成功；如果没有这行代码，失败步骤会被 batch 顶层成功掩盖。
+    batch_result = success_result("computer_batch", {"results": results, "step_count": len(results), "all_steps_ok": all_steps_ok})  # 修改代码+ClaudeCodeParity：保留原有 payload 形状并加入整体步骤状态；如果没有这行代码，调用方拿不到 step 明细和整体判断。
+    if not all_steps_ok:  # 新增代码+ClaudeCodeParity：检查是否存在失败步骤；如果没有这行代码，顶层 ok 不会随步骤失败变成 false。
+        batch_result["ok"] = False  # 新增代码+ClaudeCodeParity：把顶层 ok 改为失败；如果没有这行代码，runtime 会记录 batch 成功从而误导模型。
+        batch_result["reason"] = "batch_step_failed"  # 新增代码+ClaudeCodeParity：给顶层失败明确原因；如果没有这行代码，用户只看到 ok false 却不知道是哪类失败。
+        batch_result["error_class"] = "batch_step_failed"  # 新增代码+ClaudeCodeParity：给顶层失败明确错误类别；如果没有这行代码，调用方无法稳定分流 batch 步骤失败。
+    return batch_result  # 修改代码+ClaudeCodeParity：返回按步骤状态修正后的 batch 结果；如果没有这行代码，computer_batch 没有最终输出。
 # 新增代码+ComputerUseMcpV2：函数段结束，run_batch 到此结束；如果没有这个边界说明，用户不容易看出批量执行范围。
-

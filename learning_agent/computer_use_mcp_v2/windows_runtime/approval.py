@@ -18,7 +18,7 @@ PHASE38_APPROVAL_CONTRACT = "phase38_windows_computer_approval"  # 新增代码+
 PHASE38_ACTIONS_EXPANDED = False  # 新增代码+Phase38WindowsComputerApproval: 明确 Phase38 不扩大真实动作面；如果没有这行代码，用户可能误以为本阶段新增了更多可执行动作。
 DEFAULT_GRANT_FLAGS: dict[str, bool] = {"observe": True, "desktopAction": True, "clipboardRead": False, "clipboardWrite": False, "systemKeyCombos": False}  # 修改代码+Phase48WindowsSecurityPolicy: 把 grant flags 扩展为 observe/action/system_key/clipboard 类别且高风险默认关闭；如果没有这行代码，Phase48 无法区分只读观察、普通动作和危险权限。
 FORBIDDEN_TARGET_PATTERNS: dict[str, tuple[str, ...]] = {"shell": ("powershell.exe", "powershell", "pwsh.exe", "cmd.exe", "command prompt", "windows terminal", "windowsterminal.exe", "wt.exe"), "codex_ui": ("codex", "openai codex"), "system_settings": ("systemsettings.exe", "settings", "control panel", "regedit", "gpedit", "task manager"), "password_manager": ("password", "credential", "bitwarden", "1password", "keepass"), "auth": ("otp", "two-factor", "2fa", "authenticator", "verification code", "captcha", "login")}  # 新增代码+Phase38WindowsComputerApproval: 定义禁止自动化的高风险窗口关键词；如果没有这行代码，终端/密码/认证等目标可能被误放行。
-SYSTEM_KEY_COMBO_TOKENS: tuple[str, ...] = ("ctrl+alt+delete", "win+", "windows+", "alt+tab", "ctrl+shift+esc", "taskmgr")  # 新增代码+Phase38WindowsComputerApproval: 定义需要额外授权的系统级组合键；如果没有这行代码，系统快捷键可能绕过 grant flag。
+SYSTEM_KEY_COMBO_TOKENS: tuple[str, ...] = ("ctrl+alt+delete", "win+", "windows+", "meta+", "super+", "cmd+", "alt+tab", "alt+f4", "ctrl+shift+esc", "taskmgr")  # 修改代码+ClaudeCodeParity: 定义需要额外授权的系统级组合键和 win 别名；如果没有这行代码，Alt+F4 或 meta/super/cmd 组合可能绕过 grant flag。
 
 
 def _bool_token(value: bool) -> str:  # 新增代码+Phase38WindowsComputerApproval: 函数段开始，把布尔值转成小写 token；如果没有这段函数，CLI 输出容易出现 True/False 大小写不稳定。
