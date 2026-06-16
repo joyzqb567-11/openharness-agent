@@ -11,6 +11,7 @@
 - `hold_key` 曾存在 keys 参数和执行层不一致风险；现在对齐 keys 数组，并有异常清理和 batch 失败传播测试。
 - Phase41 图片结果测试曾走旧 wrapper；现在迁移到 v2 MCP wrapper。
 - `zoom` 曾被当成普通动作或整图 observe；现在是只读观察语义，并尝试返回局部裁剪 `image_result`。
+- v2 架构文档、`computer-use` MCP 配置注册和独立 selftest probe 曾只被测试要求但资产缺失；现在已补齐文档、配置、probe 和可见终端场景。
 
 ## 仍需关注风险
 
@@ -21,4 +22,4 @@
 
 ## 验证备注
 
-最近一次聚焦测试 47 个通过。最终仍需执行 AGENTS 规则十七定义的真实可见终端交互验收。
+最近一次聚焦测试 77 个通过；独立 selftest probe 和 py_compile 也通过。最终仍需执行 AGENTS 规则十七定义的真实可见终端交互验收。

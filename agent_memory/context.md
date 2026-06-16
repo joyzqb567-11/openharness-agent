@@ -29,14 +29,19 @@
 - `observe`、`screenshot` 和 `zoom` 已走只读观察语义。
 - `zoom` 已在 Windows adapter 层尝试生成局部裁剪 PNG，并把裁剪图作为模型可见 `image_result` 返回。
 - `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/README.md` 已补充反推包定位、文件职责、接口合同、总链路和对齐结论。
+- `docs/computer_use_mcp_v2_architecture.md` 已补充 MCP v2 架构文档，记录 24 个公开工具、agent-side wrapper、standalone_stdio_diagnostic 和 Windows runtime 边界。
+- `learning_agent/mcp_servers.json` 已注册 `computer-use` 独立 stdio server，真实配置不再只存在于测试里。
+- `learning_agent/acceptance_controller/probes/computer_use_independent_mcp_server_probe.py` 和对应可见终端场景已补齐，用于真实终端验收时复跑独立 MCP server 自检。
 
 ## 最新验证状态
 
 最近一次聚焦自动化验证：
 
-`python -m unittest learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_windows_computer_use_real_screenshot_phase56 learning_agent.tests.test_computer_use_tool_scope`
+`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_v2_sendinput_parity_task4 learning_agent.tests.test_computer_use_mcp_v2_primary_paths learning_agent.tests.test_computer_use_mcp_v2_internal_adapter_fence learning_agent.tests.test_computer_use_mcp_agent_side_binding learning_agent.tests.test_computer_use_mcp_batch_safety learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_mcp_v2_architecture_docs learning_agent.tests.test_computer_use_mcp_v2_state_observe_action_loop learning_agent.tests.test_computer_use_tool_scope learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_windows_computer_use_real_screenshot_phase56`
 
-结果：47 个测试通过。
+结果：77 个测试通过。
+
+补充验证：`python learning_agent\acceptance_controller\probes\computer_use_independent_mcp_server_probe.py` 输出 `COMPUTER_USE_MCP_V2_READY`；`python -m py_compile learning_agent\acceptance_controller\probes\computer_use_independent_mcp_server_probe.py learning_agent\tests\test_computer_use_mcp_v2_architecture_docs.py` 通过。
 
 最新相关提交：`659b7c0 feat: return model-visible zoom screenshots`。
 

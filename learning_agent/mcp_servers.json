@@ -22,6 +22,13 @@
         "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\browser_automation_mcp_server.py",
         "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent"
       ]
+    },
+    {
+      "name": "computer-use",
+      "command": "C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "args": [
+        "H:\\codexworkplace\\sofeware\\OpenHarness-main\\learning_agent\\mcp\\servers\\computer_use_server.py"
+      ]
     }
   ]
 }

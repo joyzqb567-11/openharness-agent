@@ -4,12 +4,14 @@ from __future__ import annotations  # 新增代码+ComputerUseMcpV2ArchitectureD
 import unittest  # 新增代码+ComputerUseMcpV2ArchitectureDocs：使用标准 unittest 框架；如果没有这行代码，本测试不会被发现。
 from pathlib import Path  # 新增代码+ComputerUseMcpV2ArchitectureDocs：用于定位 docs 文件；如果没有这行代码，测试只能依赖脆弱字符串路径。
 
+from learning_agent.computer_use_mcp_v2.inferred_ant_mcp.build_tools import COMPUTER_USE_MCP_TOOL_NAMES  # 修改代码+ComputerUseMcpV2ArchitectureDocs：从真实工具清单读取当前数量；如果没有这一行，文档测试会停留在旧 17 工具合同。
+
 
 class ComputerUseMcpV2ArchitectureDocsTests(unittest.TestCase):  # 新增代码+ComputerUseMcpV2ArchitectureDocs：函数段开始，保护架构文档关键内容；如果没有这段测试，后续维护可能删掉重要边界说明。
     def test_architecture_doc_records_tool_surface_and_execution_boundaries(self) -> None:  # 新增代码+ComputerUseMcpV2ArchitectureDocs：验证文档包含关键工具面和执行路径；如果没有这行测试，文档可能失去防跑偏价值。
         doc_path = Path(__file__).resolve().parents[2] / "docs" / "computer_use_mcp_v2_architecture.md"  # 新增代码+ComputerUseMcpV2ArchitectureDocs：定位架构文档；如果没有这行代码，测试不知道要检查哪个文件。
         text = doc_path.read_text(encoding="utf-8")  # 新增代码+ComputerUseMcpV2ArchitectureDocs：读取文档文本；如果没有这行代码，后续断言没有输入。
-        self.assertIn("17 个", text)  # 新增代码+ComputerUseMcpV2ArchitectureDocs：确认文档写明精确 17 工具面；如果没有这行代码，工具数量边界可能被淡化。
+        self.assertIn(f"{len(COMPUTER_USE_MCP_TOOL_NAMES)} 个", text)  # 修改代码+ComputerUseMcpV2ArchitectureDocs：确认文档写明当前真实工具数量；如果没有这行代码，工具数量边界可能被旧数字误导。
         self.assertIn("agent-side wrapper", text)  # 新增代码+ComputerUseMcpV2ArchitectureDocs：确认文档写明主执行路径；如果没有这行代码，后续可能误把 stdio callTool 当主路径。
         self.assertIn("standalone_stdio_diagnostic", text)  # 新增代码+ComputerUseMcpV2ArchitectureDocs：确认文档写明 stdio 诊断标记；如果没有这行代码，调试路径和生产路径会再次混淆。
         self.assertIn("internal_adapter_tools.py", text)  # 新增代码+ComputerUseMcpV2ArchitectureDocs：确认文档写明内部 facade；如果没有这行代码，旧能力边界容易被误解。
