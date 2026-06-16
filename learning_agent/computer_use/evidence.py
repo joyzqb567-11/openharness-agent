@@ -252,14 +252,16 @@ def run_phase41_image_results_contract() -> dict[str, Any]:  # 新增代码+Phas
         from learning_agent.computer_use.controller import ComputerUseController, WindowsComputerUseBackend  # 新增代码+Phase41WindowsImageResults: 导入真实 Computer Use 控制链；如果没有这行代码，自检只能验证孤立 evidence。
         from learning_agent.computer_use.helper_client import StaticWindowObservationHelper, WindowObservationPayload  # 新增代码+Phase41WindowsImageResults: 导入静态观察 helper；如果没有这行代码，自检会需要真实桌面截图。
         from learning_agent.computer_use.windows_backend import StaticWindowsWindowInventory  # 新增代码+Phase41WindowsImageResults: 导入静态窗口 inventory；如果没有这行代码，自检会依赖用户当前窗口。
-        from learning_agent.core.agent import LearningAgent, ModelMessage, ToolCallingFakeModel  # 新增代码+Phase41WindowsImageResults: 导入真实 agent 和假模型；如果没有这行代码，active_artifacts 集成无法自检。
+        from learning_agent.core.agent import LearningAgent, ModelMessage, ToolCallingFakeModel  # 修改代码+Phase41McpV2Migration: 导入真实 agent 和假模型；如果没有这行代码，active_artifacts 集成无法自检。
+        from learning_agent.core.messages import ToolCall  # 修改代码+Phase41McpV2Migration: 导入统一 ToolCall 用于执行模型真实可见的 v2 MCP 工具；如果没有这行代码，自检只能继续依赖已删除的旧私有入口。
     except ModuleNotFoundError as error:  # 新增代码+Phase41WindowsImageResults: 兼容 start_oauth_agent 脚本模式下包名前缀不可用；如果没有这行代码，bat 入口可能导入失败。
-        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.controller", "learning_agent.computer_use.helper_client", "learning_agent.computer_use.windows_backend", "learning_agent.core", "learning_agent.core.agent"}:  # 新增代码+Phase41WindowsImageResults: 只允许目标包路径缺失时 fallback；如果没有这行代码，真实内部错误会被误吞。
+        if error.name not in {"learning_agent", "learning_agent.computer_use", "learning_agent.computer_use.controller", "learning_agent.computer_use.helper_client", "learning_agent.computer_use.windows_backend", "learning_agent.core", "learning_agent.core.agent", "learning_agent.core.messages"}:  # 修改代码+Phase41McpV2Migration: 允许 core.messages 的脚本路径 fallback；如果没有这行代码，bat 自检会把 ToolCall 路径差异误报为真实错误。
             raise  # 新增代码+Phase41WindowsImageResults: 重新抛出非路径类导入错误；如果没有这行代码，排查真实 bug 会很困难。
         from computer_use.controller import ComputerUseController, WindowsComputerUseBackend  # 新增代码+Phase41WindowsImageResults: 脚本模式导入 Computer Use 控制链；如果没有这行代码，直接运行 evidence.py 无法自检。
         from computer_use.helper_client import StaticWindowObservationHelper, WindowObservationPayload  # 新增代码+Phase41WindowsImageResults: 脚本模式导入静态 helper；如果没有这行代码，自检无法模拟截图。
         from computer_use.windows_backend import StaticWindowsWindowInventory  # 新增代码+Phase41WindowsImageResults: 脚本模式导入静态 inventory；如果没有这行代码，自检无法模拟窗口。
-        from core.agent import LearningAgent, ModelMessage, ToolCallingFakeModel  # 新增代码+Phase41WindowsImageResults: 脚本模式导入真实 agent；如果没有这行代码，agent artifact 集成无法自检。
+        from core.agent import LearningAgent, ModelMessage, ToolCallingFakeModel  # 修改代码+Phase41McpV2Migration: 脚本模式导入真实 agent；如果没有这行代码，agent artifact 集成无法自检。
+        from core.messages import ToolCall  # 修改代码+Phase41McpV2Migration: 脚本模式导入统一 ToolCall；如果没有这行代码，旧镜像自检不能走 v2 MCP 工具执行链。
 
     with tempfile.TemporaryDirectory() as raw_dir:  # 新增代码+Phase41WindowsImageResults: 创建临时根目录；如果没有这行代码，自检文件会留在真实项目目录。
         evidence_root = Path(raw_dir) / "evidence"  # 新增代码+Phase41WindowsImageResults: 定义临时 evidence 路径；如果没有这行代码，截图 artifact 路径不好隔离。
@@ -275,10 +277,10 @@ def run_phase41_image_results_contract() -> dict[str, Any]:  # 新增代码+Phas
         controller = ComputerUseController(backend=backend)  # 新增代码+Phase41WindowsImageResults: 创建统一控制器；如果没有这行代码，自检无法覆盖生产 controller。
         window = controller.observe({"action": "list_windows"}).data["windows"][0]  # 新增代码+Phase41WindowsImageResults: 获取可信窗口引用；如果没有这行代码，get_window_state 会因未知窗口失败。
         result = controller.observe({"action": "get_window_state", "window": window})  # 新增代码+Phase41WindowsImageResults: 通过生产链读取窗口状态；如果没有这行代码，自检无法证明 controller 输出 image_results。
-        result_text = result.to_text("computer_observe")  # 新增代码+Phase41WindowsImageResults: 生成模型可见工具文本；如果没有这行代码，自检无法证明图片区文本存在。
+        result_text = result.to_text("mcp__computer-use__observe")  # 修改代码+Phase41McpV2Migration: 自检文本使用 v2 observe 名称；如果没有这行代码，Phase41 审计会误以为旧 computer_observe 仍是模型可见入口。
         agent = LearningAgent(model=ToolCallingFakeModel([ModelMessage(text="不会调用模型。")]), workspace=workspace, ask_permission=lambda action: True, debug_enabled=False)  # 新增代码+Phase41WindowsImageResults: 创建真实 agent 但不用联网模型；如果没有这行代码，active_artifacts 集成无法验证。
         agent.computer_use_controller = controller  # 新增代码+Phase41WindowsImageResults: 注入同一个只读控制器；如果没有这行代码，agent 会使用默认不可用后端。
-        agent_output = agent._computer_observe({"action": "get_window_state", "window": window})  # 新增代码+Phase41WindowsImageResults: 通过 agent 工具入口读取窗口状态；如果没有这行代码，agent artifact 登记逻辑不会运行。
+        agent_output = agent._execute_tool(ToolCall(name="mcp__computer-use__observe", arguments={"action": "get_window_state", "window": window, "reason": "phase41 legacy mirror v2 selftest"}))  # 修改代码+Phase41McpV2Migration: 通过模型真实可见的 v2 MCP observe 读取窗口状态；如果没有这行代码，旧镜像自检会继续调用已删除的 _computer_observe。
         artifact = bool(direct_blocks) and Path(direct_blocks[0]["artifact_path"]).exists()  # 新增代码+Phase41WindowsImageResults: 判断截图 artifact 是否真实存在；如果没有这行代码，OK token 可能只证明 block 文本存在。
         image_block = bool(collect_image_result_blocks(result.data)) and "Computer Use Image Results" in result_text  # 新增代码+Phase41WindowsImageResults: 判断 controller 是否输出图片块和图片区；如果没有这行代码，模型可见协议可能没接上。
         agent_artifact = any(str(evidence_root) in path for path in agent.active_artifacts) and "Computer Use Image Results" in agent_output  # 新增代码+Phase41WindowsImageResults: 判断 agent 是否登记截图 artifact；如果没有这行代码，长任务恢复仍可能丢图片。
