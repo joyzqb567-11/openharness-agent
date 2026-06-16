@@ -68,3 +68,16 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已新增并通过测试：`test_computer_use_mcp_v2_permission_grants`，共 3 个测试通过。
 - 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope`，共 30 个测试通过。
 - 已通过 py_compile：`types.py`、`permissions.py`、`test_computer_use_mcp_v2_permission_grants.py`。
+- Task 5 结果 content blocks parity 已完成：`result_blocks.py` 新增 `text_content_block`、`image_content_block`、显式 `content`/`debug` 支持，并让 `mcp_content_from_result` 在有显式 content 时直出 ClaudeCode-compatible blocks、无显式 content 时保留旧 JSON 文本回退。
+- `observation.py` 已能从 `image_results`、`zoom_image_results`、`legacy_text`、嵌套 `legacy_result` 中收集截图 artifact，复用 Windows 图片读取/转码逻辑生成 base64 image content block，同时输出 `debug.artifact_path`、`debug.mime_type`、`debug.image_count`。
+- `actions.py` 已透传 host payload 自带的 `content`/`debug`；`image_messages.py` 已能从新协议 JSON 的 `debug.artifact_path` 中提取图片引用，保持旧图片回灌链路可用。
+- 已新增并通过测试：`test_computer_use_mcp_v2_result_blocks`，共 5 个测试通过。
+- 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_result_blocks`，共 38 个测试通过。
+- 已通过 py_compile：`result_blocks.py`、`observation.py`、`actions.py`、`image_messages.py`、`test_computer_use_mcp_v2_result_blocks.py`。
+- Task 6 Lock lifecycle 与 cleanup parity 已完成：`ComputerUseMcpV2Context` 新增 `computer_use_session_id`、`check_computer_use_lock`、`acquire_computer_use_lock`、`release_computer_use_lock`、`cleanup_after_turn`、`is_lock_held_locally` 回调字段。
+- `runtime.py` 已实现 ClaudeCode defers-lock 语义：`request_access`、`list_granted_applications` 只走 lock check；其它合法 Computer Use 工具先 acquire lock，失败时返回 `computer_use_lock_unavailable` 且 `desktop_action_performed=False`；成功/失败结果均写入 `debug.lock_mode`、`debug.lock_backend`。
+- `bind_session_context.py` 已接入 agent 主循环现有 `_computer_use_cleanup_runtime()`，确保 v2 MCP lock、主循环 finally cleanup 和 `/computer` runtime 使用同一套 Windows lock 事实源。
+- `WindowsComputerUseSessionRuntime` 已新增 `check_computer_use_lock`、`acquire_computer_use_lock`、`release_computer_use_lock`、`cleanup_after_turn`、`is_lock_held_locally` facade 回调方法；`turn_cleanup.py` 的报告新增 `claudecode_lock_lifecycle=True` 与 `lock_cleanup_mode=turn_cleanup`。
+- 已新增并通过测试：`test_computer_use_mcp_v2_lock_lifecycle`，共 7 个测试通过。
+- 已复跑通过：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_tool_scope learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_result_blocks learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle`，共 45 个测试通过。
+- 已通过 py_compile：`types.py`、`runtime.py`、`bind_session_context.py`、`session_runtime.py`、`turn_cleanup.py`、`test_computer_use_mcp_v2_lock_lifecycle.py`。

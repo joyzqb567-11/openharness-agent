@@ -118,6 +118,10 @@ def extract_computer_use_image_specs_from_tool_output(output: str) -> list[dict[
         parsed_output = json.loads(str(output or ""))  # 修改代码+McpImageReinjection: 把工具文本解析成 JSON 对象；如果没有这行代码，payload.legacy_text 无法结构化访问。
     except (TypeError, ValueError, json.JSONDecodeError):  # 修改代码+McpImageReinjection: 非 JSON 输出仍按无图处理；如果没有这行代码，普通无图工具结果会抛异常中断主循环。
         return []  # 修改代码+McpImageReinjection: 无法解析 JSON 时返回空列表；如果没有这行代码，调用方拿不到稳定空结果。
+    if isinstance(parsed_output, dict):  # 新增代码+ClaudeCodeContentParity：先读取新协议 debug 字段；如果没有这行代码，result.debug.artifact_path 里的截图路径无法回灌。
+        debug = parsed_output.get("debug", {})  # 新增代码+ClaudeCodeContentParity：获取顶层 debug 信息；如果没有这行代码，artifact_path 无法结构化读取。
+        if isinstance(debug, dict) and debug.get("artifact_path"):  # 新增代码+ClaudeCodeContentParity：确认 debug 里有可用截图路径；如果没有这行代码，空 debug 会被误加入图片列表。
+            return [{"artifact_path": str(debug.get("artifact_path") or ""), "mime_type": str(debug.get("mime_type") or "")}]  # 新增代码+ClaudeCodeContentParity：返回新协议调试路径作为图片引用；如果没有这行代码，JSON 文本链路看不到 screenshot 像素。
     payload = parsed_output.get("payload", {}) if isinstance(parsed_output, dict) else {}  # 修改代码+McpImageReinjection: 读取 MCP 包装中的 payload；如果没有这行代码，非字典 JSON 会触发属性错误。
     nested_candidates: list[str] = []  # 新增代码+ComputerUseRawImageReinjection：收集 v2 MCP adapter 可能放置原始图片区的文本字段；如果没有这行代码，深层 legacy_result.text 里的截图路径无法进入模型。
     if isinstance(payload, dict):  # 新增代码+ComputerUseRawImageReinjection：只有 payload 是字典时才读取受控字段；如果没有这行代码，异常 JSON 结构会触发属性错误。

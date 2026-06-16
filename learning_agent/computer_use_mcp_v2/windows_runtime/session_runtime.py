@@ -67,6 +67,32 @@ class WindowsComputerUseSessionRuntime:  # 新增代码+Phase40WindowsAbortClean
         return self._read_notifications()  # 新增代码+Phase40WindowsAbortCleanup: 返回已规范化通知列表；如果没有这行代码，调用方需要知道内部通知文件路径。
     # 新增代码+Phase40WindowsAbortCleanup: 函数段结束，notifications 到此结束；如果没有这个边界说明，读者不容易看出通知公开读取范围。
 
+    def check_computer_use_lock(self, tool_name: str) -> dict[str, Any]:  # 新增代码+ClaudeCodeLockParity：函数段开始，提供 ClaudeCode-style 只检查锁回调；如果没有这段函数，桥接层需要直接知道 lock_manager.status 细节。
+        status = dict(self.lock_manager.status())  # 新增代码+ClaudeCodeLockParity：读取 durable 锁状态；如果没有这行代码，检查回调没有事实来源。
+        status.update({"ok": True, "checked": True, "lock_backend": "windows_runtime", "tool_name": str(tool_name), "session_id": self.session_id})  # 新增代码+ClaudeCodeLockParity：补充 runtime 统一字段；如果没有这行代码，facade 无法稳定判断检查成功。
+        return status  # 新增代码+ClaudeCodeLockParity：返回锁检查摘要；如果没有这行代码，调用方拿不到状态。
+    # 新增代码+ClaudeCodeLockParity：函数段结束，check_computer_use_lock 到此结束；如果没有这个边界说明，用户不容易看出只检查锁范围。
+
+    def acquire_computer_use_lock(self, tool_name: str) -> dict[str, Any]:  # 新增代码+ClaudeCodeLockParity：函数段开始，提供 ClaudeCode-style 取锁回调；如果没有这段函数，观察/动作工具无法通过 runtime 统一获取独占锁。
+        result = dict(self.lock_manager.acquire(self.session_id, owner_label=f"computer-use-mcp-v2:{tool_name}", metadata={"tool_name": str(tool_name), "runtime": "computer_use_mcp_v2"}) or {})  # 新增代码+ClaudeCodeLockParity：调用 durable acquire；如果没有这行代码，真实桌面控制不会被独占保护。
+        result.update({"lock_backend": "windows_runtime", "tool_name": str(tool_name), "session_id": self.session_id})  # 新增代码+ClaudeCodeLockParity：补充后端和会话字段；如果没有这行代码，debug 无法定位锁 owner。
+        return result  # 新增代码+ClaudeCodeLockParity：返回取锁结果；如果没有这行代码，facade 无法判断是否继续执行。
+    # 新增代码+ClaudeCodeLockParity：函数段结束，acquire_computer_use_lock 到此结束；如果没有这个边界说明，用户不容易看出取锁范围。
+
+    def release_computer_use_lock(self, reason: str = "turn cleanup") -> dict[str, Any]:  # 新增代码+ClaudeCodeLockParity：函数段开始，提供 ClaudeCode-style 释放锁回调；如果没有这段函数，轻量 cleanup 无法释放本 session 锁。
+        result = dict(self.lock_manager.release(self.session_id) or {})  # 新增代码+ClaudeCodeLockParity：释放当前 session 锁；如果没有这行代码，长任务结束后可能残留锁。
+        result.update({"lock_backend": "windows_runtime", "reason": str(reason), "session_id": self.session_id})  # 新增代码+ClaudeCodeLockParity：补充释放原因和会话；如果没有这行代码，审计无法解释为什么释放。
+        return result  # 新增代码+ClaudeCodeLockParity：返回释放结果；如果没有这行代码，cleanup helper 无法判断释放是否成功。
+    # 新增代码+ClaudeCodeLockParity：函数段结束，release_computer_use_lock 到此结束；如果没有这个边界说明，用户不容易看出释放锁范围。
+
+    def cleanup_after_turn(self, reason: str = "turn cleanup") -> dict[str, Any]:  # 新增代码+ClaudeCodeLockParity：函数段开始，提供 facade 可调用的 turn cleanup 别名；如果没有这段函数，桥接层需要知道 cleanup_turn 的内部命名。
+        return self.cleanup_turn(reason=str(reason))  # 新增代码+ClaudeCodeLockParity：委托已有完整 cleanup；如果没有这行代码，abort 清理、资源清理和通知会被绕过。
+    # 新增代码+ClaudeCodeLockParity：函数段结束，cleanup_after_turn 到此结束；如果没有这个边界说明，用户不容易看出 cleanup 别名范围。
+
+    def is_lock_held_locally(self, _tool_name: str = "") -> bool:  # 新增代码+ClaudeCodeLockParity：函数段开始，提供 facade 可调用的本地持锁判断；如果没有这段函数，debug 只能展示 acquire 返回值。
+        return bool(self.lock_manager.has_lock(self.session_id))  # 新增代码+ClaudeCodeLockParity：判断当前 session 是否持有锁；如果没有这行代码，陈旧或他人持锁状态无法区分。
+    # 新增代码+ClaudeCodeLockParity：函数段结束，is_lock_held_locally 到此结束；如果没有这个边界说明，用户不容易看出本地持锁判断范围。
+
     def request_global_abort(self, reason: str, source: str = "runtime") -> dict[str, Any]:  # 新增代码+Phase40WindowsAbortCleanup: 函数段开始，请求全局 abort 并记录通知；如果没有这段函数，abort 只有底层 flag 而没有 ClaudeCode 风格的用户可见事件。
         status = self.lock_manager.request_abort(reason, requested_by=source)  # 新增代码+Phase40WindowsAbortCleanup: 写入 durable abort flag；如果没有这行代码，下一次桌面动作不会被阻断。
         owned_cleanup = self.owned_resource_registry.abort_cleanup(session_id=self.session_id, reason=reason)  # 修改代码+CleanupRecoveryMaturity：急停时同步清理本 session 自有资源；如果没有这一行，abort 后可能留下 agent 自己启动的进程或窗口。

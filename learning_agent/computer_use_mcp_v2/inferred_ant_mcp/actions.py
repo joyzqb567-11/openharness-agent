@@ -44,7 +44,9 @@ def _host_payload_result(tool_name: str, payload: dict[str, Any]) -> dict[str, A
         reason = str(payload.get("reason") or payload.get("message") or nested_result.get("reason") or nested_result.get("payload", {}).get("legacy_text", "") or "host_adapter_rejected")  # 新增代码+McpHostFailureFix: 提取可读失败原因；如果没有这一行，模型只知道失败但不知道为什么失败。
         error_class = str(payload.get("error_class") or nested_result.get("error_class") or "host_adapter_rejected")  # 新增代码+McpHostFailureFix: 保留旧门禁失败类别；如果没有这一行，恢复逻辑无法区分缺窗口和普通 host 错误。
         return {"ok": False, "runtime": "computer_use_mcp_v2", "legacy_adapter_used": legacy_adapter_used, "tool_name": str(tool_name), "reason": reason, "error_class": error_class, "payload": dict(payload)}  # 新增代码+McpHostFailureFix: 返回顶层失败结果且保留原始 payload；如果没有这一行，验收事件会再次误报动作成功。
-    return success_result(tool_name, payload, legacy_adapter_used=legacy_adapter_used)  # 新增代码+McpHostFailureFix: host 未失败时沿用成功包装；如果没有这一行，正常 cursor/click host 结果会丢失统一 runtime 字段。
+    content = payload.get("content") if isinstance(payload.get("content"), list) else None  # 新增代码+ClaudeCodeContentParity：透传 host 已生成的 content blocks；如果没有这行代码，host 级图片或文本块会被成功包装吞掉。
+    debug = payload.get("debug") if isinstance(payload.get("debug"), dict) else None  # 新增代码+ClaudeCodeContentParity：透传 host 已生成的 debug 证据；如果没有这行代码，artifact_path 等调试信息会丢失。
+    return success_result(tool_name, payload, legacy_adapter_used=legacy_adapter_used, content=content, debug=debug)  # 修改代码+ClaudeCodeContentParity: host 未失败时沿用成功包装并保留 content/debug；如果没有这一行，正常 cursor/click host 结果会丢失统一 runtime 字段或新协议块。
 # 新增代码+McpHostFailureFix: 函数段结束，_host_payload_result 到此结束；如果没有这个边界说明，用户不容易看出 host payload 包装范围。
 
 
