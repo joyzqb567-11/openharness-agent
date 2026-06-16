@@ -19,6 +19,7 @@
 - Task 6：修正 `zoom` 观察语义，并返回模型可见的局部裁剪截图，提交 `659b7c0`。
 - Task 7：补充 `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/README.md`，并按规则把超长 `agent_memory/context.md`、`progress.md`、`bugs.md` 归档压缩。
 - Task 8 自动化补强：补齐 `docs/computer_use_mcp_v2_architecture.md`、`computer-use` MCP 配置注册、独立 selftest probe 和可见终端场景；原失败的 3 个接入资产测试已修复。
+- Task 8 可见终端验收：首次场景发现 `COMPUTER_USE_MCP_V2_READY` 可被失败句子误命中；已改用独立最终标记 `COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK`，并让模型只调用一次只读 `mcp__computer-use__list_granted_applications`。
 
 ## Task 6 关键细节
 
@@ -29,7 +30,7 @@
 
 ## 当前状态
 
-Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：77 个相关测试通过，独立 probe 输出 `COMPUTER_USE_MCP_V2_READY`，新/改 Python 文件 py_compile 通过。下一步是尝试真实可见终端验收。
+Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：77 个相关测试通过，独立 probe 输出 `COMPUTER_USE_MCP_V2_READY`，新/改 Python 文件 py_compile 通过。真实可见终端验收已通过两次：worktree run `learning_agent/acceptance_controller/runs/agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_091911/result.json`，原项目精确 BAT 路径 run `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_092030\result.json`。
 
 ## 停止条件
 

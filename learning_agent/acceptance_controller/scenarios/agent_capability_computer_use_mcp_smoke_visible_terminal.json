@@ -7,28 +7,31 @@
   "final_log_wait_seconds": 15,
   "post_success_wait_seconds": 2,
   "visible_terminal_gate": true,
-  "success_marker": "COMPUTER_USE_MCP_V2_READY",
+  "success_marker": "COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK",
   "multi_prompt_lines": true,
-  "prompt": "Open Computer Use full mode, then run the independent computer-use MCP server selftest probe from the visible terminal.",
+  "prompt": "Open Computer Use full mode, then call one safe read-only computer-use MCP v2 tool from the visible terminal.",
   "prompt_lines": [
     "/computer use --full",
-    "请在真实可见终端里验证独立 computer-use MCP server 自检，不要移动鼠标，不要点击桌面。请调用终端执行：python learning_agent\\acceptance_controller\\probes\\computer_use_independent_mcp_server_probe.py。看到 COMPUTER_USE_MCP_V2_READY 后，最终只回复一行：COMPUTER_USE_MCP_V2_READY"
+    "请只调用一次 mcp__computer-use__list_granted_applications 工具查看当前授权状态。不要打开任何软件，不要移动鼠标，不要点击，不要观察屏幕。工具返回后，最终只回复一行：COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK"
   ],
   "required_event_states": [
     "agent_ready_for_user_prompt",
     "computer_status_printed",
     "user_prompt_received",
+    "computer_use_mcp_v2_tool",
     "final_answer_printed"
   ],
   "debug_log_contains": [
-    "COMPUTER_USE_MCP_V2_READY"
+    "list_granted_applications",
+    "COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK"
   ],
   "event_answer_contains": [
-    "COMPUTER_USE_MCP_V2_READY"
+    "COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK"
   ],
   "event_payload_contains": [
     "Computer Use Mode",
-    "full_mode=true"
+    "full_mode=true",
+    "list_granted_applications"
   ],
   "max_permission_sent_count": 0
 }

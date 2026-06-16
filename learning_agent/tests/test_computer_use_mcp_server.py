@@ -164,7 +164,8 @@ class ComputerUseMcpServerTests(unittest.TestCase):  # 新增代码+ComputerUseM
         scenario = json.loads(scenario_path.read_text(encoding="utf-8"))  # 新增代码+ComputerUseMCP：解析真实终端场景 JSON；如果没有这行代码，坏 JSON 不会被发现。
         self.assertTrue(scenario["visible_terminal_gate"])  # 新增代码+ComputerUseMCP：断言场景强制真实可见终端；如果没有这行代码，验收可能退化成纯自动化脚本。
         self.assertIn("/computer use --full", scenario["prompt_lines"])  # 新增代码+ComputerUseMCP：断言场景先打开 Computer Use full 模式；如果没有这行代码，模型主循环可能没有加载 computer_use 能力包。
-        self.assertIn(COMPUTER_USE_MCP_READY_MARKER, scenario["success_marker"])  # 修改代码+ComputerUseMcpV2：断言场景成功标记跟随 v2 ready 常量；如果没有这行代码，验收器可能继续等待旧 marker 而误判失败。
+        self.assertEqual("COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK", scenario["success_marker"])  # 修改代码+ComputerUseMCPVisibleGate：断言最终回答使用独立成功标记；如果没有这一行，缺证据失败句子可能因为包含 ready marker 而假阳性。
+        self.assertNotIn(COMPUTER_USE_MCP_READY_MARKER, scenario["success_marker"])  # 新增代码+ComputerUseMCPVisibleGate：确认 probe marker 不会同时充当最终回答 marker；如果没有这一行，场景可能再次把“未看到 READY”误判成通过。
     # 新增代码+ComputerUseMCP：函数段结束，test_acceptance_probe_and_visible_terminal_scenario_exist 到此结束；如果没有这个边界说明，初学者不容易看出验收资产测试范围。
 
 

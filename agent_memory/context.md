@@ -43,8 +43,10 @@
 
 补充验证：`python learning_agent\acceptance_controller\probes\computer_use_independent_mcp_server_probe.py` 输出 `COMPUTER_USE_MCP_V2_READY`；`python -m py_compile learning_agent\acceptance_controller\probes\computer_use_independent_mcp_server_probe.py learning_agent\tests\test_computer_use_mcp_v2_architecture_docs.py` 通过。
 
+真实可见终端验收：已使用安全场景调用 `/computer use --full`，再让模型只调用一次 `mcp__computer-use__list_granted_applications`，最终回答 `COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK`。worktree run 和原项目精确 `start_oauth_agent.bat` run 均通过；原项目 run 路径为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_092030\result.json`。
+
 最新相关提交：`659b7c0 feat: return model-visible zoom screenshots`。
 
-## 仍需完成
+## 真实终端验收
 
-按照 AGENTS 规则十七，最终回答前还必须完成真实可见终端交互验收：启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，在真实可见终端内输入接近真实用户习惯的 prompt，观察 agent 输出并确认 Computer Use 功能可用。自动化测试不能替代这个验收。
+按照 AGENTS 规则十七，真实可见终端交互验收已经完成：原项目路径 controller 启动了 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实终端中输入 `/computer use --full` 和只读 MCP 工具验证 prompt，观察到 `list_granted_applications ok=true`，最终输出 `COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK`。
