@@ -227,6 +227,17 @@ class ComputerUseMcpV2ContractTests(unittest.TestCase):  # 新增代码+Computer
         self.assertEqual({"x": 1, "y": 2, "reason": "test-release"}, host.arguments[-1])  # 新增代码+ClaudeCodeParity：断言 left_mouse_up 桥接到 host 时保留坐标；如果没有这一行，runtime 可能成功但悄悄丢掉释放位置。
     # 新增代码+ClaudeCodeParity：函数段结束，test_new_parity_tools_dispatch_to_host_methods 到此结束；如果没有这个边界说明，用户不容易看出 host bridge 合同测试范围。
 
+    def test_zoom_runtime_uses_observation_semantics(self) -> None:  # 新增代码+ClaudeCodeZoom: 函数段开始，验证 zoom 虽调用 host.zoom 但语义属于观察；如果没有这个测试，zoom 会继续走 action 分支而不写 observation。
+        observations: list[tuple[str, dict[str, Any]]] = []  # 新增代码+ClaudeCodeZoom: 收集 runtime observation 回调；如果没有这一行，测试无法证明 zoom 被当成观察结果记录。
+        host = _FakeParityHost()  # 新增代码+ClaudeCodeZoom: 创建带 zoom 方法的 fake host；如果没有这一行，runtime 会进入无 host 失败路径。
+        context = ComputerUseMcpV2Context(host=host, record_observation=lambda kind, payload: observations.append((kind, payload)))  # 新增代码+ClaudeCodeZoom: 注入 host 和 observation 记录器；如果没有这一行，测试无法观察 runtime 语义分支。
+        result = dispatch_computer_use_mcp_v2_tool("mcp__computer-use__zoom", {"x": 1, "y": 2, "width": 3, "height": 4}, context)  # 新增代码+ClaudeCodeZoom: 通过公开 zoom 工具执行 runtime；如果没有这一行，分发行为不会被覆盖。
+        self.assertTrue(result["ok"], result)  # 新增代码+ClaudeCodeZoom: 断言 zoom 调用成功；如果没有这一行，后续 observation 断言可能掩盖执行失败。
+        self.assertEqual(["zoom"], host.calls)  # 新增代码+ClaudeCodeZoom: 断言仍然调用 host.zoom 而不是退化成 host.observe；如果没有这一行，局部放大宿主桥接可能被破坏。
+        self.assertEqual("computer_use_mcp_v2_observe", observations[0][0])  # 新增代码+ClaudeCodeZoom: 断言 zoom 写入观察记录；如果没有这一行，zoom 会继续像动作一样缺少观察证据。
+        self.assertEqual("zoom", observations[0][1]["method"])  # 新增代码+ClaudeCodeZoom: 断言记录 payload 来自 host.zoom；如果没有这一行，观察记录可能写入了错误宿主结果。
+    # 新增代码+ClaudeCodeZoom: 函数段结束，test_zoom_runtime_uses_observation_semantics 到此结束；如果没有这个边界说明，用户不容易看出 zoom runtime 语义测试范围。
+
     # 新增代码+ComputerUseMcpV2RedTests：函数段开始，test_v2_server_selftest_reports_exact_surface 验证 server 自检使用 v2 工具面；如果没有这段测试，旧 server selftest 仍可能通过。
     def test_v2_server_selftest_reports_exact_surface(self) -> None:  # 新增代码+ComputerUseMcpV2RedTests：声明 server 自检测试；如果没有这一行，server 入口合同没有自动化保护。
         report = run_selftest()  # 新增代码+ComputerUseMcpV2RedTests：运行 v2 server 自检；如果没有这一行，测试无法获得 server 报告。

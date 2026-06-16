@@ -1,12 +1,17 @@
 from __future__ import annotations  # 新增代码+McpSessionAdapterRedTest: 让类型注解延迟解析；如果没有这一行，前向类型在老解释器或导入顺序变化时可能提前求值失败。
 
 import json  # 新增代码+McpSessionAdapterRedTest: 用来解析 adapter 返回的 JSON 文本；如果没有这一行，测试只能做脆弱的字符串包含判断。
+import tempfile  # 新增代码+ClaudeCodeZoom: 用临时目录保存可裁剪的测试截图；如果没有这一行，zoom 红灯测试会污染项目目录或依赖固定路径。
 import unittest  # 新增代码+McpSessionAdapterRedTest: 使用标准库测试框架；如果没有这一行，红灯测试无法被 unittest 发现和执行。
+from pathlib import Path  # 新增代码+ClaudeCodeZoom: 用 Path 稳定检查 zoom 生成的图片 artifact；如果没有这一行，测试只能用脆弱字符串处理文件路径。
 from typing import Any  # 新增代码+McpSessionAdapterRedTest: 标注 fake 回调 payload 的通用类型；如果没有这一行，测试意图不够清楚。
 
+from PIL import Image  # 新增代码+ClaudeCodeZoom: 生成并检查真实 PNG 像素尺寸；如果没有这一行，测试无法证明 zoom 真的裁剪了截图。
 from learning_agent.computer_use_mcp_v2.windows_runtime.action_gates import COMPUTER_USE_COMPLETION_CHANGE_ACTIONS, COMPUTER_USE_MOUSE_KEYBOARD_ACTIONS, computer_use_full_mode_requires_agent_owned_launch, computer_use_full_mode_requires_model_visible_observation  # 新增代码+ClaudeCodeParity: 导入 full 模式门禁集合和判断函数；如果没有这一行，测试无法证明新增 parity 动作会被盲动和完成门管住。
 from learning_agent.computer_use_mcp_v2.windows_runtime.action_policy import COORDINATE_ACTIONS, prepare_action_arguments  # 新增代码+ClaudeCodeParity: 导入坐标动作集合和策略入口；如果没有这一行，测试无法证明新增鼠标动作会进入坐标转换证据链。
+from learning_agent.computer_use_mcp_v2.windows_runtime.coordinates import build_screenshot_coordinate_mapping  # 新增代码+ClaudeCodeZoom: 复用正式截图坐标映射合同；如果没有这一行，测试会手写一份容易漂移的 scale 数据。
 from learning_agent.computer_use_mcp_v2.windows_runtime.controller import ComputerUseController, MemoryComputerUseBackend  # 新增代码+ClaudeCodeParity: 导入真实 v2 controller 和内存后端；如果没有这一行，测试只能覆盖 fake controller 而漏掉真实 allowed_actions 门禁。
+from learning_agent.computer_use_mcp_v2.windows_runtime.image_messages import extract_computer_use_image_specs_from_tool_output  # 新增代码+ClaudeCodeZoom: 验证 zoom 结果能被模型图片回灌解析器读到；如果没有这一行，测试只能检查 JSON 而不能证明模型可见。
 from learning_agent.computer_use_mcp_v2.windows_runtime.mcp_session_adapter import ComputerUseMcpSessionAdapter, ComputerUseMcpSessionCallbacks, ComputerUseMcpSessionState, _wrap_legacy_text  # 修改代码+ClaudeCodeParity: 改从 v2 Windows runtime 导入内部 session adapter；如果没有这一行，删除旧 computer_use 包后 adapter 迁移测试无法运行。
 
 
@@ -100,6 +105,33 @@ class ComputerUseMcpSessionAdapterTests(unittest.TestCase):  # 新增代码+McpS
         self.assertEqual("fake-app.exe", controller.observed[1]["window"]["app_id"])  # 新增代码+McpObserveMapping: 断言自动解析的窗口传入 get_window_state；如果没有这一行，截图观察可能仍缺目标。
         self.assertIn("computer_observe", [kind for kind, _payload in recorder.traces])  # 新增代码+McpSessionAdapterRedTest: 断言旧 observe trace 被写入；如果没有这一行，观察证据不可审计。
         self.assertEqual("computer_observe", recorder.images[0][1])  # 新增代码+McpSessionAdapterRedTest: 断言截图 artifact 来源保留；如果没有这一行，图片链路可能掉线。
+
+    def test_zoom_returns_cropped_model_visible_image_result(self) -> None:  # 新增代码+ClaudeCodeZoom: 函数段开始，验证 zoom 是只读观察并返回裁剪后的模型可见图片；如果没有这个测试，zoom 可能只返回全屏截图或误走动作链。
+        with tempfile.TemporaryDirectory() as temp_dir:  # 新增代码+ClaudeCodeZoom: 为测试截图创建隔离目录；如果没有这一行，生成的 artifact 可能残留在仓库里。
+            source_path = Path(temp_dir) / "zoom-source.png"  # 新增代码+ClaudeCodeZoom: 定义原始全窗口截图路径；如果没有这一行，后续无法比较 zoom 是否生成了新裁剪图。
+            Image.new("RGB", (4, 4), (255, 0, 0)).save(source_path)  # 新增代码+ClaudeCodeZoom: 写入 4x4 有效 PNG；如果没有这一行，生产裁剪逻辑无法打开图片验证尺寸。
+            trusted_window = {"app_id": "fake-app.exe", "window_id": "hwnd:zoom", "title_preview": "Zoom App", "rect": {"left": 10, "top": 20, "right": 12, "bottom": 22}}  # 新增代码+ClaudeCodeZoom: 构造 2x2 逻辑窗口；如果没有这一行，scale=2 的坐标映射没有窗口来源。
+            mapping = build_screenshot_coordinate_mapping(trusted_window, 4, 4)  # 新增代码+ClaudeCodeZoom: 生成逻辑坐标到截图像素的 2 倍映射；如果没有这一行，zoom 裁剪无法证明复用正式 scale 合同。
+            image_result = {"type": "image_result", "model": "phase41_model_visible_image_results", "source": "window_state", "artifact_path": str(source_path), "image_path": str(source_path), "mime_type": "image/png", "width": 4, "height": 4, "sensitive_text_included": False, "text_redacted": True, "screenshot_coordinate_model": mapping["model"], "screenshot_coordinate_mapping": mapping, "marker": "phase41_windows_image_results"}  # 修改代码+ClaudeCodeZoom: 使用正式 mapping.model 作为图片块坐标模型名；如果没有这一行，测试会错读不存在字段而不是验证 zoom 生产缺口。
+            state = {"window": trusted_window, "screenshot_captured": True, "screenshot_path": str(source_path), "screenshot_width": 4, "screenshot_height": 4, "screenshot_format": "png", "screenshot_coordinate_model": mapping["model"], "screenshot_coordinate_mapping": mapping, "image_results": [image_result], "image_result_count": 1}  # 修改代码+ClaudeCodeZoom: 使用正式 mapping.model 放入窗口状态；如果没有这一行，测试输入会偏离生产坐标合同。
+            backend = MemoryComputerUseBackend(windows=[trusted_window], window_states={("fake-app.exe", "hwnd:zoom"): state})  # 新增代码+ClaudeCodeZoom: 创建不会触碰真实桌面的可观察后端；如果没有这一行，测试可能误碰真实 Windows 桌面。
+            recorder = _CallbackRecorder()  # 新增代码+ClaudeCodeZoom: 创建回调记录器；如果没有这一行，测试无法确认图片 artifact 是否登记。
+            callbacks = ComputerUseMcpSessionCallbacks(ask_permission=recorder.ask_permission, observe_before_action_rejection=lambda _action, _arguments: None, agent_owned_launch_rejection=lambda _action, _arguments: None, completion_signal_for_action=lambda _action, _arguments: None, record_observation=recorder.record_observation, record_runtime_trace=recorder.record_runtime_trace, record_image_artifacts=recorder.record_image_artifacts, emit_acceptance_event=recorder.emit_acceptance_event)  # 新增代码+ClaudeCodeZoom: 注入 adapter 所需回调；如果没有这一行，旧 observe 链无法记录截图和 trace。
+            adapter = ComputerUseMcpSessionAdapter(controller=ComputerUseController(backend=backend), callbacks=callbacks, state=ComputerUseMcpSessionState())  # 新增代码+ClaudeCodeZoom: 用真实 controller 包住内存后端；如果没有这一行，测试不能覆盖真实 adapter 到 controller 路径。
+            result = adapter.call_atomic_tool("zoom", {"x": 10, "y": 20, "width": 1, "height": 1, "window": trusted_window, "reason": "unit test zoom"})  # 修改代码+ClaudeCodeZoom: 请求窗口左上 1x1 逻辑区域并显式带入可信窗口 rect；如果没有这一行，Memory 后端精简窗口引用会让测试偏离裁剪目标。
+            self.assertTrue(result["ok"], result)  # 新增代码+ClaudeCodeZoom: 断言 zoom 工具成功；如果没有这一行，后续字段断言可能掩盖 observe 失败。
+            self.assertEqual([], backend.actions)  # 新增代码+ClaudeCodeZoom: 断言 zoom 没有执行任何桌面动作；如果没有这一行，read_only 工具可能悄悄触碰鼠标键盘。
+            self.assertEqual(1, result["payload"].get("zoom_image_result_count", 0), result)  # 新增代码+ClaudeCodeZoom: 断言 adapter 明确生成一张 zoom 图片；如果没有这一行，旧全图结果可能被误判对齐。
+            zoom_results = result["payload"].get("zoom_image_results", [])  # 新增代码+ClaudeCodeZoom: 读取 zoom 专属图片块；如果没有这一行，后续无法检查裁剪 artifact。
+            self.assertEqual(1, len(zoom_results), result)  # 新增代码+ClaudeCodeZoom: 断言只有一张裁剪图；如果没有这一行，多图或空图都可能混过。
+            zoom_path = Path(str(zoom_results[0]["artifact_path"]))  # 新增代码+ClaudeCodeZoom: 转成 Path 方便检查文件；如果没有这一行，路径存在性只能靠字符串猜。
+            self.assertNotEqual(source_path, zoom_path)  # 新增代码+ClaudeCodeZoom: 断言 zoom 生成新裁剪图而不是复用全图；如果没有这一行，模型仍可能只看到整张截图。
+            self.assertTrue(zoom_path.is_file(), zoom_path)  # 新增代码+ClaudeCodeZoom: 断言裁剪图真实落盘；如果没有这一行，image_result 可能指向不存在路径。
+            with Image.open(zoom_path) as zoom_image:  # 新增代码+ClaudeCodeZoom: 打开裁剪图检查像素尺寸；如果没有这一行，无法证明 scale 后的 crop 真执行。
+                self.assertEqual((2, 2), zoom_image.size)  # 新增代码+ClaudeCodeZoom: 断言 1x1 逻辑区域按 scale=2 变成 2x2 像素；如果没有这一行，坐标映射可能没被使用。
+            specs = extract_computer_use_image_specs_from_tool_output(result["text"])  # 新增代码+ClaudeCodeZoom: 从最终工具文本解析模型会回灌的图片路径；如果没有这一行，JSON 有图不代表模型能看见。
+            self.assertEqual(str(zoom_path), specs[0]["artifact_path"])  # 新增代码+ClaudeCodeZoom: 断言模型回灌的是裁剪图而不是原始全图；如果没有这一行，zoom 语义可能只停留在 payload。
+    # 新增代码+ClaudeCodeZoom: 函数段结束，test_zoom_returns_cropped_model_visible_image_result 到此结束；如果没有这个边界说明，用户不容易看出 zoom 图片回归测试范围。
 
     def test_observed_window_is_reused_by_following_left_click(self) -> None:  # 新增代码+McpObservedWindowRedTest: 函数段开始，验证 observe 后 click 自动复用可信窗口；如果没有这个测试，模型必须手动传旧 window 才能动作。
         adapter, controller, _recorder = _make_adapter()  # 新增代码+McpObservedWindowRedTest: 创建同一个 session adapter；如果没有这一行，observe 和 click 不能共享状态。

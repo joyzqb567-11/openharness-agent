@@ -35,7 +35,7 @@ def dispatch_computer_use_mcp_v2_tool(tool_name: str, arguments: dict[str, Any] 
         result = request_access(runtime_context, safe_arguments)  # 新增代码+ComputerUseMcpV2：执行授权申请；如果没有这行代码，权限回调不会被调用。
     elif raw_name == "list_granted_applications":  # 新增代码+ComputerUseMcpV2：分发授权查询；如果没有这行代码，授权状态无法查看。
         result = list_granted_applications(runtime_context)  # 新增代码+ComputerUseMcpV2：执行授权查询；如果没有这行代码，模型拿不到 grant 摘要。
-    elif raw_name in {"observe", "screenshot"}:  # 新增代码+ComputerUseMcpV2：分发观察类工具；如果没有这行代码，观察工具会被误当动作。
+    elif raw_name in {"observe", "screenshot", "zoom"}:  # 修改代码+ClaudeCodeZoom：把 zoom 纳入只读观察类分发；如果没有这行代码，zoom 虽标 readOnly 但运行时仍像动作工具一样缺观察记录。
         result = observe(runtime_context, raw_name, safe_arguments)  # 新增代码+ComputerUseMcpV2：执行观察；如果没有这行代码，主循环拿不到桌面状态。
     elif raw_name == "wait":  # 新增代码+ComputerUseMcpV2：分发等待工具；如果没有这行代码，wait 会被误判未知。
         seconds = max(0.0, min(float(safe_arguments.get("seconds", 1) or 0), 30.0))  # 新增代码+ComputerUseMcpV2：限制等待时长；如果没有这行代码，模型可能让 server 长时间卡住。
@@ -55,4 +55,3 @@ def dispatch_computer_use_mcp_v2_tool(tool_name: str, arguments: dict[str, Any] 
     emit_acceptance(runtime_context, "computer_use_mcp_v2_tool", {"tool_name": raw_name, "ok": bool(result.get("ok"))})  # 新增代码+ComputerUseMcpV2：发送验收事件；如果没有这行代码，真实终端验收难以区分 v2 动作。
     return result  # 新增代码+ComputerUseMcpV2：返回工具结果；如果没有这行代码，调用方拿不到执行输出。
 # 新增代码+ComputerUseMcpV2：函数段结束，dispatch_computer_use_mcp_v2_tool 到此结束；如果没有这个边界说明，用户不容易看出 runtime 分发范围。
-

@@ -5,6 +5,7 @@ import json  # 新增代码+McpSessionAdapter: 用于解析旧工具文本和生
 import re  # 修改代码+ComputerUseMcpV2ResidualCleanup：用于只替换完整旧工具名 token；如果没有这一行，简单 replace 可能误伤 computer_use_mcp_v2 这类新模块名。
 import time  # 新增代码+McpSessionAdapter: 用于实现 wait 原子工具；如果没有这一行，等待工具无法给界面加载留时间。
 from dataclasses import dataclass, field  # 新增代码+McpSessionAdapter: 用 dataclass 保存回调和状态；如果没有这一行，就要手写大量初始化样板。
+from pathlib import Path  # 新增代码+ClaudeCodeZoom: 用 Path 处理 zoom 源图和裁剪图路径；如果没有这一行，裁剪 artifact 路径会退回脆弱字符串拼接。
 from typing import Any, Callable  # 新增代码+McpSessionAdapter: 标注 controller 和回调的动态边界；如果没有这一行，adapter 的 duck typing 意图不清楚。
 
 try:  # 新增代码+McpSessionAdapter: 优先按包路径导入 Computer Use 旧能力；如果没有这一行，正常包运行无法找到 agent_tools。
@@ -23,6 +24,7 @@ RecordImageArtifacts = Callable[[dict[str, Any], str], None]  # 新增代码+Mcp
 AskPermission = Callable[[str], bool]  # 新增代码+McpSessionAdapter: 定义权限询问回调签名；如果没有这一行，高风险动作权限边界不清楚。
 ActionGate = Callable[[str, dict[str, Any]], str | None]  # 新增代码+McpSessionAdapter: 定义动作门禁回调签名；如果没有这一行，先观察、先启动、完成收束这些 agent 能力无法表达。
 AcceptanceEmitter = Callable[[str, dict[str, Any]], None]  # 新增代码+McpSessionAdapter: 定义验收事件回调签名；如果没有这一行，真实终端验收证据无法注入。
+ZOOM_IMAGE_RESULT_MODEL = "claudecode_parity_zoom_image_result_v1"  # 新增代码+ClaudeCodeZoom: 定义 zoom 裁剪图的稳定协议名；如果没有这一行，后续审计无法区分全窗口截图和局部放大截图。
 
 
 def _noop_record_observation(_kind: str, _payload: dict[str, Any]) -> None:  # 新增代码+McpSessionAdapter: 函数段开始，提供 observation 空回调；如果没有这段函数，轻量测试对象缺回调时会崩溃。
@@ -255,6 +257,94 @@ def _action_can_reuse_observed_window(legacy_arguments: dict[str, Any]) -> bool:
 # 新增代码+McpObservedWindowFix: 函数段结束，_action_can_reuse_observed_window 到此结束；如果没有这个边界说明，用户不容易看出窗口复用规则。
 
 
+def _zoom_safe_int(arguments: dict[str, Any], name: str, default: int = 0) -> int:  # 新增代码+ClaudeCodeZoom: 函数段开始，安全读取 zoom 坐标和尺寸整数；如果没有这段函数，坏参数会让裁剪逻辑抛异常中断工具调用。
+    try:  # 新增代码+ClaudeCodeZoom: 捕获无法转整数的输入；如果没有这一行，字符串空值或 None 会直接抛出 ValueError/TypeError。
+        return int(arguments.get(name, default) or default)  # 新增代码+ClaudeCodeZoom: 返回指定字段的整数值；如果没有这一行，裁剪坐标没有稳定数值来源。
+    except (TypeError, ValueError):  # 新增代码+ClaudeCodeZoom: 处理非数字输入；如果没有这一行，异常会冒泡到 agent 主循环。
+        return int(default)  # 新增代码+ClaudeCodeZoom: 返回兜底整数；如果没有这一行，函数没有稳定失败输出。
+# 新增代码+ClaudeCodeZoom: 函数段结束，_zoom_safe_int 到此结束；如果没有这个边界说明，用户不容易看出参数兜底范围。
+
+
+def _zoom_annotate_wrapped_result(wrapped: dict[str, Any], image_results: list[dict[str, Any]], failure_reason: str = "") -> dict[str, Any]:  # 新增代码+ClaudeCodeZoom: 函数段开始，把 zoom 裁剪结果写回 adapter 包装结果；如果没有这段函数，payload 和模型可解析文本会各写各的容易漂移。
+    payload = wrapped.get("payload", {}) if isinstance(wrapped.get("payload", {}), dict) else {}  # 新增代码+ClaudeCodeZoom: 安全读取包装 payload；如果没有这一行，异常包装结构会触发属性错误。
+    payload["zoom_image_results"] = [dict(item) for item in image_results]  # 新增代码+ClaudeCodeZoom: 保存 zoom 专属图片块；如果没有这一行，调用方无法区分局部放大图和原始全图。
+    payload["zoom_image_result_count"] = len(image_results)  # 新增代码+ClaudeCodeZoom: 保存 zoom 图片数量；如果没有这一行，测试和终端日志无法快速判断是否产出裁剪图。
+    payload["zoom_failure_reason"] = str(failure_reason or "")  # 新增代码+ClaudeCodeZoom: 记录无法裁剪的原因；如果没有这一行，真实环境缺图或缺坐标时只能猜。
+    if image_results:  # 新增代码+ClaudeCodeZoom: 只有成功生成裁剪图时才覆盖模型可见图片区；如果没有这一行，失败也会输出空图片区噪音。
+        payload["image_results"] = [dict(item) for item in image_results]  # 新增代码+ClaudeCodeZoom: 把局部图放到浅层 image_results；如果没有这一行，active artifact 收集器可能优先看到旧全图。
+        payload["image_result_count"] = len(image_results)  # 新增代码+ClaudeCodeZoom: 同步浅层图片数量；如果没有这一行，观察结果数量仍可能显示原始全图数量。
+        try:  # 新增代码+ClaudeCodeZoom: 复用现有图片区文本格式化函数；如果没有这一行，导入或格式化失败会中断 zoom 工具。
+            from .evidence import format_image_result_lines  # 新增代码+ClaudeCodeZoom: 导入模型可解析图片区格式器；如果没有这一行，zoom 图无法进入后续多模态回灌解析器。
+            image_result_lines = format_image_result_lines(image_results)  # 新增代码+ClaudeCodeZoom: 生成 Computer Use Image Results 文本行；如果没有这一行，payload 有图但模型消息解析不到。
+        except Exception as error:  # 新增代码+ClaudeCodeZoom: 兜底处理格式化函数不可用；如果没有这一行，偶发导入问题会让整个 observe 失败。
+            image_result_lines = [f"Computer Use Image Results", f"- image_result_count=0", f"- image_0_marker=zoom_format_failed:{type(error).__name__}"]  # 新增代码+ClaudeCodeZoom: 返回可审计失败文本；如果没有这一行，格式化失败没有任何线索。
+        if image_result_lines:  # 新增代码+ClaudeCodeZoom: 确认确实有图片区文本；如果没有这一行，空列表会产生多余换行。
+            legacy_text = str(payload.get("legacy_text", ""))  # 新增代码+ClaudeCodeZoom: 读取原 observe 文本；如果没有这一行，追加 zoom 图片区会丢失原始观察摘要。
+            joiner = "\n" if legacy_text else ""  # 新增代码+ClaudeCodeZoom: 只在已有文本后补换行；如果没有这一行，空文本会多一个开头换行。
+            payload["legacy_text"] = legacy_text + joiner + "\n".join(image_result_lines)  # 新增代码+ClaudeCodeZoom: 追加 zoom 图片区且让后出现的 image_0 覆盖原全图解析；如果没有这一行，模型仍会回灌原始截图。
+    wrapped["payload"] = payload  # 新增代码+ClaudeCodeZoom: 把更新后的 payload 放回结果；如果没有这一行，局部修改不会返回给调用方。
+    wrapped["text"] = json.dumps(wrapped, ensure_ascii=False, sort_keys=True)  # 新增代码+ClaudeCodeZoom: 重新生成最终 JSON 文本；如果没有这一行，result["text"] 仍是旧全图版本。
+    return wrapped  # 新增代码+ClaudeCodeZoom: 返回更新后的包装结果；如果没有这一行，调用方拿不到增强结果。
+# 新增代码+ClaudeCodeZoom: 函数段结束，_zoom_annotate_wrapped_result 到此结束；如果没有这个边界说明，用户不容易看出结果回写范围。
+
+
+def _build_zoom_image_result(arguments: dict[str, Any], wrapped: dict[str, Any], observed_window: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:  # 新增代码+ClaudeCodeZoom: 函数段开始，从 observe 结果生成局部裁剪 image_result；如果没有这段函数，zoom 只能返回整张截图。
+    if not bool(wrapped.get("ok")):  # 新增代码+ClaudeCodeZoom: 观察失败时不尝试裁剪；如果没有这一行，失败文本可能被当成有效源图继续处理。
+        return None, "observe_failed"  # 新增代码+ClaudeCodeZoom: 返回观察失败原因；如果没有这一行，调用方无法解释为什么没有局部图。
+    payload = wrapped.get("payload", {}) if isinstance(wrapped.get("payload", {}), dict) else {}  # 新增代码+ClaudeCodeZoom: 读取 adapter 包装 payload；如果没有这一行，legacy_text 无处获取。
+    legacy_text = str(payload.get("legacy_text", ""))  # 新增代码+ClaudeCodeZoom: 读取旧 observe 文本中的图片区；如果没有这一行，源截图路径无法被发现。
+    try:  # 新增代码+ClaudeCodeZoom: 导入现有图片结果文本解析器；如果没有这一行，导入失败会中断整个工具。
+        from .image_messages import extract_computer_use_image_specs_from_tool_output  # 新增代码+ClaudeCodeZoom: 复用模型回灌路径解析逻辑；如果没有这一行，zoom 会自造一套路径解析规则。
+        source_specs = extract_computer_use_image_specs_from_tool_output(legacy_text)  # 新增代码+ClaudeCodeZoom: 从 observe 文本中提取源图路径；如果没有这一行，裁剪没有输入图片。
+    except Exception as error:  # 新增代码+ClaudeCodeZoom: 捕获解析器不可用或坏文本异常；如果没有这一行，zoom 会把解析问题冒泡成工具崩溃。
+        return None, f"image_spec_parse_failed:{type(error).__name__}"  # 新增代码+ClaudeCodeZoom: 返回解析失败原因；如果没有这一行，用户不知道为什么没有局部图。
+    if not source_specs:  # 新增代码+ClaudeCodeZoom: 检查 observe 是否真的提供了图片引用；如果没有这一行，空列表会在索引时崩溃。
+        return None, "no_source_image_result"  # 新增代码+ClaudeCodeZoom: 返回缺少源图原因；如果没有这一行，模型无法恢复为普通 observe。
+    source_spec = dict(source_specs[0])  # 新增代码+ClaudeCodeZoom: 使用第一张 observe 截图作为 zoom 源；如果没有这一行，后续修改可能污染解析器返回值。
+    source_path = Path(str(source_spec.get("artifact_path", "") or ""))  # 新增代码+ClaudeCodeZoom: 把源图路径转为 Path；如果没有这一行，文件存在性和派生路径处理不稳定。
+    if not source_path.is_file():  # 新增代码+ClaudeCodeZoom: 确认源图真实存在；如果没有这一行，Pillow 会抛出更难懂的文件错误。
+        return None, "source_artifact_missing"  # 新增代码+ClaudeCodeZoom: 返回源图缺失原因；如果没有这一行，缺文件问题不可审计。
+    try:  # 新增代码+ClaudeCodeZoom: 延迟导入 Pillow 和坐标映射函数；如果没有这一行，缺依赖会在 agent 启动阶段就失败。
+        from PIL import Image  # 新增代码+ClaudeCodeZoom: 使用 Pillow 打开和裁剪 PNG/JPEG/WebP；如果没有这一行，无法真正生成局部图片。
+        from .coordinates import build_screenshot_coordinate_mapping  # 新增代码+ClaudeCodeZoom: 复用正式截图 scale 合同；如果没有这一行，zoom 会手写一份易漂移坐标换算。
+    except Exception as error:  # 新增代码+ClaudeCodeZoom: 处理 Pillow 或坐标模块不可用；如果没有这一行，环境缺依赖会让工具调用崩溃。
+        return None, f"zoom_dependencies_unavailable:{type(error).__name__}"  # 新增代码+ClaudeCodeZoom: 返回依赖缺失原因；如果没有这一行，用户只能看到异常类型。
+    x = _zoom_safe_int(arguments, "x")  # 新增代码+ClaudeCodeZoom: 读取 zoom 区域左上角 x；如果没有这一行，横向裁剪位置没有来源。
+    y = _zoom_safe_int(arguments, "y")  # 新增代码+ClaudeCodeZoom: 读取 zoom 区域左上角 y；如果没有这一行，纵向裁剪位置没有来源。
+    width = max(1, _zoom_safe_int(arguments, "width", 1))  # 新增代码+ClaudeCodeZoom: 读取并限制 zoom 宽度至少 1；如果没有这一行，零宽裁剪会生成无效图片。
+    height = max(1, _zoom_safe_int(arguments, "height", 1))  # 新增代码+ClaudeCodeZoom: 读取并限制 zoom 高度至少 1；如果没有这一行，零高裁剪会生成无效图片。
+    try:  # 新增代码+ClaudeCodeZoom: 捕获打开、换算、裁剪、保存中的所有可恢复错误；如果没有这一行，坏图会中断 agent 主循环。
+        with Image.open(source_path) as source_image_handle:  # 新增代码+ClaudeCodeZoom: 打开 observe 源截图；如果没有这一行，无法读取像素尺寸和裁剪内容。
+            source_image = source_image_handle.convert("RGBA")  # 新增代码+ClaudeCodeZoom: 转成稳定 RGBA 模式；如果没有这一行，不同源图模式保存 PNG 时可能表现不同。
+            image_width, image_height = source_image.size  # 新增代码+ClaudeCodeZoom: 读取源图像素尺寸；如果没有这一行，坐标映射和边界裁剪无从计算。
+            mapping = build_screenshot_coordinate_mapping(observed_window, int(image_width), int(image_height))  # 新增代码+ClaudeCodeZoom: 用窗口逻辑 rect 和截图尺寸计算 scale；如果没有这一行，zoom 坐标无法从屏幕逻辑坐标转成截图像素。
+            if not bool(mapping.get("valid", False)):  # 新增代码+ClaudeCodeZoom: 坐标映射无效时停止裁剪；如果没有这一行，缺 rect 会产生误导性局部图。
+                return None, str(mapping.get("fallback_reason", "invalid_screenshot_coordinate_mapping"))  # 新增代码+ClaudeCodeZoom: 返回映射失败原因；如果没有这一行，用户不知道是坐标数据不足。
+            window_rect = mapping.get("window_logical_rect", {}) if isinstance(mapping.get("window_logical_rect", {}), dict) else {}  # 新增代码+ClaudeCodeZoom: 读取窗口逻辑矩形；如果没有这一行，屏幕坐标无法转成窗口相对坐标。
+            scale = mapping.get("window_relative_logical_to_screenshot_pixel", {}) if isinstance(mapping.get("window_relative_logical_to_screenshot_pixel", {}), dict) else {}  # 新增代码+ClaudeCodeZoom: 读取逻辑到像素的比例；如果没有这一行，DPI/截图缩放会被忽略。
+            scale_x = float(scale.get("scale_x", 1.0) or 1.0)  # 新增代码+ClaudeCodeZoom: 读取横向 scale；如果没有这一行，宽度换算只能假设 1:1。
+            scale_y = float(scale.get("scale_y", 1.0) or 1.0)  # 新增代码+ClaudeCodeZoom: 读取纵向 scale；如果没有这一行，高度换算只能假设 1:1。
+            left = int(round((x - int(window_rect.get("left", 0) or 0)) * scale_x))  # 新增代码+ClaudeCodeZoom: 把屏幕逻辑 x 转成截图像素 left；如果没有这一行，裁剪会错位。
+            top = int(round((y - int(window_rect.get("top", 0) or 0)) * scale_y))  # 新增代码+ClaudeCodeZoom: 把屏幕逻辑 y 转成截图像素 top；如果没有这一行，裁剪会错位。
+            right = int(round((x + width - int(window_rect.get("left", 0) or 0)) * scale_x))  # 新增代码+ClaudeCodeZoom: 计算截图像素 right；如果没有这一行，裁剪宽度无法对齐逻辑区域。
+            bottom = int(round((y + height - int(window_rect.get("top", 0) or 0)) * scale_y))  # 新增代码+ClaudeCodeZoom: 计算截图像素 bottom；如果没有这一行，裁剪高度无法对齐逻辑区域。
+            crop_left = max(0, min(int(image_width), left))  # 新增代码+ClaudeCodeZoom: 将左边界夹到图片范围内；如果没有这一行，越界区域会让裁剪语义不清。
+            crop_top = max(0, min(int(image_height), top))  # 新增代码+ClaudeCodeZoom: 将上边界夹到图片范围内；如果没有这一行，越界区域会让裁剪语义不清。
+            crop_right = max(crop_left, min(int(image_width), right))  # 新增代码+ClaudeCodeZoom: 将右边界夹到图片范围内且不小于左边界；如果没有这一行，反向区域会生成坏图。
+            crop_bottom = max(crop_top, min(int(image_height), bottom))  # 新增代码+ClaudeCodeZoom: 将下边界夹到图片范围内且不小于上边界；如果没有这一行，反向区域会生成坏图。
+            if crop_right <= crop_left or crop_bottom <= crop_top:  # 新增代码+ClaudeCodeZoom: 检查裁剪区域是否为空；如果没有这一行，Pillow 可能保存 0 尺寸异常图。
+                return None, "zoom_region_outside_screenshot"  # 新增代码+ClaudeCodeZoom: 返回区域越界原因；如果没有这一行，用户无法调整坐标。
+            zoom_path = source_path.with_name(f"{source_path.stem}_zoom_{x}_{y}_{width}_{height}_{int(time.time() * 1000)}.png")  # 新增代码+ClaudeCodeZoom: 生成同目录局部图路径；如果没有这一行，裁剪图没有稳定 artifact 文件。
+            cropped_image = source_image.crop((crop_left, crop_top, crop_right, crop_bottom))  # 新增代码+ClaudeCodeZoom: 真正裁剪局部像素；如果没有这一行，zoom 仍然只是元数据。
+            cropped_image.save(zoom_path, format="PNG")  # 新增代码+ClaudeCodeZoom: 保存局部 PNG artifact；如果没有这一行，模型无法读取裁剪后的图片。
+            zoom_width, zoom_height = cropped_image.size  # 新增代码+ClaudeCodeZoom: 读取裁剪图尺寸；如果没有这一行，image_result 无法报告局部图大小。
+    except Exception as error:  # 新增代码+ClaudeCodeZoom: 处理图片打开或裁剪失败；如果没有这一行，坏 artifact 会让整个工具调用失败。
+        return None, f"zoom_crop_failed:{type(error).__name__}"  # 新增代码+ClaudeCodeZoom: 返回裁剪失败原因；如果没有这一行，调用方无法审计失败。
+    zoom_block = {"type": "image_result", "model": ZOOM_IMAGE_RESULT_MODEL, "source": "zoom", "artifact_path": str(zoom_path), "image_path": str(zoom_path), "mime_type": "image/png", "width": int(zoom_width), "height": int(zoom_height), "sensitive_text_included": False, "text_redacted": True, "screenshot_coordinate_model": str(mapping.get("model", "")), "screenshot_coordinate_mapping": mapping, "zoom_source_artifact_path": str(source_path), "zoom_region_logical": {"x": x, "y": y, "width": width, "height": height}, "zoom_crop_pixel_rect": {"left": crop_left, "top": crop_top, "right": crop_right, "bottom": crop_bottom, "width": int(zoom_width), "height": int(zoom_height)}, "marker": "claudecode_parity_zoom_image_result"}  # 新增代码+ClaudeCodeZoom: 构造局部放大图片块；如果没有这一行，裁剪图无法进入统一 image_result 协议。
+    return zoom_block, ""  # 新增代码+ClaudeCodeZoom: 返回成功图片块和空失败原因；如果没有这一行，调用方拿不到 zoom 结果。
+# 新增代码+ClaudeCodeZoom: 函数段结束，_build_zoom_image_result 到此结束；如果没有这个边界说明，用户不容易看出 zoom 裁剪流程范围。
+
+
 @dataclass  # 新增代码+McpSessionAdapter: 自动生成 adapter 初始化逻辑；如果没有这一行，构造函数会重复样板代码。
 class ComputerUseMcpSessionAdapter:  # 新增代码+McpSessionAdapter: 函数段开始，执行 MCP 原子工具并复用 agent 旧能力；如果没有这个类，stdio MCP server 无法拿到 agent 回调。
     controller: Any  # 新增代码+McpSessionAdapter: 保存 Computer Use controller；如果没有这一行，旧 status/observe/action 没有后端。
@@ -315,6 +405,12 @@ class ComputerUseMcpSessionAdapter:  # 新增代码+McpSessionAdapter: 函数段
         legacy_text = computer_use_internal_adapter_tools.internal_observe_desktop(legacy_arguments, self.controller, self.callbacks.record_observation, self.callbacks.record_runtime_trace, self.callbacks.record_image_artifacts)  # 修改代码+ComputerUseMcpV2InternalAdapterFence：通过内部 facade 调用观察截图能力；如果没有这一行，接线层会继续直接引用旧 computer_observe 工具名。
         wrapped = _wrap_legacy_text(tool_name, "computer_observe", legacy_text)  # 修改代码+McpObservedWindowFix: 先包装 observe 结果再决定是否写 session 状态；如果没有这一行，失败 observe 也可能污染窗口上下文。
         observed_window = legacy_arguments.get("window") if isinstance(legacy_arguments.get("window"), dict) else {}  # 新增代码+McpObservedWindowFix: 读取本次 observe 使用的可信窗口；如果没有这一行，后续 click 无法复用同一目标。
+        if tool_name == "zoom":  # 新增代码+ClaudeCodeZoom: 只对 zoom 执行局部裁剪增强；如果没有这一行，普通 observe/screenshot 会被错误改成局部图。
+            zoom_block, zoom_failure_reason = _build_zoom_image_result(arguments, wrapped, observed_window)  # 新增代码+ClaudeCodeZoom: 根据源截图和坐标映射生成局部图片块；如果没有这一行，zoom 仍只会返回全窗口截图。
+            zoom_results = [zoom_block] if zoom_block is not None else []  # 新增代码+ClaudeCodeZoom: 把可选图片块转成列表；如果没有这一行，结果回写函数要处理 None 分支。
+            wrapped = _zoom_annotate_wrapped_result(wrapped, zoom_results, zoom_failure_reason)  # 新增代码+ClaudeCodeZoom: 把 zoom 图片和失败原因写回 payload/text；如果没有这一行，模型下一轮仍解析不到局部图。
+            if zoom_results:  # 新增代码+ClaudeCodeZoom: 只有真实生成裁剪图时才登记 artifact；如果没有这一行，失败 zoom 会产生空 artifact 事件。
+                self.callbacks.record_image_artifacts(wrapped, "computer_observe")  # 新增代码+ClaudeCodeZoom: 复用观察图片登记链记录局部图；如果没有这一行，active_artifacts 可能只保留原全图。
         if bool(wrapped.get("ok")) and observed_window:  # 新增代码+McpObservedWindowFix: 只有成功观察且窗口非空才保存；如果没有这一行，失败或空窗口会污染动作目标。
             self.state.last_observed_window = dict(observed_window)  # 新增代码+McpObservedWindowFix: 把窗口写入会话状态；如果没有这一行，left_click 后续仍会缺少可信 window。
         return wrapped  # 修改代码+McpObservedWindowFix: 返回包装后的 observe 结果；如果没有这一行，调用方拿不到观察结果。
