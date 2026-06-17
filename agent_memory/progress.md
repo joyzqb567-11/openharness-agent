@@ -188,3 +188,7 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Task 3 已用 CodeGraph 检查真实 SendInput 粘贴路径，确认 `real_sendinput_guard.py` 已有 `_clipboard_text/_set_clipboard_text/_paste_clipboard_text` 恢复链路；本任务暂不替换真实输入路径，避免扩大风险面。
 - Task 3 已通过 py_compile：`system_clipboard.py`、`test_computer_use_mcp_v2_clipboard_restore_contract.py`。
 - Task 3 已按规则三复制学习备份到 `learning_agent/test/computer_use_clipboard_restore_contract_20260617/`。
+- Task 4 已完成权限审批提示对齐：新增 `inferred_ant_mcp/approval_prompt.py`，`permissions.py` 改为复用 `build_computer_use_approval_prompt()`，提示中稳定包含 `apps/applications/grantFlags/sentinelWarnings/reason`。
+- Task 4 已通过聚焦测试和回归：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_permission_approval_prompt learning_agent.tests.test_computer_use_mcp_v2_permission_grants`，5 个测试通过。
+- Task 4 已通过 py_compile：`approval_prompt.py`、`permissions.py`、`test_computer_use_mcp_v2_permission_approval_prompt.py`。
+- Task 4 已按规则三复制学习备份到 `learning_agent/test/computer_use_permission_approval_prompt_20260617/`。
