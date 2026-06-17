@@ -183,3 +183,8 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Task 2 已通过相关回归：`python -m unittest learning_agent.tests.test_computer_use_mcp_batch_safety learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_contract`，27 个测试通过。
 - Task 2 已通过 py_compile：`system_clipboard.py`、`clipboard.py`、`types.py`、`bind_session_context.py`、`test_computer_use_mcp_v2_clipboard_system_bridge.py`。
 - Task 2 已按规则三复制学习备份到 `learning_agent/test/computer_use_clipboard_system_bridge_20260617/`。
+- Task 3 已完成剪贴板 save/write/verify/paste/restore 合同：`system_clipboard.py` 新增 `paste_text_with_restore()`，会先保存原剪贴板，写入临时文本，读回验证，验证通过才调用粘贴回调，最后无论成功失败都尽力恢复原文本。
+- Task 3 已通过聚焦测试：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_clipboard_restore_contract learning_agent.tests.test_computer_use_mcp_v2_clipboard_system_bridge`，5 个测试通过。
+- Task 3 已用 CodeGraph 检查真实 SendInput 粘贴路径，确认 `real_sendinput_guard.py` 已有 `_clipboard_text/_set_clipboard_text/_paste_clipboard_text` 恢复链路；本任务暂不替换真实输入路径，避免扩大风险面。
+- Task 3 已通过 py_compile：`system_clipboard.py`、`test_computer_use_mcp_v2_clipboard_restore_contract.py`。
+- Task 3 已按规则三复制学习备份到 `learning_agent/test/computer_use_clipboard_restore_contract_20260617/`。
