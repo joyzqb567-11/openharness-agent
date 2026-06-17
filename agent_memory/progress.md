@@ -178,3 +178,8 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 停止条件：真实系统剪贴板触及敏感内容、真实 GUI benchmark 需要操作用户私有数据、或可见终端无法人工确认。
 - Task 1 已执行当前矩阵命令，输出为 `COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=11/14 partial=3 missing=0 visible_terminal_gate=false claudecode_parity=false claudecode_parity_or_better=false`。
 - Task 1 已通过 CodeGraph 查询 `computer use clipboard request_access permissions alignment matrix visible terminal grantFlags WindowsProductionClipboardGuard`，确认 `clipboard.py` 仍是 context clipboard 为主，`permissions.py` 已有 `apps/grantFlags/sentinelWarnings` 基础结构，`claudecode_alignment_matrix.py` 的 CA07/CA13/CA14 仍需补证据和门禁。
+- Task 2 已完成 Windows 系统剪贴板桥接：新增 `windows_runtime/system_clipboard.py`，`ComputerUseMcpV2Context` 增加 `clipboard_backend`，`bind_session_context.py` 默认绑定 `WindowsClipboardBackend`，`clipboard.py` 改为先检查 `clipboardRead/clipboardWrite` 再调用后端读写。
+- Task 2 已通过聚焦测试：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_clipboard_system_bridge`，3 个测试通过。
+- Task 2 已通过相关回归：`python -m unittest learning_agent.tests.test_computer_use_mcp_batch_safety learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_contract`，27 个测试通过。
+- Task 2 已通过 py_compile：`system_clipboard.py`、`clipboard.py`、`types.py`、`bind_session_context.py`、`test_computer_use_mcp_v2_clipboard_system_bridge.py`。
+- Task 2 已按规则三复制学习备份到 `learning_agent/test/computer_use_clipboard_system_bridge_20260617/`。
