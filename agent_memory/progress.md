@@ -198,3 +198,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Task 5 已运行真实矩阵命令，当前仍为 `COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=11/14 partial=3 missing=0 visible_terminal_gate=false claudecode_parity=false claudecode_parity_or_better=false`，没有误升 parity。
 - Task 5 已通过 py_compile：`claudecode_alignment_matrix.py`、`test_computer_use_mcp_v2_claudecode_alignment_matrix.py`。
 - Task 5 已按规则三复制学习备份到 `learning_agent/test/computer_use_alignment_matrix_hardening_20260617/`。
+- Task 6 已新增安全真实可见终端场景：`learning_agent/acceptance_controller/scenarios/agent_capability_computer_use_claudecode_windows_parity_visible_terminal.json`，场景只允许 `/computer use --full`、`request_access`、`list_granted_applications`、`write_clipboard`、`read_clipboard` 这一条安全链路，不允许登录页、用户文件、系统设置或真实窗口点击输入。
+- Task 6 已验证场景 JSON 可解析：`python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_computer_use_claudecode_windows_parity_visible_terminal.json` 通过。
+- Task 6 真实可见终端执行命令已确认：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\acceptance_controller\controller.ps1 -ScenarioPath .\learning_agent\acceptance_controller\scenarios\agent_capability_computer_use_claudecode_windows_parity_visible_terminal.json`；该命令将在 Task 7 最终验证门执行并生成 run 证据。
+
+### Visible terminal acceptance steps
+
+1. 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，或通过 `learning_agent\acceptance_controller\controller.ps1` 由控制器启动该 BAT。
+2. 确认它是用户本地电脑上可见的真实终端窗口。
+3. 在 agent 交互提示符输入场景 prompt，或由 controller 将 `prompt_lines` 逐行输入。
+4. 观察终端输出是否出现 `COMPUTER_USE_CLAUDECODE_WINDOWS_PARITY_OK`。
+5. 只有看到真实终端成功输出并生成 run 证据，才允许把 CA14 记为通过。
