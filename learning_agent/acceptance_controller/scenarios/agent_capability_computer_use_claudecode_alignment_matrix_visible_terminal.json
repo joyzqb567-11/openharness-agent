@@ -1,0 +1,57 @@
+{
+  "id": "agent_capability_computer_use_claudecode_alignment_matrix_visible_terminal",
+  "name": "agent_capability_computer_use_claudecode_alignment_matrix_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_claudecode_alignment_matrix_visible_terminal",
+  "window_title_prefix": "LearningAgent-ClaudeCodeAlignment",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "success_marker": "COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY",
+  "prompt": "Please run the Computer Use ClaudeCode alignment matrix acceptance.",
+  "prompt_lines": [
+    "Please run the Computer Use ClaudeCode alignment matrix. Use only local OpenHarness evidence and the local ClaudeCode source at D:\\ClaudeCode-main\\ClaudeCode-main. Do not open browsers, login windows, passwords, system settings, registry, installers, payment pages, or user documents. The final answer must include the fixed marker: COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY.",
+    "You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; python -m learning_agent.computer_use_mcp_v2.windows_runtime.claudecode_alignment_matrix --repo-root .. --claudecode-root D:\\ClaudeCode-main\\ClaudeCode-main",
+    "Do not write the final answer early. Only after the terminal command prints COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY, the final answer's last line must completely copy: COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=13/14 partial=1 missing=0 visible_terminal_gate=false claudecode_parity=false claudecode_parity_or_better=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY",
+    "level=CLAUDECODE_ALIGNMENT_PARTIAL",
+    "aligned=13/14",
+    "partial=1",
+    "missing=0",
+    "visible_terminal_gate=false",
+    "claudecode_parity=false",
+    "claudecode_parity_or_better=false"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY",
+    "level=CLAUDECODE_ALIGNMENT_PARTIAL",
+    "aligned=13/14",
+    "partial=1",
+    "missing=0",
+    "visible_terminal_gate=false",
+    "claudecode_parity=false",
+    "claudecode_parity_or_better=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY",
+      "level=CLAUDECODE_ALIGNMENT_PARTIAL",
+      "aligned=13/14",
+      "partial=1",
+      "missing=0",
+      "visible_terminal_gate=false",
+      "claudecode_parity=false",
+      "claudecode_parity_or_better=false"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

@@ -192,3 +192,9 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Task 4 已通过聚焦测试和回归：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_permission_approval_prompt learning_agent.tests.test_computer_use_mcp_v2_permission_grants`，5 个测试通过。
 - Task 4 已通过 py_compile：`approval_prompt.py`、`permissions.py`、`test_computer_use_mcp_v2_permission_approval_prompt.py`。
 - Task 4 已按规则三复制学习备份到 `learning_agent/test/computer_use_permission_approval_prompt_20260617/`。
+- Task 5 已完成 CA07/CA14 矩阵硬化测试：新增 `test_computer_use_mcp_v2_claudecode_alignment_matrix.py`，覆盖 CA07 两侧 token 对齐、CA14 无 gate 只能 partial、CA14 需要真实 run 目录才 aligned。
+- Task 5 已在 `claudecode_alignment_matrix.py` 增加 `EXCLUDED_PLATFORM_DIFFERENCES`，把 macOS TCC、Swift helper、外部 MCP 包内部实现作为说明性排除项返回到机器报告和 Markdown 报告，但不改变 14 项矩阵分母。
+- Task 5 已通过聚焦测试：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_alignment_matrix`，4 个测试通过。
+- Task 5 已运行真实矩阵命令，当前仍为 `COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=11/14 partial=3 missing=0 visible_terminal_gate=false claudecode_parity=false claudecode_parity_or_better=false`，没有误升 parity。
+- Task 5 已通过 py_compile：`claudecode_alignment_matrix.py`、`test_computer_use_mcp_v2_claudecode_alignment_matrix.py`。
+- Task 5 已按规则三复制学习备份到 `learning_agent/test/computer_use_alignment_matrix_hardening_20260617/`。
