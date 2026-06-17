@@ -103,3 +103,78 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已更新 `docs/computer_use_mcp_v2_architecture.md`，记录最终协议链路：ClaudeCode-facing schema、`protocol_normalizer.py` 转换边界、权限 grant flags、MCP content blocks、lock lifecycle、display state、tools/list 动态 app inventory、agent-side wrapper 的 current tool use context 和 content block 映射。
 - 真实可见终端验收已通过：控制器启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，在真实终端中输入 `/computer use --full` 和只读 MCP prompt，生成 run `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_smoke_visible_terminal-20260616_165645\result.json`。
 - 本次真实终端 run 的关键断言：`completed=true`、`prompt_sent=true`、`prompt_received=true`、`final_printed=true`、`permission_sent_count=0`、`computer_use_mcp_v2_tool=true`、工具调用为 `list_granted_applications`、最终回答为 `COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK`。
+
+## 2026-06-16 Computer Use Adaptive Image Pipeline
+
+- 用户确认采用“内部保真 + 外部自适应压缩”路线：内部 evidence 保留 Windows 原始截图格式，模型出口按图片规模和来源选择 PNG/JPEG。
+- 已按 TDD 先补红灯测试：`test_agent_compresses_large_bmp_computer_use_screenshot_to_jpeg_model_image_block` 和 `test_evidence_store_preserves_bmp_payload_as_internal_artifact` 首次运行失败，证明旧链路仍是 BMP/PNG 固定路径。
+- 已修改旧 `learning_agent/computer_use/evidence.py` 和 v2 `learning_agent/computer_use_mcp_v2/windows_runtime/evidence.py`：`normalize_screenshot_artifact_bytes` 不再把 BMP 源头转 PNG，只做格式清理并保留原始截图证据。
+- 已修改 `learning_agent/computer_use_mcp_v2/windows_runtime/image_messages.py`：新增 `COMPUTER_USE_JPEG_QUALITY=75`、小图 PNG 阈值、zoom/crop/region 保真提示、自适应模型图片编码；小 PNG 原样保真，大 BMP/WebP 或超预算 PNG 走模型出口转码，大图默认 JPEG。
+- 已修改 `observation.py` 传递图片 `source` 给编码层；已修改 `result_blocks.py` 和 `claudecode_bridge/wrapper.py` 的未知 MIME 兜底为 `image/jpeg`，更接近 ClaudeCode。
+- 已通过聚焦测试：`python -m unittest learning_agent.tests.test_windows_computer_use_image_results_phase41.WindowsComputerUseImageResultsPhase41Tests.test_agent_compresses_large_bmp_computer_use_screenshot_to_jpeg_model_image_block learning_agent.tests.test_windows_computer_use_image_results_phase41.WindowsComputerUseImageResultsPhase41Tests.test_evidence_store_preserves_bmp_payload_as_internal_artifact`，2 个测试通过。
+- 已通过相关回归：`python -m unittest learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_computer_use_mcp_v2_result_blocks learning_agent.tests.test_computer_use_mcp_v2_bridge_wrapper`，19 个测试通过。
+- 已按 AGENTS 规则三把本轮修改文件复制到 `learning_agent/test/computer_use_adaptive_image_20260616/`，作为用户学习备份。
+- 尚未完成最终门禁：还需要 py_compile、完整 computer use 相关回归，以及 `start_oauth_agent.bat` 真实可见终端交互验收。
+
+## 2026-06-16 Computer Use Adaptive Image Pipeline 验收补记
+
+- 已修复真实 observe 链路发现的旧适配器路径漂移：工具结果里的 `mcp__computer-use__computer_batch\evidence` 路径可能不存在，而真实证据文件位于 `computer_use\evidence`；现在模型图片回灌前会自动修复到真实 artifact 路径。
+- 已新增回归测试 `test_mcp_observe_image_block_repairs_legacy_adapter_evidence_path`，先复现 `block_count=0` 的问题，再验证修复后可生成模型可见图片块。
+- 已通过相关回归：`python -m unittest learning_agent.tests.test_windows_computer_use_image_results_phase41 learning_agent.tests.test_computer_use_mcp_v2_result_blocks learning_agent.tests.test_computer_use_mcp_v2_bridge_wrapper`，20 个测试通过。
+- 已通过完整 v2 computer use 回归矩阵：`python -m unittest ...test_computer_use_mcp_v2_state_observe_action_loop`，116 个测试通过。
+- 已通过 py_compile：`evidence.py`、`windows_runtime/evidence.py`、`image_messages.py`、`observation.py`、`result_blocks.py`、`wrapper.py`、`test_windows_computer_use_image_results_phase41.py`，以及 `learning_agent/test/computer_use_adaptive_image_20260616/` 下的 Python 备份文件。
+- 真实可见终端验收已通过：控制器启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，在真实终端中输入 `/computer use --full` 和只读 observe prompt，生成 run `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal-20260616_213724\result.json`。
+- 本次真实终端 run 的关键断言：`completed=true`、`assertion.passed=true`、`computer_use_mcp_v2_tool=true`、工具调用为 `mcp__computer-use__observe`、`permission_sent_count=0`、`real_desktop_touched=false`、`low_level_event_count=0`、最终回答为 `COMPUTER_USE_MCP_V2_OBSERVE_ADAPTIVE_IMAGE_OK`。
+- 已复核最新工具结果 `learning_agent\debug_logs\tool_results\20260616_213741_mcp__computer-use__observe_eedb27cbc31b.txt`：可构建模型消息，`block_count=1`，内容类型为 `text + image_url`；当前窗口截图小于阈值，因此外发 PNG 保真，大图 JPEG 路径由自动化测试覆盖。
+- CodeGraph 当前状态已复核为最新：`codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,245`、`Nodes 48,175`、`Edges 95,944`。
+
+## 2026-06-16 Computer Use ClaudeCode Lifecycle Parity 蓝图
+
+- 用户确认 Esc acquire/cleanup、完整 turn cleanup、standalone tools/list disabled 分支、displayResolvedForApps string key 四项都值得继续对齐 ClaudeCode。
+- 已按 `superpowers:writing-plans` 创建长任务蓝图：`docs/superpowers/plans/2026-06-16-computer-use-claudecode-lifecycle-parity.md`。
+- 蓝图明确不重写 Windows backend，只补 v2 MCP facade、ClaudeCode bridge 和 Windows session runtime 的连接处；内部保留 OpenHarness rich state，外部对齐 ClaudeCode 可观察协议字段。
+- 蓝图包含 8 个执行任务：Esc 红测、Esc acquire lifecycle、统一 run_turn_cleanup、tools/list disabled、displayResolvedForApps key、wrapper cleanup 回归、文档/学习备份/记忆、自动化与真实可见终端验收。
+- 蓝图自检已通过：UTF-8 正常，638 行，未发现 `TBD`、`TODO`、`implement later`、`fill in details`、`Modify later` 等占位词。
+
+## 2026-06-16 Computer Use ClaudeCode Lifecycle Parity 执行记录
+
+- 已完成 Esc acquire lifecycle：`ComputerUseMcpV2Context` 新增 Esc lifecycle 回调；`runtime.py` 在 acquire 成功后注册全局 Escape 急停；`WindowsComputerUseSessionRuntime` 接入 `GlobalEscapeAbortController`；`bind_session_context.py` 把 register/expected escape 回调传入 v2 context。
+- 已完成统一 cleanup：`WindowsComputerUseSessionRuntime.cleanup_turn()` 改为委托 `run_turn_cleanup()`，覆盖 transient input release、hidden window restore、Esc hook unregister、lock release 和 abort clear，再合并 owned resource cleanup、residual check 和 notification。
+- 已完成 standalone `tools/list` disabled：`mcpServer.py` 在 disabled/context-disabled 时返回 `tools: []`，不会加载 Windows app inventory，并记录 `computer_use_tools_list_app_inventory` trace，状态为 `disabled`。
+- 已完成 `displayResolvedForApps` key 化：外部 `displayState.displayResolvedForApps` 为排序去重 string key，内部 rich records 保留在 `displayResolvedForAppsRecords` 与 context 的 `display_resolved_for_apps`。
+- 已新增并通过聚焦测试：`test_computer_use_mcp_v2_escape_cleanup_parity`、`test_computer_use_mcp_v2_tools_list_disabled`、`test_computer_use_mcp_v2_display_resolved_key`；已更新并通过 `test_computer_use_mcp_v2_display_state`、`test_computer_use_mcp_v2_dynamic_tools_list`、`test_computer_use_mcp_v2_bridge_wrapper`。
+- 执行中发现并修复一个 wrapper cleanup 接线缺口：轻量 runtime/fake runtime 没有 `lock_manager` 时，绑定层曾直接丢弃 `cleanup_turn`；现在即使无 lock manager，只要 runtime 暴露 `cleanup_turn`，也会绑定到 context。
+
+## 2026-06-16 Computer Use ClaudeCode Lifecycle Parity 完成记录
+
+- 已补齐真实终端验收场景：`learning_agent/acceptance_controller/scenarios/agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal.json`，用于在真实 `start_oauth_agent.bat` 窗口中依次执行 `/computer use --full`、只读 `mcp__computer-use__observe`、`/computer cleanup learning-agent-default-session` 和最终标记确认。
+- 已通过大范围 v2 computer use 回归：`python -m unittest learning_agent.tests.test_computer_use_mcp_v2_claudecode_protocol_manifest learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_result_blocks learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle learning_agent.tests.test_computer_use_mcp_v2_display_state learning_agent.tests.test_computer_use_mcp_v2_display_resolved_key learning_agent.tests.test_computer_use_mcp_v2_dynamic_tools_list learning_agent.tests.test_computer_use_mcp_v2_tools_list_disabled learning_agent.tests.test_computer_use_mcp_v2_escape_cleanup_parity learning_agent.tests.test_computer_use_mcp_v2_bridge_wrapper learning_agent.tests.test_computer_use_mcp_v2_contract learning_agent.tests.test_computer_use_mcp_server learning_agent.tests.test_computer_use_mcp_session_adapter learning_agent.tests.test_computer_use_mcp_agent_side_binding learning_agent.tests.test_computer_use_mcp_v2_architecture_docs learning_agent.tests.test_computer_use_mcp_v2_state_observe_action_loop learning_agent.tests.test_computer_use_tool_scope`，共 92 个测试通过。
+- 已通过关键源码和学习备份 `py_compile`：覆盖 `types.py`、`runtime.py`、`bind_session_context.py`、`observation.py`、`session_runtime.py`、`coordinates.py`、`mcpServer.py`、新增/修改测试文件，以及 `learning_agent/test/computer_use_lifecycle_parity_20260616/` 下的 Python 备份。
+- 已通过真实可见终端验收：controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实输入 4 行 prompt，run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal-20260616_234022\result.json`。
+- 本次真实终端 run 关键断言：`completed=true`、`assertion.passed=true`、`permission_sent_count=0`、`computer_use_mcp_v2_tool=true`、`Computer Use Mode`、`full_mode=true`、`observe`、`Computer Runtime`、`cleanup_completed=true`、`Computer Recovery`、`computer_use_turn_cleanup_completed` 和最终回答 `COMPUTER_USE_MCP_V2_LIFECYCLE_PARITY_OK` 均出现。
+- 已强制重建主目录 CodeGraph：`codegraph index --force .` 先清空旧索引再扫描 1260 个源码文件；随后 `codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,260`、`Nodes 48,491`、`Edges 159,608`。
+- 已将本轮新增/修改文件、场景文件和真实终端验收结果复制到 `learning_agent/test/computer_use_lifecycle_parity_20260616/`，用于用户学习和后续复盘。
+
+## 2026-06-17 Computer Use ClaudeCode 最新知识图谱对比审计
+
+- 已按最新 CodeGraph 检查两个仓库：OpenHarness 为 `Files 1,260 / Nodes 48,491 / Edges 159,608`，ClaudeCode 为 `Files 1,902 / Nodes 43,685 / Edges 140,720`，两边 `codegraph status .` 均显示 `[OK] Index is up to date`。
+- 已确认 ClaudeCode 仓库可见的 Computer Use 源码主要在 `utils/computerUse/`、`services/mcp/client.ts`、`components/permissions/ComputerUseApproval/ComputerUseApproval.tsx` 和 `state/AppStateStore.ts`；核心协议和调度仍来自外部 `@ant/computer-use-mcp`，该包源码不在当前 ClaudeCode 树内。
+- 已确认 OpenHarness 当前总链路为：`mcp__computer-use__*` → `learning_agent/mcp/agent_adapter.py` → `claudecode_bridge/wrapper.py` → `inferred_ant_mcp/runtime.py` → `permissions/observation/actions/batch/clipboard/applications` → `legacy_ports.py` → `windows_runtime/mcp_session_adapter.py` → Windows controller / evidence / SendInput。
+- 已运行 OpenHarness 内置 `claudecode_alignment_matrix`，当前输出为 `COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=11/14 partial=3 missing=0 visible_terminal_gate=false`。
+- 本轮审计结论：OpenHarness 的公开 MCP 工具面、参数主字段、agent-side wrapper、content block 映射、lock/cleanup/display/tools-list disabled 等可观察协议已高度对齐 ClaudeCode；但不能声明“完全一致”，因为外部 `@ant/computer-use-mcp` 包内部不可逐行比对，且当前矩阵 CA07/CA13/CA14 仍为 partial。
+- 本轮未做代码修改，也未执行规则十七真实可见终端交互验收；因此本轮只能输出审计结论，不能声明新的开发完成或验收通过。
+
+## 2026-06-17 Computer Use ClaudeCode Windows Parity 书面蓝图
+
+- 已按 `superpowers:writing-plans` 创建长任务防跑偏蓝图：`docs/superpowers/plans/2026-06-17-computer-use-claudecode-windows-parity-blueprint.md`。
+- 蓝图确认优先继续对齐四类内容：真实 Windows 系统剪贴板读写、剪贴板 save/write/verify/paste/restore 合同、权限审批提示与拒绝路径、CA07/CA13/CA14 证据和可见终端 gate。
+- 蓝图明确不做：复制外部 MCP 包内部实现、实现 macOS TCC/Swift helper、把 Windows 安全门禁改成 macOS 形态、一次性重写旧 v1/v2 所有适配层。
+- 当前没有修改功能代码，也没有触发新的真实可见终端验收；下一步如果进入执行，应从蓝图 Task 1 冻结基线和 Task 2 剪贴板桥接失败测试开始。
+
+## 2026-06-17 Computer Use ClaudeCode Windows Parity Blueprint
+
+- 当前任务：按 `docs/superpowers/plans/2026-06-17-computer-use-claudecode-windows-parity-blueprint.md` 执行。
+- 下一步：Task 1 冻结基线，Task 2 先写剪贴板桥接失败测试。
+- 停止条件：真实系统剪贴板触及敏感内容、真实 GUI benchmark 需要操作用户私有数据、或可见终端无法人工确认。
+- Task 1 已执行当前矩阵命令，输出为 `COMPUTER_USE_CLAUDECODE_ALIGNMENT_READY level=CLAUDECODE_ALIGNMENT_PARTIAL aligned=11/14 partial=3 missing=0 visible_terminal_gate=false claudecode_parity=false claudecode_parity_or_better=false`。
+- Task 1 已通过 CodeGraph 查询 `computer use clipboard request_access permissions alignment matrix visible terminal grantFlags WindowsProductionClipboardGuard`，确认 `clipboard.py` 仍是 context clipboard 为主，`permissions.py` 已有 `apps/grantFlags/sentinelWarnings` 基础结构，`claudecode_alignment_matrix.py` 的 CA07/CA13/CA14 仍需补证据和门禁。

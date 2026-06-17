@@ -50,3 +50,22 @@
 ## 真实终端验收
 
 按照 AGENTS 规则十七，真实可见终端交互验收已经完成：原项目路径 controller 启动了 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实终端中输入 `/computer use --full` 和只读 MCP 工具验证 prompt，观察到 `list_granted_applications ok=true`，最终输出 `COMPUTER_USE_MCP_V2_VISIBLE_TERMINAL_OK`。
+
+## 2026-06-16 Lifecycle Parity 当前状态
+
+本轮长任务已完成 `docs/superpowers/plans/2026-06-16-computer-use-claudecode-lifecycle-parity.md` 的代码、测试、CodeGraph、学习备份和真实终端验收闭环。代码层四项主体任务已完成：Esc acquire 后注册全局 Escape 急停、session cleanup 统一走 `run_turn_cleanup()`、standalone `tools/list` disabled 返回空工具列表、外部 `displayResolvedForApps` 改为 ClaudeCode string key 且 rich records 保留。
+
+当前稳定验收事实：92 个 v2 computer use 相关测试通过；关键文件与学习备份 `py_compile` 通过；真实可见终端 run `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal-20260616_234022\result.json` 通过；CodeGraph 已执行 `codegraph index --force .` 并显示 `[OK] Index is up to date`，统计为 `Files 1,260`、`Nodes 48,491`、`Edges 159,608`。
+
+后续若继续做 ClaudeCode parity，优先基于当前主目录和最新 CodeGraph，不再从旧 `.worktrees` 或历史备份目录取实现。
+
+## 2026-06-17 Computer Use ClaudeCode Windows Parity 蓝图范围
+
+已创建正式书面蓝图：`docs/superpowers/plans/2026-06-17-computer-use-claudecode-windows-parity-blueprint.md`。本蓝图用于继续对齐当前审计中值得推进的差异：Windows 系统剪贴板桥接、ClaudeCode-compatible 权限审批语义补强、CA07/CA13/CA14 矩阵证据硬化、真实可见终端门禁。明确排除外部 MCP 包内部实现、macOS TCC/Swift helper、`pbcopy/pbpaste` 等 macOS 专属机制，以及 Windows/macOS 系统差异导致的不可比行为。
+
+## Computer Use ClaudeCode Windows Parity Scope - 2026-06-17
+
+- 目标：让 OpenHarness Computer Use 在 Windows 上对齐 ClaudeCode 的可观察协议、权限、剪贴板、真实输入证据和可见终端验收。
+- 排除：外部 MCP 包内部实现、macOS TCC、Swift helper、macOS `pbcopy/pbpaste`、Windows/macOS 系统差异导致的不可比行为。
+- 当前矩阵基线：执行前以 `claudecode_alignment_matrix` 为准，已知上一轮审计为 11/14 aligned，CA07/CA13/CA14 为 partial，CA14 的 visible terminal gate 为 false。
+- 优先级：先补真实系统剪贴板和权限语义测试，再补矩阵证据和真实可见终端验收。
