@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent_capability_phase45_windows_screenshot_runtime",
   "output_prefix": "agent_capability_phase45_windows_screenshot_runtime",
   "window_title_prefix": "LearningAgent-Phase45-WindowsScreenshotRuntime",
@@ -8,7 +8,7 @@
   "success_marker": "PHASE45_WINDOWS_SCREENSHOT_RUNTIME_READY",
   "prompt_lines": [
     "请执行一次 Phase 45 Windows Computer Use 截图运行时验收：这次只允许运行项目内 screenshot_runtime 模块自检，必须证明 capture=true、artifact=true、fallback=true、host_capture=true、raw_bytes_hidden=true、actions_expanded=false；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE45_WINDOWS_SCREENSHOT_RUNTIME_READY。",
-    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.screenshot_runtime import main; raise SystemExit(main())\"",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.screenshot_runtime import main; raise SystemExit(main())\"",
     "不要提前最终回答；只有终端命令成功输出 PHASE45_WINDOWS_SCREENSHOT_RUNTIME_OK 后，最终回答最后一行必须完整复制：PHASE45_WINDOWS_SCREENSHOT_RUNTIME_READY PHASE45_WINDOWS_SCREENSHOT_RUNTIME_OK capture=true artifact=true fallback=true host_capture=true raw_bytes_hidden=true actions_expanded=false"
   ],
   "required_event_states": [

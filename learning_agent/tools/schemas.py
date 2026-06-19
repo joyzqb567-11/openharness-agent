@@ -1128,10 +1128,12 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [  # 作用: 告诉真实模型当前 agent
 ]  # 作用: 工具 schema 列表结束
 
 
-KERNEL_TOOL_NAMES: set[str] = {  # 修改代码+ComputerUseDebugTools: 定义基础常驻候选工具，最终是否可见还要经过 scope 过滤；如果没有这一行，debug 工具无法自动出现，bash 也可能重新混进默认工具面。
+KERNEL_TOOL_NAMES: set[str] = {  # 修改代码+ToolSearchBash常驻: 定义基础常驻候选工具，最终是否可见还要经过 scope 过滤；如果没有这一行，tool_search、bash 和 debug 工具无法稳定进入对应首轮工具面。
     "read",  # 新增代码+极简工具面: 保留读取原子工具；若没有这行代码，模型首轮无法读取代码、提示词和 skill 索引
     "write",  # 新增代码+极简工具面: 保留写入原子工具；若没有这行代码，模型首轮无法在确认后创建或覆盖文件
     "edit",  # 新增代码+极简工具面: 保留定点编辑原子工具；若没有这行代码，模型首轮只能用整文件覆盖完成小改动
+    "bash",  # 修改代码+ToolSearchBash常驻: 保留命令执行原子工具作为普通代码模式首轮工具；如果没有这一行，模型仍不能像 ClaudeCode 一样直接跑测试、列目录或执行必要命令。
+    "tool_search",  # 修改代码+ToolSearchBash常驻: 保留动态工具发现入口作为首轮工具；如果没有这一行，其他 deferred 工具仍可能因为缺少发现入口而无法被模型主动加载。
     "read_trace",  # 新增代码+ComputerUseDebugTools: 把调试 trace 工具放入内核候选，再由 scope 决定是否可见；如果没有这一行，debug 模式无法自动看到 read_trace。
     "read_state",  # 新增代码+ComputerUseDebugTools: 把调试状态工具放入内核候选，再由 scope 决定是否可见；如果没有这一行，debug 模式无法自动看到 read_state。
     "read_last_observation",  # 新增代码+ComputerUseDebugTools: 把最近 observation 工具放入内核候选；如果没有这一行，debug 模式无法自动读取最近观察事件。

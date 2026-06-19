@@ -110,7 +110,7 @@ def build_builtin_tool_catalog(tool_schemas: list[dict[str, Any]] | None = None)
         tool_name = str(function_schema.get("name", "")) if isinstance(function_schema, dict) else ""  # 新增代码+ToolsSplit: 安全读取并规范化工具名；若没有这行代码，能力包映射可能收到非字符串键。
         capability_pack = builtin_tool_capability_pack(tool_name)  # 新增代码+ToolsSplit: 查询当前内置工具所属能力包；若没有这行代码，普通工具无法被按包延迟加载。
         always_load = tool_name in kernel_tool_names  # 新增代码+ToolsSplit: 只有内核工具首轮强制可见；若没有这行代码，低频工具会继续污染首轮工具池。
-        should_defer = not always_load  # 新增代码+ToolsSplit: 除 read/write/edit/bash 外全部内置工具默认不进首轮模型 schema；若没有这行代码，未映射的旧工具仍会常驻可见。
+        should_defer = not always_load  # 修改代码+ToolSearchBash常驻: 除 read/write/edit/bash/tool_search 和 debug 候选外，其他内置工具默认不进首轮模型 schema；若没有这行代码，低频旧工具仍会常驻污染模型注意力。
         protocol_metadata = builtin_tool_protocol_metadata(tool_name)  # 新增代码+Stage15D: 读取工具协议 v3 元数据；若没有这行代码，内置工具不会携带并发和权限语义。
         catalog.append(agent_tool_from_schema(schema, source="builtin", should_defer=should_defer, always_load=always_load, capability_pack=capability_pack, **protocol_metadata))  # 修改代码+Stage15D: 保存延迟加载、能力包和协议元数据；若没有这行代码，Stage 15E/F 无法基于 catalog 做权限和并发决策。
     return catalog  # 新增代码+ToolsSplit: 返回完整内置工具目录；若没有这行代码，调用方无法取得构建结果。

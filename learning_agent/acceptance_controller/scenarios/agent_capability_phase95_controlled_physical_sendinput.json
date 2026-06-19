@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase95_controlled_physical_sendinput",
   "name": "agent_capability_phase95_controlled_physical_sendinput",
   "output_prefix": "agent_capability_phase95_controlled_physical_sendinput",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase95 controlled physical SendInput sender acceptance.",
   "prompt_lines": [
     "Please run one Phase 95 controlled physical Windows SendInput sender acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE95_CONTROLLED_PHYSICAL_SENDINPUT_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.controlled_physical_sendinput import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.controlled_physical_sendinput import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE95_CONTROLLED_PHYSICAL_SENDINPUT_OK, the final answer's last line must completely copy: PHASE95_CONTROLLED_PHYSICAL_SENDINPUT_READY PHASE95_CONTROLLED_PHYSICAL_SENDINPUT_OK phase94_authorized_candidate_reused=true controlled_physical_sender_ready=true default_off_zero_physical_events=true enabled_backend_receives_low_level_events=true unsafe_target_zero_physical_events=true unsupported_event_zero_physical_events=true raw_text_hidden=true real_desktop_touched=false uncontrolled_actions_expanded=false"
   ],
   "required_event_states": [

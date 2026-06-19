@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase61_abort_streaming_hooks",
   "name": "agent_capability_phase61_abort_streaming_hooks",
   "output_prefix": "agent_capability_phase61_abort_streaming_hooks",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase61 Windows Computer Use abort streaming hooks acceptance.",
   "prompt_lines": [
     "Please run one Phase 61 Windows Computer Use abort, cleanup, hotkey fallback, and streaming hooks acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not register a global keyboard hook, and do not interact with any user window. The final answer must include the fixed marker: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.abort_streaming_hooks import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.abort_streaming_hooks import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK, the final answer's last line must completely copy: PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_READY PHASE61_WINDOWS_ABORT_STREAMING_HOOKS_OK abort_zero_events=true exception_cleanup=true stale_recovered=true streaming_hooks=true hotkey_fallback=true terminal_status=true actions_expanded=false"
   ],
   "required_event_states": [

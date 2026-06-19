@@ -5,7 +5,7 @@ import base64  # 新增代码+ClaudeCodeContentParity：把截图字节编码为
 from pathlib import Path  # 新增代码+ClaudeCodeContentParity：稳定处理 artifact_path 文件；如果没有这行代码，存在性检查和后缀 MIME 判断会变脆弱。
 from typing import Any  # 新增代码+ComputerUseMcpV2：导入通用 JSON 类型；如果没有这行代码，观察结果边界不清楚。
 
-from ..windows_runtime.coordinates import claudecode_display_state_from_payload  # 新增代码+ClaudeCodeDisplayParity：复用 Windows 坐标层的 display state 抽取器；如果没有这行代码，observation 会重复理解显示器和截图尺寸字段。
+from ..windows_runtime.coordinates import claudecode_display_resolved_for_apps_key, claudecode_display_state_from_payload  # 修改代码+ClaudeCodeLifecycleParity：复用 Windows 坐标层的 display state 抽取器和 key helper；如果没有这行代码，observation 会重复理解显示器和 app key 字段。
 from ..windows_runtime.image_messages import MAX_COMPUTER_USE_MODEL_IMAGE_BYTES, build_computer_use_model_image_payload, extract_computer_use_image_specs_from_tool_output  # 新增代码+ClaudeCodeContentParity：复用成熟图片读取/转码/解析逻辑；如果没有这行代码，观察结果会重新造一套容易不一致的图片处理。
 from .errors import error_result  # 新增代码+ClaudeCodeZoom: 导入统一失败结果用于 zoom 无 host 场景；如果没有这一行，zoom 缺宿主时只能伪装成普通 captured=false。
 from .result_blocks import image_content_block, success_result, text_content_block  # 修改代码+ClaudeCodeContentParity：导入成功结果和 content block 构造器；如果没有这行代码，观察工具无法返回 ClaudeCode-compatible 图片块。
@@ -21,7 +21,7 @@ def _append_image_specs_from_entries(specs: list[dict[str, str]], entries: Any) 
         artifact_path = str(entry.get("artifact_path") or entry.get("path") or "")  # 新增代码+ClaudeCodeContentParity：兼容 artifact_path/path 两种命名；如果没有这行代码，不同后端产出的路径可能被漏掉。
         if not artifact_path:  # 新增代码+ClaudeCodeContentParity：没有路径就无法读取图片；如果没有这行代码，空路径会进入文件系统检查。
             continue  # 新增代码+ClaudeCodeContentParity：跳过缺路径图片；如果没有这行代码，后面会浪费一次无效读图。
-        specs.append({"artifact_path": artifact_path, "mime_type": str(entry.get("mime_type") or entry.get("media_type") or "")})  # 新增代码+ClaudeCodeContentParity：保存图片路径和 MIME；如果没有这行代码，后续无法把截图转为 base64 图片块。
+        specs.append({"artifact_path": artifact_path, "mime_type": str(entry.get("mime_type") or entry.get("media_type") or ""), "source": str(entry.get("source") or "")})  # 修改代码+ComputerUseAdaptiveImage：保存图片路径、MIME 和来源提示；如果没有这行代码，zoom/crop 不能优先走 PNG 保真策略。
 # 新增代码+ClaudeCodeContentParity：函数段结束，_append_image_specs_from_entries 到此结束；如果没有这个边界说明，用户不容易看出图片条目解析范围。
 
 
@@ -59,7 +59,7 @@ def _content_and_debug_from_observation(tool_name: str, payload: dict[str, Any],
     recorder = record_observation if callable(record_observation) else None  # 新增代码+ClaudeCodeContentParity：只在记录器可调用时传给图片读取层；如果没有这行代码，None 或坏对象会导致读图诊断崩溃。
     for spec in _collect_image_specs_from_payload(payload):  # 新增代码+ClaudeCodeContentParity：逐张读取 payload 里的截图引用；如果没有这行代码，content 中不会有图片块。
         artifact_path = Path(str(spec.get("artifact_path", "") or ""))  # 新增代码+ClaudeCodeContentParity：把路径文本转成 Path；如果没有这行代码，图片读取 helper 无法稳定处理后缀。
-        image_payload = build_computer_use_model_image_payload(artifact_path, spec.get("mime_type"), MAX_COMPUTER_USE_MODEL_IMAGE_BYTES, record_observation=recorder)  # 新增代码+ClaudeCodeContentParity：读取图片并复用 BMP 转 PNG/大小限制；如果没有这行代码，Windows 截图可能以模型不支持的格式返回。
+        image_payload = build_computer_use_model_image_payload(artifact_path, spec.get("mime_type"), MAX_COMPUTER_USE_MODEL_IMAGE_BYTES, record_observation=recorder, image_source=spec.get("source", tool_name))  # 修改代码+ComputerUseAdaptiveImage：读取图片并按来源/尺寸自适应输出 PNG 或 JPEG；如果没有这行代码，大图会继续固定走 PNG。
         if image_payload is None:  # 新增代码+ClaudeCodeContentParity：处理不存在、过大、空图或转码失败；如果没有这行代码，后续解包 None 会崩溃。
             continue  # 新增代码+ClaudeCodeContentParity：跳过当前不可用图片并继续下一张；如果没有这行代码，一张坏图会阻断全部观察结果。
         image_bytes, mime_type = image_payload  # 新增代码+ClaudeCodeContentParity：取出可发送的图片字节和 MIME；如果没有这行代码，base64 编码不知道处理哪份数据。
@@ -76,7 +76,9 @@ def _content_and_debug_from_observation(tool_name: str, payload: dict[str, Any],
 
 
 def _context_display_state_payload(context: ComputerUseMcpV2Context) -> dict[str, Any]:  # 新增代码+ClaudeCodeDisplayParity：函数段开始，把 context 内部 snake_case display 状态转成 ClaudeCode camelCase；如果没有这段函数，多个返回点可能字段名不一致。
-    return {"selectedDisplayId": context.selected_display_id, "displayPinnedByModel": bool(context.display_pinned_by_model), "displayResolvedForApps": [dict(item) for item in context.display_resolved_for_apps], "lastScreenshotDims": dict(context.last_screenshot_dims)}  # 新增代码+ClaudeCodeDisplayParity：返回模型可见 displayState；如果没有这行代码，模型端无法稳定读取四个 ClaudeCode 字段。
+    records = [dict(item) for item in context.display_resolved_for_apps if isinstance(item, dict)]  # 新增代码+ClaudeCodeLifecycleParity：复制内部 rich app-display records；如果没有这行代码，外部 payload 可能拿到可变共享引用。
+    key = context.display_resolved_for_apps_key or claudecode_display_resolved_for_apps_key(records)  # 新增代码+ClaudeCodeLifecycleParity：优先使用 context 保存的 key，否则现场生成；如果没有这行代码，displayResolvedForApps 可能继续输出数组。
+    return {"selectedDisplayId": context.selected_display_id, "displayPinnedByModel": bool(context.display_pinned_by_model), "displayResolvedForApps": key, "displayResolvedForAppsRecords": records, "lastScreenshotDims": dict(context.last_screenshot_dims)}  # 修改代码+ClaudeCodeLifecycleParity：返回 ClaudeCode string key 并保留 OpenHarness rich records；如果没有这行代码，外部协议和内部诊断无法同时满足。
 # 新增代码+ClaudeCodeDisplayParity：函数段结束，_context_display_state_payload 到此结束；如果没有这个边界说明，用户不容易看出 camelCase 转换范围。
 
 
@@ -109,6 +111,7 @@ def _update_display_state_from_observation(context: ComputerUseMcpV2Context, arg
         context.last_screenshot_dims = {"width": int(extracted_dims.get("width", 0)), "height": int(extracted_dims.get("height", 0))}  # 新增代码+ClaudeCodeDisplayParity：保存最近截图尺寸；如果没有这行代码，cleanup 后也无法保留 lastScreenshotDims。
     resolved_for_apps = extracted_state.get("displayResolvedForApps") if isinstance(extracted_state.get("displayResolvedForApps"), list) else []  # 新增代码+ClaudeCodeDisplayParity：读取 app-display 解析列表；如果没有这行代码，窗口落屏信息无法合并。
     _merge_display_resolved_for_apps(context, resolved_for_apps)  # 新增代码+ClaudeCodeDisplayParity：合并解析记录；如果没有这行代码，displayResolvedForApps 不会跨观察累积。
+    context.display_resolved_for_apps_key = claudecode_display_resolved_for_apps_key(context.display_resolved_for_apps)  # 新增代码+ClaudeCodeLifecycleParity：更新 ClaudeCode string key；如果没有这行代码，多轮状态无法恢复稳定 displayResolvedForApps。
     payload["displayState"] = _context_display_state_payload(context)  # 新增代码+ClaudeCodeDisplayParity：把 ClaudeCode camelCase 状态写回本次 payload；如果没有这行代码，模型结果里看不到 display state。
     return payload["displayState"]  # 新增代码+ClaudeCodeDisplayParity：返回本次状态供测试或未来调用复用；如果没有这行代码，调用方无法直接断言更新结果。
 # 新增代码+ClaudeCodeDisplayParity：函数段结束，_update_display_state_from_observation 到此结束；如果没有这个边界说明，用户不容易看出 display state 写入范围。

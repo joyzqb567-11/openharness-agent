@@ -1,6 +1,0 @@
-"""Phase98 Computer Use 模式包级导出。"""  # 新增代码+Phase98UniversalComputerUseMode：说明本包入口只公开 Task 2 需要的 Phase98 API；如果没有这行代码，读者会误以为这里继续承载 Phase27-97 历史导出。
-from learning_agent.computer_use.mode_session import DEFAULT_MODE_SESSION_ID, DEFAULT_MODE_SESSION_ROOT, PHASE98_COMPUTER_USE_MODE_MODEL, PHASE98_COMPUTER_USE_MODE_OK, PHASE98_COMPUTER_USE_MODE_READY, ComputerUseModeSessionStore  # 新增代码+Phase98UniversalComputerUseMode：公开通用 Computer Use 模式 session；如果没有这行代码，其它模块只能硬编码内部路径。
-from learning_agent.computer_use.universal_live_execution import UniversalWindowsLiveExecutionGate  # 修改代码+Phase102FullModeExecutionGate：补回 Phase93 通用执行门禁的包级导出；如果没有这行代码，外部 agent 不能从 learning_agent.computer_use 直接复用通用 computer use 执行入口。
-__all__: list[str] = []  # 新增代码+Phase98UniversalComputerUseMode：初始化包级公开名称列表；如果没有这行代码，后续 extend 会因为 __all__ 不存在而失败。
-__all__.extend(["DEFAULT_MODE_SESSION_ID", "DEFAULT_MODE_SESSION_ROOT", "PHASE98_COMPUTER_USE_MODE_MODEL", "PHASE98_COMPUTER_USE_MODE_OK", "PHASE98_COMPUTER_USE_MODE_READY", "ComputerUseModeSessionStore"])  # 新增代码+Phase98UniversalComputerUseMode：把 Phase98 名称加入包级导出；如果没有这行代码，from learning_agent.computer_use import * 会漏掉新模式 API。
-__all__.extend(["UniversalWindowsLiveExecutionGate"])  # 修改代码+Phase102FullModeExecutionGate：把通用执行门禁加入包级公开名称；如果没有这行代码，Phase93 包级公开 API 回归测试会继续失败。

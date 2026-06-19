@@ -156,7 +156,9 @@ def render_computer_status(snapshot: dict[str, Any]) -> str:  # 修改代码+Pha
     lines.append(f"- recent_issue={_recent_issue(lock, capability_matrix)}")  # 新增代码+Phase51ComputerStatusUI: 输出最近风险；如果没有这行代码，错误会埋在长区块。
     lines.append("Computer Grants")  # 新增代码+Phase51ComputerStatusUI: 输出授权区标题；如果没有这行代码，用户找不到 grant/revoke 状态。
     security_policy = _as_dict(approval.get("security_policy", {}))  # 修改代码+Phase51ComputerStatusUI: 读取 Phase48 安全策略状态；如果没有这行代码，旧的 security_policy 终端合同会从 /computer status 消失。
+    last_permission_decision = _as_dict(approval.get("last_permission_decision", {}))  # 新增代码+PermissionUIStatusParity: 读取最近权限决策；如果没有这行代码，状态页无法显示最近允许或拒绝来源。
     lines.append(f"- approval_model={approval.get('approval_model', '')}")  # 修改代码+Phase51ComputerStatusUI: 保留 Phase38 审批模型可见行；如果没有这行代码，回归测试和用户都看不到当前审批模型。
+    lines.append(f"- permission_prompt_version={approval.get('permission_prompt_version', '')} last_permission_decision={_short_text(last_permission_decision.get('decision', 'none'), 80)} denied_decision_count={approval.get('denied_decision_count', 0)}")  # 新增代码+PermissionUIStatusParity: 显示权限 UI 版本和最近决策；如果没有这行代码，真实终端用户看不到权限提示合同和拒绝计数。
     lines.append(f"- security_policy={security_policy.get('security_policy', '')} grant_classes={','.join(_as_list(security_policy.get('grant_classes', [])))}")  # 修改代码+Phase51ComputerStatusUI: 保留 Phase48 安全策略和 grant_classes 可见行；如果没有这行代码，用户看不到 observe/action/system_key/clipboard 分类。
     lines.append(f"- approval_flags={_flag_text(approval.get('grant_flags', {}))}")  # 新增代码+Phase51ComputerStatusUI: 输出审批 flags；如果没有这行代码，systemKey/clipboard 风险不可见。
     lines.append(f"- terminal_flags={_flag_text(terminal_grants.get('grant_flags', {}))}")  # 新增代码+Phase51ComputerStatusUI: 输出终端草案 flags；如果没有这行代码，grant 命令记录的权限不可见。

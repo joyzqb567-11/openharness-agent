@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase58_real_sendinput_guard",
   "name": "agent_capability_phase58_real_sendinput_guard",
   "output_prefix": "agent_capability_phase58_real_sendinput_guard",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase58 Windows real SendInput target guard acceptance.",
   "prompt_lines": [
     "Please run one Phase 58 Windows Computer Use real SendInput target guard acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The self-check may open its own temporary dedicated Phase58 safe window, may send controlled SendInput only to that safe window, and must clean it up. The final answer must include the fixed marker: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.real_sendinput_guard import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.real_sendinput_guard import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK and real_smoke=true, the final answer's last line must completely copy: PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_READY PHASE58_WINDOWS_REAL_SENDINPUT_GUARD_OK target_guard=true low_level_events=true forbidden_zero_events=true before_after=true after_changed=true raw_text_hidden=true safe_window_only=true real_smoke=true actions_expanded=true"
   ],
   "required_event_states": [

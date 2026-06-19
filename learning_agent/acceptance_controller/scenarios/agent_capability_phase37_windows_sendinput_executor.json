@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent_capability_phase37_windows_sendinput_executor",
   "output_prefix": "agent_capability_phase37_windows_sendinput_executor",
   "window_title_prefix": "LearningAgent-Phase37-WindowsSendInputExecutor",
@@ -8,7 +8,7 @@
   "success_marker": "PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY",
   "prompt_lines": [
     "请执行一次 Phase 37 Windows Computer Use SendInput executor 合同验收：这次只允许运行项目内 sendinput_executor 模块；必须证明 SendInput 执行器合同已建立，真实输入默认关闭，fake 注入实现被安全调用，原始 type_text 文本没有进入可见日志；不要移动鼠标，不要点击真实桌面，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY。",
-    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.sendinput_executor import main; raise SystemExit(main())\"",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.sendinput_executor import main; raise SystemExit(main())\"",
     "不要提前最终回答；只有终端命令成功输出 PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK 后，最终回答最后一行必须完整复制：PHASE37_WINDOWS_SENDINPUT_EXECUTOR_READY PHASE37_WINDOWS_SENDINPUT_EXECUTOR_OK contract_ready=true real_input_default=false fake_impl_exercised=true raw_text_hidden=true actions_expanded=false"
   ],
   "required_event_states": [

@@ -1,0 +1,68 @@
+{
+  "id": "computer_use_auto_observe_recovery_paint_visible_terminal",
+  "name": "computer_use_auto_observe_recovery_paint_visible_terminal",
+  "output_prefix": "computer_use_auto_observe_recovery_paint_visible_terminal",
+  "window_title_prefix": "LearningAgent-AutoObservePaint",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 8,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"
+  },
+  "success_marker": "COMPUTER_USE_AUTO_OBSERVE_RECOVERY_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Use /computer use --full and run a generic Paint Computer Use auto-observe recovery acceptance through the visible agent terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请使用本机真实 Windows 画图软件 Paint 打开一个新的空白画布，并使用真实鼠标在画布上画一条明显的黑色横线。必须使用 Computer Use 真实控制本地画图窗口，不要使用 PowerShell、Python、命令行、脚本或直接写文件生成图片；如果系统提示动作前必须先观察，请继续通过真实 Computer Use 观察窗口后再动作，不要反复重新打开应用。完成后最后一行只输出：COMPUTER_USE_AUTO_OBSERVE_RECOVERY_OK real_paint_used=true auto_observe_recovery=true low_level_event_count_gt_zero=true old_window_default_takeover=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_AUTO_OBSERVE_RECOVERY_OK",
+    "real_paint_used=true",
+    "auto_observe_recovery=true",
+    "low_level_event_count_gt_zero=true",
+    "old_window_default_takeover=false"
+  ],
+  "debug_log_contains": [
+    "COMPUTER_USE_AUTO_OBSERVE_RECOVERY_OK",
+    "real_paint_used=true",
+    "auto_observe_recovery=true",
+    "low_level_event_count_gt_zero=true",
+    "old_window_default_takeover=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "COMPUTER_USE_AUTO_OBSERVE_RECOVERY_OK",
+      "real_paint_used=true",
+      "auto_observe_recovery=true",
+      "low_level_event_count_gt_zero=true",
+      "old_window_default_takeover=false"
+    ]
+  },
+  "alternate_success_paths": [
+    {
+      "name": "existing_paint_safe_refusal",
+      "event_answer_contains": [
+        "已经打开",
+        "明确授权"
+      ],
+      "debug_log_contains": [
+        "old_window_default_takeover=false"
+      ]
+    }
+  ],
+  "max_permission_sent_count": 4
+}

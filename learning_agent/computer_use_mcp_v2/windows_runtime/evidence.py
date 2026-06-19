@@ -68,26 +68,13 @@ def screenshot_mime_type(raw_format: Any) -> str:  # 新增代码+Phase41Windows
 # 新增代码+Phase41WindowsImageResults: 函数段结束，screenshot_mime_type 到此结束；如果没有这个结束标记，学习者不容易看出 MIME 映射边界。
 
 
-# 新增代码+ComputerUsePngSource: 函数段开始，normalize_screenshot_artifact_bytes 把 Windows provider 返回的截图源头归一成模型友好的 artifact；如果没有这段函数，BMP 会继续在 evidence 层落盘并误导后续主循环。
-def normalize_screenshot_artifact_bytes(raw_bytes: bytes, raw_format: Any) -> tuple[bytes, str]:  # 新增代码+ComputerUsePngSource: 定义截图 artifact 字节归一化入口；如果没有这行代码，save_window_state 只能原样保存 helper 格式。
-    screenshot_format = safe_screenshot_format(raw_format)  # 新增代码+ComputerUsePngSource: 先复用安全后缀清理；如果没有这行代码，后续转换可能相信危险或空格式。
-    if not raw_bytes:  # 新增代码+ComputerUsePngSource: 无截图字节时直接返回空结果；如果没有这行代码，空 payload 会被 Pillow 当坏图片处理。
-        return b"", ""  # 新增代码+ComputerUsePngSource: 返回空字节和空格式；如果没有这行代码，无截图场景会生成误导性图片格式。
-    if screenshot_format != "bmp":  # 新增代码+ComputerUsePngSource: 只对模型不支持的 BMP 做源头转码；如果没有这行代码，已有 PNG/JPEG 会被无意义重编码。
-        return raw_bytes, screenshot_format  # 新增代码+ComputerUsePngSource: 保留模型已支持的原始图片；如果没有这行代码，正常 PNG 截图会被错误改动。
-    try:  # 新增代码+ComputerUsePngSource: 延迟导入图片库以降低普通路径启动成本；如果没有这行代码，Pillow 缺失会在模块导入阶段影响非截图功能。
-        from io import BytesIO  # 新增代码+ComputerUsePngSource: 导入内存缓冲区用于读 BMP 写 PNG；如果没有这行代码，转码需要创建临时文件增加清理风险。
-        from PIL import Image  # 新增代码+ComputerUsePngSource: 导入 Pillow 执行真实像素转码；如果没有这行代码，只能错误地改后缀或 MIME。
-    except Exception:  # 新增代码+ComputerUsePngSource: 捕获 Pillow 不可用等环境问题；如果没有这行代码，截图保存会因可选依赖问题整体崩溃。
-        return raw_bytes, screenshot_format  # 新增代码+ComputerUsePngSource: 转码能力不可用时保留原始证据以便排查；如果没有这行代码，真实截图可能直接丢失。
-    try:  # 新增代码+ComputerUsePngSource: 捕获坏 BMP 或转码失败；如果没有这行代码，一张坏截图会中断整个 observe 工具。
-        with Image.open(BytesIO(raw_bytes)) as image:  # 新增代码+ComputerUsePngSource: 从内存读取 BMP 像素；如果没有这行代码，函数无法理解原始 BMP 内容。
-            output = BytesIO()  # 新增代码+ComputerUsePngSource: 准备 PNG 输出缓冲区；如果没有这行代码，转码后的字节没有存放位置。
-            image.save(output, format="PNG")  # 新增代码+ComputerUsePngSource: 把 BMP 像素重新编码成 PNG；如果没有这行代码，模型 API 仍可能收到不支持的 BMP。
-            return output.getvalue(), "png"  # 新增代码+ComputerUsePngSource: 返回真实 PNG 字节和 PNG 格式；如果没有这行代码，evidence 层不能从源头变成模型可读。
-    except Exception:  # 新增代码+ComputerUsePngSource: 转码失败时兜底保留原始证据；如果没有这行代码，截图链路会因为个别坏图直接失败。
-        return raw_bytes, screenshot_format  # 新增代码+ComputerUsePngSource: 返回原始 BMP 便于后续下游兜底或人工排查；如果没有这行代码，观察证据可能丢失。
-# 新增代码+ComputerUsePngSource: 函数段结束，normalize_screenshot_artifact_bytes 到此结束；如果没有这个边界说明，用户不容易看出源头图片归一化范围。
+# 修改代码+ComputerUseAdaptiveImage: 函数段开始，normalize_screenshot_artifact_bytes 现在只清理格式并保留原始截图证据；如果没有这段函数，内部保真和外部压缩的职责会混在一起。
+def normalize_screenshot_artifact_bytes(raw_bytes: bytes, raw_format: Any) -> tuple[bytes, str]:  # 修改代码+ComputerUseAdaptiveImage: 定义截图 artifact 保真入口；如果没有这行代码，save_window_state 可能再次把 BMP 源头转成其它格式。
+    screenshot_format = safe_screenshot_format(raw_format)  # 修改代码+ComputerUseAdaptiveImage: 仍然复用安全后缀清理；如果没有这行代码，helper 传入的格式可能污染文件名。
+    if not raw_bytes:  # 修改代码+ComputerUseAdaptiveImage: 无截图字节时直接返回空结果；如果没有这行代码，空 payload 会生成误导性图片文件。
+        return b"", ""  # 修改代码+ComputerUseAdaptiveImage: 返回空字节和空格式；如果没有这行代码，无截图场景会被当成有效截图。
+    return raw_bytes, screenshot_format  # 修改代码+ComputerUseAdaptiveImage: 原样保留内部证据字节和真实格式；如果没有这行代码，BMP 保真源会在 evidence 层被提前破坏。
+# 修改代码+ComputerUseAdaptiveImage: 函数段结束，normalize_screenshot_artifact_bytes 到此结束；如果没有这个边界说明，用户不容易看出 evidence 只负责保真落盘。
 
 
 # 新增代码+Phase41WindowsImageResults: 函数段开始，build_image_result_blocks 把截图 evidence 转成模型可见但不含 UIA 文本的图片块；如果没有这段函数，截图只能作为普通路径藏在 dict 里，作者意图是给模型一个稳定、低泄露风险的图片引用协议。
@@ -195,7 +182,7 @@ class ComputerUseEvidenceStore:  # 新增代码+Phase29ComputerUse: 定义 Compu
         evidence_id = f"computer-window-{phase29_evidence_timestamp()}-{uuid.uuid4().hex[:8]}"  # 新增代码+Phase29ComputerUse: 生成唯一证据 id；如果没有这行代码，多次观察无法区分。 
         screenshot_bytes = bytes(getattr(payload, "screenshot_bytes", b"") or b"")  # 新增代码+Phase29ComputerUse: 读取截图字节并兜底为空；如果没有这行代码，无截图 helper 会触发异常。 
         screenshot_format = safe_screenshot_format(getattr(payload, "screenshot_format", ""))  # 新增代码+Phase29ComputerUse: 清理截图格式；如果没有这行代码，截图文件后缀不安全。 
-        screenshot_bytes, screenshot_format = normalize_screenshot_artifact_bytes(screenshot_bytes, screenshot_format)  # 新增代码+ComputerUsePngSource: 在 evidence 源头把 BMP 归一成 PNG；如果没有这行代码，模型主循环仍可能拿到不支持的 image/bmp artifact。
+        screenshot_bytes, screenshot_format = normalize_screenshot_artifact_bytes(screenshot_bytes, screenshot_format)  # 修改代码+ComputerUseAdaptiveImage: 在 evidence 源头只清理格式并保留原始截图；如果没有这行代码，内部证据格式可能不安全或不稳定。
         screenshot_path = ""  # 新增代码+Phase29ComputerUse: 初始化截图路径为空；如果没有这行代码，无截图场景下字段会缺失。 
         if screenshot_bytes:  # 新增代码+Phase29ComputerUse: 只有 helper 真给了截图才写图片文件；如果没有这行代码，会写出无意义空截图。 
             screenshot_file = self.evidence_root / f"{evidence_id}.{screenshot_format}"  # 新增代码+Phase29ComputerUse: 构造截图文件路径；如果没有这行代码，截图字节没有保存目标。 

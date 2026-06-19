@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase67_prompt_task_planner",
   "name": "agent_capability_phase67_prompt_task_planner",
   "output_prefix": "agent_capability_phase67_prompt_task_planner",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase67 Windows Computer Use prompt task planner acceptance.",
   "prompt_lines": [
     "Please run one Phase 67 Windows Computer Use prompt task planner acceptance. Use only the project terminal self-check command. Do not call an LLM for planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE67_PROMPT_TASK_PLANNER_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.prompt_task_planner import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.prompt_task_planner import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE67_PROMPT_TASK_PLANNER_OK, the final answer's last line must completely copy: PHASE67_PROMPT_TASK_PLANNER_READY PHASE67_PROMPT_TASK_PLANNER_OK prompt_task_plan=true expected_result_per_step=true risk_level_per_step=true checkpoint_per_step=true paint_pikachu_prompt=true high_risk_confirmation=true actions_expanded=false"
   ],
   "required_event_states": [

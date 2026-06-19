@@ -1,0 +1,63 @@
+{
+  "id": "computer_use_universal_drawing_task_stage_batch_visible_terminal",
+  "name": "computer_use_universal_drawing_task_stage_batch_visible_terminal",
+  "output_prefix": "computer_use_universal_drawing_task_stage_batch_visible_terminal",
+  "window_title_prefix": "LearningAgent-UniversalDrawingStage",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 5,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "UNIVERSAL_DRAWING_STAGE_BATCH_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Run universal Computer Use drawing stage batch through visible terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请使用本机任意可用绘图软件，绘制一个简单彩色人物，至少包含轮廓、头部、身体和两种颜色，并通过软件界面保存图片。不要使用 PowerShell、Python、命令行、脚本、网页图片或 AI 生成图片直接生成成品。最后输出：UNIVERSAL_DRAWING_STAGE_BATCH_OK desktop_task_completed=true stage_boundary_observation_used=true batch_execution_used=true",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "universal_stage_task_loop_used",
+    "desktop_task_plan_created",
+    "pointer_path_batch",
+    "stage_boundary_observation_used",
+    "batch_execution_used"
+  ],
+  "event_answer_contains": [
+    "UNIVERSAL_DRAWING_STAGE_BATCH_OK",
+    "desktop_task_completed=true",
+    "stage_boundary_observation_used=true",
+    "batch_execution_used=true"
+  ],
+  "debug_log_contains": [
+    "UNIVERSAL_DRAWING_STAGE_BATCH_OK",
+    "desktop_task_completed=true",
+    "stage_boundary_observation_used=true",
+    "batch_execution_used=true"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[=:][ ]*[1-9][0-9]*"
+  ],
+  "assertions": {
+    "output_contains": [
+      "UNIVERSAL_DRAWING_STAGE_BATCH_OK",
+      "desktop_task_completed=true",
+      "stage_boundary_observation_used=true",
+      "batch_execution_used=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

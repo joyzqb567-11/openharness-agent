@@ -1,0 +1,65 @@
+{
+  "id": "agent_capability_computer_use_universal_target_lease_visible_terminal",
+  "name": "agent_capability_computer_use_universal_target_lease_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_universal_target_lease_visible_terminal",
+  "window_title_prefix": "LearningAgent-UniversalTargetLease",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 8,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY",
+  "multi_prompt_lines": true,
+  "prompt": "Run the universal TargetLease tests first, then open Computer Use full mode and finish with a read-only Computer Use check.",
+  "prompt_lines": [
+    "Before enabling Computer Use full mode, use only the terminal/bash tool from the current learning_agent workspace and run this verification command exactly: $env:PYTHONPATH='..'; C:\\Users\\joyzq\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe -m pytest tests/test_universal_computer_use_target_lease.py tests/test_computer_use_controller_target_lease_gate.py tests/test_window_text_safety.py -q. Do not open browsers, login windows, Notepad, PowerShell desktop windows, Command Prompt desktop windows, system settings, registry, installers, payment pages, or user documents. After the command passes, reply with exactly: TARGET_LEASE_PYTEST_PASSED",
+    "/computer use --full",
+    "Now call exactly one safe read-only MCP tool: mcp__computer-use__list_granted_applications. Do not open applications, do not observe the screen, do not move the mouse, do not click, do not type, and do not launch PowerShell or Command Prompt. After that read-only tool returns, the final answer's last line must completely copy: UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY target_lease_required=true target_ref_backed_by_lease=true target_drift_zero_events=true notepad_is_regression_sample=true notepad_specific_core=false uncontrolled_actions_expanded=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "list_granted_applications"
+  ],
+  "event_answer_contains": [
+    "UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY",
+    "target_lease_required=true",
+    "target_ref_backed_by_lease=true",
+    "target_drift_zero_events=true",
+    "notepad_is_regression_sample=true",
+    "notepad_specific_core=false",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "debug_log_contains": [
+    "UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY",
+    "target_lease_required=true",
+    "target_ref_backed_by_lease=true",
+    "target_drift_zero_events=true",
+    "notepad_is_regression_sample=true",
+    "notepad_specific_core=false",
+    "uncontrolled_actions_expanded=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY",
+      "target_lease_required=true",
+      "target_ref_backed_by_lease=true",
+      "target_drift_zero_events=true",
+      "notepad_is_regression_sample=true",
+      "notepad_specific_core=false",
+      "uncontrolled_actions_expanded=false"
+    ]
+  },
+  "max_permission_sent_count": 2
+}

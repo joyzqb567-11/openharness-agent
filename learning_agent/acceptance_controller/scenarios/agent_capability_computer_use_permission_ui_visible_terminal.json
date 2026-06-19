@@ -1,0 +1,51 @@
+{
+  "id": "agent_capability_computer_use_permission_ui_visible_terminal",
+  "name": "agent_capability_computer_use_permission_ui_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_permission_ui_visible_terminal",
+  "window_title_prefix": "LearningAgent-ComputerUsePermissionUI",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 540,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 4,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"
+  },
+  "success_marker": "COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, trigger one safe request_access permission panel for Notepad, inspect status, then print the final marker.",
+  "prompt_lines": [
+    "/computer use --full",
+    "Use Computer Use safely. Call exactly one mcp__computer-use__request_access for apps [\"notepad.exe\"] with grantFlags observe=true, desktopAction=true, clipboardRead=false, clipboardWrite=false, systemKeyCombos=false, and reason \"Visible terminal permission UI acceptance for Notepad\". Then call exactly one mcp__computer-use__list_granted_applications. Do not click the screen, do not type into any app, do not open login pages, do not change system settings, and do not touch private files. After both tool results are returned, reply exactly: COMPUTER_USE_PERMISSION_UI_REQUEST_DONE",
+    "/computer status",
+    "Reply exactly: COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "permission_required",
+    "permission_answered",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "mcp__computer-use__request_access",
+    "mcp__computer-use__list_granted_applications",
+    "COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "Computer Use 权限请求",
+    "Visible terminal permission UI acceptance for Notepad",
+    "request_access",
+    "list_granted_applications",
+    "permission_prompt_version=windows-permission-ui-v1"
+  ],
+  "max_permission_sent_count": 2
+}

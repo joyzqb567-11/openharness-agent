@@ -1,0 +1,38 @@
+{
+  "id": "agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal",
+  "name": "agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal",
+  "window_title_prefix": "LearningAgent-ComputerUseObserveAdaptiveImage",
+  "max_seconds": 360,
+  "final_log_wait_seconds": 25,
+  "post_success_wait_seconds": 3,
+  "visible_terminal_gate": true,
+  "success_marker": "COMPUTER_USE_MCP_V2_OBSERVE_ADAPTIVE_IMAGE_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, then call one safe read-only computer-use MCP observe tool from the visible terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请只调用一次 mcp__computer-use__observe 工具观察当前桌面截图，用于验证 Computer Use 图片观察链路。不要打开任何软件，不要移动鼠标，不要点击，不要输入，不要调用鼠标键盘或剪贴板动作。工具返回后，最终只回复一行：COMPUTER_USE_MCP_V2_OBSERVE_ADAPTIVE_IMAGE_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "mcp__computer-use__observe",
+    "agent_model_block_count",
+    "COMPUTER_USE_MCP_V2_OBSERVE_ADAPTIVE_IMAGE_OK"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_MCP_V2_OBSERVE_ADAPTIVE_IMAGE_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "observe"
+  ],
+  "max_permission_sent_count": 0
+}

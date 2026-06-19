@@ -1,0 +1,56 @@
+{
+  "id": "agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal",
+  "name": "agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal",
+  "window_title_prefix": "LearningAgent-NotepadDragSavePressure",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 8,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"
+  },
+  "success_marker": "NOTEPAD_DRAG_SAVE_PRESSURE_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, then use real Notepad to type hello everyone, drag the Notepad window in a screen loop with the mouse, and save Desktop\\1.txt.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请打开本地真实记事本，并在记事本里输入 hello everyone；然后使用真实鼠标拖住记事本窗口标题栏，让记事本窗口沿屏幕上方、右侧、下方、左侧移动一圈，最后回到接近起点的位置；最后把文件保存为本地电脑桌面上的 1.txt。不要直接用 PowerShell、Python 或命令行写入 1.txt，必须通过真实记事本窗口完成。完成后最后一行输出：NOTEPAD_DRAG_SAVE_PRESSURE_OK hello everyone saved_to_desktop=true real_notepad_used=true mouse_drag_loop=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true"
+  ],
+  "event_answer_contains": [
+    "NOTEPAD_DRAG_SAVE_PRESSURE_OK",
+    "hello everyone",
+    "saved_to_desktop=true",
+    "real_notepad_used=true",
+    "mouse_drag_loop=true"
+  ],
+  "debug_log_contains": [
+    "NOTEPAD_DRAG_SAVE_PRESSURE_OK",
+    "hello everyone",
+    "saved_to_desktop=true",
+    "real_notepad_used=true",
+    "mouse_drag_loop=true"
+  ],
+  "assertions": {
+    "output_contains": [
+      "NOTEPAD_DRAG_SAVE_PRESSURE_OK",
+      "hello everyone",
+      "saved_to_desktop=true",
+      "real_notepad_used=true",
+      "mouse_drag_loop=true"
+    ]
+  },
+  "max_permission_sent_count": 3
+}

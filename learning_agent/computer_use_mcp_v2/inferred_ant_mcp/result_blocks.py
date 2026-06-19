@@ -10,8 +10,8 @@ def text_content_block(text: str) -> dict[str, Any]:  # 新增代码+ClaudeCodeC
 # 新增代码+ClaudeCodeContentParity：函数段结束，text_content_block 到此结束；如果没有这个边界说明，用户不容易看出文本块构造范围。
 
 
-def image_content_block(data: str, media_type: str = "image/png") -> dict[str, Any]:  # 新增代码+ClaudeCodeContentParity：函数段开始，生成 ClaudeCode 风格 base64 图片 content block；如果没有这段函数，screenshot/zoom 无法直接把图片像素交给模型。
-    safe_media_type = str(media_type or "image/png")  # 新增代码+ClaudeCodeContentParity：补齐图片 MIME 默认值；如果没有这行代码，空 MIME 会让多模态 content 难以识别图片格式。
+def image_content_block(data: str, media_type: str = "image/jpeg") -> dict[str, Any]:  # 修改代码+ComputerUseAdaptiveImage：函数段开始，生成 ClaudeCode 风格 base64 图片 content block；如果没有这段函数，screenshot/zoom 无法直接把图片像素交给模型。
+    safe_media_type = str(media_type or "image/jpeg")  # 修改代码+ComputerUseAdaptiveImage：缺省 MIME 对齐 ClaudeCode 的 JPEG 兜底；如果没有这行代码，未知图片会默认成 PNG 而偏离 ClaudeCode。
     return {"type": "image", "source": {"type": "base64", "media_type": safe_media_type, "data": str(data)}}  # 新增代码+ClaudeCodeContentParity：返回 ClaudeCode-compatible 图片块；如果没有这行代码，截图只能通过文件路径二次回灌。
 # 新增代码+ClaudeCodeContentParity：函数段结束，image_content_block 到此结束；如果没有这个边界说明，用户不容易看出图片块构造范围。
 

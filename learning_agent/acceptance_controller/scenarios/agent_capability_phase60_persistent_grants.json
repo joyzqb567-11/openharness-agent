@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase60_persistent_grants",
   "name": "agent_capability_phase60_persistent_grants",
   "output_prefix": "agent_capability_phase60_persistent_grants",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase60 Windows Computer Use persistent grants acceptance.",
   "prompt_lines": [
     "Please run one Phase 60 Windows Computer Use persistent grants acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click or type into the desktop, and do not run real SendInput. The final answer must include the fixed marker: PHASE60_WINDOWS_PERSISTENT_GRANTS_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.persistent_grants import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.persistent_grants import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE60_WINDOWS_PERSISTENT_GRANTS_OK, the final answer's last line must completely copy: PHASE60_WINDOWS_PERSISTENT_GRANTS_READY PHASE60_WINDOWS_PERSISTENT_GRANTS_OK approve=true unauthorized_denied=true expired_denied=true revoked_denied=true high_risk_default=true terminal_status=true actions_expanded=false"
   ],
   "required_event_states": [

@@ -1,0 +1,39 @@
+{
+  "id": "agent_capability_tool_surface_claudecode_parity_visible_terminal",
+  "name": "agent_capability_tool_surface_claudecode_parity_visible_terminal",
+  "output_prefix": "agent_capability_tool_surface_claudecode_parity_visible_terminal",
+  "window_title_prefix": "LearningAgent-ToolSurfaceParity",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 420,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 4,
+  "success_marker": "TOOL_SURFACE_CLAUDECODE_PARITY_OK",
+  "prompt": "请检查当前首轮可见工具面。",
+  "prompt_lines": [
+    "请检查你当前这一轮直接暴露给大模型的工具面。不要调用任何工具，不要修改文件。你只需要根据当前可见工具列表回答：必须明确列出 read、write、edit、bash、tool_search 都是首轮可见工具，并明确说明 mcp__computer-use__left_click 在普通代码模式不可见。最后一行必须完全输出 TOOL_SURFACE_CLAUDECODE_PARITY_OK。"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "TOOL_SURFACE_CLAUDECODE_PARITY_OK",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "event_answer_contains": [
+    "TOOL_SURFACE_CLAUDECODE_PARITY_OK",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "max_permission_sent_count": 0
+}

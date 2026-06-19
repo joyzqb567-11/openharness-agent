@@ -761,3 +761,9 @@ Boundary after URG-4:
 - The loop proves observe -> plan -> act -> verify -> cleanup in safe recording-sender contract mode.
 - It does not claim physical desktop dispatch maturity: `real_dispatch_performed=false` and `real_desktop_touched=false`.
 - URG-4 is Rule-17-complete for the safe recording-sender observe-plan-act-verify loop. It still does not claim mature physical desktop execution.
+# 2026-06-18 ClaudeCode vs OpenHarness Computer Use CodeGraph Audit
+
+- 用户要求基于最新 CodeGraph 全面检查 `D:\ClaudeCode-main\ClaudeCode-main` 的 ClaudeCode Computer Use 功能、文件、源码、接口、数据和总链路。
+- 用户要求再对比当前 `H:\codexworkplace\sofeware\OpenHarness-main` 的 OpenHarness agent Computer Use 知识图谱，判断是否尽可能对齐 ClaudeCode。
+- 已确认两个项目都有 `.codegraph/`，并且 `codegraph status .` 均显示 `[OK] Index is up to date`。
+- 本轮只做源码审计和差异报告，不修改 Computer Use 运行代码，因此不触发规则十七的开发完成验收。

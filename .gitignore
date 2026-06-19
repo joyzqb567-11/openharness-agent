@@ -56,3 +56,17 @@ learning_agent/test/**/*.jpeg
 learning_agent/test/**/*.webp
 # 新增代码+项目瘦身：忽略学习备份中的 JSONL 事件流；如果没有这行，学习目录会复制大量逐行日志，后续阅读和提交都会变重。
 learning_agent/test/**/*.jsonl
+# 新增代码+GitHub上传瘦身：忽略学习备份目录里嵌套出来的 acceptance_controller/runs；如果没有这一行，历史验收运行目录可能通过学习副本路径绕过上面的忽略规则进入仓库。
+learning_agent/test/**/acceptance_controller/runs/
+# 新增代码+GitHub上传瘦身：忽略 CodeGraph 本地索引目录；如果没有这一行，`.codegraph/.gitignore` 等本机索引辅助文件可能被误提交到 GitHub，恢复源码并不需要这些本地索引文件。
+.codegraph/
+# 新增代码+GitHub上传瘦身：忽略 pytest 本地缓存目录；如果没有这一行，`.pytest_cache` 这类测试缓存可能进入备份仓库，既不能帮助恢复代码，也会制造无意义 diff。
+.pytest_cache/
+# 新增代码+GitHub上传瘦身：忽略 computer_use_mcp_v2 的运行记忆目录；如果没有这一行，真实桌面运行产生的记忆、日志或证据可能被上传，既膨胀仓库也有隐私风险。
+learning_agent/computer_use_mcp_v2/memory/
+# 新增代码+GitHub上传瘦身：忽略压缩上下文产物目录；如果没有这一行，长任务运行时生成的大量 compact artifacts 会被误当成源码上传。
+learning_agent/memory/compact_artifacts/
+# 新增代码+GitHub上传瘦身：忽略 harness 运行快照目录；如果没有这一行，每次 agent 执行产生的 runtime JSON 会进入 GitHub，恢复代码并不需要这些本机运行痕迹。
+learning_agent/memory/harness/runs/
+# 新增代码+GitHub上传瘦身：忽略 learning_agent 的 runtime 运行日志；如果没有这一行，commands.json 和 events.jsonl 这类本机执行轨迹会被上传，恢复源码不需要这些运行记录。
+learning_agent/memory/runtime/

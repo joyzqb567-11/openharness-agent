@@ -1,8 +1,0 @@
-{
-  "flow_id": "browser_flow_1780313729338",
-  "completed_stage_names": [],
-  "outputs": {},
-  "status": "failed",
-  "failed_stage": "open_example",
-  "error": "browser_open 只支持 http:// 或 https:// URL。"
-}

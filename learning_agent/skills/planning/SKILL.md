@@ -14,4 +14,4 @@ description: Use when multi-step, risky, public-interface, or long-running work 
 边界：
 - 多文件、运行时逻辑、公开接口或高风险改动先列成功标准和验证方式。
 - 计划不是拖延；它要帮助缩小范围和减少返工。
-- 实际执行默认通过 `read / write / edit` 完成；命令执行需要先按需加载 execution 能力后再使用 bash 或运行时已接入的工具桥完成。
+- 实际执行默认通过 `read / write / edit / bash / tool_search` 完成；后台命令生命周期等更高级执行能力需要按需加载 execution 能力或运行时已接入的工具桥完成。

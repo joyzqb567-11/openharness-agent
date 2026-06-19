@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase52_windows_production_matrix",
   "name": "agent_capability_phase52_windows_production_matrix",
   "output_prefix": "agent_capability_phase52_windows_production_matrix",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase52 Windows Computer Use production matrix acceptance and confirm that Phase43 through Phase51 are all covered.",
   "prompt_lines": [
     "Please run one Phase 52 Windows Computer Use production matrix acceptance. Use only the project terminal self-check command. Do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE52_WINDOWS_PRODUCTION_MATRIX_READY.",
-    "You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.production_matrix import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.production_matrix import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE52_WINDOWS_PRODUCTION_MATRIX_OK, the final answer's last line must completely copy: PHASE52_WINDOWS_PRODUCTION_MATRIX_READY PHASE52_WINDOWS_PRODUCTION_MATRIX_OK phase_count=9 native_capability=true native_host=true screenshot_runtime=true uia_tree=true sendinput_dispatcher=true security_policy=true tool_surface=true recovery_runtime=true status_ui=true dispatcher_actions_expanded=true actions_expanded=false"
   ],
   "required_event_states": [

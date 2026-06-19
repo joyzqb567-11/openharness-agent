@@ -33,6 +33,9 @@ $env:LEARNING_AGENT_MODEL_PROVIDER = "codex-oauth"  # 新增代码: 告诉 learn
 if (-not $env:CODEX_MODEL) {  # 新增代码: 如果用户没有显式指定 Codex 模型
     $env:CODEX_MODEL = "gpt-5.5"  # 新增代码: 默认使用 GPT-5.5，匹配你的学习目标
 }  # 新增代码: 默认模型设置结束
+if (-not $env:CODEX_OAUTH_NATIVE_TOOLS) {  # 新增代码+OAuthNativeDefault: 如果用户没有显式设置原生工具开关，就进入默认开启分支；如果没有这一行，真实 OAuth 终端仍会默认走旧 JSON 工具协议，agent 的原生 function_call/tool_search 能力不会自动启用。
+    $env:CODEX_OAUTH_NATIVE_TOOLS = "1"  # 新增代码+OAuthNativeDefault: 默认启用 Responses 顶层 tools、原生 function_call 和 hosted tool_search 链路；如果没有这一行，OpenHarness 的 agent 能力提升需要用户每次手动设置环境变量。
+}  # 新增代码+OAuthNativeDefault: 结束默认开启分支，并保留用户提前设置 0/false/off 等值来关闭 native tools 的能力；如果没有这一行，PowerShell 条件块语法不完整。
 if (-not $env:CODEX_OAUTH_TIMEOUT_SECONDS) {  # 新增代码: 如果用户没有显式指定网页登录等待时间
     $env:CODEX_OAUTH_TIMEOUT_SECONDS = "300"  # 新增代码: 默认等待 5 分钟，给网页登录留足时间
 }  # 新增代码: 默认 OAuth 超时设置结束

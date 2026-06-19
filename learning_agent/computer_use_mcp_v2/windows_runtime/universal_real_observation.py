@@ -7,13 +7,15 @@ from pathlib import Path  # 新增代码+URG1RealObservationFrame：导入 Path 
 from typing import Any  # 新增代码+URG1RealObservationFrame：导入 Any 描述 provider 的动态字典接口；如果没有这一行，观察帧协议边界不清楚。
 
 try:  # 新增代码+URG1RealObservationFrame：优先按 learning_agent 包路径导入真实基座；如果没有这一段，单测和生产入口无法共享同一实现。
+    from learning_agent.computer_use_mcp_v2.windows_runtime.windows_element_cache import WindowsElementSnapshotCache  # 修改代码+ComputerUseMcpV2LegacyFolderRemoval：从 v2 内部导入 Cua Driver 风格元素缓存；如果没有这一行，删除旧 computer_use 目录后 ObservationFrame 无法生成 element_index。
     from learning_agent.computer_use_mcp_v2.windows_runtime.observation_fusion import WindowsObservationFusionRuntime  # 新增代码+URG1RealObservationFrame：导入现有观察融合层；如果没有这一行，URG-1 会重复造一个不兼容的融合协议。
     from learning_agent.computer_use_mcp_v2.windows_runtime.real_screenshot_pipeline import WindowsRealScreenshotPipeline  # 新增代码+URG1RealObservationFrame：导入现有真实截图管线；如果没有这一行，ObservationFrame 没有视觉证据来源。
     from learning_agent.computer_use_mcp_v2.windows_runtime.real_uia_locator import WindowsRealUiaLocatorRuntime  # 新增代码+URG1RealObservationFrame：导入现有真实 UIA runtime；如果没有这一行，ObservationFrame 没有控件树来源。
     from learning_agent.computer_use_mcp_v2.windows_runtime.windows_backend import WindowsWindowInventoryProbe  # 新增代码+URG1RealObservationFrame：导入现有窗口 inventory；如果没有这一行，ObservationFrame 没有目标窗口列表。
 except ModuleNotFoundError as error:  # 新增代码+URG1RealObservationFrame：兼容 start_oauth_agent.bat 从 learning_agent 目录运行；如果没有这一段，真实可见终端可能因包前缀失败。
-    if error.name not in {"learning_agent", "learning_agent.computer_use_mcp_v2.windows_runtime", "learning_agent.computer_use_mcp_v2.windows_runtime.observation_fusion", "learning_agent.computer_use_mcp_v2.windows_runtime.real_screenshot_pipeline", "learning_agent.computer_use_mcp_v2.windows_runtime.real_uia_locator", "learning_agent.computer_use_mcp_v2.windows_runtime.windows_backend"}:  # 新增代码+URG1RealObservationFrame：只兜底包路径缺失；如果没有这一行，真实内部 bug 会被误吞。
+    if error.name not in {"learning_agent", "learning_agent.computer_use_mcp_v2.windows_runtime", "learning_agent.computer_use_mcp_v2.windows_runtime.windows_element_cache", "learning_agent.computer_use_mcp_v2.windows_runtime.observation_fusion", "learning_agent.computer_use_mcp_v2.windows_runtime.real_screenshot_pipeline", "learning_agent.computer_use_mcp_v2.windows_runtime.real_uia_locator", "learning_agent.computer_use_mcp_v2.windows_runtime.windows_backend"}:  # 修改代码+ComputerUseMcpV2LegacyFolderRemoval：允许脚本模式下 v2 包路径缺失后走 fallback；如果没有这一行，start_oauth_agent.bat 下导入缓存会失败。
         raise  # 新增代码+URG1RealObservationFrame：重新抛出非路径类导入错误；如果没有这一行，排查真实依赖问题会很困难。
+    from computer_use_mcp_v2.windows_runtime.windows_element_cache import WindowsElementSnapshotCache  # type: ignore  # 修改代码+ComputerUseMcpV2LegacyFolderRemoval：脚本模式从 v2 内部导入元素缓存；如果没有这一行，删除旧目录后 bat 入口无法运行带 element_index 的观察帧。
     from computer_use_mcp_v2.windows_runtime.observation_fusion import WindowsObservationFusionRuntime  # type: ignore  # 新增代码+URG1RealObservationFrame：脚本模式导入观察融合层；如果没有这一行，bat 入口无法运行 URG-1。
     from computer_use_mcp_v2.windows_runtime.real_screenshot_pipeline import WindowsRealScreenshotPipeline  # type: ignore  # 新增代码+URG1RealObservationFrame：脚本模式导入真实截图管线；如果没有这一行，bat 入口没有截图 provider。
     from computer_use_mcp_v2.windows_runtime.real_uia_locator import WindowsRealUiaLocatorRuntime  # type: ignore  # 新增代码+URG1RealObservationFrame：脚本模式导入真实 UIA runtime；如果没有这一行，bat 入口没有 UIA provider。
@@ -89,12 +91,38 @@ def _phase116_no_uia(reason: str) -> dict[str, Any]:  # 新增代码+URG1RealObs
 # 新增代码+URG1RealObservationFrame：函数段结束，_phase116_no_uia 到此结束；如果没有这个边界说明，初学者不容易看出 UIA 失败范围。
 
 
+def _phase116_target_process_id(window: dict[str, Any]) -> str:  # 新增代码+CuaDriverBorrowing：函数段开始，从窗口元数据提取进程身份；如果没有这段函数，元素缓存可能只按窗口号绑定而忽略进程。
+    return str(window.get("pid", window.get("process_id", window.get("processId", window.get("app_id", "")))) or "")  # 新增代码+CuaDriverBorrowing：优先读取 pid，缺失时用 app_id 兜底；如果没有这一行，旧 inventory 无 pid 时完全无法缓存。
+# 新增代码+CuaDriverBorrowing：函数段结束，_phase116_target_process_id 到此结束；如果没有这个边界说明，初学者不容易看出进程身份来源。
+
+
+def _phase116_target_window_id(window: dict[str, Any]) -> str:  # 新增代码+CuaDriverBorrowing：函数段开始，从窗口元数据提取窗口身份；如果没有这段函数，元素缓存无法和后续动作目标对应。
+    hwnd = str(window.get("hwnd", "") or "")  # 新增代码+CuaDriverBorrowing：读取 hwnd 兜底值；如果没有这一行，缺 window_id 的旧窗口无法生成稳定身份。
+    return str(window.get("window_id", "") or (f"hwnd:{hwnd}" if hwnd else ""))  # 新增代码+CuaDriverBorrowing：优先使用 window_id，否则用 hwnd 构造；如果没有这一行，缓存键可能为空。
+# 新增代码+CuaDriverBorrowing：函数段结束，_phase116_target_window_id 到此结束；如果没有这个边界说明，初学者不容易看出窗口身份来源。
+
+
+def _phase116_update_element_cache(element_cache: Any, target_window: dict[str, Any], uia_result: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:  # 新增代码+CuaDriverBorrowing：函数段开始，把 UIA flat_nodes 写入元素缓存；如果没有这段函数，观察和动作之间仍没有 element_index 闭环。
+    process_id = _phase116_target_process_id(target_window)  # 新增代码+CuaDriverBorrowing：读取进程身份；如果没有这一行，缓存不能按进程隔离。
+    window_id = _phase116_target_window_id(target_window)  # 新增代码+CuaDriverBorrowing：读取窗口身份；如果没有这一行，缓存不能按窗口隔离。
+    flat_nodes = [dict(item) for item in list(uia_result.get("flat_nodes", []) or []) if isinstance(item, dict)]  # 新增代码+CuaDriverBorrowing：复制 UIA 扁平节点列表；如果没有这一行，坏节点可能污染缓存。
+    if not process_id or not window_id or not hasattr(element_cache, "update_snapshot"):  # 新增代码+CuaDriverBorrowing：检查缓存更新必需条件；如果没有这一行，空目标或坏缓存对象会抛异常。
+        report = {"model": "cua_driver_borrowing_element_cache_v1", "updated": False, "reason": "missing_process_or_window_or_cache", "process_id": process_id, "window_id": window_id, "element_count": 0, "raw_text_included": False}  # 新增代码+CuaDriverBorrowing：返回未更新原因；如果没有这一行，调用方不知道为什么没有缓存。
+        return report, {"model": report["model"], "process_id": process_id, "window_id": window_id, "element_count": 0, "elements": [], "truncated": False, "sensitive_text_filtered": 0}  # 新增代码+CuaDriverBorrowing：返回空摘要；如果没有这一行，frame 字段会缺失。
+    update_report = dict(element_cache.update_snapshot(process_id, window_id, flat_nodes))  # 新增代码+CuaDriverBorrowing：执行缓存替换更新；如果没有这一行，flat_nodes 不会进入 element_index 缓存。
+    summary = dict(element_cache.summary(process_id, window_id))  # 新增代码+CuaDriverBorrowing：读取有界安全摘要；如果没有这一行，模型和审计看不到元素编号含义。
+    update_report.update({"updated": True, "raw_text_included": False})  # 新增代码+CuaDriverBorrowing：补充更新成功和无原文标记；如果没有这一行，安全边界不明确。
+    return update_report, summary  # 新增代码+CuaDriverBorrowing：返回更新报告和摘要；如果没有这一行，observe 无法挂接缓存证据。
+# 新增代码+CuaDriverBorrowing：函数段结束，_phase116_update_element_cache 到此结束；如果没有这个边界说明，初学者不容易看出缓存衔接范围。
+
+
 class UniversalRealObservationFrameRuntime:  # 新增代码+URG1RealObservationFrame：类段开始，组合窗口、截图、UIA 和融合层生成统一 ObservationFrame；如果没有这个类，URG-1 会停留在分散工具。
-    def __init__(self, inventory_probe: Any | None = None, screenshot_pipeline: Any | None = None, uia_runtime: Any | None = None, fusion_runtime: Any | None = None) -> None:  # 新增代码+URG1RealObservationFrame：函数段开始，允许生产默认依赖和测试注入依赖；如果没有这段函数，单测会触碰真实桌面。
+    def __init__(self, inventory_probe: Any | None = None, screenshot_pipeline: Any | None = None, uia_runtime: Any | None = None, fusion_runtime: Any | None = None, element_cache: Any | None = None) -> None:  # 修改代码+CuaDriverBorrowing：函数段开始，允许注入元素缓存；如果没有 element_cache 参数，观察结果无法给后续动作提供 element_index。
         self.inventory_probe = inventory_probe if inventory_probe is not None else WindowsWindowInventoryProbe()  # 新增代码+URG1RealObservationFrame：保存窗口 inventory provider；如果没有这一行，runtime 无法列出目标窗口。
         self.screenshot_pipeline = screenshot_pipeline if screenshot_pipeline is not None else WindowsRealScreenshotPipeline()  # 新增代码+URG1RealObservationFrame：保存截图 pipeline；如果没有这一行，runtime 无法获取视觉证据。
         self.uia_runtime = uia_runtime if uia_runtime is not None else WindowsRealUiaLocatorRuntime()  # 新增代码+URG1RealObservationFrame：保存 UIA runtime；如果没有这一行，runtime 无法获取控件树。
         self.fusion_runtime = fusion_runtime if fusion_runtime is not None else WindowsObservationFusionRuntime()  # 新增代码+URG1RealObservationFrame：保存融合 runtime；如果没有这一行，调用方拿不到统一观察对象。
+        self.element_cache = element_cache if element_cache is not None else WindowsElementSnapshotCache()  # 新增代码+CuaDriverBorrowing：保存或创建元素缓存；如果没有这一行，ObservationFrame 不会持有元素索引状态。
     # 新增代码+URG1RealObservationFrame：函数段结束，UniversalRealObservationFrameRuntime.__init__ 到此结束；如果没有这个边界说明，初学者不容易看出初始化范围。
 
     def observe(self, target_hint: str = "", real_desktop_touched: bool = False, target_window: dict[str, Any] | None = None) -> dict[str, Any]:  # 修改代码+BoundObservationTarget：函数段开始，执行一次只读 ObservationFrame 生成并优先使用绑定窗口；如果没有 target_window，真实 full loop 会在多个同名窗口中看错目标。
@@ -110,12 +138,16 @@ class UniversalRealObservationFrameRuntime:  # 新增代码+URG1RealObservationF
             uia_result = self.uia_runtime.observe_window(target_window) if hasattr(self.uia_runtime, "observe_window") else _phase116_no_uia("UIA runtime 没有 observe_window。")  # 新增代码+URG1RealObservationFrame：执行只读 UIA 读取；如果没有这一行，控件树不会进入 ObservationFrame。
         else:  # 新增代码+URG1RealObservationFrame：处理没有目标窗口的 UIA 失败；如果没有这一行，无窗口环境会崩溃。
             uia_result = _phase116_no_uia("没有可观察目标窗口。")  # 新增代码+URG1RealObservationFrame：返回稳定 UIA 失败结构；如果没有这一行，融合层会缺字段。
+        element_cache_report, element_index_summary = _phase116_update_element_cache(self.element_cache, target_window, uia_result)  # 新增代码+CuaDriverBorrowing：把 UIA flat_nodes 写入内部元素缓存；如果没有这一行，observe 后的 element_index 不能驱动动作。
         fused = self.fusion_runtime.observe(target_window, screenshot_result, uia_result, inventory, ocr_result=None)  # 新增代码+URG1RealObservationFrame：复用 Phase66 融合层生成统一事实源；如果没有这一行，URG-1 会产生另一套不兼容字段。
         screenshot_summary = _phase116_safe_dict(fused.get("screenshot"))  # 新增代码+URG1RealObservationFrame：读取融合后的截图摘要；如果没有这一行，后续 token 会重复读原始 provider 输出。
         uia_summary = _phase116_safe_dict(fused.get("uia"))  # 新增代码+URG1RealObservationFrame：读取融合后的 UIA 摘要；如果没有这一行，后续 token 会重复读原始 provider 输出。
         window_state = _phase116_safe_dict(fused.get("window_state"))  # 新增代码+URG1RealObservationFrame：读取融合后的窗口状态；如果没有这一行，目标身份 token 没有统一来源。
         target_identity_present = bool(target_window.get("window_id") or target_window.get("hwnd")) and bool(target_window.get("app_id") or target_window.get("title") or target_window.get("title_preview"))  # 新增代码+URG1RealObservationFrame：判断目标窗口身份是否足够；如果没有这一行，后续动作前重验没有起点。
         frame = {"marker": PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MARKER, "model": PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MODEL, "real_observation_frame": True, "target_hint": str(target_hint or ""), "target_window": dict(target_window), "target_window_identity_present": target_identity_present, "inventory": inventory, "real_window_inventory": bool(inventory.get("windows") or inventory.get("active_window")), "screenshot": screenshot_summary, "uia": uia_summary, "window_state": window_state, "fused_observation": fused, "screenshot_observation": bool(fused.get("screenshot_observation")), "uia_tree_observation": bool(fused.get("uia_tree_observation")), "window_state_observation": bool(fused.get("window_state_observation")), "real_screenshot_pipeline_used": bool(screenshot_summary.get("available")), "screenshot_artifact_openable": _phase116_artifact_openable(screenshot_result), "pixel_guard_passed": bool(screenshot_summary.get("pixel_guard_passed")), "real_uia_provider_used": bool(uia_summary.get("available")), "uia_or_vision_targeting": bool(fused.get("uia_tree_observation") or fused.get("ocr_or_vision_slot")), "raw_text_included": bool(fused.get("raw_text_included")), "actions_expanded": PHASE116_ACTIONS_EXPANDED, "real_desktop_touched": bool(real_desktop_touched), "low_level_event_count": 0}  # 新增代码+URG1RealObservationFrame：返回完整 ObservationFrame；如果没有这一行，规划器、测试和终端验收没有统一结构。
+        frame["element_index_cache"] = element_cache_report  # 新增代码+CuaDriverBorrowing：把缓存更新报告挂到观察帧；如果没有这一行，调用方不知道本次是否生成 element_index。
+        frame["element_index_summary"] = element_index_summary  # 新增代码+CuaDriverBorrowing：把有界元素摘要挂到观察帧；如果没有这一行，模型和审计看不到编号对应哪个控件。
+        frame["element_index_count"] = int(element_cache_report.get("element_count", 0) or 0)  # 新增代码+CuaDriverBorrowing：提供快捷元素数量字段；如果没有这一行，后续矩阵需要解析嵌套 report。
         return frame  # 新增代码+URG1RealObservationFrame：交还观察帧给调用方；如果没有这一行，调用者拿不到 URG-1 的结果。
     # 新增代码+URG1RealObservationFrame：函数段结束，UniversalRealObservationFrameRuntime.observe 到此结束；如果没有这个边界说明，初学者不容易看出观察流程范围。
 # 新增代码+URG1RealObservationFrame：类段结束，UniversalRealObservationFrameRuntime 到此结束；如果没有这个边界说明，初学者不容易看出 runtime 范围。
@@ -184,7 +216,7 @@ def main(argv: list[str] | None = None) -> int:  # 新增代码+URG1RealObservat
 # 新增代码+URG1RealObservationFrame：函数段结束，main 到此结束；如果没有这个边界说明，初学者不容易看出命令行入口范围。
 
 
-__all__ = ["PHASE116_ACTIONS_EXPANDED", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MARKER", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MODEL", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_OK_TOKEN", "UniversalRealObservationFrameRuntime", "main", "run_universal_real_observation_frame_contract", "universal_real_observation_frame_cli_line"]  # 新增代码+URG1RealObservationFrame：限定公开导出名称；如果没有这一行，from module import * 会暴露内部 fake provider。
+__all__ = ["PHASE116_ACTIONS_EXPANDED", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MARKER", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_MODEL", "PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_OK_TOKEN", "UniversalRealObservationFrameRuntime", "main", "run_universal_real_observation_frame_contract", "universal_real_observation_frame_cli_line"]  # 修改代码+CuaDriverBorrowing：保留原公开导出且不暴露缓存 helper；如果没有这一行，from module import * 会暴露内部 fake provider。
 
 
 if __name__ == "__main__":  # 新增代码+URG1RealObservationFrame：文件入口段开始，允许 `python -m` 直接运行；如果没有这一行，真实终端无法直接调用本模块。

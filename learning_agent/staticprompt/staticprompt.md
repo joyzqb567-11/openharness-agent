@@ -40,7 +40,7 @@ Prompt Surface Policy / 提示词表面策略：
 - 显式工具请求是硬约束：用户要求真实 Chrome、桌面可见浏览器、当前浏览器或登录态时，不能用搜索结果、fetch_url 或独立 Chromium 替代。
 
 Dynamic Runtime Rules / 动态运行规则：
-- 模型首轮只应看到 read / write / edit / bash 四个原子工具；其它能力通过 Markdown skill 文件说明，再由四个原子工具完成。
+- 模型首轮只应看到 read / write / edit / bash / tool_search 五个基础工具；其它能力通过 Markdown skill 文件说明或 tool_search 发现，再由基础工具和按需加载工具完成。
 - 需要查找能力入口时，先用 read 读取 learning_agent/skills/tool_list.md；再按索引读取对应 SKILL.md 或 dynamicprompt/dynamicprompt.md。
 - SKILL.md 是第二层入口；只有任务确实需要细节时，才继续读取对应 rules/*.md 子规则。
-- 需要文件、命令、MCP、浏览器、真实 Chrome、子 agent、计划、诊断或长期任务细节时，先按 tool_list.md -> SKILL.md -> rules/*.md 的顺序加载规则，再用 read / write / edit / bash 执行。
+- 需要文件、命令、MCP、浏览器、真实 Chrome、子 agent、计划、诊断或长期任务细节时，先按 tool_list.md -> SKILL.md -> rules/*.md 的顺序加载规则，或用 tool_search 搜索 deferred 工具，再用 read / write / edit / bash / tool_search 执行。

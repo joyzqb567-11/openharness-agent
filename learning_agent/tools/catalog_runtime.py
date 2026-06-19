@@ -10,7 +10,8 @@ try:  # 新增代码+AgentPyPhaseHMcpToolRuntime: 包运行模式下导入 MCP l
     from learning_agent.tool_policy import ToolPolicyDecision  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入策略决策类型；若没有这行代码，tool_policy_decision 的返回边界不清楚。
     from learning_agent.tools.catalog import build_builtin_tool_catalog  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入内置工具目录构建函数；若没有这行代码，catalog_runtime 无法构建基础工具目录。
     from learning_agent.tools.pool import available_tool_schemas as pool_available_tool_schemas  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入工具池转 schema helper；若没有这行代码，available_tool_schemas 会重复实现映射逻辑。
-    from learning_agent.tools.pool import current_tool_pool as pool_current_tool_pool  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入当前工具池过滤 helper；若没有这行代码，current_tool_pool 会重复实现 visible 过滤。
+    from learning_agent.tools.pool import available_responses_tool_schemas as pool_available_responses_tool_schemas  # 新增代码+OAuthNativeToolsRuntimeEntry: 导入 Responses native 工具池转换 helper；如果没有这一行，OAuth native 模式无法从 filteredTools 当前快照生成顶层 tools。
+    from learning_agent.tools.pool import filteredTools as pool_filteredTools  # 修改代码+FilteredTools删除旧名：导入和 ClaudeCode 同名的当前可用工具过滤 helper；如果没有这行代码，运行时链路就没有统一的工具过滤入口。
     from learning_agent.tools.pool import decide_tool_policy as pool_decide_tool_policy  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入统一策略决策 helper；若没有这行代码，loaded/allowed/workflow 规则会重新散落。
     from learning_agent.tools.pool import filter_allowed_tool_schemas as pool_filter_allowed_tool_schemas  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入 allowed_tools 白名单过滤 helper；若没有这行代码，子 agent 工具边界会重复实现。
     from learning_agent.tools.pool import tool_schema_names as pool_tool_schema_names  # 新增代码+AgentPyPhaseHMcpToolRuntime: 导入 schema 工具名提取 helper；若没有这行代码，日志工具名解析会留在主类。
@@ -23,7 +24,8 @@ except ModuleNotFoundError as error:  # 新增代码+AgentPyPhaseHMcpToolRuntime
     from tool_policy import ToolPolicyDecision  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入策略决策类型；若没有这行代码，工具策略返回值无法统一。
     from tools.catalog import build_builtin_tool_catalog  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入内置 catalog 构建函数；若没有这行代码，bat 入口没有基础工具目录。
     from tools.pool import available_tool_schemas as pool_available_tool_schemas  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入工具池 schema helper；若没有这行代码，bat 入口无法生成模型工具 schema。
-    from tools.pool import current_tool_pool as pool_current_tool_pool  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入当前工具池 helper；若没有这行代码，bat 入口无法按策略过滤工具。
+    from tools.pool import available_responses_tool_schemas as pool_available_responses_tool_schemas  # 新增代码+OAuthNativeToolsRuntimeEntry: 脚本模式下导入 Responses native 工具池转换 helper；如果没有这一行，start_oauth_agent.bat 无法生成 native tools。
+    from tools.pool import filteredTools as pool_filteredTools  # 修改代码+FilteredTools删除旧名：脚本模式下导入同名过滤 helper；如果没有这行代码，start_oauth_agent.bat 运行路径下会找不到过滤入口。
     from tools.pool import decide_tool_policy as pool_decide_tool_policy  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入策略决策 helper；若没有这行代码，bat 入口策略状态会断开。
     from tools.pool import filter_allowed_tool_schemas as pool_filter_allowed_tool_schemas  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入 allowed_tools helper；若没有这行代码，子 agent 白名单会断开。
     from tools.pool import tool_schema_names as pool_tool_schema_names  # 新增代码+AgentPyPhaseHMcpToolRuntime: 脚本模式下导入工具名提取 helper；若没有这行代码，终端日志工具名会断开。
@@ -105,9 +107,9 @@ def commit_pending_loaded_tool_names(agent: Any) -> None:  # 新增代码+AgentP
 # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段结束，commit_pending_loaded_tool_names 到此结束；若没有这个边界说明，用户不容易看出 pending 提交范围。
 
 
-def current_tool_pool(agent: Any) -> list[AgentTool]:  # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段开始，返回当前真正暴露给模型的工具池；若没有这段函数，deferred 工具无法被默认隐藏。
-    return pool_current_tool_pool(tool_catalog(agent), lambda tool: tool_policy_decision(agent, tool))  # 新增代码+AgentPyPhaseHMcpToolRuntime: 委托 tools.pool 从完整目录过滤当前可见工具；若没有这行代码，工具池过滤逻辑仍堆在 LearningAgent 大类。
-# 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段结束，current_tool_pool 到此结束；若没有这个边界说明，用户不容易看出当前工具池范围。
+def filteredTools(agent: Any) -> list[AgentTool]:  # 新增代码+FilteredTools命名入口：函数段开始，返回当前真正暴露给模型的工具池；如果没有这段函数，agent 运行链路里仍看不到 ClaudeCode 同名 filteredTools 入口。
+    return pool_filteredTools(tool_catalog(agent), lambda tool: tool_policy_decision(agent, tool))  # 新增代码+FilteredTools命名入口：委托 tools.pool 从完整目录过滤当前可见工具；如果没有这行代码，工具池过滤逻辑会重新散落到运行时模块。
+# 新增代码+FilteredTools命名入口：函数段结束，filteredTools 到此结束；如果没有这个边界说明，用户不容易看出当前工具池范围。
 
 
 def filter_allowed_tool_schemas(agent: Any, tool_schemas: list[dict[str, Any]]) -> list[dict[str, Any]]:  # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段开始，根据 allowed_tool_names 过滤工具 schema；若没有这段函数，子 agent 无法执行工具白名单策略。
@@ -115,10 +117,19 @@ def filter_allowed_tool_schemas(agent: Any, tool_schemas: list[dict[str, Any]]) 
 # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段结束，filter_allowed_tool_schemas 到此结束；若没有这个边界说明，用户不容易看出白名单过滤范围。
 
 
-def available_tool_schemas(agent: Any) -> list[dict[str, Any]]:  # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段开始，返回当前工具池对应的模型 schema；若没有这段函数，模型无法按 loaded/deferred 状态接收工具。
-    all_tool_schemas = pool_available_tool_schemas(current_tool_pool(agent))  # 新增代码+AgentPyPhaseHMcpToolRuntime: 委托 tools.pool 把当前工具池转成模型 schema；若没有这行代码，schema 映射逻辑仍散在主类。
+def available_tool_schemas(agent: Any) -> list[dict[str, Any]]:  # 修改代码+FilteredTools命名入口：函数段开始，返回 filteredTools 对应的模型 schema；如果没有这段函数，模型无法按 loaded/deferred 状态接收工具。
+    all_tool_schemas = pool_available_tool_schemas(filteredTools(agent))  # 修改代码+FilteredTools命名入口：先用 ClaudeCode 同名 filteredTools 过滤当前可见工具，再转成 API schema；如果没有这行代码，schema 链路里看不出 filteredTools 的位置。
     return filter_allowed_tool_schemas(agent, all_tool_schemas)  # 新增代码+AgentPyPhaseHMcpToolRuntime: 在当前工具池基础上继续应用子 agent 白名单；若没有这行代码，allowed_tools 参数不会真正限制模型可见工具。
 # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段结束，available_tool_schemas 到此结束；若没有这个边界说明，用户不容易看出 schema 生成范围。
+
+
+def available_responses_tool_schemas(agent: Any) -> list[dict[str, Any]]:  # 新增代码+OAuthNativeToolsRuntimeEntry: 函数段开始，每轮从 filteredTools 当前快照生成 Responses native 顶层 tools；如果没有这段函数，OAuth native 模式会绕开当前工具策略。
+    current_tools = filteredTools(agent)  # 新增代码+OAuthNativeToolsRuntimeEntry: 先按当前 agent 状态重新计算可见工具池；如果没有这一行，native tools 可能只按旧缓存或首轮状态生成。
+    if agent.allowed_tool_names is not None:  # 新增代码+OAuthNativeToolsRuntimeEntry: 子 agent 白名单存在时继续收窄工具池；如果没有这一行，native tools 会绕过旧协议已有的 allowed_tools 边界。
+        current_tools = [tool for tool in current_tools if tool.name in agent.allowed_tool_names]  # 新增代码+OAuthNativeToolsRuntimeEntry: 只保留白名单工具；如果没有这一行，子 agent 可能看到未授权工具。
+    native_tool_schemas = pool_available_responses_tool_schemas(current_tools)  # 新增代码+OAuthNativeToolsRuntimeEntry: 把当前工具池转成 namespace/tool_search 形状；如果没有这一行，OAuth adapter 拿不到 Responses native tools。
+    return native_tool_schemas  # 新增代码+OAuthNativeToolsRuntimeEntry: 返回本轮 native tools 快照；如果没有这一行，调用方无法发送顶层 tools。
+# 新增代码+OAuthNativeToolsRuntimeEntry: 函数段结束，available_responses_tool_schemas 到此结束；如果没有这个边界说明，用户不容易看出 native 工具池生成范围。
 
 
 def tool_schema_names(agent: Any, tools: list[dict[str, Any]] | None = None) -> list[str]:  # 新增代码+AgentPyPhaseHMcpToolRuntime: 函数段开始，从工具 schema 提取工具名；若没有这段函数，日志无法准确显示某一轮真实工具集合。

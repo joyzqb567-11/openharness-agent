@@ -1,0 +1,58 @@
+{
+  "id": "agent_capability_computer_use_permission_denial_visible_terminal",
+  "name": "agent_capability_computer_use_permission_denial_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_permission_denial_visible_terminal",
+  "window_title_prefix": "LearningAgent-ComputerUsePermissionDenial",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 540,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 4,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"
+  },
+  "permission_policy": {
+    "default_response": "deny",
+    "allow_contains": [
+      "启动 MCP server"
+    ],
+    "deny_contains": [
+      "Computer Use 权限请求",
+      "Visible terminal permission denial acceptance for Notepad"
+    ]
+  },
+  "success_marker": "COMPUTER_USE_PERMISSION_DENIAL_VISIBLE_TERMINAL_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, trigger one safe request_access permission panel for Notepad, deny it, and print the final marker.",
+  "prompt_lines": [
+    "/computer use --full",
+    "Use Computer Use safely. Call exactly one mcp__computer-use__request_access for apps [\"notepad.exe\"] with grantFlags observe=true, desktopAction=true, clipboardRead=false, clipboardWrite=false, systemKeyCombos=false, and reason \"Visible terminal permission denial acceptance for Notepad\". The visible terminal controller will deny this permission. Do not click the screen, do not type into any app, do not call list_granted_applications, do not open login pages, do not change system settings, and do not touch private files. After the denied tool result is returned, reply exactly: COMPUTER_USE_PERMISSION_DENIAL_VISIBLE_TERMINAL_OK denied=true response=n"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "permission_required",
+    "permission_answered",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "mcp__computer-use__request_access",
+    "COMPUTER_USE_PERMISSION_DENIAL_VISIBLE_TERMINAL_OK",
+    "denied=true",
+    "response=n"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_PERMISSION_DENIAL_VISIBLE_TERMINAL_OK",
+    "denied=true",
+    "response=n"
+  ],
+  "event_payload_contains": [
+    "Computer Use 权限请求",
+    "Visible terminal permission denial acceptance for Notepad",
+    "request_access",
+    "\"allowed\":false"
+  ],
+  "max_permission_sent_count": 2
+}

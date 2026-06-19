@@ -1,5 +1,14 @@
 # Experience
 
+## 2026-06-19 Computer Use complex GUI task stage-runtime lesson
+
+Computer Use complex GUI tasks must not rely on primitive tool-loop convergence. The stable design is generic stage planning, stage-boundary observation, batch execution, and stage verification. App-specific samples are acceptance fixtures, not architecture.
+
+- 经验：画图、文本编辑、浏览、表单、多软件协作这类任务不能靠“模型每轮自己想下一步原子动作”自然收敛；否则很容易只完成一笔、一行或一个窗口动作，就把 `Next desktop action` 当成最终回答。
+- 做法：先在规划层生成 `DesktopTaskPlan` 和 `StagePlan`，再由观察层只在阶段边界确认状态，由执行层一次性批量执行该阶段动作，最后由验证层判断该阶段是否真的完成。
+- 边界：代表性验收可以使用 Paint、Notepad、浏览器等本机软件，但这些名字只能出现在 acceptance fixture、别名发现和日志证据里，不能变成生产运行时的专用控制分支。
+- 门禁：最终回答门禁只能作为兜底。真正减少失败和耗时的核心，是阶段规划、阶段观察、批执行和阶段验证，而不是继续加长提示词或让模型反复输入 `Y`、反复 observe。
+
 ## 2026-05-28 长回答验收断言经验
 
 - 经验：真实终端验收不能只用 `answer_preview` 判断最终回答是否包含关键字段，因为长回答很容易在 500 字预览处截断。
@@ -122,3 +131,36 @@
 - 做法：每次瘦身先跑 runtime reachability/source audit，再区分 active runtime core、active tool surface、compatibility wrapper、representative sample、maturity acceptance；确认死入口后，优先删除或迁移入口本体，并让 `/computer maturity` 输出可见 token。
 - 门禁：对“已删除旧入口”的结论必须基于源码 AST 或 import/reference 扫描，不要只靠 README、历史记录或口头判断；真实终端场景也要加入同一个 token，防止自动化和终端验收漂移。
 - 边界：不是所有带旧 phase 名的文件都能立即删。有些文件仍承担测试工厂、代表样例、兼容命令或 maturity 子报告职责，必须先迁移职责再删除。
+## 2026-06-19 Computer Use 资源新鲜度经验：窗口新鲜不等于资源新鲜
+
+- 经验：`fresh_agent_owned_window`、`target_ref_one_to_one=true`、PID/HWND 一对一只能证明 agent 绑定了一个新窗口，不能证明窗口里承载的是新空白资源；Notepad、Word、Excel、浏览器这类资源容器可能在新进程里恢复旧文件或旧标签。
+- 做法：Computer Use 的写动作入口不能只依赖 launch/observe 的上一轮状态；如果 action 有绑定窗口且窗口来自 agent-owned launch/target_ref，必须在底层键鼠执行前根据窗口标题、资源文件名、空白标题、用户是否授权已有资源做兜底 `ResourceFreshness` 判断。
+- 验收：真实可见终端压力测试要区分三种合法结果：新空白资源完整完成任务；启动前已有旧窗口时零事件要求用户关闭/授权；启动后应用恢复旧资源时零事件要求用户创建空白资源或授权已有资源。不能把后两种安全拒绝误判成“功能失败”，也不能把它们说成“保存成功”。
+## 2026-06-19 Computer Use 受控资源启动经验：文档容器不能裸启动
+- 经验：Notepad、Word、Excel、浏览器这类“资源容器”即使是 agent 新启动的新窗口，也可能自动恢复旧文件或旧标签；因此窗口新鲜、PID/HWND 一对一、target_ref 一对一都不能单独证明资源新鲜。
+- 做法：当用户任务明确要求创建或保存具体本地文件，例如桌面 `1.txt`，启动层应优先使用“应用可执行文件 + 受控资源路径”的 argv/no-shell 启动方式，让目标资源从源头进入应用，而不是依赖模型启动后再 `Ctrl+N` 自救。
+- 边界：不能把文件路径参数盲目塞给所有应用；只允许已验证支持该模式的文档类应用，未知应用、单实例应用和聊天类应用仍应走通用 FreshTarget/TargetLease/用户授权流程。
+- 验收：以后遇到“受控 driver 可以成功、主循环 open_application 却打开旧文档”的问题，优先比较两者启动参数差异，而不是继续堆提示词或重复修窗口绑定。
+
+## 2026-06-19 Computer Use 经验：模型 reason 会压缩，受控资源必须结构化传递
+- 经验：不要假设 `request_access.reason` 或 `open_application.reason` 会完整复述用户原始 prompt；真实模型会把“保存为桌面 1.txt”压缩成“保存到桌面”，导致文件名丢失。
+- 做法：需要跨多步工具调用使用的信息，应该在分类/规划阶段提取成脱敏结构化字段，例如 `controlled_resource_name=1.txt`、`controlled_resource_location_hint=desktop`，再通过 session state 传递。
+- 经验：`/computer use --full` 可能先创建并缓存 v2 context，真实任务 prompt 后到；因此只在 host 构造时同步上下文不够，复用 host 的每次工具调用前也要刷新当前 agent 上下文。
+- 验收：以后排查“driver 成功但主循环打开旧文档”时，必须检查真实工具 payload 是否包含受控资源字段和 argv 启动参数，不能只看 PID/HWND/target_ref 是否为新窗口。
+
+## 2026-06-19 Computer Use 验收经验：普通压力测试默认不要关闭自动同意
+- 经验：`start_oauth_agent.ps1` 已默认开启 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1`，但 acceptance scenario 里的 `environment` 会覆盖启动脚本默认值；如果普通压力测试场景写成 `0`，controller 就会反复代输 `Y`。
+- 做法：普通 Computer Use 功能/压力测试场景应保持 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1` 或不显式关闭；只有 `permission_ui`、`permission_denial` 这类专门验收权限弹窗和拒绝路径的场景才允许设置为 `0`。
+- 验收：需要同时看 `permission_sent_count=0`、事件流包含 `permission_auto_approved`、不包含 `permission_required`，不能只看场景最终成功标记。
+
+## 2026-06-19 Computer Use 经验：脱敏事件不等于真实可输入文本
+- 经验：Stage batch 里的 `text_sha256_16` 和 `text_length` 只能做审计，不能被真实 Unicode sender 当作待输入文本；否则真实 GUI 会出现“动作链路看似执行，窗口里没有输入”的假进展。
+- 做法：通用 Computer Use 文本输入要分三层处理：公开工具结果只保留脱敏摘要；dispatcher 只在最后一跳声明 `requires_raw_text=true` 时开启短通道；受控物理 sender 只接受私有 `_secure_plaintext_text`，并在调用真实后端前临时恢复 `text`。
+- 验收：以后排查文本输入失败，必须同时看 `requested_text` 是否正确、`secure_plaintext_text_channel_missing` 是否出现、公开结果是否泄露原文、真实后端是否报告 `low_level_event_count>0`；不能只看哈希或事件数量。
+## 2026-06-19 Computer Use 经验：高层桌面任务未完成必须变成运行时 pending
+- 经验：`desktop_task_incomplete` pending 允许 `observe` 只是为了获得阶段边界事实，不代表可以把 pending 降级成普通 `desktop_observe_before_action`；observe/screenshot 的普通动作 marker 不应覆盖高层未完成状态。
+- 经验：`desktop_task_incomplete=true` 不能只作为 final gate 的文本判断信号；它必须进入 `actionability_pending`，否则模型仍可能在下一轮退回 `key/click/drag` 等原子动作，把通用 Stage Runtime 拆散。
+- 做法：高层 `desktop_task` 工具未完成时输出稳定 marker，例如 `OPENHARNESS_DESKTOP_TASK_INCOMPLETE`，并声明 `next_required_tool=mcp__computer-use__desktop_task`、`next_allowed_tools=mcp__computer-use__desktop_task,mcp__computer-use__observe,mcp__computer-use__request_access`。
+- 门禁：在该 marker 激活期间，除高层任务、阶段观察和必要授权外，所有桌面原子动作都应被阻断；这不是 Notepad/Paint 专项，而是所有通用 GUI 任务的收敛边界。
+- 经验：文本正文抽取要识别用户常见标签词，例如“输入文本 `hello everyone`”和“准确文本：hello everyone”；标签词是说明，不是正文。否则 Stage Runtime 会正确执行错误内容，形成假进度。
+- 验收：以后遇到复杂 GUI 任务超时或提前 final，必须同时检查 `desktop_task_completed/desktop_task_incomplete`、`stage_count/completed_stage_count`、`actionability_pending`、后续工具是否被限制在 `desktop_task/observe`，不能只看 low-level event 数量。

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase76_89_windows_live_control",
   "name": "agent_capability_phase76_89_windows_live_control",
   "output_prefix": "agent_capability_phase76_89_windows_live_control",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase76-89 Windows Computer Use production live-control acceptance.",
   "prompt_lines": [
     "Please run one Phase 76-89 Windows Computer Use production live-control acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE76_89_WINDOWS_LIVE_CONTROL_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.production_live_control import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.production_live_control import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE76_89_WINDOWS_LIVE_CONTROL_OK, the final answer's last line must completely copy: PHASE76_89_WINDOWS_LIVE_CONTROL_READY PHASE76_89_WINDOWS_LIVE_CONTROL_OK passed=true phase_count=14 claudecode_gap_closed=true unified_host_adapter=true live_observation_fusion=true display_coordinate_model=true sendinput_production_gate=true clipboard_save_verify_restore=true app_launch_focus_plan=true allowlist_sentinel_permissions=true global_abort_cleanup_hooks=true high_level_tool_surface=true observe_act_verify_loop=true representative_e2e_matrix=true mspaint_pikachu_scenario=true humanlike_drawing_actions=true direct_image_file_cheat=false security_window_denial=true real_visible_terminal_gate=true uncontrolled_actions_expanded=false"
   ],
   "required_event_states": [

@@ -1,0 +1,42 @@
+{
+  "id": "agent_capability_computer_use_phase148c_single_app_calculation_visible_terminal",
+  "name": "agent_capability_computer_use_phase148c_single_app_calculation_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_phase148c_single_app_calculation_visible_terminal",
+  "window_title_prefix": "LearningAgent-Phase148C-SingleAppCalculation",
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 6,
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "success_marker": "PHASE148C_FRESH_BENCHMARK_READY",
+  "prompt": "Run the Phase148C single_app_calculation controlled visible-terminal benchmark.",
+  "prompt_lines": [
+    "Run the Phase148C single_app_calculation controlled benchmark. Use only the project terminal command below. It may open only the controlled Calculator test target and controlled project evidence files. Do not open login pages, payment pages, system settings, registry, installers, password managers, or private user documents.",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; $env:LEARNING_AGENT_PHASE137_RUN_REAL_CALCULATOR_SUM='1'; $env:LEARNING_AGENT_PHASE137_ENABLE_REAL_CALCULATOR_SUM='1'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.controlled_calculator_live_sum import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK, observed_result_matches_expected=true, uia_invoke_sequence_used=true, and real_desktop_touched=true, the final answer's last line must contain: PHASE148C_FRESH_BENCHMARK_READY PHASE148C_FRESH_BENCHMARK_OK family=single_app_calculation PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK observed_result_matches_expected=true uia_invoke_sequence_used=true real_desktop_touched=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "PHASE148C_FRESH_BENCHMARK_READY",
+    "PHASE148C_FRESH_BENCHMARK_OK",
+    "family=single_app_calculation",
+    "PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK",
+    "observed_result_matches_expected=true",
+    "uia_invoke_sequence_used=true",
+    "real_desktop_touched=true"
+  ],
+  "event_answer_contains": [
+    "PHASE148C_FRESH_BENCHMARK_READY",
+    "PHASE148C_FRESH_BENCHMARK_OK",
+    "family=single_app_calculation",
+    "PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK",
+    "observed_result_matches_expected=true",
+    "uia_invoke_sequence_used=true",
+    "real_desktop_touched=true"
+  ],
+  "max_permission_sent_count": 0
+}

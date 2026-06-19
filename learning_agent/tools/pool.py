@@ -6,12 +6,12 @@ from typing import Any, Callable  # 新增代码+ToolsPoolSplit: 工具池 helpe
 
 try:  # 新增代码+ToolsPoolSplit: 包运行模式下导入工具元数据和策略决策类型；若没有这行代码，pool 无法复用正式类型。
     from learning_agent.tool_policy import ToolPolicyDecision  # 新增代码+ToolsPoolSplit: 导入策略决策结果类型；若没有这行代码，真实 Chrome 阻断无法返回统一决策对象。
-    from learning_agent.tools.types import AgentTool  # 新增代码+ToolsPoolSplit: 导入工具元数据类型；若没有这行代码，pool 只能处理裸字典。
+    from learning_agent.tools.types import AgentTool, toolToAPISchema  # 修改代码+ToolToAPISchema命名入口：同时导入 ClaudeCode 同名 schema 转换入口；如果没有这行代码，当前工具池转换仍只能直接调用内部方法，用户不容易对照 ClaudeCode。
 except ModuleNotFoundError as error:  # 新增代码+ToolsPoolSplit: 捕获直接运行脚本时包名不可用的情况；若没有这行代码，bat 入口可能导入失败。
     if error.name not in {"learning_agent", "learning_agent.tool_policy", "learning_agent.tools", "learning_agent.tools.types"}:  # 新增代码+ToolsPoolSplit: 只允许目标包路径缺失时 fallback；若没有这行代码，内部真实 bug 会被误吞。
         raise  # 新增代码+ToolsPoolSplit: 重新抛出真实导入错误；若没有这行代码，排查 pool 问题会很困难。
     from tool_policy import ToolPolicyDecision  # 新增代码+ToolsPoolSplit: 脚本模式下导入策略决策结果类型；若没有这行代码，直接执行时策略阻断无法统一。
-    from tools.types import AgentTool  # 新增代码+ToolsPoolSplit: 脚本模式下导入 AgentTool；若没有这行代码，直接执行时工具池 helper 无法工作。
+    from tools.types import AgentTool, toolToAPISchema  # 修改代码+ToolToAPISchema命名入口：脚本模式下也导入同名 schema 转换入口；如果没有这行代码，start_oauth_agent.bat 路径下会找不到新命名入口。
 
 
 def decide_tool_policy(tool: AgentTool, *, tool_policy: Any, tool_policy_context: Any, allowed_tool_names: set[str] | None, loaded_tool_names: set[str], real_chrome_blocked: bool) -> ToolPolicyDecision:  # 新增代码+ToolsPoolSplit: 统一计算工具策略决策；若没有这行代码，主类会继续手写 loaded 和 workflow 逻辑。
@@ -22,18 +22,43 @@ def decide_tool_policy(tool: AgentTool, *, tool_policy: Any, tool_policy_context
     return tool_policy.decide(tool, tool_policy_context, loaded=loaded)  # 新增代码+ToolsPoolSplit: 调用统一策略入口；若没有这行代码，deny/skill/workflow/deferred 状态不会统一生效。
 
 
-def current_tool_pool(catalog: list[AgentTool], decision_for_tool: Callable[[AgentTool], ToolPolicyDecision]) -> list[AgentTool]:  # 新增代码+ToolsPoolSplit: 从完整目录计算当前可见工具池；若没有这行代码，LearningAgent 仍要在主类里过滤工具。
-    current_pool: list[AgentTool] = []  # 新增代码+ToolsPoolSplit: 准备累积当前可见工具；若没有这行代码，循环没有地方保存过滤后的工具。
-    for tool in catalog:  # 新增代码+ToolsPoolSplit: 遍历完整 catalog 决定哪些工具进入当前池；若没有这行代码，pool 无法从目录派生。
-        decision = decision_for_tool(tool)  # 新增代码+ToolsPoolSplit: 为当前工具读取策略决策；若没有这行代码，工具池无法尊重 deny/skill/workflow 状态。
-        if not decision.visible:  # 新增代码+ToolsPoolSplit: 只让策略判定 visible 的工具进入模型工具池；若没有这行代码，blocked/needs_skill/needs_workflow 工具可能泄露给模型。
-            continue  # 新增代码+ToolsPoolSplit: 不把不可见工具加入当前 pool；若没有这行代码，隐藏工具会继续暴露。
-        current_pool.append(tool)  # 新增代码+ToolsPoolSplit: 保存当前可见工具；若没有这行代码，模型会看不到应该可用的工具。
-    return current_pool  # 新增代码+ToolsPoolSplit: 返回当前可见工具池；若没有这行代码，schema 构建没有输入来源。
+def filteredTools(catalog: list[AgentTool], decision_for_tool: Callable[[AgentTool], ToolPolicyDecision]) -> list[AgentTool]:  # 修改代码+FilteredTools删除旧名：函数段开始，提供和 ClaudeCode 同名的当前可用工具过滤入口；如果没有这段函数，代码小白就没有一个唯一清楚的工具过滤入口。
+    filtered_tools: list[AgentTool] = []  # 新增代码+FilteredTools命名入口：准备累积当前真正可见的工具；如果没有这行代码，循环没有地方保存过滤后的工具。
+    for tool in catalog:  # 新增代码+FilteredTools命名入口：遍历完整 catalog 决定哪些工具进入当前池；如果没有这行代码，过滤入口无法从完整目录派生当前工具集合。
+        decision = decision_for_tool(tool)  # 新增代码+FilteredTools命名入口：为当前工具读取策略决策；如果没有这行代码，工具池无法尊重 deny、skill、workflow 和 deferred 状态。
+        if not decision.visible:  # 新增代码+FilteredTools命名入口：只让策略判定 visible 的工具进入模型工具池；如果没有这行代码，被阻断或延迟的工具可能泄露给模型。
+            continue  # 新增代码+FilteredTools命名入口：跳过不可见工具；如果没有这行代码，隐藏工具会继续被追加到模型可见列表。
+        filtered_tools.append(tool)  # 新增代码+FilteredTools命名入口：保存当前可见工具；如果没有这行代码，模型会看不到应该直接可用的工具。
+    return filtered_tools  # 新增代码+FilteredTools命名入口：返回当前过滤后的可见工具池；如果没有这行代码，schema 构建没有输入来源。
+# 修改代码+FilteredTools删除旧名：函数段结束，filteredTools 到此结束；如果没有这个边界说明，用户不容易看出它就是对齐 ClaudeCode 的唯一过滤入口。
 
 
 def available_tool_schemas(tool_pool: list[AgentTool]) -> list[dict[str, Any]]:  # 新增代码+ToolsPoolSplit: 把当前工具池转换为模型 schema；若没有这行代码，主类仍要自己做 schema 映射。
-    return [tool.to_model_schema() for tool in tool_pool]  # 新增代码+ToolsPoolSplit: 每个工具生成独立 OpenAI-compatible schema 副本；若没有这行代码，模型无法收到当前工具定义。
+    return [toolToAPISchema(tool) for tool in tool_pool]  # 修改代码+ToolToAPISchema命名入口：当前工具池统一通过 ClaudeCode 同名入口生成 API schema；如果没有这行代码，新入口不会出现在真实发送 OpenAI API 的链路里。
+
+
+def available_responses_tool_schemas(tool_pool: list[AgentTool]) -> list[dict[str, Any]]:  # 新增代码+OAuthNativeToolsRuntimeEntry: 函数段开始，把当前工具池转换为 Responses native 顶层 tools；如果没有这段函数，OAuth native 模式无法复用 filteredTools 后的工具池。
+    try:  # 新增代码+OAuthNativeToolsRuntimeEntry: 包运行模式下导入 Responses native schema builder；如果没有这一行，工具池无法生成 namespace/tool_search 形状。
+        from learning_agent.models.responses_native import build_hosted_tool_search_tools_by_namespace  # 新增代码+OAuthNativeToolsRuntimeEntry: 导入多 namespace 构造器；如果没有这一行，Computer Use 无法独立分组。
+        from learning_agent.models.responses_native import default_responses_namespace_descriptions  # 新增代码+OAuthNativeToolsRuntimeEntry: 导入默认 namespace 说明；如果没有这一行，模型看到的分组说明会缺失。
+        from learning_agent.models.responses_native import default_responses_namespace_for_tool_name  # 新增代码+OAuthNativeToolsRuntimeEntry: 导入默认工具名分组规则；如果没有这一行，Computer Use 工具无法稳定进入 computer_use namespace。
+    except ModuleNotFoundError as error:  # 新增代码+OAuthNativeToolsRuntimeEntry: 兼容 start_oauth_agent.bat 脚本模式下包名前缀不同；如果没有这一行，真实终端入口可能导入失败。
+        if error.name not in {"learning_agent", "learning_agent.models", "learning_agent.models.responses_native"}:  # 新增代码+OAuthNativeToolsRuntimeEntry: 只允许目标包路径缺失进入 fallback；如果没有这一行，responses_native 内部 bug 会被误吞。
+            raise  # 新增代码+OAuthNativeToolsRuntimeEntry: 重新抛出真实导入错误；如果没有这一行，排查 native schema 失败会很困难。
+        from models.responses_native import build_hosted_tool_search_tools_by_namespace  # 新增代码+OAuthNativeToolsRuntimeEntry: 脚本模式导入多 namespace 构造器；如果没有这一行，bat 入口无法生成 native tools。
+        from models.responses_native import default_responses_namespace_descriptions  # 新增代码+OAuthNativeToolsRuntimeEntry: 脚本模式导入默认 namespace 说明；如果没有这一行，bat 入口 namespace 说明会缺失。
+        from models.responses_native import default_responses_namespace_for_tool_name  # 新增代码+OAuthNativeToolsRuntimeEntry: 脚本模式导入默认分组规则；如果没有这一行，bat 入口 Computer Use 分组会断开。
+    chat_completion_schemas = available_tool_schemas(tool_pool)  # 新增代码+OAuthNativeToolsRuntimeEntry: 先复用旧稳定 schema 转换入口；如果没有这一行，新协议会重复实现 toolToAPISchema。
+    deferred_tool_names = {tool.name for tool in tool_pool if tool.should_defer and not tool.always_load}  # 新增代码+OAuthNativeToolsRuntimeEntry: 从当前工具池计算应延迟加载的工具名；如果没有这一行，defer_loading 无法跟随每轮工具状态。
+    computer_use_tool_names = {tool.name for tool in tool_pool if default_responses_namespace_for_tool_name(tool.name) == "computer_use"}  # 新增代码+OAuthNativeComputerUseNamespace: 把当前 Computer Use 工具也纳入延迟加载集合；如果没有这一行，桌面工具可能首轮 eager 暴露。
+    deferred_tool_names.update(computer_use_tool_names)  # 新增代码+OAuthNativeComputerUseNamespace: 合并 Computer Use 延迟规则；如果没有这一行，权限/观察类工具可能缺少 defer_loading。
+    return build_hosted_tool_search_tools_by_namespace(  # 新增代码+OAuthNativeToolsRuntimeEntry: 返回 Responses native 顶层 tools；如果没有这一行，OAuth adapter 拿不到 namespace/tool_search payload。
+        chat_completion_schemas,  # 新增代码+OAuthNativeToolsRuntimeEntry: 传入旧格式 schema 列表供 builder 转换；如果没有这一行，builder 没有工具输入。
+        deferred_tool_names=deferred_tool_names,  # 新增代码+OAuthNativeToolsRuntimeEntry: 传入每轮动态计算的 deferred 工具名；如果没有这一行，defer_loading 不会生效。
+        namespace_for_tool=default_responses_namespace_for_tool_name,  # 新增代码+OAuthNativeToolsRuntimeEntry: 传入默认 namespace 分组规则；如果没有这一行，Computer Use namespace 无法生成。
+        namespace_descriptions=default_responses_namespace_descriptions(),  # 新增代码+OAuthNativeToolsRuntimeEntry: 传入 namespace 说明；如果没有这一行，模型缺少分组语义。
+    )  # 新增代码+OAuthNativeToolsRuntimeEntry: 结束 builder 调用；如果没有这一行，Python 调用语法不完整。
+# 新增代码+OAuthNativeToolsRuntimeEntry: 函数段结束，available_responses_tool_schemas 到此结束；如果没有这个边界说明，用户不容易看出 native schema 入口范围。
 
 
 def filter_allowed_tool_schemas(tool_schemas: list[dict[str, Any]], allowed_tool_names: set[str] | None) -> list[dict[str, Any]]:  # 新增代码+ToolsPoolSplit: 根据子 agent 白名单过滤工具 schema；若没有这行代码，allowed_tools 规则会散在主类里。

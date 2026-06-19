@@ -1,0 +1,38 @@
+{
+  "id": "agent_capability_oauth_native_computer_use_visible_terminal",
+  "name": "agent_capability_oauth_native_computer_use_visible_terminal",
+  "output_prefix": "agent_capability_oauth_native_computer_use_visible_terminal",
+  "window_title_prefix": "LearningAgent-OAuthNativeComputerUse",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 480,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 4,
+  "environment": {
+    "CODEX_OAUTH_NATIVE_TOOLS": "1"
+  },
+  "success_marker": "OAUTH_NATIVE_COMPUTER_USE_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, then verify OAuth native Responses tools can use a safe Computer Use permission/status tool.",
+  "prompt_lines": [
+    "/computer use --full",
+    "Use exactly one safe Computer Use permission or status tool such as list_granted_applications to check current access state for notepad. Do not click the screen, do not type passwords, do not change system settings, and do not operate private documents. Only after the real tool result is returned, answer with a final line exactly OAUTH_NATIVE_COMPUTER_USE_OK."
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "OAUTH_NATIVE_COMPUTER_USE_OK",
+    "list_granted_applications"
+  ],
+  "event_answer_contains": [
+    "OAUTH_NATIVE_COMPUTER_USE_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode"
+  ],
+  "max_permission_sent_count": 0
+}

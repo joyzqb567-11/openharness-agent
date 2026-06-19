@@ -1,0 +1,43 @@
+{
+  "id": "agent_capability_tool_to_api_schema_entry_visible_terminal",
+  "name": "agent_capability_tool_to_api_schema_entry_visible_terminal",
+  "output_prefix": "agent_capability_tool_to_api_schema_entry_visible_terminal",
+  "window_title_prefix": "LearningAgent-ToolToAPISchema",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 420,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 4,
+  "success_marker": "TOOL_TO_API_SCHEMA_ENTRY_OK",
+  "prompt": "Verify the OpenHarness toolToAPISchema naming entry.",
+  "prompt_lines": [
+    "Please verify the OpenHarness tool schema naming entry. Use only the read tool if you need to inspect source files. Do not modify files. Check learning_agent/tools/types.py and learning_agent/tools/pool.py. Your final answer must clearly state that toolToAPISchema exists, that available_tool_schemas uses toolToAPISchema, and that the first-turn tool surface remains read/write/edit/bash/tool_search. The final line must be exactly TOOL_TO_API_SCHEMA_ENTRY_OK."
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "TOOL_TO_API_SCHEMA_ENTRY_OK",
+    "toolToAPISchema",
+    "available_tool_schemas",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "event_answer_contains": [
+    "TOOL_TO_API_SCHEMA_ENTRY_OK",
+    "toolToAPISchema",
+    "available_tool_schemas",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "max_permission_sent_count": 0
+}

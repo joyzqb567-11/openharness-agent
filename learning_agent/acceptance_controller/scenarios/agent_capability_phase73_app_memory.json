@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase73_app_memory",
   "name": "agent_capability_phase73_app_memory",
   "output_prefix": "agent_capability_phase73_app_memory",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase73 Windows Computer Use app memory acceptance.",
   "prompt_lines": [
     "Please run one Phase 73 Windows Computer Use app memory and self-learning acceptance. Use only the project terminal self-check command. Do not call an LLM for execution planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE73_APP_MEMORY_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.app_memory import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.app_memory import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE73_APP_MEMORY_OK, the final answer's last line must completely copy: PHASE73_APP_MEMORY_READY PHASE73_APP_MEMORY_OK app_memory=true non_secret_memory=true memory_assists_not_scripts=true memory_can_be_revoked=true actions_expanded=false"
   ],
   "required_event_states": [

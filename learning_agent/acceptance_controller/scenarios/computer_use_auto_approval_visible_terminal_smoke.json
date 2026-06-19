@@ -1,0 +1,58 @@
+{
+  "id": "computer_use_auto_approval_visible_terminal_smoke",
+  "name": "computer_use_auto_approval_visible_terminal_smoke",
+  "output_prefix": "computer_use_auto_approval_visible_terminal_smoke",
+  "window_title_prefix": "LearningAgent-ComputerUseAutoApproval",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 360,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 4,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "COMPUTER_USE_AUTO_APPROVAL_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode and verify request_access is auto-approved without typing y.",
+  "prompt_lines": [
+    "/computer use --full",
+    "Use Computer Use safely. Call exactly one mcp__computer-use__request_access for apps [{\"displayName\":\"Notepad\",\"bundleId\":\"notepad.exe\"}] with grantFlags observe=true, desktopAction=true, clipboardRead=false, clipboardWrite=false, systemKeyCombos=false, and reason \"Visible terminal auto approval smoke\". Then call exactly one mcp__computer-use__list_granted_applications. Do not click the screen, do not type into any app, do not open any application, do not change files, and do not change system settings. After both tool results are returned, reply exactly: COMPUTER_USE_AUTO_APPROVAL_OK auto_approved=true permission_sent_count_zero=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "permission_auto_approved",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "危险调试模式已开启",
+    "Visible terminal auto approval smoke",
+    "request_access",
+    "list_granted_applications"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_AUTO_APPROVAL_OK",
+    "auto_approved=true",
+    "permission_sent_count_zero=true"
+  ],
+  "debug_log_contains": [
+    "mcp__computer-use__request_access",
+    "mcp__computer-use__list_granted_applications",
+    "COMPUTER_USE_AUTO_APPROVAL_OK",
+    "auto_approved=true",
+    "permission_sent_count_zero=true"
+  ],
+  "assertions": {
+    "output_contains": [
+      "COMPUTER_USE_AUTO_APPROVAL_OK",
+      "auto_approved=true",
+      "permission_sent_count_zero=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

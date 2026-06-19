@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent_capability_phase42_windows_computer_use_final_matrix",
   "output_prefix": "agent_capability_phase42_windows_computer_use_final_matrix",
   "window_title_prefix": "LearningAgent-Phase42-WindowsComputerUseFinal",
@@ -8,7 +8,7 @@
   "success_marker": "PHASE42_WINDOWS_COMPUTER_USE_FINAL_READY",
   "prompt_lines": [
     "请执行一次 Phase 42 Windows Computer Use 最终矩阵验收：这次只允许运行项目内 final_matrix 模块自检，必须证明 Phase35-41 矩阵齐全、observe、evidence、approval、gated_refusal、safe_action、abort_cleanup、artifact_visibility 都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE42_WINDOWS_COMPUTER_USE_FINAL_READY。",
-    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.final_matrix import main; raise SystemExit(main())\"",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.final_matrix import main; raise SystemExit(main())\"",
     "不要提前最终回答；只有终端命令成功输出 PHASE42_WINDOWS_COMPUTER_USE_FINAL_OK 后，最终回答最后一行必须完整复制：PHASE42_WINDOWS_COMPUTER_USE_FINAL_READY PHASE42_WINDOWS_COMPUTER_USE_FINAL_OK phase_count=7 matrix=true observe=true evidence=true approval=true gated_refusal=true safe_action=true abort_cleanup=true artifact_visibility=true actions_expanded=false"
   ],
   "required_event_states": [

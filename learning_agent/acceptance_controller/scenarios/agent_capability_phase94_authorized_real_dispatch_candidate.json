@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase94_authorized_real_dispatch_candidate",
   "name": "agent_capability_phase94_authorized_real_dispatch_candidate",
   "output_prefix": "agent_capability_phase94_authorized_real_dispatch_candidate",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase94 authorized real dispatch candidate acceptance.",
   "prompt_lines": [
     "Please run one Phase 94 authorized Windows Computer Use real dispatch candidate acceptance. Use only the project terminal self-check command in safe contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE94_AUTHORIZED_REAL_DISPATCH_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.authorized_real_dispatch import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.authorized_real_dispatch import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE94_AUTHORIZED_REAL_DISPATCH_OK, the final answer's last line must completely copy: PHASE94_AUTHORIZED_REAL_DISPATCH_READY PHASE94_AUTHORIZED_REAL_DISPATCH_OK phase93_recording_gap_closed_by_candidate=true authorized_real_dispatch_candidate_ready=true authorized_low_level_dispatch_reaches_sender=true real_dispatch_default_disabled=true unauthorized_window_zero_events=true unsafe_window_zero_events=true target_drift_zero_events=true raw_text_hidden=true real_dispatch_performed=false uncontrolled_actions_expanded=false"
   ],
   "required_event_states": [

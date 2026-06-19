@@ -37,6 +37,7 @@ def model_message_to_debug_dict(model_message: Any) -> dict[str, Any]:  # 新增
         "decision_note": model_message.decision_note,  # 新增代码+AgentPySplitPhase7: 记录模型给人看的决策说明；若没有这行代码，初学者看不懂模型为什么调用工具。
         "text": model_message.text,  # 新增代码+AgentPySplitPhase7: 记录模型文本回答；若没有这行代码，调试日志无法复盘模型说了什么。
         "tool_calls": [tool_call_to_debug_dict(call) for call in model_message.tool_calls],  # 新增代码+AgentPySplitPhase7: 记录模型请求的所有工具调用；若没有这行代码，工具循环在日志里会断链。
+        "native_output_items": list(getattr(model_message, "native_output_items", [])),  # 新增代码+OAuthNativeDebugLogging: 记录 Responses 原生 output items；如果没有这一行，tool_search_call/tool_search_output 只会留在内存里，真实后端证据链会断掉。
     }  # 新增代码+AgentPySplitPhase7: 调试字典结束；若没有这行代码，Python 字典语法不完整。
 # 新增代码+AgentPySplitPhase7: 函数段结束，model_message_to_debug_dict 到此结束；若没有这行注释，用户不容易看出模型消息转换边界。
 

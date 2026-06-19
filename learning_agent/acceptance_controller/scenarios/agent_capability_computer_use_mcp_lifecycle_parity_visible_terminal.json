@@ -1,0 +1,41 @@
+{
+  "id": "agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal",
+  "name": "agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_mcp_lifecycle_parity_visible_terminal",
+  "window_title_prefix": "LearningAgent-ComputerUseLifecycleParity",
+  "max_seconds": 420,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 3,
+  "visible_terminal_gate": true,
+  "success_marker": "COMPUTER_USE_MCP_V2_LIFECYCLE_PARITY_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open Computer Use full mode, call one safe observe tool, run terminal cleanup, then print the lifecycle parity marker.",
+  "prompt_lines": [
+    "/computer use --full",
+    "For Computer Use lifecycle parity acceptance, call exactly one mcp__computer-use__observe tool to observe the current desktop. Do not click, type, move the mouse, open applications, or change the desktop. After the tool returns, reply exactly: COMPUTER_USE_MCP_V2_LIFECYCLE_OBSERVE_DONE",
+    "/computer cleanup learning-agent-default-session",
+    "Reply exactly: COMPUTER_USE_MCP_V2_LIFECYCLE_PARITY_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_MCP_V2_LIFECYCLE_PARITY_OK"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "observe",
+    "Computer Runtime",
+    "cleanup_completed=true",
+    "lock_released=",
+    "Computer Recovery",
+    "abort_cleared=",
+    "computer_use_turn_cleanup_completed"
+  ],
+  "max_permission_sent_count": 0
+}

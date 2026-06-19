@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase54_native_reality_gate",
   "name": "agent_capability_phase54_native_reality_gate",
   "output_prefix": "agent_capability_phase54_native_reality_gate",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase54 Windows native dependency and permission reality gate acceptance.",
   "prompt_lines": [
     "Please run one Phase 54 Windows Computer Use native dependency and permission reality gate acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, do not click the real desktop, do not move the mouse, and do not type into any other real window. The final answer must include the fixed marker: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY.",
-    "You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.native_reality_gate import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this safe verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.native_reality_gate import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK, the final answer's last line must completely copy: PHASE54_WINDOWS_NATIVE_REALITY_GATE_READY PHASE54_WINDOWS_NATIVE_REALITY_GATE_OK dependency_count=9 report_written=true install_attempted=false system_settings_changed=false actions_expanded=false"
   ],
   "required_event_states": [

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_universal_real_gui_observation_frame",
   "name": "agent_capability_universal_real_gui_observation_frame",
   "output_prefix": "agent_capability_universal_real_gui_observation_frame",
@@ -10,7 +10,7 @@
   "prompt": "Please run the URG-1 universal real GUI observation frame acceptance.",
   "prompt_lines": [
     "Please run the URG-1 Universal Real GUI Computer Use ObservationFrame acceptance. Use only the project terminal self-check command in safe read-only contract mode. Do not interact with any user window, do not open real apps, do not click, do not type into the desktop, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.universal_real_observation import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.universal_real_observation import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_OK, the final answer's last line must completely copy: PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_READY PHASE116_UNIVERSAL_REAL_OBSERVATION_FRAME_OK real_observation_frame=true real_window_inventory=true real_screenshot_pipeline_used=true screenshot_artifact_openable=true pixel_guard_passed=true real_uia_provider_used=true target_window_identity_present=true uia_or_vision_targeting=true actions_expanded=false real_desktop_touched=false low_level_event_count=0"
   ],
   "required_event_states": [

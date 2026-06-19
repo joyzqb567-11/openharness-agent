@@ -1,0 +1,54 @@
+﻿{
+  "id": "agent_capability_cua_driver_real_windows_production_visible_terminal",
+  "name": "agent_capability_cua_driver_real_windows_production_visible_terminal",
+  "output_prefix": "agent_capability_cua_driver_real_windows_production_visible_terminal",
+  "window_title_prefix": "LearningAgent-CuaRealWinProd",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 6,
+  "success_marker": "CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK",
+  "prompt": "Run the Cua Driver borrowing real Windows production acceptance.",
+  "prompt_lines": [
+    "Run the Cua Driver borrowing real Windows production acceptance. Use only the local project terminal commands below. The run may open only the controlled Notepad test target and controlled project evidence files. Do not open browsers, login pages, payment pages, system settings, registry, installers, password managers, or private user documents.",
+    "You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; python -m learning_agent.computer_use_mcp_v2.windows_runtime.cua_driver_borrowing_matrix --repo-root ..; $env:LEARNING_AGENT_PHASE97_RUN_REAL_NOTEPAD_EDIT='1'; $env:LEARNING_AGENT_PHASE97_ENABLE_REAL_NOTEPAD_EDIT='1'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.controlled_notepad_live_edit import main; raise SystemExit(main())\"",
+    "Do not write the final answer early. Only after the terminal command prints CUA_DRIVER_WINDOWS_BORROWING_OK, PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK, real_notepad_edit_executed=true, notepad_process_verified=true, saved_file_verified=true, and real_desktop_touched=true, the final answer's last line must contain: CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK CUA_DRIVER_WINDOWS_BORROWING_OK PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK real_notepad_edit_executed=true notepad_process_verified=true saved_file_verified=true real_desktop_touched=true"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK",
+    "CUA_DRIVER_WINDOWS_BORROWING_OK",
+    "PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK",
+    "real_notepad_edit_executed=true",
+    "notepad_process_verified=true",
+    "saved_file_verified=true",
+    "real_desktop_touched=true"
+  ],
+  "event_answer_contains": [
+    "CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK",
+    "CUA_DRIVER_WINDOWS_BORROWING_OK",
+    "PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK",
+    "real_notepad_edit_executed=true",
+    "notepad_process_verified=true",
+    "saved_file_verified=true",
+    "real_desktop_touched=true"
+  ],
+  "assertions": {
+    "output_contains": [
+      "CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK",
+      "CUA_DRIVER_WINDOWS_BORROWING_OK",
+      "PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK",
+      "real_notepad_edit_executed=true",
+      "notepad_process_verified=true",
+      "saved_file_verified=true",
+      "real_desktop_touched=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

@@ -1,0 +1,33 @@
+{
+  "id": "agent_capability_oauth_native_tools_visible_terminal",
+  "name": "agent_capability_oauth_native_tools_visible_terminal",
+  "output_prefix": "agent_capability_oauth_native_tools_visible_terminal",
+  "window_title_prefix": "LearningAgent-OAuthNativeTools",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 420,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 4,
+  "environment": {
+    "CODEX_OAUTH_NATIVE_TOOLS": "1"
+  },
+  "success_marker": "OAUTH_NATIVE_TOOLS_OK",
+  "prompt": "Verify OAuth native Responses tools through a safe read/list task.",
+  "prompt_lines": [
+    "Use the currently available tools to read the project README.md or list one safe file name in the current project directory. Do not modify files. Only after a real tool result is returned, answer with a final line exactly OAUTH_NATIVE_TOOLS_OK."
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "OAUTH_NATIVE_TOOLS_OK",
+    "read"
+  ],
+  "event_answer_contains": [
+    "OAUTH_NATIVE_TOOLS_OK"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -5,15 +5,21 @@ from pathlib import Path  # 新增代码+Phase40WindowsAbortCleanup: 导入 Path
 from typing import Any  # 新增代码+Phase40WindowsAbortCleanup: 导入 Any 描述 JSON 风格结构；如果没有这行代码，公开接口类型边界不清楚。
 try:  # 新增代码+Phase40WindowsAbortCleanup: 优先按包模式导入锁和文件工具；如果没有这行代码，正常 `python -m` 入口无法复用既有 durable 文件能力。
     from learning_agent.computer_use_mcp_v2.windows_runtime.audit import ComputerUseAuditStore  # 新增代码+Phase50WindowsRecovery: 导入审计仓库用于 action journal 回放；如果没有这行代码，Phase50 无法复盘最近动作链路。
+    from learning_agent.computer_use_mcp_v2.windows_runtime.global_escape_abort import GlobalEscapeAbortController  # 新增代码+ClaudeCodeLifecycleParity：导入全局 Escape 急停控制器；如果没有这一行，session runtime 无法在 acquire 后注册 ClaudeCode 风格 Esc。
     from learning_agent.computer_use_mcp_v2.windows_runtime.lock import ComputerUseLockManager, phase30_lock_timestamp  # 新增代码+Phase40WindowsAbortCleanup: 导入 durable lock 管理器和 UTC 时间戳；如果没有这行代码，runtime 无法写 abort/cleanup 状态。
     from learning_agent.computer_use_mcp_v2.windows_runtime.owned_resource_registry import OwnedResourceRegistry  # 修改代码+CleanupRecoveryMaturity：导入 Task 4 自有资源注册表；如果没有这一行，stop/abort 只能清锁不能清理本 agent 启动的资源。
+    from learning_agent.computer_use_mcp_v2.windows_runtime.session_context import ComputerUseSessionContextStore  # 新增代码+ClaudeCodeLifecycleParity：导入统一 session context store；如果没有这一行，cleanup 找不到 hidden windows 的事实源。
+    from learning_agent.computer_use_mcp_v2.windows_runtime.turn_cleanup import run_turn_cleanup  # 新增代码+ClaudeCodeLifecycleParity：导入统一 turn cleanup 入口；如果没有这一行，session cleanup 会继续手写分散清理逻辑。
     from learning_agent.runtime.files import atomic_write_json, read_json_or_default  # 新增代码+Phase40WindowsAbortCleanup: 导入安全 JSON 写入和读取；如果没有这行代码，通知文件可能被半写损坏。
 except ModuleNotFoundError as error:  # 新增代码+Phase40WindowsAbortCleanup: 兼容 start_oauth_agent.bat 脚本模式导入；如果没有这行代码，真实可见终端可能因为包路径不同而失败。
-    if error.name not in {"learning_agent", "learning_agent.computer_use_mcp_v2.windows_runtime", "learning_agent.computer_use_mcp_v2.windows_runtime.audit", "learning_agent.computer_use_mcp_v2.windows_runtime.lock", "learning_agent.computer_use_mcp_v2.windows_runtime.owned_resource_registry", "learning_agent.runtime", "learning_agent.runtime.files"}:  # 修改代码+CleanupRecoveryMaturity：允许 owned_resource_registry 在脚本模式 fallback；如果没有这一行，bat 入口下 Task 4 registry 导入会失败。
+    if error.name not in {"learning_agent", "learning_agent.computer_use_mcp_v2.windows_runtime", "learning_agent.computer_use_mcp_v2.windows_runtime.audit", "learning_agent.computer_use_mcp_v2.windows_runtime.global_escape_abort", "learning_agent.computer_use_mcp_v2.windows_runtime.lock", "learning_agent.computer_use_mcp_v2.windows_runtime.owned_resource_registry", "learning_agent.computer_use_mcp_v2.windows_runtime.session_context", "learning_agent.computer_use_mcp_v2.windows_runtime.turn_cleanup", "learning_agent.runtime", "learning_agent.runtime.files"}:  # 修改代码+ClaudeCodeLifecycleParity：允许新增 Esc/context/cleanup 模块在脚本模式 fallback；如果没有这一行，bat 入口下生命周期对齐导入会失败。
         raise  # 新增代码+Phase40WindowsAbortCleanup: 非预期导入错误继续抛出；如果没有这行代码，排查 runtime.files 内部错误会很困难。
     from computer_use_mcp_v2.windows_runtime.audit import ComputerUseAuditStore  # 新增代码+Phase50WindowsRecovery: 脚本模式导入审计仓库；如果没有这行代码，start_oauth_agent.bat 下 `/computer journal` 无法读取动作链路。
+    from computer_use_mcp_v2.windows_runtime.global_escape_abort import GlobalEscapeAbortController  # type: ignore  # 新增代码+ClaudeCodeLifecycleParity：脚本模式导入 Escape 控制器；如果没有这一行，bat 入口无法注册全局 Esc 急停。
     from computer_use_mcp_v2.windows_runtime.lock import ComputerUseLockManager, phase30_lock_timestamp  # 新增代码+Phase40WindowsAbortCleanup: 脚本模式导入 durable lock 管理器；如果没有这行代码，bat 入口无法执行 `/computer cleanup`。
     from computer_use_mcp_v2.windows_runtime.owned_resource_registry import OwnedResourceRegistry  # type: ignore  # 修改代码+CleanupRecoveryMaturity：脚本模式导入同一自有资源注册表；如果没有这一行，双击 bat 后 stop/abort 不能调用 registry。
+    from computer_use_mcp_v2.windows_runtime.session_context import ComputerUseSessionContextStore  # type: ignore  # 新增代码+ClaudeCodeLifecycleParity：脚本模式导入 session context store；如果没有这一行，bat 入口 cleanup 无法恢复 hidden windows。
+    from computer_use_mcp_v2.windows_runtime.turn_cleanup import run_turn_cleanup  # type: ignore  # 新增代码+ClaudeCodeLifecycleParity：脚本模式导入统一 cleanup；如果没有这一行，bat 入口 cleanup 仍会绕过 Esc 注销。
     from runtime.files import atomic_write_json, read_json_or_default  # 新增代码+Phase40WindowsAbortCleanup: 脚本模式导入 JSON 文件工具；如果没有这行代码，bat 入口无法持久化通知。
 
 PHASE40_WINDOWS_ABORT_CLEANUP_MARKER = "PHASE40_WINDOWS_ABORT_CLEANUP_READY"  # 新增代码+Phase40WindowsAbortCleanup: 定义 Phase40 稳定 marker；如果没有这行代码，真实终端验收无法可靠匹配阶段完成。
@@ -33,7 +39,17 @@ def _bool_token(value: Any) -> str:  # 新增代码+Phase40WindowsAbortCleanup: 
 
 
 class WindowsComputerUseSessionRuntime:  # 新增代码+Phase40WindowsAbortCleanup: 定义 Windows Computer Use 会话运行时；如果没有这个类，abort、cleanup 和通知会继续散落在终端命令和锁管理器里。
-    def __init__(self, lock_manager: ComputerUseLockManager | None = None, session_id: str = PHASE40_DEFAULT_SESSION_ID, notification_limit: int = 20, audit_store: ComputerUseAuditStore | None = None, owned_resource_registry: OwnedResourceRegistry | None = None) -> None:  # 修改代码+CleanupRecoveryMaturity: 函数段开始，初始化锁、会话、通知、审计和自有资源注册表；如果没有这段函数，stop/abort 无法复用同一 registry。
+    def __init__(  # 修改代码+ClaudeCodeLifecycleParity：函数段开始，初始化锁、会话、通知、审计、自有资源和 Esc 生命周期依赖；如果没有这段函数，v2 主链路无法复用同一 runtime 状态。
+        self,  # 修改代码+ClaudeCodeLifecycleParity：接收 runtime 实例自身；如果没有这一行，后续属性无法保存到对象上。
+        lock_manager: ComputerUseLockManager | None = None,  # 修改代码+ClaudeCodeLifecycleParity：允许注入隔离 lock manager；如果没有这一行，测试和生产无法共享可控锁事实源。
+        session_id: str = PHASE40_DEFAULT_SESSION_ID,  # 修改代码+ClaudeCodeLifecycleParity：接收当前 Computer Use 会话 id；如果没有这一行，Esc 和 cleanup 不知道归属哪一轮。
+        notification_limit: int = 20,  # 修改代码+ClaudeCodeLifecycleParity：限制通知队列长度；如果没有这一行，长期任务通知可能无限增长。
+        audit_store: ComputerUseAuditStore | None = None,  # 修改代码+ClaudeCodeLifecycleParity：允许注入审计仓库；如果没有这一行，恢复和 journal 测试会污染真实审计数据。
+        owned_resource_registry: OwnedResourceRegistry | None = None,  # 修改代码+ClaudeCodeLifecycleParity：允许注入自有资源注册表；如果没有这一行，cleanup 无法测试资源清理边界。
+        context_store: ComputerUseSessionContextStore | None = None,  # 新增代码+ClaudeCodeLifecycleParity：允许注入 session context store；如果没有这一行，cleanup 找不到 hidden windows 的统一事实源。
+        host_cleanup_backend: Any | None = None,  # 新增代码+ClaudeCodeLifecycleParity：允许注入 host cleanup 后端；如果没有这一行，run_turn_cleanup 无法真正恢复 host/app 或释放临时输入。
+        escape_abort_controller: Any | None = None,  # 新增代码+ClaudeCodeLifecycleParity：允许注入 Esc 急停控制器；如果没有这一行，测试会被迫注册真实系统热键。
+    ) -> None:  # 修改代码+ClaudeCodeLifecycleParity：返回 None 表示只初始化对象；如果没有这一行，Python 函数签名不完整。
         self.lock_manager = lock_manager if lock_manager is not None else ComputerUseLockManager()  # 新增代码+Phase40WindowsAbortCleanup: 保存或创建 durable lock 管理器；如果没有这行代码，runtime 没有底层 abort/cleanup 状态源。
         self.session_id = str(session_id or PHASE40_DEFAULT_SESSION_ID)  # 新增代码+Phase40WindowsAbortCleanup: 保存当前 runtime 会话 id；如果没有这行代码，cleanup 不知道应该释放哪个 owner。
         self.owned_resource_registry = owned_resource_registry if owned_resource_registry is not None else OwnedResourceRegistry(session_id=self.session_id)  # 修改代码+CleanupRecoveryMaturity：保存或创建自有资源注册表；如果没有这一行，runtime 无法登记和清理自己启动的进程/窗口。
@@ -43,6 +59,10 @@ class WindowsComputerUseSessionRuntime:  # 新增代码+Phase40WindowsAbortClean
         self.recovery_model = PHASE50_RECOVERY_RUNTIME_MODEL  # 新增代码+Phase50WindowsRecovery: 保存 Phase50 恢复模型名；如果没有这行代码，recover/journal 输出无法标明恢复层版本。
         default_audit_dir = Path(self.lock_manager.base_dir).parent / "audit"  # 新增代码+Phase50WindowsRecovery: 根据 lock 根目录推导同一 workspace 的 audit 目录；如果没有这行代码，终端 journal 可能读错项目的审计文件。
         self.audit_store = audit_store if audit_store is not None else ComputerUseAuditStore(base_dir=default_audit_dir)  # 新增代码+Phase50WindowsRecovery: 保存或创建审计仓库；如果没有这行代码，action_journal 没有数据源。
+        default_context_dir = Path(self.lock_manager.base_dir).parent / "session_context"  # 新增代码+ClaudeCodeLifecycleParity：根据 lock 根目录推导同一 workspace 的 context 目录；如果没有这一行，cleanup 会读不到同一轮 hidden windows。
+        self.context_store = context_store if context_store is not None else ComputerUseSessionContextStore(base_dir=default_context_dir)  # 新增代码+ClaudeCodeLifecycleParity：保存或创建 cleanup context store；如果没有这一行，hidden windows 状态无法跨函数读取。
+        self.host_cleanup_backend = host_cleanup_backend  # 新增代码+ClaudeCodeLifecycleParity：保存 host cleanup 后端；如果没有这一行，cleanup 无法调用 unhide/release_transient_inputs。
+        self.escape_abort_controller = escape_abort_controller if escape_abort_controller is not None else GlobalEscapeAbortController(lock_manager=self.lock_manager, session_id=self.session_id)  # 新增代码+ClaudeCodeLifecycleParity：保存或创建全局 Esc 控制器；如果没有这一行，acquire 后无法注册用户急停热键。
     # 新增代码+Phase40WindowsAbortCleanup: 函数段结束，__init__ 到此结束；如果没有这个边界说明，读者不容易看出初始化范围。
 
     def _read_notifications(self) -> list[dict[str, Any]]:  # 新增代码+Phase40WindowsAbortCleanup: 函数段开始，读取持久化通知队列；如果没有这段函数，通知只能停留在内存里跨命令丢失。
@@ -93,6 +113,18 @@ class WindowsComputerUseSessionRuntime:  # 新增代码+Phase40WindowsAbortClean
         return bool(self.lock_manager.has_lock(self.session_id))  # 新增代码+ClaudeCodeLockParity：判断当前 session 是否持有锁；如果没有这行代码，陈旧或他人持锁状态无法区分。
     # 新增代码+ClaudeCodeLockParity：函数段结束，is_lock_held_locally 到此结束；如果没有这个边界说明，用户不容易看出本地持锁判断范围。
 
+    def register_global_escape_abort(self, tool_name: str = "") -> dict[str, Any]:  # 新增代码+ClaudeCodeLifecycleParity：函数段开始，注册 ClaudeCode 风格全局 Esc 急停；如果没有这段函数，v2 context 无法在 acquire 成功后启用 Esc。
+        register_method = getattr(self.escape_abort_controller, "register", None)  # 新增代码+ClaudeCodeLifecycleParity：读取控制器注册方法；如果没有这一行，非标准 fake 控制器会直接崩溃。
+        report = dict(register_method() or {}) if callable(register_method) else {"global_hotkey_registered": False, "reason": "escape_register_missing"}  # 新增代码+ClaudeCodeLifecycleParity：调用注册或返回稳定缺失报告；如果没有这一行，runtime debug 字段会不稳定。
+        report.update({"tool_name": str(tool_name), "session_id": self.session_id, "escape_backend": "windows_runtime"})  # 新增代码+ClaudeCodeLifecycleParity：补充工具名和会话；如果没有这一行，debug 无法说明哪次工具触发注册。
+        return report  # 新增代码+ClaudeCodeLifecycleParity：返回注册报告；如果没有这一行，runtime 无法把结果写入 debug。
+    # 新增代码+ClaudeCodeLifecycleParity：函数段结束，register_global_escape_abort 到此结束；如果没有这个边界说明，用户不容易看出注册范围。
+
+    def mark_expected_escape(self, reason: str = "model_sent_escape", count: int = 1) -> dict[str, Any]:  # 新增代码+ClaudeCodeLifecycleParity：函数段开始，声明模型计划内 Escape；如果没有这段函数，模型关闭菜单时可能触发用户急停。
+        mark_method = getattr(self.escape_abort_controller, "mark_expected_escape", None)  # 新增代码+ClaudeCodeLifecycleParity：读取控制器计划 Escape 方法；如果没有这一行，非标准 fake 控制器会直接崩溃。
+        return dict(mark_method(reason=reason, count=count) or {}) if callable(mark_method) else {"expected_escape_count": 0, "reason": "mark_expected_escape_missing"}  # 新增代码+ClaudeCodeLifecycleParity：委托控制器或返回稳定缺失报告；如果没有这一行，调用方无法审计 expected Escape 能力。
+    # 新增代码+ClaudeCodeLifecycleParity：函数段结束，mark_expected_escape 到此结束；如果没有这个边界说明，用户不容易看出计划内 Escape 范围。
+
     def request_global_abort(self, reason: str, source: str = "runtime") -> dict[str, Any]:  # 新增代码+Phase40WindowsAbortCleanup: 函数段开始，请求全局 abort 并记录通知；如果没有这段函数，abort 只有底层 flag 而没有 ClaudeCode 风格的用户可见事件。
         status = self.lock_manager.request_abort(reason, requested_by=source)  # 新增代码+Phase40WindowsAbortCleanup: 写入 durable abort flag；如果没有这行代码，下一次桌面动作不会被阻断。
         owned_cleanup = self.owned_resource_registry.abort_cleanup(session_id=self.session_id, reason=reason)  # 修改代码+CleanupRecoveryMaturity：急停时同步清理本 session 自有资源；如果没有这一行，abort 后可能留下 agent 自己启动的进程或窗口。
@@ -103,17 +135,20 @@ class WindowsComputerUseSessionRuntime:  # 新增代码+Phase40WindowsAbortClean
 
     def cleanup_turn(self, session_id: str | None = None, reason: str = "turn cleanup") -> dict[str, Any]:  # 新增代码+Phase40WindowsAbortCleanup: 函数段开始，清理一轮 Computer Use 控制状态；如果没有这段函数，崩溃或结束后的锁可能残留。
         target_session_id = str(session_id or self.session_id or PHASE40_DEFAULT_SESSION_ID)  # 新增代码+Phase40WindowsAbortCleanup: 确定要释放的会话 id；如果没有这行代码，cleanup 不知道释放哪个 owner。
-        release_result = self.lock_manager.release(target_session_id)  # 新增代码+Phase40WindowsAbortCleanup: 尝试释放该会话持有的桌面锁；如果没有这行代码，cleanup 只会打印状态不会实际清理。
-        lock_released = bool(release_result.get("released"))  # 新增代码+Phase40WindowsAbortCleanup: 规范化释放结果；如果没有这行代码，终端输出无法稳定显示 true/false。
-        abort_was_requested = bool(self.lock_manager.status().get("abort_requested", False))  # 新增代码+Phase50WindowsRecovery: 记录 cleanup 前是否处于急停；如果没有这行代码，cleanup 无法判断是否需要清除 abort 状态。
-        abort_clear_result = self.lock_manager.clear_abort(cleared_by=f"cleanup:{target_session_id}") if abort_was_requested else self.lock_manager.status()  # 新增代码+Phase50WindowsRecovery: cleanup 时同步清除全局 abort；如果没有这行代码，急停 flag 可能在清理后永久残留。
-        abort_cleared = bool(abort_was_requested and not abort_clear_result.get("abort_requested", False))  # 新增代码+Phase50WindowsRecovery: 规范化 abort 是否被成功清除；如果没有这行代码，终端输出无法证明 state cleanup 完整。
+        turn_cleanup = run_turn_cleanup(self.context_store, target_session_id, host_backend=self.host_cleanup_backend, lock_manager=self.lock_manager, escape_controller=self.escape_abort_controller, reason=reason)  # 修改代码+ClaudeCodeLifecycleParity：用统一 turn cleanup 处理 hidden restore、Esc 注销、锁释放和 abort 清理；如果没有这一行，cleanup 会继续分散且容易漏项。
+        release_result = dict(turn_cleanup.get("release", {}) or {}) if isinstance(turn_cleanup.get("release", {}), dict) else {}  # 修改代码+ClaudeCodeLifecycleParity：读取统一 cleanup 的锁释放报告；如果没有这一行，返回值缺少旧调用方依赖的 release 字段。
+        lock_released = bool(turn_cleanup.get("lock_released", release_result.get("released", False)))  # 修改代码+ClaudeCodeLifecycleParity：规范化锁释放状态；如果没有这一行，终端输出无法稳定显示 true/false。
+        abort_clear_result = dict(turn_cleanup.get("abort_clear", {}) or {}) if isinstance(turn_cleanup.get("abort_clear", {}), dict) else self.lock_manager.status()  # 修改代码+ClaudeCodeLifecycleParity：读取统一 cleanup 的 abort 清理报告；如果没有这一行，恢复层看不到 abort clear 细节。
+        abort_cleared = bool(turn_cleanup.get("abort_cleared", not abort_clear_result.get("abort_requested", False)))  # 修改代码+ClaudeCodeLifecycleParity：规范化 abort 是否已清除；如果没有这一行，终端输出无法证明 state cleanup 完整。
         owned_cleanup = self.owned_resource_registry.cleanup_owned_resources(session_id=target_session_id, reason=reason)  # 修改代码+CleanupRecoveryMaturity：stop/cleanup 时清理本 session 自有资源；如果没有这一行，/computer stop 只会释放锁而不处理自有进程/窗口。
         owned_residual = self.owned_resource_registry.check_residuals(session_id=target_session_id)  # 修改代码+CleanupRecoveryMaturity：清理后检查是否仍有自有资源残留；如果没有这一行，残留进程可能被误报为清理完成。
-        notification = self._record_notification("computer_use_turn_cleanup_completed", f"Computer Use cleanup completed for {target_session_id}", {"reason": reason, "lock_released": lock_released, "abort_cleared": abort_cleared})  # 修改代码+Phase50WindowsRecovery: 记录 cleanup 通知并包含 abort 清理结果；如果没有这行代码，turn 清理没有可见轨迹和完整恢复证据。
+        owned_cleanup_completed = bool(owned_cleanup.get("cleanup_completed", False))  # 修改代码+ClaudeCodeLifecycleParity：读取自有资源清理是否成功；如果没有这一行，cleanup_completed 会忽略 agent 自己启动的资源。
+        owned_residual_absent = bool(owned_residual.get("residual_check_passed", not owned_residual.get("residual_owned_process", False) and not owned_residual.get("residual_owned_window", False)))  # 修改代码+ClaudeCodeLifecycleParity：确认自有资源没有残留；如果没有这一行，清理完成可能掩盖残留进程或窗口。
+        cleanup_completed = bool(turn_cleanup.get("cleanup_completed", True) and owned_cleanup_completed and owned_residual_absent)  # 修改代码+ClaudeCodeLifecycleParity：把统一 cleanup 与自有资源清理合并成单一成功字段；如果没有这一行，调用方仍要自己解读多份报告。
+        notification = self._record_notification("computer_use_turn_cleanup_completed", f"Computer Use cleanup completed for {target_session_id}", {"reason": reason, "lock_released": lock_released, "abort_cleared": abort_cleared, "host_windows_restored": bool(turn_cleanup.get("host_windows_restored", True)), "escape_hook_unregistered": bool(turn_cleanup.get("escape_hook_unregistered", True)), "owned_resource_cleanup_completed": owned_cleanup_completed})  # 修改代码+ClaudeCodeLifecycleParity：记录 cleanup 通知并包含 lifecycle 细节；如果没有这行代码，turn 清理没有可见轨迹和完整恢复证据。
         status = self.lock_manager.status()  # 新增代码+Phase40WindowsAbortCleanup: 读取 cleanup 后的最新锁状态；如果没有这行代码，返回值可能仍是释放前状态。
         notifications = self._read_notifications()  # 新增代码+Phase40WindowsAbortCleanup: 读取通知数量用于返回摘要；如果没有这行代码，调用方看不到累计通知数量。
-        return {"model": self.model, "recovery_model": self.recovery_model, "marker": PHASE40_WINDOWS_ABORT_CLEANUP_MARKER, "phase50_marker": PHASE50_WINDOWS_RECOVERY_MARKER, "cleanup_completed": True, "session_id": target_session_id, "lock_released": lock_released, "abort_cleared": abort_cleared, "owned_resource_cleanup": owned_cleanup, "owned_resource_cleanup_completed": bool(owned_cleanup.get("cleanup_completed", False)), "owned_resource_residual_check": owned_residual, "residual_owned_process": bool(owned_residual.get("residual_owned_process", False)), "abort_clear": abort_clear_result, "release": release_result, "status": status, "notification": notification, "notification_count": len(notifications), "actions_expanded": PHASE40_ACTIONS_EXPANDED}  # 修改代码+CleanupRecoveryMaturity: 返回结构化 cleanup、恢复和自有资源清理字段；如果没有这一行，终端和测试无法统一判断 stop 是否清理资源。
+        return {"model": self.model, "recovery_model": self.recovery_model, "marker": PHASE40_WINDOWS_ABORT_CLEANUP_MARKER, "phase50_marker": PHASE50_WINDOWS_RECOVERY_MARKER, "cleanup_completed": cleanup_completed, "session_id": target_session_id, "lock_released": lock_released, "abort_cleared": abort_cleared, "host_windows_restored": bool(turn_cleanup.get("host_windows_restored", True)), "escape_hook_unregistered": bool(turn_cleanup.get("escape_hook_unregistered", True)), "transient_inputs_released": bool(turn_cleanup.get("transient_inputs_released", True)), "owned_resource_cleanup": owned_cleanup, "owned_resource_cleanup_completed": owned_cleanup_completed, "owned_resource_residual_check": owned_residual, "residual_owned_process": bool(owned_residual.get("residual_owned_process", False)), "turn_cleanup": turn_cleanup, "abort_clear": abort_clear_result, "release": release_result, "status": status, "notification": notification, "notification_count": len(notifications), "claudecode_lock_lifecycle": True, "lock_cleanup_mode": "run_turn_cleanup", "actions_expanded": PHASE40_ACTIONS_EXPANDED}  # 修改代码+ClaudeCodeLifecycleParity：返回结构化 lifecycle cleanup、恢复和自有资源清理字段；如果没有这一行，终端和测试无法统一判断 stop 是否清理完整。
     # 新增代码+Phase40WindowsAbortCleanup: 函数段结束，cleanup_turn 到此结束；如果没有这个边界说明，读者不容易看出 turn cleanup 范围。
 
     def recover_stale_lock(self, owner_label: str = "learning_agent_recovery", metadata: dict[str, Any] | None = None) -> dict[str, Any]:  # 新增代码+Phase50WindowsRecovery: 函数段开始，显式恢复陈旧桌面锁；如果没有这段函数，崩溃遗留 owner 只能靠下一次 action 被动恢复。

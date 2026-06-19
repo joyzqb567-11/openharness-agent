@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase62_high_level_tools",
   "name": "agent_capability_phase62_high_level_tools",
   "output_prefix": "agent_capability_phase62_high_level_tools",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase62 Windows Computer Use high-level tools acceptance.",
   "prompt_lines": [
     "Please run one Phase 62 Windows Computer Use high-level Computer Tool API and streaming integration acceptance. Use only the project terminal self-check command. Do not install dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE62_WINDOWS_HIGH_LEVEL_TOOLS_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.high_level_tools import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.high_level_tools import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE62_WINDOWS_HIGH_LEVEL_TOOLS_OK, the final answer's last line must completely copy: PHASE62_WINDOWS_HIGH_LEVEL_TOOLS_READY PHASE62_WINDOWS_HIGH_LEVEL_TOOLS_OK high_level_ops=true read_only_parallel=true write_serial=true streaming_progress=true image_artifact=true uia_candidates=true abort_zero_events=true actions_expanded=false"
   ],
   "required_event_states": [

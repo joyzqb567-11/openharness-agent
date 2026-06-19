@@ -86,10 +86,24 @@ def _phase148c_tokens_passed(required_tokens: list[str], checks: Any) -> bool:  
 
 
 # 新增代码+Phase148CFreshBenchmark：函数段开始，判断截图和日志 artifact 是否完整；如果没有这个 helper，缺截图可能被错误接受。
-def _phase148c_artifacts_passed(assertion: dict[str, Any]) -> bool:  # 新增代码+Phase148CFreshBenchmark：声明 artifact 检查 helper；如果没有这一行，builder 无法统一检查证据文件。
-    checks = assertion.get("artifact_checks") if isinstance(assertion.get("artifact_checks"), dict) else {}  # 新增代码+Phase148CFreshBenchmark：安全读取 artifact 检查字典；如果没有这一行，非字典结果会导致崩溃。
-    required = ("result_json", "event_log", "debug_log", "startup_screenshot", "prompt_screenshot", "final_screenshot")  # 新增代码+Phase148CFreshBenchmark：列出必须 artifact；如果没有这一行，证据完整性没有清晰标准。
-    return all(checks.get(name) is True for name in required)  # 新增代码+Phase148CFreshBenchmark：要求全部 artifact 存在；如果没有这一行，缺少最终截图也可能被接受。
+def _phase148c_artifacts_passed(assertion: dict[str, Any], verifier_report: dict[str, Any]) -> bool:  # 修改代码+Phase148CArtifactFallback：函数段开始，兼容 controller 顶层 artifact 路径；如果没有这段函数，真实可见终端 result 会因缺 assertion.artifact_checks 被误拒。
+    checks = assertion.get("artifact_checks") if isinstance(assertion.get("artifact_checks"), dict) else {}  # 修改代码+Phase148CArtifactFallback：先读取旧版显式 artifact 检查；如果没有这一行，旧场景的 artifact_checks 不能继续复用。
+    required = ("result_json", "event_log", "debug_log", "startup_screenshot", "prompt_screenshot", "final_screenshot")  # 修改代码+Phase148CArtifactFallback：列出必须 artifact；如果没有这一行，证据完整性没有清晰标准。
+    if checks:  # 新增代码+Phase148CArtifactFallback：如果 controller 已经给出显式检查就优先使用；如果没有这一行，新旧 result 的判断顺序会不清楚。
+        return all(checks.get(name) is True for name in required)  # 修改代码+Phase148CArtifactFallback：要求显式检查全部为真；如果没有这一行，旧式 artifact_checks 可能部分缺失仍被接受。
+    run_dir_text = str(verifier_report.get("run_dir", "") or "").strip()  # 新增代码+Phase148CArtifactFallback：读取真实可见终端 run 目录；如果没有这一行，result_json 兜底路径无法从 run_dir 推断。
+    run_dir = Path(run_dir_text) if run_dir_text else Path("")  # 新增代码+Phase148CArtifactFallback：把非空 run_dir 转成路径；如果没有这一行，后续路径存在性检查无法执行。
+    result_json_text = str(verifier_report.get("result_json", "") or "").strip()  # 新增代码+Phase148CArtifactFallback：读取可选 result_json 显式路径；如果没有这一行，外部注入的 result_json 路径会被忽略。
+    result_json_path = Path(result_json_text) if result_json_text else (run_dir / "result.json" if run_dir_text else Path(""))  # 新增代码+Phase148CArtifactFallback：没有显式路径时从 run_dir 推断 result.json；如果没有这一行，controller 旧结果会永远缺 result_json 证据。
+    artifact_paths = {  # 新增代码+Phase148CArtifactFallback：开始构造顶层 artifact 路径表；如果没有这一行，后续无法统一检查所有必要文件。
+        "result_json": result_json_path,  # 新增代码+Phase148CArtifactFallback：登记 result.json 路径；如果没有这一行，机器结果文件存在性不会进入证据门。
+        "event_log": Path(str(verifier_report.get("event_log", "") or "")),  # 新增代码+Phase148CArtifactFallback：登记事件日志路径；如果没有这一行，事件过程证据缺失也可能通过。
+        "debug_log": Path(str(verifier_report.get("copied_debug_log", "") or "")),  # 新增代码+Phase148CArtifactFallback：登记归档调试日志路径；如果没有这一行，工具输出文本证据不会被检查。
+        "startup_screenshot": Path(str(verifier_report.get("startup_screenshot", "") or "")),  # 新增代码+Phase148CArtifactFallback：登记启动截图路径；如果没有这一行，真实可见终端启动画面缺失也可能通过。
+        "prompt_screenshot": Path(str(verifier_report.get("prompt_screenshot", "") or "")),  # 新增代码+Phase148CArtifactFallback：登记输入 prompt 后截图路径；如果没有这一行，真实输入过程证据缺失也可能通过。
+        "final_screenshot": Path(str(verifier_report.get("final_screenshot", "") or "")),  # 新增代码+Phase148CArtifactFallback：登记最终截图路径；如果没有这一行，最终可见终端结果画面缺失也可能通过。
+    }  # 新增代码+Phase148CArtifactFallback：结束 artifact 路径表；如果没有这一行，Python 字典语法不完整。
+    return all(str(path) and path.exists() for path in artifact_paths.values())  # 新增代码+Phase148CArtifactFallback：要求所有顶层路径真实存在；如果没有这一行，只有 JSON 字段但文件不存在也会被误接收。
 # 新增代码+Phase148CFreshBenchmark：函数段结束，_phase148c_artifacts_passed 到此结束；如果没有这个边界说明，初学者不容易看出 artifact 检查范围。
 
 
@@ -114,7 +128,7 @@ def build_phase148c_fresh_evidence_from_verifier(entry: dict[str, Any], verifier
     debug_tokens_passed = _phase148c_tokens_passed(required_tokens, assertion.get("debug_log_checks"))  # 新增代码+Phase148CFreshBenchmark：检查 debug log token；如果没有这一行，工具输出缺失可能被接受。
     answer_tokens_passed = _phase148c_tokens_passed(required_tokens, assertion.get("event_answer_checks"))  # 新增代码+Phase148CFreshBenchmark：检查最终回答 token；如果没有这一行，用户可见输出缺失可能被接受。
     verifier_passed = bool(verifier_report.get("completed") is True and assertion.get("passed") is True)  # 新增代码+Phase148CFreshBenchmark：汇总 verifier 通过状态；如果没有这一行，失败 run 也可能进入 evidence。
-    artifact_passed = _phase148c_artifacts_passed(assertion)  # 新增代码+Phase148CFreshBenchmark：检查 result/events/log/screenshots；如果没有这一行，证据不完整也可能被接受。
+    artifact_passed = _phase148c_artifacts_passed(assertion, verifier_report)  # 修改代码+Phase148CArtifactFallback：检查 result/events/log/screenshots 并兼容 controller 顶层路径；如果没有这一行，真实可见终端证据会被误判不完整。
     visible_acceptance = bool(verifier_passed and artifact_passed and debug_tokens_passed and answer_tokens_passed and human_screenshot_checked)  # 新增代码+Phase148CFreshBenchmark：汇总可见终端验收是否成立；如果没有这一行，各门禁不会形成总判断。
     real_gui_backing = bool(entry.get("real_gui_backing"))  # 新增代码+Phase148CFreshBenchmark：读取真实 GUI 背书；如果没有这一行，物理派发判断无法区分证据级别。
     physical_token = str(entry.get("physical_dispatch_token", ""))  # 新增代码+Phase148CFreshBenchmark：读取物理派发 token；如果没有这一行，真实 GUI 正例无法核对 real_desktop_touched。

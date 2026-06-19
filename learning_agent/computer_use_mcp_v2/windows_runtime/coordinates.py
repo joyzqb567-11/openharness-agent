@@ -128,6 +128,18 @@ def _resolved_app_from_mapping(value: Any, selected_display_id: str) -> dict[str
 # 新增代码+ClaudeCodeDisplayParity: 函数段结束，_resolved_app_from_mapping 到此结束；如果没有这个边界说明，读者不容易看出 app-display 解析范围。
 
 
+def claudecode_display_resolved_for_apps_key(records: Any) -> str:  # 新增代码+ClaudeCodeLifecycleParity：函数段开始，把 rich app-display records 压成 ClaudeCode string key；如果没有这段函数，外部 displayResolvedForApps 会继续返回 OpenHarness 私有数组。
+    app_ids: list[str] = []  # 新增代码+ClaudeCodeLifecycleParity：准备保存唯一 app id；如果没有这行代码，排序去重没有容器。
+    for record in records if isinstance(records, list) else []:  # 新增代码+ClaudeCodeLifecycleParity：只遍历列表形 records；如果没有这行代码，坏类型会导致迭代异常或污染 key。
+        if not isinstance(record, dict):  # 新增代码+ClaudeCodeLifecycleParity：只接受字典记录；如果没有这行代码，字符串或数字记录会触发 get 错误。
+            continue  # 新增代码+ClaudeCodeLifecycleParity：跳过坏记录并继续；如果没有这行代码，一项坏数据会中断全部 key 生成。
+        app_id = str(record.get("appId", record.get("bundleId", record.get("bundle_id", record.get("app_id", "")))) or "").strip()  # 新增代码+ClaudeCodeLifecycleParity：兼容 camelCase 和 snake_case 应用字段；如果没有这行代码，不同来源记录无法统一生成 key。
+        if app_id and app_id not in app_ids:  # 新增代码+ClaudeCodeLifecycleParity：过滤空值并按首次出现去重；如果没有这行代码，key 会包含空项或重复 app。
+            app_ids.append(app_id)  # 新增代码+ClaudeCodeLifecycleParity：保存唯一 app id；如果没有这行代码，最终 key 会一直为空。
+    return ",".join(sorted(app_ids))  # 新增代码+ClaudeCodeLifecycleParity：按字母排序并逗号拼接；如果没有这行代码，ClaudeCode-facing key 会因窗口顺序漂移。
+# 新增代码+ClaudeCodeLifecycleParity：函数段结束，claudecode_display_resolved_for_apps_key 到此结束；如果没有这个边界说明，用户不容易看出 key 生成范围。
+
+
 # 新增代码+ClaudeCodeDisplayParity: 函数段开始，把 Windows payload 汇总成 ClaudeCode display state 摘要；如果没有这段函数，facade 无法把 selectedDisplayId/lastScreenshotDims 等字段稳定返回给模型。
 def claudecode_display_state_from_payload(payload: Any) -> dict[str, Any]:  # 新增代码+ClaudeCodeDisplayParity: 定义公开 display state 抽取 API；如果没有这行代码，observation.py 无法复用坐标模块事实。
     source = payload if isinstance(payload, dict) else {}  # 新增代码+ClaudeCodeDisplayParity: 只信任字典 payload；如果没有这行代码，host 返回坏类型会导致抽取崩溃。

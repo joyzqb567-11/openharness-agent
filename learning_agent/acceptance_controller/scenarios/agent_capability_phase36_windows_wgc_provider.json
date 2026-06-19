@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent_capability_phase36_windows_wgc_provider",
   "output_prefix": "agent_capability_phase36_windows_wgc_provider",
   "window_title_prefix": "LearningAgent-Phase36-WindowsWGCProvider",
@@ -8,7 +8,7 @@
   "success_marker": "PHASE36_WINDOWS_WGC_PROVIDER_READY",
   "prompt_lines": [
     "请执行一次 Phase 36 Windows Computer Use Windows.Graphics.Capture provider 合同验收：这次只允许运行项目内 wgc_capture 模块；它必须诚实报告 WGC Python 绑定是否存在，必须说明 provider 合同已建立，当前没有真实 WGC 实现时必须 fallback_required=true；不要移动鼠标，不要点击真实桌面，不要读取任意用户窗口。最终回答必须包含固定标记：PHASE36_WINDOWS_WGC_PROVIDER_READY。",
-    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.wgc_capture import main; raise SystemExit(main())\"",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.wgc_capture import main; raise SystemExit(main())\"",
     "不要提前最终回答；只有终端命令成功输出 PHASE36_WINDOWS_WGC_PROVIDER_OK 后，最终回答最后一行必须完整复制：PHASE36_WINDOWS_WGC_PROVIDER_READY PHASE36_WINDOWS_WGC_PROVIDER_OK dependency_reported=true capture_contract_ready=true fallback_required=true actions_expanded=false"
   ],
   "required_event_states": [

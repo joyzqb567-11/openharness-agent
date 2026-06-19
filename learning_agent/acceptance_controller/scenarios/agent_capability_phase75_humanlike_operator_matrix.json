@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase75_humanlike_operator_matrix",
   "name": "agent_capability_phase75_humanlike_operator_matrix",
   "output_prefix": "agent_capability_phase75_humanlike_operator_matrix",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase75 Windows Computer Use final Humanlike Windows Operator matrix acceptance.",
   "prompt_lines": [
     "Please run one Phase 75 Windows Computer Use final Humanlike Windows Operator matrix acceptance. Use only the project terminal self-check command in safe contract mode. Do not call an LLM for execution planning, do not interact with any user window, do not open Paint live, do not directly generate an image file, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.humanlike_operator_matrix import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.humanlike_operator_matrix import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK, the final answer's last line must completely copy: PHASE75_HUMANLIKE_WINDOWS_OPERATOR_READY PHASE75_HUMANLIKE_WINDOWS_OPERATOR_OK phase_count=10 prompt_to_any_normal_app=true humanlike_observe_act_verify_loop=true generic_windows_app_control=true per_app_scripts_required=false uia_ocr_vision_fusion=true mouse_keyboard_window_control=true failure_recovery=true representative_real_apps_passed=true mspaint_pikachu_scenario=true real_paint_app_control=true humanlike_drawing_actions=true direct_image_file_cheat=false abort_safety=true high_risk_confirmation=true visible_terminal_gate=true approval_bypass_blocked=true uncontrolled_actions_expanded=false"
   ],
   "required_event_states": [

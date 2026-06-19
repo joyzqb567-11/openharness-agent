@@ -1,0 +1,63 @@
+{
+  "id": "computer_use_universal_multi_app_stage_batch_visible_terminal",
+  "name": "computer_use_universal_multi_app_stage_batch_visible_terminal",
+  "output_prefix": "computer_use_universal_multi_app_stage_batch_visible_terminal",
+  "window_title_prefix": "LearningAgent-UniversalMultiStage",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "pressure_only": true,
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 5,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "UNIVERSAL_MULTI_APP_STAGE_BATCH_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Run universal Computer Use multi app stage batch through visible terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请使用两个本机普通应用窗口完成一个简单任务：一个窗口用于查找或展示短文本信息，另一个窗口用于整理并保存该信息。每一个写入动作都必须绑定对应窗口。不要使用 PowerShell、Python 或命令行直接写文件。最后输出：UNIVERSAL_MULTI_APP_STAGE_BATCH_OK desktop_task_completed=true target_ref_one_to_one=true batch_execution_used=true",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "universal_stage_task_loop_used",
+    "desktop_task_plan_created",
+    "target_ref_one_to_one",
+    "batch_execution_used"
+  ],
+  "event_answer_contains": [
+    "UNIVERSAL_MULTI_APP_STAGE_BATCH_OK",
+    "desktop_task_completed=true",
+    "target_ref_one_to_one=true",
+    "batch_execution_used=true"
+  ],
+  "debug_log_contains": [
+    "UNIVERSAL_MULTI_APP_STAGE_BATCH_OK",
+    "desktop_task_completed=true",
+    "target_ref_one_to_one=true",
+    "batch_execution_used=true"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[=:][ ]*[1-9][0-9]*"
+  ],
+  "assertions": {
+    "output_contains": [
+      "UNIVERSAL_MULTI_APP_STAGE_BATCH_OK",
+      "desktop_task_completed=true",
+      "target_ref_one_to_one=true",
+      "batch_execution_used=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

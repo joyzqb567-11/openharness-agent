@@ -209,3 +209,568 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 3. 在 agent 交互提示符输入场景 prompt，或由 controller 将 `prompt_lines` 逐行输入。
 4. 观察终端输出是否出现 `COMPUTER_USE_CLAUDECODE_WINDOWS_PARITY_OK`。
 5. 只有看到真实终端成功输出并生成 run 证据，才允许把 CA14 记为通过。
+
+## 2026-06-17 Tool Surface ClaudeCode Parity
+
+- 本轮按用户要求先改两点：`tool_search` 首轮常驻，`bash` 在代码开发模式首轮可见并可执行。
+- 已按 TDD 先修改 `test_computer_use_tool_scope.py`，红灯确认当前代码模式和 Computer Use 源码开发模式缺少 `bash`、`tool_search`。
+- 已修改 `learning_agent/tools/schemas.py`，把 `bash` 和 `tool_search` 加入 `KERNEL_TOOL_NAMES`。
+- 已修改 `learning_agent/tools/tool_scope.py`，移除代码模式对 `bash` 的硬阻断，并把代码模式基础工具边界更新为 `read/write/edit/bash/tool_search`。
+- 已同步 `learning_agent/tools/catalog.py`、`learning_agent/staticprompt/staticprompt.md`、`learning_agent/dynamicprompt/dynamicprompt.md`、`learning_agent/skills/tool_list.md`、相关 `SKILL.md` 和 README 里的旧四工具说明。
+- 已通过聚焦验证：`python -m unittest learning_agent.tests.test_computer_use_tool_scope`，11 个测试通过。
+- 已通过语法检查：`python -m py_compile learning_agent/tools/schemas.py learning_agent/tools/tool_scope.py learning_agent/tools/catalog.py learning_agent/tests/test_computer_use_tool_scope.py learning_agent/tests/test_tools_policy.py`。
+- 已用真实 agent 快照确认普通代码模式首轮工具为 `bash,edit,read,tool_search,write`。
+- 注意：`learning_agent.tests.test_tools_policy` 当前仍因既有导入错误 `ask_permission_from_terminal` 无法运行，不是本轮断言失败。
+- 已完成规则十七真实可见终端交互验收：controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，在真实终端输入工具面检查 prompt，run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_tool_surface_claudecode_parity_visible_terminal-20260617_103435\result.json`。
+- 真实终端验收断言通过：`completed=true`、`assertion.passed=true`、`permission_sent_count=0`、最终回答包含 `read/write/edit/bash/tool_search`，并明确 `mcp__computer-use__left_click` 在普通代码模式不可见，最终 marker 为 `TOOL_SURFACE_CLAUDECODE_PARITY_OK`。
+
+## 2026-06-17 ToolToAPISchema Naming Entry
+
+- 本轮按用户要求新增 ClaudeCode 同名记忆点：`toolToAPISchema`，让 OpenHarness 工具 schema 转换链路更容易被代码小白定位。
+- 已按 TDD 先新增 `learning_agent/tests/test_tool_to_api_schema.py`，红灯确认 `learning_agent.tools.types` 和 `learning_agent.tools.pool` 原本都没有 `toolToAPISchema` 入口。
+- 已在 `learning_agent/tools/types.py` 增加 `toolToAPISchema(tool)`，该函数只包装 `AgentTool.to_model_schema()`，不改变任何工具 schema 内容。
+- 已在 `learning_agent/tools/pool.py` 将 `available_tool_schemas()` 改为调用 `toolToAPISchema(tool)`，让新名字进入真实 OpenAI API 工具 schema 发送链路。
+- 已通过聚焦测试：`python -m unittest learning_agent.tests.test_tool_to_api_schema`，2 个测试通过。
+- 已通过工具面回归：`python -m unittest learning_agent.tests.test_computer_use_tool_scope`，11 个测试通过；合并运行 `test_tool_to_api_schema + test_computer_use_tool_scope` 共 13 个测试通过。
+- 已通过语法检查：`python -m py_compile learning_agent/tools/types.py learning_agent/tools/pool.py learning_agent/tests/test_tool_to_api_schema.py`。
+- 已用真实 agent 快照确认首轮工具面仍为 `read,write,edit,bash,tool_search`，说明命名入口没有改变工具暴露行为。
+- 已新增并校验真实终端验收场景：`learning_agent/acceptance_controller/scenarios/agent_capability_tool_to_api_schema_entry_visible_terminal.json`。
+- 已完成规则十七真实可见终端交互验收：controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实终端 run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_tool_to_api_schema_entry_visible_terminal-20260617_114025\result.json`。
+- 真实终端验收断言通过：`completed=true`、`assertion.passed=true`、`permission_sent_count=0`，最终回答包含 `toolToAPISchema`、`available_tool_schemas`、`read/write/edit/bash/tool_search` 和 marker `TOOL_TO_API_SCHEMA_ENTRY_OK`。
+
+## 2026-06-17 FilteredTools Naming Entry
+
+- 本轮按用户要求新增 ClaudeCode 同名记忆点：`filteredTools`，让 OpenHarness “过滤当前可用工具”的链路更容易和 ClaudeCode 的 `filteredTools` 对照。
+- 已按 TDD 先新增 `learning_agent/tests/test_filtered_tools_naming.py`，红灯确认 `learning_agent.tools.pool` 和 `learning_agent.tools.catalog_runtime` 原本都没有 `filteredTools` 入口。
+- 已在 `learning_agent/tools/pool.py` 增加 `filteredTools(catalog, decision_for_tool)`，并把旧 `current_tool_pool()` 改为委托 `filteredTools()` 的兼容包装。
+- 已在 `learning_agent/tools/catalog_runtime.py` 增加 `filteredTools(agent)`，并把 `available_tool_schemas()` 改为先走 `filteredTools(agent)` 再转 schema。
+- 已通过聚焦测试：`python -m unittest learning_agent.tests.test_filtered_tools_naming`，2 个测试通过。
+- 已通过相关回归：`python -m unittest learning_agent.tests.test_filtered_tools_naming learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_computer_use_tool_scope`，15 个测试通过。
+- 已通过语法检查：`python -m py_compile learning_agent/tools/pool.py learning_agent/tools/catalog_runtime.py learning_agent/tests/test_filtered_tools_naming.py`。
+- 已用真实 agent 快照确认首轮工具面仍为 `read,write,edit,bash,tool_search`，并确认 `catalog_runtime.current_tool_pool(agent) == catalog_runtime.filteredTools(agent)`。
+- OpenAI `defer_loading` 判断：官方 Responses API 支持 namespace/tool_search 形态的 `defer_loading`；当前 Chat Completions 链路暂不应直接混入该字段，后续若要完全对齐应新增 Responses API tool_search/namespace 链路。
+- 已新增并校验真实终端验收场景：`learning_agent/acceptance_controller/scenarios/agent_capability_filtered_tools_entry_visible_terminal.json`。
+- 已完成规则十七真实可见终端交互验收：controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实终端 run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_filtered_tools_entry_visible_terminal-20260617_120011\result.json`。
+- 真实终端验收断言通过：`completed=true`、`assertion.passed=true`、`permission_sent_count=0`，最终回答包含 `filteredTools`、`current_tool_pool`、`available_tool_schemas`、`read/write/edit/bash/tool_search` 和 marker `FILTERED_TOOLS_ENTRY_OK`。
+- 已按规则三复制学习备份到 `learning_agent/test/filtered_tools_naming_20260617/`。
+- 已更新主目录 CodeGraph；最终 `codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,292`、`Nodes 49,002`、`Edges 60,471`。
+
+## 2026-06-17 FilteredTools Only Removal Entry
+
+- 本轮按用户进一步建议，删除 `current_tool_pool()` 旧名字，只保留 `filteredTools()`，避免同一功能两个名字让代码小白混淆。
+- 已先创建书面迁移记录：`docs/superpowers/plans/2026-06-17-current-tool-pool-removal-record.md`。
+- CodeGraph 审计结果：`codegraph callers current_tool_pool --limit 80` 返回 `No callers found for "current_tool_pool"`，说明 active 生产代码没有外部 caller。
+- 已按 TDD 修改 `learning_agent/tests/test_filtered_tools_naming.py`，红灯确认 `learning_agent.tools.pool` 和 `learning_agent.tools.catalog_runtime` 仍公开旧名，然后删除生产旧名后绿灯通过。
+- 已从 `learning_agent/tools/pool.py` 删除 `current_tool_pool(catalog, decision_for_tool)` 兼容包装，只保留 `filteredTools(catalog, decision_for_tool)`。
+- 已从 `learning_agent/tools/catalog_runtime.py` 删除 `current_tool_pool(agent)` 兼容包装，只保留 `filteredTools(agent)`；`available_tool_schemas()` 继续使用 `filteredTools(agent)`。
+- 已将 `learning_agent/tests/test_tools_policy.py` 的旧入口导入和调用替换为 `filteredTools`。
+- 已更新真实终端验收场景 `learning_agent/acceptance_controller/scenarios/agent_capability_filtered_tools_entry_visible_terminal.json`，新 marker 为 `FILTERED_TOOLS_ONLY_ENTRY_OK`，验收目标改为确认旧名不再公开。
+- 已通过相关回归：`python -m unittest learning_agent.tests.test_filtered_tools_naming learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_computer_use_tool_scope`，15 个测试通过。
+- 已通过语法和场景校验：`python -m py_compile learning_agent/tools/pool.py learning_agent/tools/catalog_runtime.py learning_agent/tests/test_filtered_tools_naming.py learning_agent/tests/test_tools_policy.py`；`python -m json.tool learning_agent\acceptance_controller\scenarios\agent_capability_filtered_tools_entry_visible_terminal.json`。
+- 已用真实 agent 快照确认首轮工具面仍为 `read,write,edit,bash,tool_search`，并确认 `pool_has_current_tool_pool=False`、`runtime_has_current_tool_pool=False`。
+- 已用 active 路径搜索确认没有 `def current_tool_pool`、`import current_tool_pool` 或 `current_tool_pool as`。
+- 已完成规则十七真实可见终端交互验收：controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat`，真实终端 run 为 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\acceptance_controller\runs\agent_capability_filtered_tools_entry_visible_terminal-20260617_125615\result.json`。
+- 真实终端验收断言通过：`completed=true`、`assertion.passed=true`、`permission_sent_count=0`，最终回答确认 `current_tool_pool` 不再作为函数公开，`available_tool_schemas` 仍走 `filteredTools`，首轮工具面仍为 `read/write/edit/bash/tool_search`，marker 为 `FILTERED_TOOLS_ONLY_ENTRY_OK`。
+- 已按规则三复制学习备份到 `learning_agent/test/filtered_tools_only_removal_20260617/`。
+- 已更新主目录 CodeGraph；最终 `codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,296`、`Nodes 49,141`、`Edges 159,413`。
+## 2026-06-17 OAuth Native Tools ClaudeCode Parity Blueprint
+
+- 已创建书面蓝图：`docs/superpowers/plans/2026-06-17-openharness-oauth-native-tools-claudecode-parity.md`。
+- 蓝图目标：让 OpenHarness 的 ChatGPT OAuth 后端链路对齐 ClaudeCode/Codex 风格原生 Responses tools，把工具真实放进顶层 `tools`，并解析 `function_call`、`tool_search_call`、`tool_search_output`。
+- 当前只完成方案制定，尚未修改运行代码。
+- 后续执行时必须先按蓝图 Task 1 冻结范围和证据，再逐项 TDD 执行。
+
+## 2026-06-18 OAuth Native Tools Blueprint Strengthening
+
+- 已按用户要求先补强蓝图，尚未执行代码修改。
+- 补强文件：`docs/superpowers/plans/2026-06-17-openharness-oauth-native-tools-claudecode-parity.md`。
+- 本次补强明确：该蓝图只负责 Computer Use 的模型协议层，不覆盖 Windows 桌面执行器、外部 MCP 包内部实现、macOS TCC/Swift helper。
+- 已新增门禁：每轮重新计算 `filteredTools()`、deferred 工具集合和 Responses namespace；至少拆出 `computer_use` namespace；hosted `tool_search_call/tool_search_output` 必须被保留；Computer Use 图片/观察结果必须能进入下一轮 Responses `input_image`。
+- 已新增 Task 2A：专门锁定 Computer Use namespace 和每轮 defer 判断。
+- 已补强 Task 7 和 Task 8：真实 OAuth probe 必须看见原生 `tool_search_call/tool_search_output`，真实可见终端验收必须包含安全 Computer Use 权限类工具场景。
+- 当前状态：等待用户确认蓝图后再执行实现任务。
+
+## 2026-06-17 OAuth Native Tools ClaudeCode Parity Plan
+
+- 计划文件：`docs/superpowers/plans/2026-06-17-openharness-oauth-native-tools-claudecode-parity.md`
+- 当前阶段：Task 1，冻结协议证据和范围。
+- 成功标准：OAuth native tools 模式下，工具真实出现在顶层 `tools`，模型返回原生 `function_call/tool_search_call/tool_search_output`，OpenHarness 能解析并执行 function_call。
+- 停止条件：真实 OAuth 后端不再接受该格式、模型版本低于 `gpt-5.4`、或真实终端验收无法完成。
+
+## 2026-06-18 OAuth Native Tools ClaudeCode Parity Execution
+
+- 已完成 Task 1：把 OAuth native Responses tools 的范围、成功标准和停止条件写入 `agent_memory/context.md` 与本进度文件。
+- 已完成 Task 2/2A：新增 `learning_agent/models/responses_native.py`，支持 Chat Completions function schema 转 Responses function、namespace、hosted `tool_search`、`defer_loading` 和 `computer_use` namespace。
+- 已完成 Task 3/5：新增 Responses 原生 output item parser，并扩展 OAuth SSE parser 以保留 `response.output_item.done`、`response.function_call_arguments.delta`、`response.function_call_arguments.done` 和 `response.completed` 中的原生 output。
+- 已完成 Task 4：`CodexOAuthChatModel` 增加 `CODEX_OAUTH_NATIVE_TOOLS` / `native_tools_enabled` 开关；开启时工具进入请求体顶层 `tools`，关闭时仍保留旧 `text.format=json_schema` 回退路径。
+- 已完成 Task 6：`learning_agent/core/message_builders.py` 新增 native tool result builder，可生成 `function_call_output` 并把 Computer Use 图片消息转换为 Responses `input_image`。
+- 已完成 Task 7 默认跳过 probe：`python -m unittest learning_agent.tests.test_codex_oauth_native_tools_probe` 结果为 `OK (skipped=1)`。
+- 已完成 Task 7 真实 OAuth backend probe：`RUN_CODEX_OAUTH_NATIVE_TOOLS=1` 与 `CODEX_OAUTH_NATIVE_TOOLS=1` 下运行 `python -m unittest learning_agent.tests.test_codex_oauth_native_tools_probe`，结果为 `OK`，证明本机 ChatGPT OAuth 后端接受 hosted `tool_search` / namespace / `defer_loading` 并返回可解析的原生工具调用。
+- 已完成 Task 8 验收资产：新增 `learning_agent/acceptance_controller/scenarios/agent_capability_oauth_native_tools_visible_terminal.json` 与 `learning_agent/acceptance_controller/scenarios/agent_capability_oauth_native_computer_use_visible_terminal.json`。
+- 已补强 acceptance controller：`controller.ps1` 现在支持 scenario JSON 的 `environment` 字段，可以把 `CODEX_OAUTH_NATIVE_TOOLS=1` 传入真实可见终端启动链路。
+- Task 8 真实可见终端自动验收未完成：controller 启动 `start_oauth_agent.bat` 后在聚焦真实终端窗口时失败，错误为 `无法聚焦真实终端窗口，停止发送文本。`，失败 run 目录为 `learning_agent/acceptance_controller/runs/agent_capability_oauth_native_tools_visible_terminal-20260618_101119/`。
+- 已关闭本次半启动的 `LearningAgent-OAuthNativeTools-101119` cmd 窗口，避免后台继续等待输入。
+- 已按规则三复制学习备份到 `learning_agent/test/oauth_native_tools_schema_20260617/`、`learning_agent/test/oauth_native_computer_use_namespace_20260617/`、`learning_agent/test/oauth_native_output_parser_20260617/`、`learning_agent/test/oauth_native_codex_body_20260617/`、`learning_agent/test/oauth_native_sse_parser_20260617/`、`learning_agent/test/oauth_native_tool_result_messages_20260617/`、`learning_agent/test/oauth_native_backend_probe_20260617/`、`learning_agent/test/oauth_native_visible_terminal_20260617/`。
+- Task 9 稳定测试通过：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_codex_oauth_native_sse_parser learning_agent.tests.test_responses_native_tool_result_messages learning_agent.tests.test_codex_oauth_native_tools_probe learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_filtered_tools_naming` 结果为 19 个测试通过，其中真实后端 probe 默认 skipped 1 个。
+- Task 9 编译检查通过：`python -m py_compile learning_agent\models\responses_native.py learning_agent\models\adapters.py learning_agent\core\messages.py learning_agent\core\message_builders.py learning_agent\tests\test_responses_native_tool_schema.py learning_agent\tests\test_responses_native_output_parser.py learning_agent\tests\test_codex_oauth_native_tools_body.py learning_agent\tests\test_codex_oauth_native_sse_parser.py learning_agent\tests\test_responses_native_tool_result_messages.py learning_agent\tests\test_codex_oauth_native_tools_probe.py` 无输出。
+- Task 9 controller 语法检查通过：PowerShell parser 对 `learning_agent/acceptance_controller/controller.ps1` 无语法错误。
+- Task 9 蓝图原始门禁命令部分失败：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_models_codex_oauth` 中本轮 10 个 native 相关测试通过，但 `test_models_codex_oauth` 导入失败，错误是 `cannot import name 'ask_permission_from_terminal' from 'learning_agent.core.agent'`。
+- Task 9 默认开关决策：不默认启用 OAuth native tools。理由是可见终端验收未完成，且蓝图原始大测试门禁仍受既有导入问题阻塞；当前必须继续显式设置 `CODEX_OAUTH_NATIVE_TOOLS=1` 才启用 native 模式。
+- CodeGraph 状态：`codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,322`、`Nodes 49,700`、`Edges 158,044`。
+- Commit 状态：本轮未执行 git commit。原因是当前工作树已有大量历史修改和未跟踪文件，直接提交会混入不属于本轮的改动；后续提交前应先由用户确认提交范围或在干净分支/工作树中整理。
+
+## 2026-06-18 OAuth Native Debug Evidence Follow-up
+
+- 已补齐模型响应 debug 证据链：`learning_agent/observability/debug_formatting.py` 的 `model_message_to_debug_dict()` 现在会把 `ModelMessage.native_output_items` 写入结构化 debug payload，避免 `tool_search_call` / `tool_search_output` 只停留在内存里。
+- 已新增测试：`learning_agent/tests/test_responses_native_debug_logging.py`，先红灯确认缺少 `native_output_items` 字段，再绿灯确认原生 output items 和旧模式空列表都会进入 debug payload。
+- 已通过 focused 回归：`python -m unittest learning_agent.tests.test_responses_native_debug_logging learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_probe`，结果为 5 个测试通过，其中真实后端 probe 默认 skipped 1 个。
+- 已通过编译检查：`python -m py_compile learning_agent\observability\debug_formatting.py learning_agent\tests\test_responses_native_debug_logging.py` 无输出。
+- 已按规则三复制学习备份到 `learning_agent/test/oauth_native_debug_logging_20260617/`。
+- 已通过本轮最终 native 回归：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_codex_oauth_native_sse_parser learning_agent.tests.test_responses_native_tool_result_messages learning_agent.tests.test_responses_native_debug_logging learning_agent.tests.test_codex_oauth_native_tools_probe learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_filtered_tools_naming`，结果为 21 个测试通过，其中真实后端 probe 默认 skipped 1 个。
+- 已通过本轮最终编译检查：`python -m py_compile learning_agent\models\responses_native.py learning_agent\models\adapters.py learning_agent\core\messages.py learning_agent\core\message_builders.py learning_agent\observability\debug_formatting.py learning_agent\tests\test_responses_native_tool_schema.py learning_agent\tests\test_responses_native_output_parser.py learning_agent\tests\test_codex_oauth_native_tools_body.py learning_agent\tests\test_codex_oauth_native_sse_parser.py learning_agent\tests\test_responses_native_tool_result_messages.py learning_agent\tests\test_responses_native_debug_logging.py learning_agent\tests\test_codex_oauth_native_tools_probe.py` 无输出。
+- 已恢复并刷新 CodeGraph：最终 `codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,325`、`Nodes 49,739`、`Edges 159,585`。
+- 注意：真实可见终端交互验收仍未完成，原因仍是 controller 无法聚焦 `start_oauth_agent.bat` 启动的真实终端；因此仍不能声明本蓝图“开发完成/验收通过”，也不能默认开启 `CODEX_OAUTH_NATIVE_TOOLS`。
+
+## 2026-06-18 OAuth Native Task 9 Compatibility Follow-up
+
+- 已修复蓝图 Task 9 原始门禁中的既有导入阻塞：`learning_agent.core.agent` 重新兼容导出 `ask_permission_from_terminal`、`ask_permission_from_terminal_customer_mode`、`build_permission_event_payload`，真实实现仍委托 `learning_agent.app.terminal_permissions`。
+- 已补齐 `LearningAgent` 旧私有工具 schema 兼容入口：`_tool_catalog()`、`_available_tool_schemas()`、`_available_responses_tool_schemas()`、`_tool_schema_names()`，真实逻辑仍委托 `learning_agent.tools.catalog_runtime`。
+- 已更新 `learning_agent/tests/test_models_codex_oauth.py` 的过期断言：按用户已确认的新设计，`tool_search` 在 MCP select 后仍应常驻暴露给模型。
+- Task 9 原始门禁已通过：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_models_codex_oauth`，结果为 59 个测试通过。
+- Native 回归组已通过：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_codex_oauth_native_sse_parser learning_agent.tests.test_responses_native_tool_result_messages learning_agent.tests.test_responses_native_debug_logging learning_agent.tests.test_codex_oauth_native_tools_probe learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_filtered_tools_naming`，结果为 21 个测试通过，其中真实后端 probe 默认 skipped 1 个。
+- 编译检查已通过：`python -m py_compile learning_agent\core\agent.py learning_agent\models\responses_native.py learning_agent\models\adapters.py learning_agent\core\messages.py learning_agent\core\message_builders.py learning_agent\observability\debug_formatting.py` 无输出。
+- 已按规则三复制学习备份到 `learning_agent/test/oauth_native_task9_compat_20260618/`。
+- 当前剩余门禁：仍需重新执行 OAuth native tools 与 OAuth native Computer Use 两个真实可见终端场景；在该门禁通过前，不允许声明开发完成，也不允许默认开启 `CODEX_OAUTH_NATIVE_TOOLS`。
+
+## 2026-06-18 OAuth Native ClaudeCode Streaming Follow-up
+
+- 已按用户纠偏先读取 ClaudeCode CodeGraph：重点参考 `utils/api.ts::toolToAPISchema()`、`services/api/claude.ts` 的 `normalizeMessagesForAPI(messages, filteredTools)`、`utils/messages.ts::normalizeMessagesForAPI()`、`services/tools/toolExecution.ts::addToolResult()`、`StreamingToolExecutor` 和 `cli/transports/ccrClient.ts::accumulateStreamEvents()`。
+- 已按 TDD 新增续轮协议测试：`test_native_tools_body_requests_encrypted_reasoning_for_stateless_turns`、`test_native_input_carries_reasoning_item_before_matching_function_call_output`、`test_native_tools_input_uses_concise_continuation_prompt_after_tool_result`。
+- 已修复 `learning_agent/models/adapters.py`：native body 增加 `include: ["reasoning.encrypted_content"]`；native input 会按 call_id 回放 reasoning/tool_search/function_call 原生 item，再追加 `function_call_output`。
+- 已修复 native 续轮 prompt：不再把整段 `messages` JSON dump 给模型，而是给出 `Original user request`、`Tool results` 和轻量 readable summary，避免工具返回后模型只输出空 reasoning。
+- 已按 ClaudeCode accumulator 思路新增并修复 SSE parser 测试：`test_sse_parser_attaches_output_text_done_to_message_placeholder`，现在空 `message in_progress` 占位会合并 `output_text.done`，最终 `ModelMessage.text` 不再丢失。
+- 聚焦测试通过：`python -m unittest learning_agent.tests.test_codex_oauth_native_sse_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_responses_native_tool_result_messages`，14 个测试通过。
+- Native 回归通过：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_codex_oauth_native_sse_parser learning_agent.tests.test_responses_native_tool_result_messages learning_agent.tests.test_responses_native_debug_logging learning_agent.tests.test_codex_oauth_native_tools_probe learning_agent.tests.test_tool_to_api_schema learning_agent.tests.test_filtered_tools_naming learning_agent.tests.test_core_run_loop.CoreRunLoopTests.test_run_retries_empty_final_answer_once`，29 个测试通过，其中真实后端 probe 默认 skipped 1 个。
+- 更大 OAuth/native 组合回归通过：`python -m unittest learning_agent.tests.test_responses_native_tool_schema learning_agent.tests.test_responses_native_output_parser learning_agent.tests.test_codex_oauth_native_tools_body learning_agent.tests.test_models_codex_oauth learning_agent.tests.test_responses_native_tool_result_messages`，67 个测试通过。
+- 编译检查通过：`python -m py_compile learning_agent\models\adapters.py learning_agent\models\responses_native.py learning_agent\core\message_builders.py learning_agent\core\agent.py learning_agent\tests\test_codex_oauth_native_tools_body.py learning_agent\tests\test_responses_native_tool_result_messages.py learning_agent\tests\test_codex_oauth_native_sse_parser.py`。
+- 真实可见终端 OAuth native tools 验收已通过：`learning_agent/acceptance_controller/runs/agent_capability_oauth_native_tools_visible_terminal-20260618_123634/result.json`，最终回答包含 `Read README.md successfully.` 和 `OAUTH_NATIVE_TOOLS_OK`。
+- 真实可见终端 OAuth native Computer Use 验收已通过：`learning_agent/acceptance_controller/runs/agent_capability_oauth_native_computer_use_visible_terminal-20260618_123710/result.json`，调用 `list_granted_applications`，最终回答 `OAUTH_NATIVE_COMPUTER_USE_OK`。
+- 已按规则三复制学习备份到 `learning_agent/test/oauth_native_reasoning_sse_20260618/`。
+- 已刷新并修复 CodeGraph：期间遇到一次 `database is locked` 和一次全量索引超时，已停止项目相关 CodeGraph daemon、移除陈旧锁并执行 `codegraph sync .`；最终 `codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,331`、`Nodes 50,132`、`Edges 50,608`。
+# 2026-06-18 ClaudeCode vs OpenHarness Computer Use CodeGraph Audit
+
+- 当前任务：基于最新 CodeGraph 审计 ClaudeCode Computer Use 与 OpenHarness Computer Use 的文件、源码、接口、数据和总链路，并输出对齐差异报告。
+- ClaudeCode CodeGraph 状态：`Files 1,902 / Nodes 43,685 / Edges 140,720`，状态为最新。
+- OpenHarness CodeGraph 状态：`Files 1,331 / Nodes 50,132 / Edges 50,608`，状态为最新。
+- 当前执行边界：只做审计报告，不修改运行代码；如果后续进入开发修复，才需要按规则十七执行真实可见终端交互验收。
+- 已完成 ClaudeCode 源码链路审计：`utils/computerUse/setup.ts`、`mcpServer.ts`、`wrapper.tsx`、`hostAdapter.ts`、`executor.ts`、`computerUseLock.ts`、`cleanup.ts`、`escHotkey.ts`、`toolRendering.tsx`、`services/mcp/client.ts` 和 `ComputerUseApproval.tsx`。
+- 已完成 OpenHarness 源码链路审计：`inferred_ant_mcp/build_tools.py`、`runtime.py`、`types.py`、`bind_session_context.py`、`clipboard.py`、`permissions.py`、`observation.py`、`legacy_ports.py`、`claudecode_bridge/wrapper.py`、`mcpServer.py`、`learning_agent/mcp/agent_adapter.py`、`windows_runtime/mcp_session_adapter.py`、`session_runtime.py`、`turn_cleanup.py` 和锁实现。
+- 本轮结论：OpenHarness 对齐了模型可见 24 工具面、`mcp__computer-use__` 前缀、主要 ClaudeCode 参数字段、MCP text/image content block、disabled tools/list 空结果、锁/cleanup/Esc 生命周期、display state 和旧接口禁止面；仍未完全一致的是隐藏外部包内部、权限 UI 体验、macOS TCC 与 Windows 权限差异、以及 Windows 侧 v2 facade 下仍复用 legacy session adapter/controller 的实现分层。
+
+## 2026-06-18 Windows Computer Use Permission UI ClaudeCode Parity Blueprint
+
+- 已按用户要求为“权限 UI 体验”单独制定 P0 对齐蓝图，文件为 `docs/superpowers/plans/2026-06-18-computer-use-windows-permission-ui-claudecode-parity.md`。
+- 本轮只写蓝图和项目记忆，不修改运行代码；因此没有触发规则十七的真实可见终端开发验收。
+- 蓝图结论：该项值得对齐，且优先级最高，因为它直接决定真实桌面控制前的用户可理解性、可拒绝性、可审计性和安全信任。
+- 蓝图范围：只对齐 Windows 终端权限体验、结构化权限决策、grant flags、sentinel 风险提示、授权审计和真实终端验收；明确排除外部 MCP 包、macOS TCC、Swift helper 和底层执行链路重构。
+- 后续执行顺序：先做 prompt UI 面板、结构化 decision、无交互默认拒绝、`request_access` payload 和真实终端验收；再做状态面板和深度审计增强。
+
+## 2026-06-18 Windows Computer Use Permission UI ClaudeCode Parity Execution
+
+- 已完成阶段 A：用 CodeGraph 和运行探针冻结旧链路，确认旧 `request_access` 成功/拒绝 payload 缺少 `decision/source/promptVersion/timestampUtc`，且无 `ask_permission` 回调时会默认允许。
+- 已完成阶段 B：先写红灯测试 `test_computer_use_permission_ui_prompt.py`、`test_computer_use_permission_decision.py`，并扩展 `test_computer_use_mcp_v2_permission_grants.py`，覆盖终端权限面板、结构化决策、无回调默认拒绝和审计字段。
+- 已完成阶段 C/D：实现终端权限面板与结构化权限决策模型，兼容旧 bool 回调，同时支持新 dict 决策、降权 grant flags、未知 flag 过滤和错误回调默认拒绝。
+- 已完成阶段 E/F：`request_access`、`list_granted_applications`、Windows runtime approval 和 `/computer status` 已接入 `permission_prompt_version`、最近决策和拒绝计数。
+- 已完成自动化验证：`python -m unittest learning_agent.tests.test_computer_use_permission_ui_prompt learning_agent.tests.test_computer_use_permission_decision learning_agent.tests.test_computer_use_mcp_v2_permission_grants learning_agent.tests.test_computer_use_mcp_v2_permission_approval_prompt learning_agent.tests.test_computer_use_mcp_v2_lock_lifecycle learning_agent.tests.test_computer_use_mcp_v2_primary_paths learning_agent.tests.test_computer_use_mcp_v2_tools_list_disabled learning_agent.tests.test_computer_use_mcp_v2_protocol_normalizer learning_agent.tests.test_windows_computer_use_approval_phase38 learning_agent.tests.test_windows_computer_use_security_policy_phase48 learning_agent.tests.test_computer_use_mcp_v2_sendinput_parity_task4`，结果为 45 个测试通过。
+- 已完成编译检查：`python -m py_compile` 覆盖本轮修改的权限 prompt、decision、permissions、types、Windows runtime approval、旧 approval、status renderer 和新增/修改测试文件，结果无输出。
+- 已按规则三复制学习备份到 `learning_agent/test/20260618_windows_permission_ui_claudecode_parity/`。
+- 已完成真实可见终端验收：`powershell -ExecutionPolicy Bypass -File learning_agent\acceptance_controller\controller.ps1 -ScenarioPath scenarios\agent_capability_computer_use_permission_ui_visible_terminal.json` 通过，结果文件为 `learning_agent/acceptance_controller/runs/agent_capability_computer_use_permission_ui_visible_terminal-20260618_145426/result.json`。
+- 本轮真实终端验收关键事实：`completed=true`、`permission_required=true`、`permission_answered=true`、`computer_use_mcp_v2_tool=true`、`request_access` 和 `list_granted_applications` 均出现、`permission_prompt_version=windows-permission-ui-v1` 出现在 `/computer status`、最终回答为 `COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK`。
+- CodeGraph 已刷新并确认最新：`codegraph sync .` 显示 Already up to date，`codegraph status .` 显示 `[OK] Index is up to date`，统计为 `Files 1,345`、`Nodes 50,356`、`Edges 51,545`。
+
+## 2026-06-18 ClaudeCode Computer Use Source Recheck
+
+- 已按用户要求重新基于 `D:\ClaudeCode-main\ClaudeCode-main` 的 CodeGraph 复核 ClaudeCode Computer Use 源码，确认该仓库 CodeGraph 状态为 `[OK] Index is up to date`，统计为 `Files 1,902 / Nodes 43,685 / Edges 140,720`。
+- 本轮结论边界：ClaudeCode 源码内可确认 `utils/computerUse/*`、`ComputerUseApproval.tsx`、`main.tsx`、`services/mcp/client.ts`、`services/mcp/config.ts`、`state/AppStateStore.ts`、`query.ts`、`query/stopHooks.ts` 等链路；`@ant/computer-use-mcp`、`@ant/computer-use-input`、`@ant/computer-use-swift` 内部实现不在该目录源码内，不能逐行确认。
+- 已修正对齐判断：权限 UI、锁/清理/Esc、MCP 名称与工具渲染、session state、多显示器状态、app 名称过滤、macOS 执行器都能在源码中找到；持久化授权、独立状态命令、完整审计账本、Windows 底层控制、外部包内部 tool schema/dispatch 只能作为 OpenHarness 对齐目标或接口痕迹，不能说是 ClaudeCode 当前源码已有完整实现。
+
+## 2026-06-18 Hermes Computer Use CodeGraph Borrowing Audit
+
+- 已按用户要求读取 `D:\hermes-agent-main` 的 CodeGraph，确认该项目 `.codegraph` 存在且状态为 `[OK] Index is up to date`，统计为 `Files 3,479 / Nodes 96,525 / Edges 238,893`。
+- Hermes Computer Use 主要源码链路为 `tools/computer_use_tool.py`、`tools/computer_use/schema.py`、`tools/computer_use/tool.py`、`tools/computer_use/backend.py`、`tools/computer_use/cua_backend.py`、`tools/computer_use/vision_routing.py`、`agent/prompt_builder.py`、`cli.py::_computer_use_approval_callback` 和对应测试/文档。
+- 关键边界：Hermes 自己的模型可见 schema、调度、安全审批、截图多模态回传、辅助视觉路由和 backend 抽象都在仓库源码内；但底层 macOS 执行依赖外部 `cua-driver mcp`，这属于外部驱动/运行时依赖，不等同于 ClaudeCode 那类无法逐行验证的隐藏完整 MCP 包。
+- 借鉴方向初判：OpenHarness 不应替换现有 ClaudeCode 风格 24 个 MCP 工具面和权限层；更值得借鉴 Hermes 的 SOM/AX 编号元素观察、`capture_after` 动作后复查、`max_elements` 输出上限、`app` scoped 观察、辅助视觉路由、统一 backend result 数据模型和模型提示词工作流。
+
+## 2026-06-18 Cua Driver Windows Computer Use Borrowing Blueprint
+
+- 已按用户要求把 Hermes 外部 `cua-driver` 源码可借鉴点整理成书面长任务蓝图，文件为 `docs/superpowers/plans/2026-06-18-cua-driver-windows-computer-use-borrowing.md`。
+- 蓝图核心结论：`cua-driver` 在角色上类似外部 Computer Use MCP driver，但现在源码已下载并进入 `D:\hermes-agent-main` CodeGraph，因此不是不可验证黑盒；OpenHarness 可以借鉴其 Windows 底层执行思想，但不应替换 ClaudeCode-compatible 24 工具面。
+- 蓝图范围：元素索引缓存、UIA/MSAA 语义动作、窗口本地坐标契约、严格 `pid + window_id` 校验、后台/no-focus dispatch 诊断、UIPI/integrity 诊断、observe-act-verify 证据链。
+- 蓝图边界：不引入 `cua-driver` 作为强依赖，不照搬 macOS Swift/SkyLight，不绕过 OpenHarness 权限 UI、lock、abort、cleanup 和审计，不声称 ClaudeCode 隐藏外部包内部已完全确认。
+- 蓝图验收门禁：每阶段先 CodeGraph 复核，先写失败测试，再实现，再跑自动化测试和编译检查；最终必须通过 `learning_agent/start_oauth_agent.bat` 真实可见终端验收，否则不能声明开发完成。
+
+## 2026-06-18 Cua Driver Borrowing Execution Phase 0
+
+- 已启动长期目标：逐项完成 `docs/superpowers/plans/2026-06-18-cua-driver-windows-computer-use-borrowing.md` 的所有任务。
+- 已按 `executing-plans` 技能复读蓝图，并按 `using-git-worktrees` 技能检查隔离工作区要求；当前分支为 `codex/publish-main`，不是 `main/master`，且当前工作区已有大量历史未提交改动，因此本轮继续在当前工作区小范围修改，避免创建不含当前变更的新 worktree 导致基线丢失。
+- OpenHarness CodeGraph 状态：`Files 1,345 / Nodes 50,356 / Edges 51,545`，结果为 `[OK] Index is up to date`。
+- Hermes CodeGraph 状态：`Files 3,828 / Nodes 103,394 / Edges 260,538`，结果为 `[OK] Index is up to date`；提示索引由旧版本构建，但当前查询可用。
+- 已用 CodeGraph 重新探索 OpenHarness 目标链路：`legacy_ports.py`、`mode_session.py`、`real_sendinput_guard.py` 等仍是当前 Computer Use v2/Windows runtime 关键路径。
+- 已用 CodeGraph 重新探索 Cua Driver 参考链路：确认 `ToolRegistry`、MCP protocol/server、Windows `get_window_state`、元素缓存、点击/输入/set_value、UIPI/输入诊断仍是主要参考对象。
+
+## 2026-06-18 Cua Driver 借鉴 Phase 3
+- 已完成 Windows 坐标合同与目标身份严格匹配模块。
+- 新增并通过 learning_agent.tests.test_computer_use_windows_coordinate_contract。
+- 已回归 Phase 1/2 元素索引缓存与观察帧集成测试。
+- 已备份 Phase 3 新增文件到 learning_agent/test/cua_driver_borrowing_phase3_coordinate_identity_20260618。
+
+## 2026-06-18 Cua Driver 借鉴 Phase 4
+- 已完成 Windows UIA Pattern 语义分发模块，覆盖 Invoke、Toggle、Value、RangeValue 后备路径。
+- 新增并通过 learning_agent.tests.test_computer_use_windows_uia_patterns。
+- 已回归 Phase 1-3 相关测试。
+- 已备份 Phase 4 新增文件到 learning_agent/test/cua_driver_borrowing_phase4_uia_patterns_20260618。
+
+## 2026-06-18 Cua Driver 借鉴 Phase 5
+- 已完成 Windows UIPI/完整性等级诊断模块，覆盖等级排序、低权限到高权限后台派发阻断、目标不可用优先解释。
+- 新增并通过 learning_agent.tests.test_computer_use_windows_integrity。
+- 已回归 Phase 1-4 相关测试。
+- 已备份 Phase 5 新增文件到 learning_agent/test/cua_driver_borrowing_phase5_integrity_20260618。
+
+## 2026-06-18 Cua Driver 借鉴 Phase 6
+- 已扩展 ComputerUseMcpV2Context，新增 element_cache、semantic_action_dispatcher、integrity_diagnostic_provider、last_observation_target。
+- 已在 MCP v2 actions.perform_action 中接入 element_index 缓存命中后的 UIA 语义 Pattern 优先路径，成功时返回 before/after evidence 与 verified 字段。
+- 新增并通过 learning_agent.tests.test_computer_use_cua_driver_observe_act_verify。
+- 已回归 MCP v2 权限、displayResolvedForApps、Esc cleanup 相关测试。
+- 已备份 Phase 6 修改文件到 learning_agent/test/cua_driver_borrowing_phase6_observe_act_verify_20260618。
+
+## 2026-06-18 Cua Driver 借鉴 Phase 7/8
+- Phase 7 鼠标热区/录制类 UI 调试增强为可选项，已按蓝图边界暂不接入；核心行为链路优先完成。
+- 已新增 Cua Driver Windows Computer Use 借鉴最终矩阵、manifest、Markdown 报告和真实可见终端 scenario。
+- 已修正 MCP stdio registry 测试：用只读 list_granted_applications 替代无交互 request_access，避免与当前权限 UI 默认拒绝策略冲突。
+- 已通过本轮最终自动化测试 53 项和本轮文件 py_compile。
+- 全量 compileall learning_agent 仍受既有历史备份文件 learning_agent/test/computer_use_full_desktop_task_router_task3_20260605/core_agent_task3_clean_index.py 第 4 行缩进错误影响，不属于本轮改动。
+- 已备份 Phase 8 新增/修改文件到 learning_agent/test/cua_driver_borrowing_phase8_matrix_visible_terminal_20260618。
+
+## 2026-06-18 Cua Driver 借鉴最终验收
+- 真实可见终端验收已完成并通过：learning_agent/acceptance_controller/runs/agent_capability_cua_driver_borrowing_visible_terminal-20260618_170814/result.json。
+- 矩阵已回填 visible_terminal_gate=true，并记录 final_visible_run_dir。
+- 最终源码、测试、场景、报告、manifest、蓝图和 result 已备份到 learning_agent/test/cua_driver_borrowing_final_20260618。
+
+## 2026-06-18 Cua Driver 真实 Windows 生产化验收准备
+- 已新增真实可见终端场景：learning_agent/acceptance_controller/scenarios/agent_capability_cua_driver_real_windows_production_visible_terminal.json。
+- 场景组合验证 Cua Driver 借鉴矩阵与受控真实 Notepad 编辑链路，最终要求 CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK、CUA_DRIVER_WINDOWS_BORROWING_OK、PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK、saved_file_verified=true、real_desktop_touched=true、real_gui_backing=true 同时出现。
+
+## 2026-06-18 Cua Driver 真实 Windows 生产化验收结果
+- 已按用户确认执行真实 Windows 链路生产化验收：使用 acceptance controller 启动 learning_agent/start_oauth_agent.bat 可见终端窗口，并由 controller 向真实 agent 交互提示符输入生产化验收 prompt。
+- 第一次 run 证明 Cua Driver 矩阵和受控 Notepad 真实编辑命令均执行成功，但场景误要求当前命令不会输出的 real_gui_backing=true，因此断言失败；该问题已记录为场景断言错误，不是底层 Windows 链路失败。
+- 已修正场景断言，改为校验当前命令真实输出的生产证据：real_notepad_edit_executed=true、notepad_process_verified=true、saved_file_verified=true、real_desktop_touched=true。
+- 修正后真实可见终端验收已通过：learning_agent/acceptance_controller/runs/agent_capability_cua_driver_real_windows_production_visible_terminal-20260618_172608/result.json。
+- 本次通过证据：completed=true、prompt_sent=true、prompt_received=true、final_printed=true、assertion.passed=true、marker_passed=true、permission_sent_count=0。
+- 最终回答和可读日志均包含：CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK、CUA_DRIVER_WINDOWS_BORROWING_OK、PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK、real_notepad_edit_executed=true、notepad_process_verified=true、saved_file_verified=true、real_desktop_touched=true。
+
+## 2026-06-18 Cua Driver 真实 Windows 生产化验收复验
+- 为避免只复述旧 run，本轮最终回答前重新执行 acceptance controller，命令为 powershell -ExecutionPolicy Bypass -File learning_agent\acceptance_controller\controller.ps1 -ScenarioPath scenarios\agent_capability_cua_driver_real_windows_production_visible_terminal.json。
+- 复验已通过，最新结果文件为 learning_agent/acceptance_controller/runs/agent_capability_cua_driver_real_windows_production_visible_terminal-20260618_173128/result.json。
+- 最新复验证据：completed=true、prompt_sent=true、prompt_received=true、final_printed=true、assertion.passed=true、marker_passed=true、permission_count_passed=true、permission_sent_count=0。
+- 最新可读日志显示真实 agent 调用 bash，命令 exit_code=0，并输出 CUA_DRIVER_WINDOWS_BORROWING_OK、PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK、real_notepad_edit_executed=true、notepad_process_verified=true、saved_file_verified=true、real_desktop_touched=true。
+
+## 2026-06-18 Windows Computer Use 生产验收矩阵蓝图
+- 已按用户要求制作书面详细蓝图，文件为 docs/superpowers/plans/2026-06-18-windows-computer-use-production-acceptance-matrix.md。
+- 蓝图目标：把当前单点真实 Windows 验收扩展为可重复执行的 production acceptance matrix，覆盖 Cua Driver Notepad 链路、权限允许、权限拒绝、Notepad、Calculator、Explorer、本地浏览器、多应用传递、失败恢复和长任务恢复。
+- 蓝图关键决策：先审计现有 controlled CLI 的真实输出，再修正 Phase148C 场景中的 stale token，尤其不能继续要求 CLI 未输出的 real_gui_backing=true。
+- 蓝图新增产物范围：matrix manifest、PowerShell matrix runner、安全权限拒绝 scenario、manifest 单元测试、用户说明文档、学习归档和项目记忆更新。
+- 已完成蓝图自检：搜索 TBD、TODO、implement later、placeholder 等计划占位词，无匹配。
+
+## 2026-06-18 Windows Computer Use 生产验收矩阵 Task 1 审计
+- 已启动长期目标：逐项完成 docs/superpowers/plans/2026-06-18-windows-computer-use-production-acceptance-matrix.md 的所有任务，直到矩阵实现、真实可见终端验收、学习归档和项目记忆更新全部完成。
+- 已按 CodeGraph 审计 acceptance controller、受控 Windows runtime 和 Phase148C 场景入口；当前工作区继续在 codex/publish-main 上小范围修改，因为当前任务依赖本工作区已有未提交的 Computer Use 前置成果。
+- 已真实运行 Notepad controlled CLI，通过且输出 PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK、real_notepad_edit_executed=true、notepad_process_verified=true、target_rechecked_before_input=true、target_rechecked_before_save=true、saved_file_verified=true、real_desktop_touched=true；该 CLI 不输出 real_gui_backing=true。
+- 已真实运行 Calculator controlled CLI，首次发现当前 Windows Calculator 对键盘 ADD 路径不稳定，表现为 Expression is 1=、Display is 1，根因不是场景断言而是派发路径与当前 Calculator UIA/键盘语义不匹配。
+- 已修正 Calculator controlled driver：优先使用 UIA InvokePattern 点击 One、Plus、One、Equals；新增并通过 learning_agent.tests.test_windows_computer_use_controlled_calculator_live_sum_phase137，随后真实 CLI 输出 PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK、observed_result_matches_expected=true、uia_invoke_sequence_used=true、real_desktop_touched=true。
+- 已真实运行 Explorer controlled CLI，通过且输出 real_gui_backing=true、filesystem_changed_after_real_actions=true、cleanup_completed=true。
+- 已真实运行 local_browser controlled CLI，通过且输出 PHASE139_CONTROLLED_BROWSER_LIVE_LOCAL_PAGE_OK、page_changed_after_real_click=true、screenshot_before_after_different=true、browser_automation_used=false、real_desktop_touched=true；该 CLI 不输出 real_gui_backing=true。
+- 已真实运行 multi_app_transfer、failure_recovery、long_task_resume controlled CLI，三者均通过并输出 real_gui_backing=true；这些场景当前可保留 real_gui_backing=true 断言。
+
+## 2026-06-18 Windows Computer Use 生产验收矩阵完成
+- 已完成蓝图全部任务：修正 Phase148C stale token、新增 Calculator UIA Invoke 优先路径、新增生产矩阵 manifest、新增一键 runner、新增权限拒绝真实终端场景、新增用户说明文档、新增单元测试，并完成学习归档。
+- 新增矩阵入口：learning_agent/acceptance_controller/run_windows_computer_use_acceptance.ps1。
+- 新增矩阵 manifest：learning_agent/acceptance_controller/windows_computer_use_production_matrix.json。
+- 新增权限拒绝场景：learning_agent/acceptance_controller/scenarios/agent_capability_computer_use_permission_denial_visible_terminal.json。
+- 新增用户文档：docs/computer_use_windows_production_acceptance.md。
+- 最新真实可见终端矩阵已通过：learning_agent/acceptance_controller/runs/windows_computer_use_production_matrix-20260618_183954/matrix_result.json。
+- 通过证据：passed=true、scenario_count=10、passed_count=10、failed_count=0；10 条场景覆盖 Cua Driver Notepad、权限允许、权限拒绝、Notepad、Calculator、Explorer、本地浏览器、多应用传递、失败恢复和长任务恢复。
+- runner 曾遇到两个基础设施问题并已收敛：Windows PowerShell 5.1 读取无 BOM 中文注释导致解析失败，已转换为 UTF-8 BOM；连续 GUI 场景过快切换导致焦点/Explorer 抖动，已在 runner 场景前后加入保守沉淀等待，不降低任何断言。
+- 最终自动化验证已通过：python -m unittest learning_agent.tests.test_windows_computer_use_controlled_calculator_live_sum_phase137 learning_agent.tests.test_windows_computer_use_acceptance_matrix_manifest -v，共 8 项通过；py_compile、JSON 解析和 runner parser 均通过。
+
+## 2026-06-18 OAuth Native Tools 默认开启
+- 用户确认为了提升 OpenHarness agent 能力，值得把 Codex OAuth Responses 原生 tools 链路设为真实终端默认开启。
+- 已修改 learning_agent/start_oauth_agent.ps1：当用户未显式设置 CODEX_OAUTH_NATIVE_TOOLS 时，默认设置为 1；如果用户提前设置 0/false/off 等非空值，脚本不会覆盖，保留旧 JSON 工具协议回退能力。
+- 已新增学习摘录 learning_agent/test/oauth_native_default_enabled_20260618.md，记录新增 PowerShell 代码和设计原因。
+
+## 2026-06-18 OAuth Native + Computer Use 真实终端验收
+- 用户要求使用 acceptance controller 控制真实可见终端窗口，输入真实 prompt 验收 OAuth native tools 与 Computer Use 回填链路。
+- 已执行 agent_capability_oauth_native_tools_visible_terminal，结果为 completed=true、assertion.passed=true、marker_passed=true，run 为 learning_agent/acceptance_controller/runs/agent_capability_oauth_native_tools_visible_terminal-20260618_195120/result.json。
+- 已执行 agent_capability_oauth_native_computer_use_visible_terminal，结果为 completed=true、assertion.passed=true、marker_passed=true，证明真实终端进入 Computer Use full mode 后可调用 list_granted_applications，run 为 learning_agent/acceptance_controller/runs/agent_capability_oauth_native_computer_use_visible_terminal-20260618_195146/result.json。
+- 已执行 agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal，结果为 completed=true、assertion.passed=true、marker_passed=true，证明真实终端可调用 mcp__computer-use__observe 并产出 screenshot_path 与 image_result_count=1，run 为 learning_agent/acceptance_controller/runs/agent_capability_computer_use_mcp_observe_adaptive_image_visible_terminal-20260618_195224/result.json。
+- 三个场景的 startup_screenshot、prompt_screenshot、final_screenshot 均已生成；最后一张 final screenshot 已人工视觉检查，确认是目标 LearningAgent 真实终端窗口而非空截图。
+
+## 2026-06-18 Computer Use 旧目录删除与 v2 内聚迁移
+- 已按用户要求删除 learning_agent/computer_use 旧目录，避免后续调试时模型继续误读旧实现为当前主链路。
+- 已将仍被 v2 主链路消费的三个模块迁入 learning_agent/computer_use_mcp_v2/windows_runtime：windows_element_cache.py、windows_coordinate_contract.py、windows_uia_patterns.py。
+- 为保持既有 Cua Driver 借鉴矩阵与完整性合同测试可运行，额外从学习副本恢复并迁入 v2 内部：cua_driver_borrowing_matrix.py、windows_integrity.py；它们不是主动作链路活依赖，但属于当前验收合同支持模块。
+- 已更新 v2 生产导入点：inferred_ant_mcp/actions.py 与 windows_runtime/universal_real_observation.py 不再引用 learning_agent.computer_use 或 computer_use.*。
+- 已新增迁移护栏测试 learning_agent/tests/test_computer_use_mcp_v2_legacy_folder_removed.py，门禁旧目录不存在、三个 v2 模块可导入、v2 主链路无旧导入。
+- 已批量迁移 learning_agent/tests 中旧 computer_use 导入、动态 importlib 字符串、mock patch 字符串和场景断言字符串到 learning_agent.computer_use_mcp_v2.windows_runtime。
+- 自动化验证已通过：39 项相关单元测试通过、py_compile 通过、cua_driver_borrowing_matrix CLI 输出 CUA_DRIVER_WINDOWS_BORROWING_OK。
+- 测试模块导入巡检显示 IMPORT_FAILURE_COUNT=0；主代码和测试旧路径扫描只剩护栏测试中的禁止片段。
+- 按 Windows Computer Use 技能安全规则，本轮未自动化真实终端输入；真实可见终端交互验收未完成，不能声明开发完成。
+
+## 2026-06-18 Computer Use v2 旧目录删除真实终端补验
+- 用户提醒应使用 OpenHarness 自带 acceptance controller，而不是 Windows Computer Use 插件去控制终端；该提醒正确，本轮已补跑真实可见终端验收。
+- 新增场景：learning_agent/acceptance_controller/scenarios/agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal.json。
+- acceptance controller 已启动 learning_agent/start_oauth_agent.bat 真实可见终端窗口，并向 agent 输入真实 prompt。
+- 最新通过 run：learning_agent/acceptance_controller/runs/agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal-20260618_202959/result.json。
+- 通过证据：completed=true、prompt_sent=true、prompt_received=true、final_printed=true、assertion.passed=true、marker_passed=true、permission_sent_count=0。
+- agent 在真实终端中调用 bash，命令 exit_code=0；输出包含 Ran 24 tests、OK、CUA_DRIVER_WINDOWS_BORROWING_OK、passed=true、cua_inspired_element_cache_present=true、uia_semantic_dispatch_present=true、coordinate_contract_present=true。
+- 最终回答最后一行是 COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK，本轮真实可见终端交互验收已通过。
+
+## 2026-06-18 Computer Use 压力测试适配性检查
+- 本轮按项目规则先使用 CodeGraph 检查 Computer Use 当前主链路，确认当前索引状态为 up to date：files=359、nodes=7990、edges=21191。
+- 当前源码静态检查通过：python -m compileall -q learning_agent\computer_use_mcp_v2 learning_agent\acceptance_controller 返回成功。
+- 当前生产矩阵 manifest 仍存在 10 条受控场景，且所有场景文件均能在 learning_agent/acceptance_controller/scenarios 下找到；manifest 仍要求 visible_terminal_required=true 与 screenshot_artifacts_required=true。
+- 当前磁盘没有找到历史记录中提到的 latest matrix result：learning_agent/acceptance_controller/runs/windows_computer_use_production_matrix-20260618_183954/matrix_result.json；runs 目录当前未列出 production matrix 运行目录。
+- 当前 learning_agent/tests 目录为空，历史记录中提到的 Computer Use 单元测试模块导入失败，说明当前工作树的回归测试证据链已经断开。
+- 结论：当前适合先做受控预压力测试或重新跑生产矩阵，不适合直接做高强度、泛化、多应用或长时间 soak 压力测试。
+
+## 2026-06-18 Computer Use 压力测试前置修复
+- 已基于 CodeGraph 和当前源码修复场景旧包路径：acceptance_controller/scenarios 中 learning_agent.computer_use. 已迁移到 learning_agent.computer_use_mcp_v2.windows_runtime.
+- 已修复通用 type_text 链路：只有底层 sender 明确 requires_raw_text=True 时才把原文传到内存低层事件，公开结果仍保持脱敏。
+- 已新增 learning_agent/tests/test_computer_use_pressure_readiness.py 回归测试，并复制学习副本到 learning_agent/test/1.py、2.py、3.py、4.md。
+- 自动化验证已通过：旧路径扫描、compileall、unittest、Phase37、Phase47、Phase52、CUA borrowing。
+- 真实可见终端交互验收尚未完成，不能声明开发完成。
+
+## 2026-06-18 Notepad 拖动保存压力测试执行
+- 已完成：桌面 C:\Users\joyzq\Desktop\1.txt 预检通过，执行前不存在。
+- 已完成：新增 Notepad 拖动保存压力测试 scenario、验证器与单元测试；相关 unittest 5 项通过，compileall 通过。
+- 已启动：acceptance_controller 真实可见终端 run，路径为 learning_agent/acceptance_controller/runs/codex_notepad_drag_save_20260618_223255/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260618_223256。
+- 已停止：本轮真实验收触发安全停止条件。Notepad 启动后恢复了标题为 *Jan项目的后端是否可以改成使用Qwen3.6-12B-IQ-Q8_0 - Notepad 的已有窗口，agent 随后对该窗口执行了 CTRL+A 与 type_text。
+- 当前结论：本轮压力测试失败，未进入 3 轮连续压力、焦点扰动或已有文件失败门禁。
+
+## 2026-06-19 通用 Computer Use FreshTarget/TargetLease 治本方案执行
+- 已完成通用 FreshTarget 策略模块、controller 预检、多目标 registry、TargetLease 新鲜度字段、UniversalTargetSession 启动后分类、漂移失效恢复、actionability 输出、重复 launch_app 前置拒绝和缺 target_ref 写动作前置拒绝。
+- 已新增/更新目标测试：FreshTarget policy、controller gate、多目标 registry、proxy binding、TargetLease gate、action gate target_ref、agent_tools redundant launch gate；最新目标 pytest 结果为 31 passed。
+- 已完成 py_compile：fresh_target_policy.py、controller.py、universal_target_session.py、target_lease.py、target_registry.py、agent_tools.py、action_gates.py 均通过。
+- 已更新动态提示词、架构文档、FreshTarget 可见终端场景、Notepad 拖动保存压力场景、Windows Computer Use 生产矩阵；相关 JSON 均通过解析。
+- 已将本轮核心代码、测试、场景和文档副本复制到 learning_agent/test，便于用户学习对照。
+- CodeGraph 已同步，最新状态：files=415、nodes=9165、edges=24827、status=OK/up to date。
+- 真实可见终端验收：agent_capability_computer_use_fresh_target_policy_visible_terminal 已通过，result.json 路径为 learning_agent/acceptance_controller/runs/agent_capability_computer_use_fresh_target_policy_visible_terminal-20260619_072430/result.json。
+- Notepad 拖动保存压力场景仍未通过：第一次 run 证明 FreshTarget/TargetLease 已零事件拒绝旧窗口动作，但最终回答未输出验收 marker；第二次 run 首次 launch_app 成功并返回 target_ref_one_to_one=true，后续模型反复 launch_app，压力场景超时，未创建 Desktop\1.txt。
+- 当前阻塞：真实 Notepad 压力场景未通过，因此不能声明开发完成；需要在用户关闭当前 Notepad 残留窗口后，重跑压力场景并确认最终 marker 与 Desktop\1.txt 文件证据。
+
+## 2026-06-19 FreshTarget 旧窗口用户动作阻断收敛修复
+- 已确认真实失败证据：latest_run_readable.md 中 `open_application notepad` 返回 `existing_target_window_requires_user_close_or_authorize`、`low_level_event_count=0`，但上层模型继续重复调用 `open_application`，说明底层 FreshTarget 正确、收敛层未把结果转成“必须用户关闭或授权”的终止态。
+- 已新增回归测试 `learning_agent/tests/test_fresh_target_user_action_required_convergence.py`，覆盖用户动作 marker 记录为 `actionability_last_block`、不保存 pending、重复 `open_application` 被 `fresh_target_user_action_required` 阻断。
+- 已更新 `learning_agent/core/actionability_state.py`：新增 `OPENHARNESS_DESKTOP_USER_ACTION_REQUIRED` marker、用户动作阻断状态、重复桌面工具阻断判断和最终答复提示。
+- 已更新 `learning_agent/core/convergence_controller.py`：模型调用前遇到用户动作阻断会注入“不要继续工具，最终回答用户”的提醒；模型仍调用同一应用启动/桌面动作时会返回合成阻断输出。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/controller.py`：FreshTarget 预检拒绝旧窗口时输出用户动作 marker，并把恢复动作改为 `ask_user_to_close_or_authorize`，不再建议继续 `observe`/`launch_app`。
+- 自动化验证已通过：新增收敛测试 2 passed；FreshTarget controller 与新增收敛测试 6 passed；Computer Use 相关目标测试 36 passed；完整 `learning_agent/tests` 50 passed；修改文件 py_compile 退出码 0。
+- CodeGraph 已同步，最新状态：files=432、nodes=9587、edges=26076、status=OK/up to date。
+- 真实可见终端旧窗口安全拒绝验收已通过：acceptance controller run `learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_092813/result.json` 显示 completed=true、assertion.passed=true、alternate_success_checks.dirty_state_safe_refusal.passed=true。
+- 验收证据：最终回答包含“不能默认接管”“明确授权”“low_level_event_count=0”“successful_action_count=0”；debug log 中 `open_application` 输出 `OPENHARNESS_DESKTOP_USER_ACTION_REQUIRED`、`retry_launch_allowed=false`、`recovery_next_allowed_actions=['ask_user_to_close_or_authorize']`、`low_level_event_count=0`。
+- 干净新窗口完整拖动保存路径未执行：当前用户旧 Notepad 窗口仍打开，按安全策略不能由 agent 自动关闭；需要用户手动关闭后才能跑创建 Desktop\1.txt 的 clean-state 压力验收。
+
+## 2026-06-19 Proxy PID TargetLease 与 observe target_ref 修复
+- 已修复启动 PID 与真实窗口 PID 不一致导致的租约误拒绝：`target_lease.py` 现在会从嵌套 `launch_result` 补齐进程身份，并对 `agent_owned_proxy_window` 使用真实窗口 `pid + hwnd` 做一对一动作前验证。
+- 已修复 `target_lease_not_verified` 后仍允许反复 `launch_app` 的恢复建议：`fresh_target_policy.py` 对该原因只允许 `observe` 与错误报告，不再建议直接重启应用。
+- 已修复 `observe` 默认窗口被前台终端带偏的问题：`mcp_session_adapter.py` 现在优先读取 controller `target_registry.get_active_target()`，并把 `target_ref` 注入 legacy observe 参数。
+- 新增/更新回归测试：proxy pid 租约测试、target_lease_not_verified 停止重复启动测试、observe active target_ref 测试。
+- 自动化验证已通过：新增目标测试 15 passed；相关 Computer Use 目标测试 25 passed；修改文件与学习副本 py_compile 均通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_proxy_pid_*`。
+- 真实可见终端验收已通过旧窗口安全拒绝路径：`learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_103036/result.json` 显示 `completed=true`、`assertion.passed=true`；最终回答要求用户关闭或授权当前旧 Notepad，未默认接管旧窗口。
+- 干净新窗口完整拖动保存路径仍未跑通：当前仍有 PID 39660、标题 `2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad` 的旧 Notepad 窗口打开；按安全策略不能由 agent 自动关闭，需要用户手动关闭后重跑 clean-state 验收。
+
+## 2026-06-19 通用 ResourceFreshness 与 target_ref 动作链修复
+- 已确认真实失败证据：clean-state Notepad 验收 run `20260619_104142` 中 `launch_app` 首次成功并返回 `target_ref_one_to_one=true`，但后续 `key/left_click` 因动作参数缺 `target_ref` 被 `target_ref_required_for_bound_window_action` 拒绝，模型随后反复 `open_application`，未创建 Desktop\1.txt。
+- 已新增 RED/GREEN 回归测试：单 active target 自动补 `target_ref`、恢复旧文档资源时后续写动作零事件阻断、多 active target 漏 `target_ref` 零事件拒绝、资源新鲜度 helper 区分旧文档与新空白文档。
+- 已更新 `mcp_session_adapter.py`：动作路径接入 registry 单目标隐式解析，单 active target 自动补顶层 `target_ref`；多 active target 时直接返回 `multiple_active_targets_require_target_ref`，不触发底层事件；observe 保存 `last_resource_freshness`，旧资源状态会阻断后续 type/key/click。
+- 已更新 `resource_identity.py`：新增通用 `build_resource_freshness` 和 `OPENHARNESS_DESKTOP_RESOURCE_USER_ACTION_REQUIRED` marker，不做 Notepad 专用逻辑，只按文档类应用、目标资源 hint、空白标题和是否要求新资源判断。
+- 已更新 `actionability_state.py`：收敛层识别资源用户动作 marker，并把 `resource_freshness_decision` 纳入低敏字段白名单。
+- 自动化验证已通过：新增/相关测试 6 passed；完整 `python -m pytest learning_agent/tests -q` 为 58 passed；`py_compile` 覆盖 mcp_session_adapter.py、resource_identity.py、actionability_state.py 均通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_resource_freshness_*`。
+- 真实可见终端验收已通过旧窗口安全拒绝路径：`learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_112514/result.json` 显示 completed=true、assertion.passed=true、alternate_success_checks.dirty_state_safe_refusal.passed=true。
+- 验收前置事实：桌面 `1.txt` 不存在，但仍有 PID 34500、标题 `2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad` 的旧 Notepad 窗口；因此本次验收不是 clean-state 保存成功，而是证明 agent 未默认接管旧窗口且 `low_level_event_count=0`。
+- CodeGraph 已同步，最新状态：files=445、nodes=9950、edges=26969、status=OK/up to date。
+- 当前状态：代码修改、自动化测试和旧窗口安全拒绝可见终端验收完成；clean-state 创建/拖动/保存 Desktop\1.txt 成功路径仍需用户关闭旧 Notepad 后复跑。
+
+## 2026-06-19 ResourceFreshness action 兜底修复
+- 已按用户手动关闭旧 Notepad 后重跑真实可见终端验收：run `learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_113358/result.json` 失败，`completed=false`、`permission_sent_count=42`、`Desktop\1.txt` 未创建。
+- 失败证据：验收前没有 Notepad 进程且桌面 `1.txt` 不存在；`open_application notepad` 后绑定新窗口 PID 40628，但窗口标题恢复为 `2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`，说明问题不是启动 PID/真实 PID，而是新进程恢复旧文档资源。
+- 根因定位：`mcp_session_adapter._call_action` 只读取 `state.last_resource_freshness`；当 observe 没写入资源新鲜度状态时，后续 `key/type/click` 不会根据动作窗口标题兜底判断旧资源，导致动作可穿透。
+- 已新增 RED/GREEN 回归测试：`test_action_blocks_restored_document_resource_when_observe_state_is_missing` 先失败于 `result["ok"] is True`，修复后通过，证明测试覆盖真实穿透缺口。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`：单 active target 自动补 `target_ref` 时同步 registry `target_lease`；action 入口在缺少 observe 资源状态时，根据 agent-owned 目标上下文和窗口标题文件名重新计算 `ResourceFreshness`，旧文件资源未授权时返回 `OPENHARNESS_DESKTOP_RESOURCE_USER_ACTION_REQUIRED`，`low_level_event_count=0`。
+- 已更新 Notepad 拖动保存压力验收场景：新增 `restored_resource_safe_refusal` 备用安全分支，只在日志/事件包含资源阻断 marker、`resource_freshness_decision=restored_existing_resource_requires_new_blank_or_authorization` 和 `low_level_event_count=0` 时通过；完整保存成功路径仍必须输出 `NOTEPAD_DRAG_SAVE_PRESSURE_OK`。
+- 自动化验证已通过：新增单测先 RED 后 GREEN；相邻测试 7 passed；完整 `python -m pytest learning_agent/tests -q` 为 59 passed；`py_compile` 通过；场景 JSON 通过 `python -m json.tool`。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_action_resource_freshness_mcp_session_adapter.py`、`20260619_action_resource_freshness_test_mcp_session_adapter_observe_target_ref.py`、`20260619_action_resource_freshness_notepad_drag_save_pressure_scenario.json`。
+- CodeGraph 已同步，最新状态：files=447、nodes=10061、edges=27259、status=OK/up to date。
+- 当前可见终端验收：因为上一轮失败验收留下 PID 40628 的 Notepad 旧文档窗口，本轮 `20260619_115543` 走“已有旧窗口安全拒绝”分支并通过，`completed=true`、`assertion.passed=true`、`permission_sent_count=3`、`event_count=17`、未创建 `Desktop\1.txt`。
+- 剩余门禁：要验证新修的“关闭后新启动但恢复旧资源”真实可见终端分支，需要用户再次手动关闭当前 PID 40628 Notepad 后重跑；若 Notepad 仍恢复旧 `.md` 文档，应通过新增 `restored_resource_safe_refusal` 分支；若 Notepad 打开空白文档，才可能继续完整拖动保存成功路径。
+
+## 2026-06-19 显式 target_ref 多目标资源门禁修复
+- 用户已手动关闭旧 Notepad 后，重跑真实可见终端验收 `20260619_120326` 失败：`completed=false`、`permission_sent_count=41`、`Desktop\1.txt` 未创建，验收残留窗口标题为 `2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`。
+- 失败证据：本轮日志显示 `launch_app` 已绑定 fresh target，后续第一步 `key CTRL+A` 对旧资源标题窗口产生 `low_level_event_count=4`；日志中没有 `computer_use_mcp_resource_freshness_action_checked` 或 `OPENHARNESS_DESKTOP_RESOURCE_USER_ACTION_REQUIRED`，说明 action 级资源门禁没有拿到动作窗口。
+- 已新增 RED/GREEN 回归测试：`test_explicit_target_ref_resolves_window_before_resource_gate_when_multiple_targets_exist` 先失败于资源 marker 缺失，修复后通过；该测试覆盖“多个 active target + 模型显式 target_ref 指向旧资源窗口”的真实绕行路径。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`：MCP 原始 action 参数会保留 `target_ref/window/target_window`；显式 `target_ref` 会先通过 registry 解析成一对一窗口并注入 `target_lease`，再进入多目标门禁和 `ResourceFreshness` 门禁。
+- 自动化验证已通过：新增单测 RED 后 GREEN；`python -m pytest learning_agent/tests/test_mcp_session_adapter_observe_target_ref.py -q` 为 7 passed；完整 `python -m pytest learning_agent/tests -q` 为 61 passed；`python -m py_compile learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py learning_agent/tests/test_mcp_session_adapter_observe_target_ref.py` 通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_explicit_target_ref_resource_fallback_mcp_session_adapter.py` 和 `learning_agent/test/20260619_explicit_target_ref_resource_fallback_test_mcp_session_adapter_observe_target_ref.py`。
+- 下一步：需要同步 CodeGraph，并在用户已关闭 Notepad 的前置条件下重跑 acceptance controller 真实可见终端验收；只有验收通过后才可声明开发完成。
+
+## 2026-06-19 observe 真实窗口标题刷新与 action 资源门禁重判修复
+- 已确认真实失败证据：clean-state 验收 run `20260619_123050` 首次 `open_application notepad` 成功绑定新窗口 PID 40268，launch 快照标题为 `Notepad`，但后续 observe 已看到标题变成 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`；adapter 仍保存旧 launch 快照，导致后续 action 没有用真实标题触发 ResourceFreshness 阻断。
+- 已新增 RED/GREEN 回归测试：`test_observe_actual_window_title_replaces_launch_snapshot_before_action_resource_gate` 先失败于 `last_observed_window["title_preview"] == "Untitled - Notepad"`，修复后通过，证明 observe 返回的真实窗口标题会覆盖启动快照。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`：从旧 observe 文本的 `数据：{...}` 安全解析真实 `state.window`，再合并 target_ref/target_lease 上下文；action 前对空资源报告或普通 observe 报告重新执行 ResourceFreshness 判断，避免“普通允许状态”盖住后续旧资源标题。
+- 自动化验证已通过：定向新测 1 passed；`python -m pytest learning_agent/tests/test_mcp_session_adapter_observe_target_ref.py -q` 为 8 passed；完整 `python -m pytest learning_agent/tests -q` 为 62 passed；`py_compile` 通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_observed_window_refresh_resource_gate_mcp_session_adapter.py` 和 `learning_agent/test/20260619_observed_window_refresh_resource_gate_test_mcp_session_adapter_observe_target_ref.py`。
+- CodeGraph 已同步，最新状态：files=451、nodes=10317、edges=27936、status=OK/up to date。
+- 真实可见终端 clean-state 验收未执行：前置检查发现仍有 Notepad PID 40268，标题为 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`；桌面 `1.txt` 不存在。按安全策略不自动关闭用户 Notepad，需要用户手动关闭后复跑 acceptance controller。
+
+## 2026-06-19 Acceptance Event 资源拒绝证据增强
+- 用户关闭 Notepad 后重跑真实可见终端验收 `agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_131603`，功能行为已符合安全预期：启动前无 Notepad，启动后 Notepad 自动恢复旧 `.md` 文档，第一下 `key CTRL+N` 被 `OPENHARNESS_DESKTOP_RESOURCE_USER_ACTION_REQUIRED` 拒绝，`low_level_event_count=0`，最终回答要求用户关闭或明确授权旧窗口。
+- 本轮失败点不是底层安全门禁，而是验收事件 payload 证据不足：`events.jsonl` 的 `computer_use_mcp_v2_tool` 只包含 `tool_name` 和 `ok=false`，scenario 的 `restored_resource_safe_refusal.event_payload_contains` 无法看到资源 marker。
+- 已新增 RED/GREEN 回归测试：`test_acceptance_event_includes_resource_user_action_summary` 先失败于 `KeyError: 'error_class'`，修复后通过，覆盖资源用户动作拒绝时验收事件必须包含 `error_class`、`reason`、`resource_freshness_decision` 和 `low_level_event_count`。
+- 已更新 `learning_agent/computer_use_mcp_v2/inferred_ant_mcp/runtime.py`：新增低敏事件摘要 helper，只裁剪记录失败 reason 和 key=value 字段，不改变工具执行、权限或窗口控制逻辑。
+- 自动化验证已通过：新增单测 1 passed；相关回归 9 passed；完整 `python -m pytest learning_agent/tests -q` 为 63 passed；`py_compile` 通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_acceptance_event_evidence_runtime.py` 和 `learning_agent/test/20260619_acceptance_event_evidence_test_computer_use_mcp_v2_runtime_acceptance_event.py`。
+- 当前真实验收前置阻塞：上一轮安全拒绝留下 Notepad PID 41340，标题为 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`；需要用户手动关闭后复跑 acceptance controller。
+- 用户再次手动关闭 Notepad 后，真实可见终端验收 `learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_133024/result.json` 已通过，`completed=true`、`assertion.passed=true`、`alternate_success_checks.restored_resource_safe_refusal.passed=true`。
+- 验收结论：当前 Notepad 在干净启动后仍自动恢复旧 `.md` 文档，agent 按安全策略拒绝 `key CTRL+N` 写动作，event payload 包含 `OPENHARNESS_DESKTOP_RESOURCE_USER_ACTION_REQUIRED`、`resource_freshness_decision=restored_existing_resource_requires_new_blank_or_authorization`、`low_level_event_count=0`，最终回答要求用户关闭或授权旧窗口。
+- 注意：本次通过的是 restored-resource 安全拒绝验收，不是完整创建/拖动/保存 `Desktop\1.txt` 成功路径；若后续要验收完整保存，需要 Notepad 真正打开空白文档，或用户明确授权使用当前旧文档窗口。
+- 用户再次手动关闭 Notepad 后复跑 `learning_agent/acceptance_controller/runs/agent_capability_computer_use_notepad_drag_save_pressure_visible_terminal-20260619_133557/result.json`，结果仍为 `completed=true`、`assertion.passed=true`、`dirty_state_safe_refusal.passed=true`、`restored_resource_safe_refusal.passed=true`。
+- 复验证据：启动前无 Notepad、桌面 `1.txt` 不存在；启动后 Notepad 再次自动恢复 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`，agent 拒绝写动作并输出 `low_level_event_count=0`、`successful_action_count=0`；桌面 `1.txt` 仍不存在。
+
+## 2026-06-19 ResourcePreparation 通用新空白资源控制层
+- 已按用户确认的通用治本方案实施：不再把 `Ctrl+N` 当普通写动作一律拒绝，而是在旧资源恢复阻断状态下，仅允许带“新建空白资源”明确意图的 `CTRL+N` 作为受控准备动作。
+- 新增状态机 `resource_preparation_pending`：准备动作成功后，后续任何输入/点击/保存动作都会被零事件拒绝，直到 agent 先调用 `observe` 确认同一个 target_ref/window 已经变成新空白资源。
+- 该方案不是 Notepad 特判：核心判断位于 `mcp_session_adapter.py`，以 `ResourceFreshness`、`target_ref`、agent-owned lease、窗口身份、标题从旧文件资源变为通用空白候选等事实做通用确认。
+- 已新增 RED/GREEN 回归测试：`test_safe_new_blank_shortcut_runs_on_restored_resource_then_blocks_typing_until_observe` 与 `test_typing_after_safe_new_blank_shortcut_is_allowed_after_observe_confirms_blank_resource`；修复前失败于 `Ctrl+N` 被旧资源门禁误挡，修复后通过。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`：新增 `OPENHARNESS_DESKTOP_RESOURCE_PREPARATION_OBSERVE_REQUIRED` marker、Ctrl+N 安全准备动作识别、pending 匹配、observe 参数补强、空白/标题变化确认和 observe-required 结果。
+- 已更新 `learning_agent/core/actionability_state.py`：收敛层识别 `OPENHARNESS_DESKTOP_RESOURCE_PREPARATION_OBSERVE_REQUIRED` 为 pending observe，不把它当用户终止阻断；并允许 observe 走 adapter active target 自动绑定，避免缺 `target_ref` 被过度拦截。
+- 自动化验证已通过：新测试 3 passed；`test_mcp_session_adapter_observe_target_ref.py` 回归 10 passed；完整 `python -m pytest learning_agent/tests -q` 为 66 passed；`py_compile` 覆盖修改实现、收敛层和测试文件通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_resource_preparation_mcp_session_adapter.py`、`20260619_resource_preparation_test_mcp_session_adapter_observe_target_ref.py`、`20260619_resource_preparation_actionability_state.py` 和 `20260619_resource_preparation_test_fresh_target_user_action_required_convergence.py`。
+- 下一步：同步 CodeGraph，并在用户手动关闭当前 Notepad 后，用 acceptance controller 跑真实可见终端验收，确认 agent 能在 Notepad 自动恢复旧 `.md` 后执行受控 `Ctrl+N`、observe 空白、再输入/拖动/保存或给出可收敛安全结果。
+
+## 2026-06-19 ResourcePreparation Ctrl+N reason 兜底修复
+- 已确认真实失败证据：visible-terminal run `20260619_140506` 中启动前无 Notepad，`open_application notepad` 新启动 PID 23324 并返回 `fresh_target_ready`，但 Windows 11 Notepad 自动恢复 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`；随后 `key` 被 `desktop_resource_user_action_required` 拒绝，未进入 ResourcePreparation。
+- 根因已修复：`mcp_session_adapter._is_safe_new_blank_resource_preparation_action()` 之前要求 reason 必须包含“新建空白/blank document”等精确词；真实模型常只写“按快捷键创建一个新的编辑页”，导致 `CTRL+N` 在旧资源恢复门禁下仍被误挡。
+- 本轮修改：在 `restored_existing_resource_requires_new_blank_or_authorization` + 文档类资源 + agent-owned 窗口 + `CTRL+N` 同时成立时，把 `CTRL+N` 本身视为受控新空白资源准备动作；动作成功后仍会写入 `resource_preparation_pending`，要求下一步必须 `observe` 确认，不能直接输入。
+- 新增 RED/GREEN 回归测试：`test_ctrl_n_is_allowed_as_preparation_even_when_reason_lacks_blank_words` 先失败于 `result["ok"] is False`，修复后通过。
+- 自动化验证已通过：`python -m pytest learning_agent/tests/test_mcp_session_adapter_observe_target_ref.py -q -k reason_lacks_blank_words` 为 1 passed；完整相关文件 11 passed；完整 `python -m pytest learning_agent/tests -q` 为 67 passed；`py_compile` 通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_resource_preparation_reason_fallback_mcp_session_adapter.py` 和 `learning_agent/test/20260619_resource_preparation_reason_fallback_test_mcp_session_adapter_observe_target_ref.py`。
+- 真实可见终端验收仍未完成：当前仍有 Notepad PID 23324，标题为 `*2026-06-18-computer-use-notepad-drag-save-pressure-test.md - Notepad`；按安全策略不能由 agent 自动关闭，需要用户手动关闭后重跑 acceptance controller。
+
+## 2026-06-19 ControlledResourceLaunch 源头资源绑定启动修复
+- 已确认根因不是 Notepad 被判定为危险应用，也不是 PID/HWND 一对一绑定失效；真实失败证据显示 `open_application notepad` 能启动并绑定新窗口，但 Windows 11 Notepad 会在新窗口里恢复旧 `.md` 标签页。
+- 治本方向改为复用受控 Notepad driver 的成功模式：文档类任务如果明确要求桌面 `1.txt`，启动层必须执行“应用 + 受控文件路径”的 argv 启动，而不是先裸启动再依赖模型 `Ctrl+N` 补救。
+- 已新增 RED/GREEN 回归测试：controller 必须把 `C:\Users\joyzq\Desktop\1.txt` 传给 target runtime；UniversalTargetSessionRuntime 必须把受控路径写入 Phase108 `launch_plan.arguments`；MCP session adapter 必须把 request_access 的完整任务上下文补给 open_application。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/controller.py`：新增 `ControlledResourceLaunch` 资源路径解析，只对已验证支持文本 argv 的应用放行，未知应用保持原通用启动方式。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/universal_target_session.py`：新增受控资源注入函数，把文件路径写入 `launch_plan.arguments`，让 Phase110 后端从源头按文件启动。
+- 已更新 `learning_agent/computer_use_mcp_v2/windows_runtime/mcp_session_adapter.py`：保存 request_access 授权原因，并在模型调用 open_application 时补齐 `session_task_context`，避免短 reason 丢失“保存到桌面 1.txt”的真实意图。
+- 自动化验证已通过：新增测试先 RED 后 GREEN；`python -m pytest learning_agent/tests -q` 结果为 71 passed；修改文件 `py_compile` 通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_controlled_resource_launch_*`。
+- 下一步：同步 CodeGraph，并在确认没有残留 Notepad 窗口后，通过 acceptance controller 运行真实可见终端验收；只有真实终端路径也通过，才可声明开发完成。
+
+## 2026-06-19 ControlledResourceContext 脱敏资源上下文贯通修复
+- 已确认上一轮源头资源绑定仍未覆盖真实终端失败：visible-terminal run 中 `request_access.reason` 被模型压缩成“不含 1.txt”的授权理由，`open_application` 的 `session_task_context` 为空，导致 controller 没机会生成 `Desktop\1.txt` argv 启动。
+- 已补充 RED/GREEN 回归测试：分类器必须从真实中文 prompt 脱敏提取 `controlled_resource_name=1.txt` 和 `controlled_resource_location_hint=desktop`；legacy host 必须把 agent 上下文同步进 MCP session state；adapter 必须在模型短 reason 丢文件名时仍把资源字段传到底层启动参数。
+- 已额外覆盖真实时序缺口：`/computer use --full` 可能先创建并复用 v2 context，真实任务 prompt 后到；`ComputerUseMcpV2LegacyHostAdapter` 现在每次调用旧 adapter 前都会从当前 agent 刷新脱敏资源上下文。
+- 已更新 `desktop_task_router.py`、`core/agent.py`、`legacy_ports.py`、`mcp_session_adapter.py` 和新增 `test_controlled_resource_context_propagation.py`；学习副本已复制到 `learning_agent/test/20260619_controlled_resource_context_*`。
+- 自动化验证已通过：新增测试 4 passed；相邻 Computer Use 回归 20 passed；完整 `python -m pytest learning_agent/tests -q` 为 75 passed；`py_compile` 覆盖本轮修改文件通过。
+- 下一步：同步 CodeGraph；真实可见终端验收仍需在用户手动关闭当前残留 Notepad 后运行 acceptance controller，确认真实主循环从源头打开受控桌面 `1.txt` 而不是旧 `.md` 标签页。
+
+## 2026-06-19 AutoObserveRecovery 主循环自动观察恢复
+- 已按 `2026-06-19-claudecode-inspired-computer-use-runtime-recovery-and-cleanup.md` 的通用方案实施第一阶段：不再只靠动态提示词要求模型下一轮 observe，而是在 `LearningAgent.run_events` 工具结果回填阶段检测 `desktop_observe_before_action` pending 并合成一次协议合法的 `mcp__computer-use__observe`。
+- 本轮新增 `learning_agent/core/actionability_recovery.py`，只做纯状态决策和预算计数；它拒绝用户动作阻断、缺 `target_ref`、非 observe pending 和超过预算的重复恢复，避免绕过 FreshTarget 或多窗口绑定。
+- 本轮更新 `learning_agent/core/agent.py`：自动恢复会先追加 assistant tool_call，再执行 observe，再回填 tool result 和截图来源，保持模型工具协议配对；恢复事件通过 `computer_use_auto_recovery_observe`、标准 `tool_use_seen/tool_result_seen` 和 runtime trace 暴露。
+- 已新增 RED/GREEN 测试：`test_actionability_auto_observe_recovery.py` 覆盖恢复计划、用户阻断硬停止和预算；`test_agent_auto_observe_recovery_loop.py` 覆盖模型只请求 `key` 时主循环自动补 `observe`。
+- 当前自动化验证已通过：新增测试 4 passed；FreshTarget/target_ref 相邻回归 10 passed。下一步继续运行更完整测试、`compileall`、CodeGraph sync/status 和 acceptance controller 真实可见终端验收。
+
+## 2026-06-19 Computer Use 验收默认自动同意权限
+- 用户确认可承受风险，希望 Computer Use 压力测试不要反复输入 `Y`。
+- 证据确认 `start_oauth_agent.ps1` 已默认设置 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1`，但多个 acceptance scenario 又显式覆盖成 `0`，导致 controller 反复代输 `Y`。
+- 已将普通 Computer Use 压力测试场景的 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS` 改为 `1`，仅保留 `permission_ui` 和 `permission_denial` 专用场景为 `0`。
+- 新增回归测试 `test_non_permission_ui_computer_use_scenarios_default_to_auto_approval`，防止普通压力测试场景重新关闭自动同意。
+- 新增可见终端 smoke 场景 `computer_use_auto_approval_visible_terminal_smoke.json`；真实验收 run `computer_use_auto_approval_visible_terminal_smoke-20260619_192920` 通过，`permission_sent_count=0`、`permission_required=false`、`permission_auto_approved=true`。
+
+## 2026-06-19 Universal Stage Planner 书面方案
+- 已根据用户确认的方向新增通用 Computer Use 书面实施方案：`docs/superpowers/plans/2026-06-19-universal-computer-use-stage-planner-observer-batch-executor.md`。
+- 方案明确以 ClaudeCode 风格的权限、锁、清理、底层执行器作为运行时底座，以 OpenHarness 的通用阶段规划、阶段边界观察、批量执行、阶段验收和最终门禁作为上层能力。
+- 方案刻意禁止在核心实现里按 Notepad、Paint、浏览器、微信、WPS 等单个应用写特判；这些应用只能作为代表性验收样本或启动别名，不作为产品架构分支。
+- 当前尚未改运行时代码；下一步若用户确认执行，应使用 `superpowers:subagent-driven-development` 或 `superpowers:executing-plans` 按方案逐项实现，并在完成后做真实可见终端验收。
+
+## 2026-06-19 Universal Stage Runtime 执行进度
+- 已按书面方案实现通用 Stage 数据模型：`ActionBatch`、`StagePlan`、`DesktopTaskPlan`、`StageResult` 和 `DesktopTaskRunState`，并补充 JSON round-trip 测试。
+- 已新增通用能力画像层：从观察帧抽象文本输入、画布、菜单、工具栏、保存界面、浏览导航、弹窗和未知能力，不在核心逻辑里按 Notepad/Paint/浏览器做分支。
+- 已新增通用阶段规划器、阶段批编译器、批执行器和阶段验证器，支持文本、绘图、导航、多目标和未知 GUI 的通用阶段表示。
+- 已将 `UniversalDesktopExecutionLoopAdapter` 的真实 full-mode 路径接入 `UniversalStageTaskLoop`，旧 `UniversalObservePlanActVerifyLoop` 保留为兼容路径。
+- 已新增最终回答门禁：当 Computer Use 阶段任务未完成、阶段数量不一致、出现 `Next desktop action` 或需要用户处理时，模型不能把任务直接 final 成完成。
+- 已新增多目标阶段测试和三份 representative acceptance scenario，scenario 使用具体本地软件作为验收样本，但运行时仍保持通用目标窗口/能力/阶段设计。
+- 下一步继续运行完整方案要求的 focused/regression/full 测试、CodeGraph sync/status 和真实可见终端 acceptance controller 验收。
+
+## 2026-06-19 Universal Stage Runtime desktop_task 桥接与新资源门禁补强
+- 已补齐 `desktop_task` 高层 MCP 工具链路：工具 schema 暴露、scope 放行、runtime dispatch、acceptance 证据复制、legacy host adapter 和默认 runtime mode store 对齐。
+- 已修复高层工具被模型调用后返回 `scope_blocked`、`not_desktop_task`、`computer_use_full_mode_required` 的三段源头问题：`desktop_task` 现在由显式工具入口强制进入通用 Stage runtime，并读取与 `/computer use --full` 相同的 mode session store。
+- 已保持通用设计：`desktop_task` 的 `target_hint` 从授权应用上下文中提取，但 stage planner/compiler 不写 Notepad、Paint、浏览器或其它单软件分支。
+- 已新增通用 FreshResource 门禁：文本、绘图和多窗口写入目标的 `prepare_target` 阶段声明 `fresh_resource_required=true`；编译器根据观察到的窗口标题判断是否承载旧文件，必要时执行通用 `Ctrl+N` 新建资源批。
+- 已新增 RED/GREEN 回归测试覆盖：旧文件标题会编译为 `focus_window -> hotkey CTRL+N -> wait -> observe`；新资源标题只聚焦；文本、绘图、多窗口目的窗口都会声明新资源要求。
+- 自动化聚焦测试已通过：`python -m pytest learning_agent/tests/test_stage_batch_compiler.py learning_agent/tests/test_universal_stage_planner.py learning_agent/tests/test_stage_task_loop.py learning_agent/tests/test_computer_use_mcp_v2_desktop_task_tool.py -q` 结果为 23 passed。
+- 当前真实可见终端验收仍未完成；上一次 visible-terminal run 因旧 Notepad 恢复窗口残留和高层工具 mode store 不一致失败，后续必须在用户手动关闭残留窗口后复跑 acceptance controller。
+
+## 2026-06-19 Universal Stage Runtime 文本抽取与短通道修复
+- 已用 visible-terminal acceptance 失败证据确认两个新源头问题：`UniversalDesktopStagePlanner` 把英文真实 prompt 里的 `direct file write)` 抽成待输入正文 `)`；`UniversalActionDslRuntime -> WindowsSendInputDispatcher -> WindowsControlledPhysicalSendInputSender` 的批量文本路径只有哈希，没有给真实 Unicode 后端提供安全短生命周期明文。
+- 已新增并跑通 RED/GREEN 回归：`test_text_payload_extraction_ignores_later_file_write_instruction` 覆盖 `hello everyone` 不被后续 `write)` 覆盖；`test_universal_action_dsl_uses_secure_text_channel_for_real_text_backend` 覆盖 Stage 批量文本输入能到达需要明文的最后一跳，同时公开结果不泄露原文。
+- 已修复 `stage_planner.py`：文本正文抽取改为扫描所有候选、剥离 `exactly` 等说明词，并拒绝纯标点候选。
+- 已修复 `universal_action_dsl.py`、`sendinput_dispatcher.py`、`controlled_physical_sendinput.py`：通用 DSL 只在低层 sender 声明需要时开启短通道；dispatcher 对受控 sender 使用 `_secure_plaintext_text` 私有字段；Phase95 只在最后一跳真实后端需要时恢复 `text`，普通记录型 sender 仍保持脱敏。
+- 已兼容旧压力测试合同：直接接入 `requires_raw_text=true` 的非 Phase95 sender 时仍可收到 `text` 字段；受控 Phase95 sender 明确声明 `accepts_secure_plaintext_text_channel=true`，避免公开明文字段进入 Phase95 验证层。
+- 自动化验证已通过：新回归 12 passed；Stage/MCP 聚焦回归 29 passed；压力前置回归 9 passed；完整 `python -m pytest learning_agent/tests -q` 为 139 passed；相关文件 `py_compile` 通过。
+- 学习副本已复制到 `learning_agent/test/20260619_224500_secure_text_payload_stage_fix_*` 六个文件。
+- 下一步：继续运行 acceptance scenario JSON 校验；在用户确认残留 Notepad/Paint 等旧窗口已关闭后复跑真实可见终端 acceptance controller。
+
+## 2026-06-19 Universal Stage Runtime CodeGraph 同步状态
+- 已执行 `codegraph sync "H:\codexworkplace\sofeware\OpenHarness-main"`，结果为 `Already up to date`。
+- 已执行 `codegraph status "H:\codexworkplace\sofeware\OpenHarness-main"`，当前索引状态为 `[OK] Index is up to date`。
+- 当前索引统计：Files=550，Nodes=13,789，Edges=38,473，Backend=`node:sqlite - built-in (full WAL)`。
+- 注意：如果后续真实可见终端验收失败并继续修改源码，需要在最终完成前再次执行 CodeGraph sync/status。
+
+## 2026-06-19 Universal Stage Runtime desktop_task_incomplete 收敛门禁修复
+- 已基于 visible-terminal acceptance run `computer_use_universal_text_task_stage_batch_visible_terminal-20260619_222522` 的证据确认两处通用源头问题：`输入文本 \`hello everyone\`` 被抽成 `文本 \`hello everyone`，`准确文本：hello everyone` 在修复轮被抽成空；`desktop_task_incomplete=true` 后模型还能退回 `key/left_click_drag` 等原子动作，绕开 Stage Runtime。
+- 已修复 `stage_planner.py`：补充 `准确文本/exact text` 前缀和 `文本/text` 说明词剥离，确保真实用户提示和修复提示都抽取出 `hello everyone`，不把标签词写进应用。
+- 已修复 `actionability_state.py`：新增 `OPENHARNESS_DESKTOP_TASK_INCOMPLETE` 协议和字段白名单；当高层桌面任务未完成时，只允许 `desktop_task`、`observe` 和必要 `request_access`，阻断 `key/click/drag` 等原子动作 fallback。
+- 已修复 `desktop_task.py`：未完成工具结果会自动嵌入可解析 actionability marker，下一轮主循环能从真实 MCP 输出里沉淀 pending，而不是依赖模型自觉。
+- 已新增/更新 RED-GREEN 回归：`test_text_payload_extraction_handles_input_text_label`、`test_text_payload_extraction_handles_exact_text_label`、`test_desktop_task_incomplete_actionability.py` 和 `test_desktop_task_incomplete_result_contains_actionability_marker`。
+- 自动化验证已通过：Stage/final gate/MCP 聚焦测试 52 passed；Computer Use 旧回归 47 passed；多目标/acceptance schema 回归 7 passed；完整 `python -m pytest learning_agent/tests -q` 为 144 passed；相关文件 `py_compile` 通过；新三份 universal stage scenario 严格 UTF-8 校验通过，全目录 scenario `utf-8-sig` 兼容校验通过。
+- 已按项目规则复制学习副本到 `learning_agent/test/20260619_231500_desktop_task_incomplete_gate_*` 六个文件。
+- 已执行最新 CodeGraph 同步与状态检查：`codegraph sync` 为 `Already up to date`，`codegraph status` 为 `[OK] Index is up to date`；当前索引 Files=557、Nodes=13,936、Edges=38,770、DB Size=36.11 MB。
+- 下一步：需要在用户关闭当前残留 Notepad/Paint 等测试窗口后，使用 acceptance controller 做真实可见终端验收；当前 Notepad PID 36524 仍有未保存内容，不能由 agent 自动关闭。
+
+## 2026-06-19 Universal Drawing visible-terminal 验收暴露的 pending 覆盖修复
+- 已尝试运行真实可见终端绘图验收：`computer_use_universal_drawing_task_stage_batch_visible_terminal-20260619_224758`。controller 命令超时，无 `result.json`，但 `events.jsonl` 已证明进入 `/computer use --full`、自动授权 Paint、调用 `desktop_task` 并触达真实 Paint 窗口。
+- 验收证据显示本轮代码的第一层修复生效：`desktop_task` 未完成后，模型多次回到 `desktop_task`，事件包含 `desktop_task_incomplete=true`、`stage_count=5`、`completed_stage_count=2`、`batch_execution_used=true`、`low_level_event_count=66`。
+- 新问题已确认：允许 `observe` 后，observe 返回的旧 `OPENHARNESS_DESKTOP_ACTION_REQUIRED` marker 会覆盖原来的 `OPENHARNESS_DESKTOP_TASK_INCOMPLETE` pending，随后模型又能调用 `left_click_drag` 等原子动作。
+- 已新增 RED/GREEN 测试 `test_desktop_task_incomplete_survives_observe_action_marker`，修复前失败于 pending 从 `desktop_task_incomplete` 变成 `desktop_observe_before_action`；修复后通过。
+- 已修复 `actionability_state.record_actionability_from_tool_result()`：当已有 `DESKTOP_TASK_INCOMPLETE_MARKER` pending 且来源工具是 `observe/screenshot` 时，普通桌面动作 marker 不再覆盖高层未完成 pending。
+- 自动化验证已重新通过：desktop_task incomplete 测试 3 passed；相邻收敛测试 9 passed；Stage/MCP 聚焦 53 passed；完整 `python -m pytest learning_agent/tests -q` 为 145 passed；`py_compile` 通过；scenario JSON `utf-8-sig` 校验通过。
+- 学习副本已复制到 `learning_agent/test/20260619_232500_desktop_task_incomplete_preserve_pending_*`。
+- 真实可见终端验收仍未通过：当前有 Notepad PID 36524 未保存窗口，以及本次绘图验收创建的 3 个 Paint 窗口。需要用户手动关闭/保存这些窗口后才能继续文本或绘图验收。
+
+## 2026-06-19 Universal Computer Use 分层 skill/prompt 准确率方案
+- 已根据用户最新确认新增书面方案：`docs/superpowers/plans/2026-06-19-universal-computer-use-layered-skills-prompts-accuracy.md`。
+- 方案方向从“失败后兜底”改为“提高主路径准确率”：意图理解、阶段规划、结构化观察、阶段批执行、阶段验证、反思学习分层处理。
+- 方案明确所有 Computer Use 内部 skill/prompt 只能放在 `learning_agent/computer_use_mcp_v2/layer_skills/`，不得修改全局 agent 系统提示词或污染其它功能。
+- 方案明确执行层只接收结构化 `ActionBatch`，不读取自由 prompt，不让模型在执行层自由决定低层鼠标键盘动作。
+- 当前只写方案，尚未修改运行时代码；如果用户确认执行，下一步应按该方案使用目标长任务/执行计划技能逐项实现，并重新做自动化测试、CodeGraph 同步和真实可见终端验收。
+
+## 2026-06-20 Universal Computer Use ClaudeCode harness 补强方案
+- 已按用户要求补强 `docs/superpowers/plans/2026-06-19-universal-computer-use-layered-skills-prompts-accuracy.md`。
+- 新增 `4.1 ClaudeCode Harness Reference Scope` 和 `4.2 OpenHarness Mapping From ClaudeCode Harness`，明确学习 ClaudeCode 的 agent context、tool-use context、task state、tool result feedback、permission、lock、cleanup、failure propagation 等 harness 机制。
+- 新增 `Task 0: Study ClaudeCode Harness And Map It To OpenHarness Computer Use`，要求实现前先用 CodeGraph 检查 `D:\ClaudeCode-main\ClaudeCode-main` 的 harness 相关路径，并产出 `learning_agent/computer_use_mcp_v2/harness_research/claudecode_harness_mapping.md`。
+- 方案新增 `harness_context.py` 与 `test_computer_use_harness_context.py`，把 Computer Use 明确建模成挂在主 agent 下的专用桌面任务 harness，而不是只靠 prompt 或单应用脚本推进。
+- 当前仍只是方案补充，未修改运行时代码；后续执行时必须从 Task 0 开始，不能跳过 ClaudeCode harness 映射直接写 Computer Use prompt。

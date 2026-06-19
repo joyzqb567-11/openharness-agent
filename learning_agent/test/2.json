@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "matrix_id": "windows_computer_use_production_matrix",
+  "matrix_name": "Windows Computer Use Production Acceptance Matrix",
+  "created_at": "2026-06-18",
+  "runner": "learning_agent/acceptance_controller/run_windows_computer_use_acceptance.ps1",
+  "controller": "learning_agent/acceptance_controller/controller.ps1",
+  "visible_terminal_required": true,
+  "screenshot_artifacts_required": true,
+  "forbidden_targets": [
+    "login_pages",
+    "payment_pages",
+    "password_managers",
+    "private_user_documents",
+    "registry_tools",
+    "installers",
+    "system_settings",
+    "administrator_prompts",
+    "uac_dialogs"
+  ],
+  "success_requirements": {
+    "completed": true,
+    "assertion_passed": true,
+    "marker_passed": true,
+    "startup_prompt_final_screenshots": true,
+    "no_dangerous_permission_skip": true
+  },
+  "scenarios": [
+    {
+      "id": "universal_target_lease",
+      "family": "computer_use_full_safety",
+      "scenario_path": "scenarios/agent_capability_computer_use_universal_target_lease_visible_terminal.json",
+      "risk_level": "controlled_safety_matrix",
+      "purpose": "Verify full-mode generic TargetLease safety gates before real write actions without adding a Notepad-specific core path.",
+      "required_tokens": [
+        "UNIVERSAL_COMPUTER_USE_TARGET_LEASE_READY",
+        "target_lease_required=true",
+        "target_ref_backed_by_lease=true",
+        "target_drift_zero_events=true",
+        "notepad_is_regression_sample=true",
+        "notepad_specific_core=false",
+        "uncontrolled_actions_expanded=false"
+      ]
+    },
+    {
+      "id": "cua_driver_notepad_production",
+      "family": "cua_driver_notepad_production",
+      "scenario_path": "scenarios/agent_capability_cua_driver_real_windows_production_visible_terminal.json",
+      "risk_level": "controlled_real_windows",
+      "purpose": "Verify Cua-inspired Windows runtime evidence plus controlled Notepad save evidence through the real visible terminal.",
+      "required_tokens": [
+        "CUA_DRIVER_WINDOWS_PRODUCTION_ACCEPTANCE_OK",
+        "CUA_DRIVER_WINDOWS_BORROWING_OK",
+        "PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK",
+        "real_notepad_edit_executed=true",
+        "notepad_process_verified=true",
+        "saved_file_verified=true",
+        "real_desktop_touched=true"
+      ]
+    },
+    {
+      "id": "permission_allow",
+      "family": "permission_allow",
+      "scenario_path": "scenarios/agent_capability_computer_use_permission_ui_visible_terminal.json",
+      "risk_level": "permission_ui_only",
+      "purpose": "Verify the visible Windows Computer Use permission panel, allow decision, status evidence, and permission prompt version.",
+      "required_tokens": [
+        "COMPUTER_USE_PERMISSION_UI_VISIBLE_TERMINAL_OK",
+        "permission_required",
+        "permission_answered",
+        "request_access",
+        "list_granted_applications",
+        "permission_prompt_version=windows-permission-ui-v1"
+      ]
+    },
+    {
+      "id": "permission_deny",
+      "family": "permission_deny",
+      "scenario_path": "scenarios/agent_capability_computer_use_permission_denial_visible_terminal.json",
+      "risk_level": "permission_denial_only",
+      "purpose": "Verify that a safe Computer Use access request can be denied, audited, and reported without executing desktop actions.",
+      "required_tokens": [
+        "COMPUTER_USE_PERMISSION_DENIAL_VISIBLE_TERMINAL_OK",
+        "permission_required",
+        "permission_answered",
+        "response=n",
+        "denied"
+      ]
+    },
+    {
+      "id": "single_app_text",
+      "family": "single_app_text",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_single_app_text_visible_terminal.json",
+      "risk_level": "controlled_notepad_file",
+      "purpose": "Verify controlled Notepad edit, target recheck, save, and durable file evidence.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=single_app_text",
+        "PHASE97_CONTROLLED_NOTEPAD_LIVE_EDIT_OK",
+        "real_notepad_edit_executed=true",
+        "notepad_process_verified=true",
+        "target_rechecked_before_input=true",
+        "target_rechecked_before_save=true",
+        "saved_file_verified=true",
+        "real_desktop_touched=true"
+      ]
+    },
+    {
+      "id": "single_app_calculation",
+      "family": "single_app_calculation",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_single_app_calculation_visible_terminal.json",
+      "risk_level": "controlled_calculator",
+      "purpose": "Verify controlled Calculator sum through UIA InvokePattern button sequence and observed result evidence.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=single_app_calculation",
+        "PHASE137_CONTROLLED_CALCULATOR_LIVE_SUM_OK",
+        "observed_result_matches_expected=true",
+        "uia_invoke_sequence_used=true",
+        "real_desktop_touched=true"
+      ]
+    },
+    {
+      "id": "local_file",
+      "family": "local_file",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_local_file_visible_terminal.json",
+      "risk_level": "controlled_explorer_file",
+      "purpose": "Verify controlled Explorer folder/file roundtrip and cleanup evidence.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=local_file",
+        "PHASE149_CONTROLLED_EXPLORER_LIVE_FILE_ROUNDTRIP_OK",
+        "filesystem_changed_after_real_actions=true",
+        "cleanup_completed=true",
+        "real_desktop_touched=true",
+        "real_gui_backing=true"
+      ]
+    },
+    {
+      "id": "local_browser",
+      "family": "local_browser",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_local_browser_visible_terminal.json",
+      "risk_level": "controlled_local_browser",
+      "purpose": "Verify controlled local browser page action, before/after screenshot difference, and no browser automation shortcut.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=local_browser",
+        "PHASE139_CONTROLLED_BROWSER_LIVE_LOCAL_PAGE_OK",
+        "page_changed_after_real_click=true",
+        "screenshot_before_after_different=true",
+        "browser_automation_used=false",
+        "real_desktop_touched=true"
+      ]
+    },
+    {
+      "id": "multi_app_transfer",
+      "family": "multi_app_transfer",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_multi_app_transfer_visible_terminal.json",
+      "risk_level": "controlled_cross_app",
+      "purpose": "Verify controlled source-to-target transfer through distinct apps with clipboard restoration and cleanup evidence.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=multi_app_transfer",
+        "PHASE150_CONTROLLED_MULTI_APP_TRANSFER_OK",
+        "transfer_text_copied_from_source=true",
+        "transferred_text_observed_in_target=true",
+        "source_and_target_apps_distinct=true",
+        "clipboard_restored=true",
+        "cleanup_completed=true",
+        "real_desktop_touched=true",
+        "real_gui_backing=true"
+      ]
+    },
+    {
+      "id": "failure_recovery",
+      "family": "failure_recovery",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_failure_recovery_visible_terminal.json",
+      "risk_level": "controlled_recovery",
+      "purpose": "Verify controlled failure injection, target reacquisition, recovery plan execution, and final state evidence.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=failure_recovery",
+        "PHASE150_CONTROLLED_FAILURE_RECOVERY_OK",
+        "controlled_failure_injected=true",
+        "recoverable_failure_observed=true",
+        "recovery_plan_executed=true",
+        "target_reacquired_after_failure=true",
+        "state_changed_after_recovery=true",
+        "cleanup_completed=true",
+        "real_desktop_touched=true",
+        "real_gui_backing=true"
+      ]
+    },
+    {
+      "id": "long_task_resume",
+      "family": "long_task_resume",
+      "scenario_path": "scenarios/agent_capability_computer_use_phase148c_long_task_resume_visible_terminal.json",
+      "risk_level": "controlled_resume",
+      "purpose": "Verify checkpointed interruption, resume state loading, no step-one repeat, and completion after resume.",
+      "required_tokens": [
+        "PHASE148C_FRESH_BENCHMARK_OK",
+        "family=long_task_resume",
+        "PHASE150_CONTROLLED_LONG_TASK_RESUME_OK",
+        "checkpoint_written_before_interruption=true",
+        "interruption_simulated=true",
+        "resume_state_loaded=true",
+        "step1_not_repeated_after_resume=true",
+        "long_task_completed_after_resume=true",
+        "cleanup_completed=true",
+        "real_desktop_touched=true",
+        "real_gui_backing=true"
+      ]
+    }
+  ]
+}

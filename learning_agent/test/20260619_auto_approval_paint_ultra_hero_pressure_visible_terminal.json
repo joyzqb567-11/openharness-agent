@@ -1,0 +1,90 @@
+{
+  "id": "computer_use_paint_ultra_hero_pressure_visible_terminal",
+  "name": "computer_use_paint_ultra_hero_pressure_visible_terminal",
+  "output_prefix": "computer_use_paint_ultra_hero_pressure_visible_terminal",
+  "window_title_prefix": "LearningAgent-PaintUltraHero",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 8,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "PAINT_ULTRA_HERO_PRESSURE_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Use /computer use --full and run a real Paint colored original ultra hero pressure test through the visible agent terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请打开本机真实画图软件 Paint，使用 Computer Use 真实鼠标和画图工具，绘制一张原创的奥特曼风格银红色巨人英雄图片：需要有银色头部、黄色椭圆眼睛、红色身体条纹、蓝色胸口能量灯、简单站立姿势，并完成颜色填充。不要使用 PowerShell、Python、命令行、脚本、网页图片、AI 生成图片或复制粘贴图片，必须通过真实画图软件窗口完成绘制和上色。最后保存到本机桌面，文件名为 ultra_paint_test.png。如果检测到已有 Paint 窗口，不要默认接管旧窗口，必须提示我先关闭旧窗口或明确授权使用旧窗口。完成后最后一行输出：PAINT_ULTRA_HERO_PRESSURE_OK real_paint_used=true colored=true saved_to_desktop=true mouse_or_tool_actions=true old_window_default_takeover=false target_ref_one_to_one=true",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "computer_action_result",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "open_application",
+    "mspaint",
+    "target_window_existed_before_launch",
+    "old_window_default_takeover",
+    "owned_process_cleanup_registered",
+    "Computer Use Stop",
+    "stopped=true",
+    "owned_resource_cleanup_completed=true",
+    "residual_owned_process=false"
+  ],
+  "event_answer_contains": [
+    "PAINT_ULTRA_HERO_PRESSURE_OK",
+    "real_paint_used=true",
+    "colored=true",
+    "saved_to_desktop=true",
+    "mouse_or_tool_actions=true",
+    "old_window_default_takeover=false",
+    "target_ref_one_to_one=true"
+  ],
+  "debug_log_contains": [
+    "PAINT_ULTRA_HERO_PRESSURE_OK",
+    "real_paint_used=true",
+    "colored=true",
+    "saved_to_desktop=true",
+    "mouse_or_tool_actions=true",
+    "old_window_default_takeover=false",
+    "target_ref_one_to_one=true",
+    "owned_process_cleanup_registered"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[=:][ ]*[1-9][0-9]*"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PAINT_ULTRA_HERO_PRESSURE_OK",
+      "real_paint_used=true",
+      "colored=true",
+      "saved_to_desktop=true",
+      "mouse_or_tool_actions=true",
+      "old_window_default_takeover=false",
+      "target_ref_one_to_one=true"
+    ]
+  },
+  "alternate_success_paths": [
+    {
+      "name": "existing_paint_safe_refusal",
+      "event_answer_contains": [
+        "旧窗口",
+        "明确授权"
+      ],
+      "debug_log_contains": [
+        "old_window_default_takeover=false"
+      ]
+    }
+  ],
+  "max_permission_sent_count": 80
+}

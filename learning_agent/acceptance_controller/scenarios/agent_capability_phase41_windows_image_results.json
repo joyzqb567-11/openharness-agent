@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent_capability_phase41_windows_image_results",
   "output_prefix": "agent_capability_phase41_windows_image_results",
   "window_title_prefix": "LearningAgent-Phase41-WindowsImageResults",
@@ -8,7 +8,7 @@
   "success_marker": "PHASE41_WINDOWS_IMAGE_RESULTS_READY",
   "prompt_lines": [
     "请执行一次 Phase 41 Windows Computer Use 图片结果块验收：这次只允许运行项目内 evidence 模块自检，必须证明截图 artifact、model-visible image_result block、agent active_artifacts 登记、敏感 UIA 文本隐藏都成立；不要点击真实桌面，不要移动鼠标，不要输入任何真实窗口。最终回答必须包含固定标记：PHASE41_WINDOWS_IMAGE_RESULTS_READY。",
-    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.evidence import main; raise SystemExit(main())\"",
+    "你必须调用终端工具执行这个安全命令验证协议：$env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.evidence import main; raise SystemExit(main())\"",
     "不要提前最终回答；只有终端命令成功输出 PHASE41_WINDOWS_IMAGE_RESULTS_OK 后，最终回答最后一行必须完整复制：PHASE41_WINDOWS_IMAGE_RESULTS_READY PHASE41_WINDOWS_IMAGE_RESULTS_OK artifact=true image_block=true agent_artifact=true sensitive_text_hidden=true actions_expanded=false"
   ],
   "required_event_states": [

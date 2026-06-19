@@ -16,6 +16,7 @@ PHASE38_WINDOWS_COMPUTER_APPROVAL_MARKER = "PHASE38_WINDOWS_COMPUTER_APPROVAL_RE
 PHASE38_WINDOWS_COMPUTER_APPROVAL_OK_TOKEN = "PHASE38_WINDOWS_COMPUTER_APPROVAL_OK"  # 新增代码+Phase38WindowsComputerApproval: 定义 CLI 成功 token；如果没有这行代码，验收脚本无法确认合同自检已运行。
 PHASE38_APPROVAL_CONTRACT = "phase38_windows_computer_approval"  # 新增代码+Phase38WindowsComputerApproval: 定义审批模型合同名称；如果没有这行代码，状态输出无法说明当前使用哪版审批逻辑。
 PHASE38_ACTIONS_EXPANDED = False  # 新增代码+Phase38WindowsComputerApproval: 明确 Phase38 不扩大真实动作面；如果没有这行代码，用户可能误以为本阶段新增了更多可执行动作。
+WINDOWS_PERMISSION_UI_PROMPT_VERSION = "windows-permission-ui-v1"  # 新增代码+Windows权限UI对齐: 定义 Windows 权限提示版本；如果没有这行代码，终端状态无法证明当前已经切到 ClaudeCode 对齐版权限面板。
 DEFAULT_GRANT_FLAGS: dict[str, bool] = {"observe": True, "desktopAction": True, "clipboardRead": False, "clipboardWrite": False, "systemKeyCombos": False}  # 修改代码+Phase48WindowsSecurityPolicy: 把 grant flags 扩展为 observe/action/system_key/clipboard 类别且高风险默认关闭；如果没有这行代码，Phase48 无法区分只读观察、普通动作和危险权限。
 FORBIDDEN_TARGET_PATTERNS: dict[str, tuple[str, ...]] = {"shell": ("powershell.exe", "powershell", "pwsh.exe", "cmd.exe", "command prompt", "windows terminal", "windowsterminal.exe", "wt.exe"), "codex_ui": ("codex", "openai codex"), "system_settings": ("systemsettings.exe", "settings", "control panel", "regedit", "gpedit", "task manager"), "password_manager": ("password", "credential", "bitwarden", "1password", "keepass"), "auth": ("otp", "two-factor", "2fa", "authenticator", "verification code", "captcha", "login")}  # 新增代码+Phase38WindowsComputerApproval: 定义禁止自动化的高风险窗口关键词；如果没有这行代码，终端/密码/认证等目标可能被误放行。
 SYSTEM_KEY_COMBO_TOKENS: tuple[str, ...] = ("ctrl+alt+delete", "win+", "windows+", "meta+", "super+", "cmd+", "alt+tab", "alt+f4", "ctrl+shift+esc", "taskmgr")  # 修改代码+ClaudeCodeParity: 定义需要额外授权的系统级组合键和 win 别名；如果没有这行代码，Alt+F4 或 meta/super/cmd 组合可能绕过 grant flag。
@@ -86,11 +87,14 @@ class WindowsComputerUseApprovalModel:  # 新增代码+Phase38WindowsComputerApp
         self.grant_flags.update({str(key): bool(value) for key, value in dict(grant_flags or {}).items()})  # 新增代码+Phase38WindowsComputerApproval: 合并外部传入 flag；如果没有这行代码，测试或未来 UI 无法注入授权选择。
         self.security_policy = security_policy  # 新增代码+Phase48WindowsSecurityPolicy: 保存可选 Phase48 策略对象；如果没有这行代码，evaluate 无法把细粒度策略接入审批链。
         self.grant_history: list[dict[str, Any]] = []  # 新增代码+Phase38WindowsComputerApproval: 保存授权历史；如果没有这行代码，后续审计无法追踪 grant 来源。
+        self.permission_prompt_version = WINDOWS_PERMISSION_UI_PROMPT_VERSION  # 新增代码+Windows权限UI对齐: 保存权限提示版本；如果没有这行代码，`/computer status` 不能告诉用户当前面板版本。
+        self.last_permission_decision: dict[str, Any] = {}  # 新增代码+Windows权限UI对齐: 保存最近一次权限决策；如果没有这行代码，用户看不到刚才是允许、拒绝还是部分允许。
+        self.denied_decision_count = 0  # 新增代码+Windows权限UI对齐: 统计完全拒绝次数；如果没有这行代码，连续权限失败不会在状态面板中暴露。
     # 修改代码+Phase48WindowsSecurityPolicy: 函数段结束，__init__ 到此结束；如果没有这个边界说明，读者不容易看出初始化范围和策略注入边界。
 
     def status(self) -> dict[str, Any]:  # 修改代码+Phase48WindowsSecurityPolicy: 函数段开始，返回机器可读审批状态并可附加安全策略状态；如果没有这段函数，controller.status 无法展示 approval 和 policy 边界。
         policy_status = self.security_policy.status() if hasattr(self.security_policy, "status") else {}  # 新增代码+Phase48WindowsSecurityPolicy: 读取可选策略状态；如果没有这行代码，Phase48 策略名称和 grant 类别不会出现在状态对象里。
-        status = {"enabled": True, "approval_model": PHASE38_APPROVAL_CONTRACT, "approval_granted_app_count": len(self.granted_apps), "grant_flags": dict(self.grant_flags), "actions_expanded": PHASE38_ACTIONS_EXPANDED, "marker": PHASE38_WINDOWS_COMPUTER_APPROVAL_MARKER}  # 修改代码+Phase48WindowsSecurityPolicy: 先返回旧审批摘要保持兼容；如果没有这行代码，Phase38 状态字段会丢失。
+        status = {"enabled": True, "approval_model": PHASE38_APPROVAL_CONTRACT, "approval_granted_app_count": len(self.granted_apps), "grant_flags": dict(self.grant_flags), "actions_expanded": PHASE38_ACTIONS_EXPANDED, "permission_prompt_version": self.permission_prompt_version, "last_permission_decision": dict(self.last_permission_decision), "denied_decision_count": self.denied_decision_count, "marker": PHASE38_WINDOWS_COMPUTER_APPROVAL_MARKER}  # 修改代码+Windows权限UI对齐: 在旧审批摘要上补充权限面板版本和最近决策；如果没有这行代码，状态接口会继续缺少用户可见的权限 UI 证据。
         if policy_status:  # 新增代码+Phase48WindowsSecurityPolicy: 仅在注入策略时追加 Phase48 字段；如果没有这行代码，未启用策略时会出现误导性状态。
             status["security_policy"] = dict(policy_status)  # 新增代码+Phase48WindowsSecurityPolicy: 写入策略状态副本；如果没有这行代码，机器可读状态拿不到 Phase48 策略证据。
         return status  # 修改代码+Phase48WindowsSecurityPolicy: 返回合并后的审批状态；如果没有这行代码，调用方拿不到状态结果。
@@ -98,7 +102,8 @@ class WindowsComputerUseApprovalModel:  # 新增代码+Phase38WindowsComputerApp
 
     def terminal_status_lines(self) -> list[str]:  # 修改代码+Phase48WindowsSecurityPolicy: 函数段开始，生成 `/computer status` 终端可见审批和策略摘要；如果没有这段函数，用户只能通过 JSON 理解安全边界。
         flag_text = ",".join(f"{name}:{_bool_token(value)}" for name, value in sorted(self.grant_flags.items()))  # 新增代码+Phase38WindowsComputerApproval: 把 flags 转成稳定短文本；如果没有这行代码，终端状态难以扫读当前危险权限。
-        lines = ["Computer Use Approval", f"- approval_model={PHASE38_APPROVAL_CONTRACT}", f"- approval_granted_app_count={len(self.granted_apps)}", f"- grant_flags={flag_text}", f"- actions_expanded={_bool_token(PHASE38_ACTIONS_EXPANDED)}"]  # 修改代码+Phase48WindowsSecurityPolicy: 先生成 Phase38 兼容审批摘要；如果没有这行代码，旧状态面板字段会丢失。
+        recent_decision = str(self.last_permission_decision.get("decision", "none") or "none")  # 新增代码+Windows权限UI对齐: 把最近决策压成短文本；如果没有这行代码，终端面板会缺少最关键的允许/拒绝结果。
+        lines = ["Computer Use Approval", f"- approval_model={PHASE38_APPROVAL_CONTRACT}", f"- approval_granted_app_count={len(self.granted_apps)}", f"- grant_flags={flag_text}", f"- actions_expanded={_bool_token(PHASE38_ACTIONS_EXPANDED)}", f"- permission_prompt_version={self.permission_prompt_version} last_permission_decision={recent_decision} denied_decision_count={self.denied_decision_count}"]  # 修改代码+Windows权限UI对齐: 在 Phase38 兼容摘要中加入权限 UI 版本和最近决策；如果没有这行代码，真实终端无法验收新权限面板是否上线。
         if hasattr(self.security_policy, "terminal_status_lines"):  # 新增代码+Phase48WindowsSecurityPolicy: 检查是否注入可渲染策略；如果没有这行代码，未启用策略时会调用空对象崩溃。
             lines.extend(self.security_policy.terminal_status_lines(self.grant_flags))  # 新增代码+Phase48WindowsSecurityPolicy: 追加 Phase48 策略面板；如果没有这行代码，真实终端用户看不到 grant_classes 和高风险默认拒绝。
         return lines  # 修改代码+Phase48WindowsSecurityPolicy: 返回审批和策略组合输出；如果没有这行代码，调用方无法打印终端状态。
@@ -121,8 +126,12 @@ class WindowsComputerUseApprovalModel:  # 新增代码+Phase38WindowsComputerApp
             app_key = _app_key(window)  # 新增代码+Phase38WindowsComputerApproval: 生成 app allowlist key；如果没有这行代码，后续 evaluate 无法匹配授权。
             self.granted_apps[app_key] = {"grant_id": grant_id, "app_key": app_key, "target_summary": summary, "reason": _safe_text(reason, 160)}  # 新增代码+Phase38WindowsComputerApproval: 保存 app 会话授权；如果没有这行代码，安全 app 点击仍会被 requires_approval 拒绝。
             granted.append(summary)  # 新增代码+Phase38WindowsComputerApproval: 记录成功授权摘要；如果没有这行代码，grant 返回缺少用户可读结果。
-        grant_record = {"grant_id": grant_id, "granted": granted, "denied": denied, "flags": dict(self.grant_flags), "reason": _safe_text(reason, 160)}  # 新增代码+Phase38WindowsComputerApproval: 生成完整授权记录；如果没有这行代码，调用方拿不到 grant_id 和 flag 状态。
+        decision_name = "allow_for_session" if granted and not denied else "allow_with_denied_targets" if granted else "deny"  # 新增代码+Windows权限UI对齐: 把本次授权结果命名为结构化决策；如果没有这行代码，状态页只能显示零散 granted/denied 列表。
+        grant_record = {"grant_id": grant_id, "granted": granted, "denied": denied, "flags": dict(self.grant_flags), "reason": _safe_text(reason, 160), "decision": decision_name, "source": "windows_runtime_policy", "promptVersion": self.permission_prompt_version}  # 修改代码+Windows权限UI对齐: 生成带决策来源和提示版本的授权记录；如果没有这行代码，历史授权无法和新权限面板对应起来。
         self.grant_history.append(grant_record)  # 新增代码+Phase38WindowsComputerApproval: 把授权记录加入历史；如果没有这行代码，后续审计无法追溯授权次数。
+        self.last_permission_decision = dict(grant_record)  # 新增代码+Windows权限UI对齐: 保存最近一次授权决策；如果没有这行代码，`/computer status` 无法展示刚才的结果。
+        if not granted:  # 新增代码+Windows权限UI对齐: 完全没有授权成功时进入拒绝统计；如果没有这行代码，拒绝次数不会增长。
+            self.denied_decision_count += 1  # 新增代码+Windows权限UI对齐: 累计完全拒绝次数；如果没有这行代码，用户无法发现权限请求一直失败。
         return grant_record  # 新增代码+Phase38WindowsComputerApproval: 返回授权结果；如果没有这行代码，调用方无法知道授权是否成功。
     # 新增代码+Phase38WindowsComputerApproval: 函数段结束，grant_for_session 到此结束；如果没有这个边界说明，读者不容易看出授权写入范围。
 

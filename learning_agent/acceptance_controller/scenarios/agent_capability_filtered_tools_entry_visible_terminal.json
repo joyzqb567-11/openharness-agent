@@ -1,0 +1,45 @@
+{
+  "id": "agent_capability_filtered_tools_entry_visible_terminal",
+  "name": "agent_capability_filtered_tools_entry_visible_terminal",
+  "output_prefix": "agent_capability_filtered_tools_entry_visible_terminal",
+  "window_title_prefix": "LearningAgent-FilteredTools",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 420,
+  "final_log_wait_seconds": 45,
+  "post_success_wait_seconds": 4,
+  "success_marker": "FILTERED_TOOLS_ONLY_ENTRY_OK",
+  "prompt": "Verify the OpenHarness filteredTools-only naming entry.",
+  "prompt_lines": [
+    "Please verify the OpenHarness filteredTools-only naming entry. Use only the read tool if you need to inspect source files. Do not modify files. Check learning_agent/tools/pool.py and learning_agent/tools/catalog_runtime.py. Your final answer must clearly state that filteredTools exists in the pool layer, that current_tool_pool is no longer exposed as a function in either file, that available_tool_schemas uses filteredTools before schema conversion, and that the first-turn tool surface remains read/write/edit/bash/tool_search. The final line must be exactly FILTERED_TOOLS_ONLY_ENTRY_OK."
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "FILTERED_TOOLS_ONLY_ENTRY_OK",
+    "filteredTools",
+    "current_tool_pool",
+    "available_tool_schemas",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "event_answer_contains": [
+    "FILTERED_TOOLS_ONLY_ENTRY_OK",
+    "filteredTools",
+    "current_tool_pool",
+    "available_tool_schemas",
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "tool_search"
+  ],
+  "max_permission_sent_count": 0
+}

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase70_generic_control_actions",
   "name": "agent_capability_phase70_generic_control_actions",
   "output_prefix": "agent_capability_phase70_generic_control_actions",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase70 Windows Computer Use generic control actions acceptance.",
   "prompt_lines": [
     "Please run one Phase 70 Windows Computer Use generic click, type, and visual point control action acceptance. Use only the project terminal self-check command. Do not call an LLM for execution planning, do not interact with any user window, do not install dependencies, do not change registry, and do not change Windows settings. The final answer must include the fixed marker: PHASE70_GENERIC_CONTROL_ACTIONS_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.generic_control_actions import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.generic_control_actions import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE70_GENERIC_CONTROL_ACTIONS_OK, the final answer's last line must completely copy: PHASE70_GENERIC_CONTROL_ACTIONS_READY PHASE70_GENERIC_CONTROL_ACTIONS_OK generic_click=true generic_type=true control_locator=true visual_fallback=true before_after_evidence=true zero_event_refusal=true actions_expanded=false"
   ],
   "required_event_states": [

@@ -1,0 +1,51 @@
+{
+  "id": "agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal",
+  "name": "agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal",
+  "window_title_prefix": "LearningAgent-ComputerUseV2LegacyRemoved",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "environment": {
+    "CODEX_OAUTH_NATIVE_TOOLS": "1"
+  },
+  "success_marker": "COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK",
+  "prompt": "Verify that OpenHarness Computer Use no longer depends on the legacy learning_agent/computer_use folder and that the v2 migrated modules still pass.",
+  "prompt_lines": [
+    "Please verify the OpenHarness Computer Use v2 legacy-folder removal migration using only local repository evidence. Do not open browsers, login windows, passwords, system settings, registry, installers, payment pages, or user documents. The final answer must include the fixed marker COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK.",
+    "You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; if (Test-Path -LiteralPath '..\\learning_agent\\computer_use') { Write-Output 'LEGACY_COMPUTER_USE_DIR_STILL_EXISTS'; exit 1 }; python -m unittest learning_agent.tests.test_computer_use_mcp_v2_legacy_folder_removed learning_agent.tests.test_computer_use_windows_element_cache learning_agent.tests.test_computer_use_windows_coordinate_contract learning_agent.tests.test_computer_use_windows_uia_patterns learning_agent.tests.test_computer_use_cua_driver_observe_act_verify learning_agent.tests.test_computer_use_windows_observation_element_cache learning_agent.tests.test_computer_use_cua_driver_borrowing_matrix learning_agent.tests.test_computer_use_windows_integrity; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; python -m learning_agent.computer_use_mcp_v2.windows_runtime.cua_driver_borrowing_matrix --repo-root ..",
+    "Do not write the final answer early. Only after the terminal command succeeds and prints CUA_DRIVER_WINDOWS_BORROWING_OK, the final answer's last line must be exactly: COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK",
+    "CUA_DRIVER_WINDOWS_BORROWING_OK",
+    "Ran 24 tests",
+    "OK",
+    "passed=true",
+    "cua_inspired_element_cache_present=true",
+    "uia_semantic_dispatch_present=true",
+    "coordinate_contract_present=true"
+  ],
+  "event_answer_contains": [
+    "COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK"
+  ],
+  "assertions": {
+    "output_contains": [
+      "COMPUTER_USE_MCP_V2_LEGACY_FOLDER_REMOVED_OK",
+      "CUA_DRIVER_WINDOWS_BORROWING_OK",
+      "passed=true",
+      "cua_inspired_element_cache_present=true",
+      "uia_semantic_dispatch_present=true",
+      "coordinate_contract_present=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

@@ -1,0 +1,52 @@
+{
+  "id": "computer_use_atomic_mouse_drag_visible_terminal",
+  "name": "computer_use_atomic_mouse_drag_visible_terminal",
+  "output_prefix": "computer_use_atomic_mouse_drag_visible_terminal",
+  "window_title_prefix": "LearningAgent-AtomicMouseDrag",
+  "max_seconds": 180,
+  "final_log_wait_seconds": 10,
+  "post_success_wait_seconds": 3,
+  "success_marker": "ATOMIC_MOUSE_DRAG_VISIBLE_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Open full Computer Use mode, ask a normal Paint line task, and verify the public atomic left_click_drag path is used instead of split left_mouse_down/up tools.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请使用本地电脑的画图软件画一条线。必须通过 Computer Use 控制真实 Paint 窗口；不要使用 PowerShell、Python、命令行或脚本；需要先打开新的 Paint 窗口，观察画布，然后使用公开的 left_click_drag 原子拖拽在画布上画线，不要使用 left_mouse_down 或 left_mouse_up。完成后最终只输出一行：ATOMIC_MOUSE_DRAG_VISIBLE_OK left_click_drag=true real_desktop_touched=true",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "computer_action_result",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "mcp__computer-use__left_click_drag",
+    "action': 'drag_path'",
+    "low_level_event_count': 6",
+    "target_window_existed_before_launch': False",
+    "ATOMIC_MOUSE_DRAG_VISIBLE_OK"
+  ],
+  "event_answer_contains": [
+    "ATOMIC_MOUSE_DRAG_VISIBLE_OK",
+    "left_click_drag=true",
+    "real_desktop_touched=true"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "left_click_drag",
+    "drag_path",
+    "low_level_event_count",
+    "target_window_existed_before_launch",
+    "old_window_default_takeover",
+    "Computer Use Stop",
+    "stopped=true"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[=:][ ]*[1-9][0-9]*"
+  ],
+  "max_permission_sent_count": 0
+}

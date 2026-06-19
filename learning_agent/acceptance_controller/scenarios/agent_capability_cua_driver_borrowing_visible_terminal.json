@@ -1,0 +1,63 @@
+{
+  "id": "agent_capability_cua_driver_borrowing_visible_terminal",
+  "name": "agent_capability_cua_driver_borrowing_visible_terminal",
+  "output_prefix": "agent_capability_cua_driver_borrowing_visible_terminal",
+  "window_title_prefix": "LearningAgent-CuaBorrowing",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 60,
+  "post_success_wait_seconds": 6,
+  "success_marker": "CUA_DRIVER_WINDOWS_BORROWING_READY",
+  "prompt": "Please run the Cua Driver Windows Computer Use borrowing matrix acceptance.",
+  "prompt_lines": [
+    "Please run the Cua Driver Windows Computer Use borrowing matrix. Use only local OpenHarness evidence. Do not open browsers, login windows, passwords, system settings, registry, installers, payment pages, or user documents. The final answer must include the fixed marker: CUA_DRIVER_WINDOWS_BORROWING_READY.",
+    "You must call the terminal tool and run this verification command exactly: $env:PYTHONPATH='..'; python -m learning_agent.computer_use_mcp_v2.windows_runtime.cua_driver_borrowing_matrix --repo-root ..",
+    "Do not write the final answer early. Only after the terminal command prints CUA_DRIVER_WINDOWS_BORROWING_READY, the final answer's last line must completely copy: CUA_DRIVER_WINDOWS_BORROWING_READY CUA_DRIVER_WINDOWS_BORROWING_OK passed=true claudecode_tool_surface_unchanged=true cua_inspired_element_cache_present=true uia_semantic_dispatch_present=true coordinate_contract_present=true uipi_diagnostics_present=true mcp_observe_act_verify_present=true hidden_claudecode_package_internals_excluded=true visible_terminal_gate=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "debug_log_contains": [
+    "CUA_DRIVER_WINDOWS_BORROWING_READY",
+    "CUA_DRIVER_WINDOWS_BORROWING_OK",
+    "passed=true",
+    "claudecode_tool_surface_unchanged=true",
+    "cua_inspired_element_cache_present=true",
+    "uia_semantic_dispatch_present=true",
+    "coordinate_contract_present=true",
+    "uipi_diagnostics_present=true",
+    "mcp_observe_act_verify_present=true",
+    "hidden_claudecode_package_internals_excluded=true"
+  ],
+  "event_answer_contains": [
+    "CUA_DRIVER_WINDOWS_BORROWING_READY",
+    "CUA_DRIVER_WINDOWS_BORROWING_OK",
+    "passed=true",
+    "claudecode_tool_surface_unchanged=true",
+    "cua_inspired_element_cache_present=true",
+    "uia_semantic_dispatch_present=true",
+    "coordinate_contract_present=true",
+    "uipi_diagnostics_present=true",
+    "mcp_observe_act_verify_present=true",
+    "hidden_claudecode_package_internals_excluded=true"
+  ],
+  "assertions": {
+    "output_contains": [
+      "CUA_DRIVER_WINDOWS_BORROWING_READY",
+      "CUA_DRIVER_WINDOWS_BORROWING_OK",
+      "passed=true",
+      "claudecode_tool_surface_unchanged=true",
+      "cua_inspired_element_cache_present=true",
+      "uia_semantic_dispatch_present=true",
+      "coordinate_contract_present=true",
+      "uipi_diagnostics_present=true",
+      "mcp_observe_act_verify_present=true",
+      "hidden_claudecode_package_internals_excluded=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}

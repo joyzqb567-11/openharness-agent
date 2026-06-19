@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "agent_capability_phase66_observation_fusion",
   "name": "agent_capability_phase66_observation_fusion",
   "output_prefix": "agent_capability_phase66_observation_fusion",
@@ -10,7 +10,7 @@
   "prompt": "Please run the Phase66 Windows Computer Use observation fusion acceptance.",
   "prompt_lines": [
     "Please run one Phase 66 Windows Computer Use observation fusion acceptance. Use only the project terminal self-check command. Do not install OCR, do not install vision dependencies, do not change registry, do not change Windows settings, and do not interact with any user window. The final answer must include the fixed marker: PHASE66_OBSERVATION_FUSION_READY.",
-    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use.observation_fusion import main; raise SystemExit(main())\"",
+    "You must call the terminal tool and run this verification command: $env:PYTHONPATH='..'; python -c \"from learning_agent.computer_use_mcp_v2.windows_runtime.observation_fusion import main; raise SystemExit(main())\"",
     "Do not write the final answer early. Only after the terminal command prints PHASE66_OBSERVATION_FUSION_OK, the final answer's last line must completely copy: PHASE66_OBSERVATION_FUSION_READY PHASE66_OBSERVATION_FUSION_OK screenshot_observation=true uia_tree_observation=true ocr_or_vision_slot=true window_state_observation=true sensitive_text_boundary=true uia_ocr_vision_fusion=true actions_expanded=false"
   ],
   "required_event_states": [

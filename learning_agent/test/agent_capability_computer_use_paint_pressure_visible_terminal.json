@@ -1,0 +1,68 @@
+{
+  "id": "agent_capability_computer_use_paint_pressure_visible_terminal",
+  "name": "agent_capability_computer_use_paint_pressure_visible_terminal",
+  "output_prefix": "agent_capability_computer_use_paint_pressure_visible_terminal",
+  "window_title_prefix": "LearningAgent-PaintPressure",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "max_seconds": 900,
+  "final_log_wait_seconds": 90,
+  "post_success_wait_seconds": 8,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "0"
+  },
+  "success_marker": "PAINT_PRESSURE_TEST_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Use /computer use --full and run the real Paint pressure test through the visible agent terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请打开本机真实 Windows 画图软件 Paint / mspaint，并在画布上用真实鼠标拖动画一个明显的红色大号圆形；再切换一种颜色，用真实鼠标在旁边画一条蓝色曲线；最后通过画图软件自己的保存界面，把图片保存到本地电脑桌面，文件名为 paint_pressure_test.png。要求：必须使用 Computer Use 真实控制本地画图窗口；不要使用 PowerShell、Python、命令行、脚本或直接写文件来生成图片；如果检测到已有画图窗口，不要默认接管旧窗口，必须提示我先关闭旧窗口或明确授权使用旧窗口。保存完成后，请最后一行只输出：PAINT_PRESSURE_TEST_OK saved_to_desktop=true real_paint_used=true mouse_draw_used=true old_window_default_takeover=false"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true"
+  ],
+  "event_answer_contains": [
+    "PAINT_PRESSURE_TEST_OK",
+    "saved_to_desktop=true",
+    "real_paint_used=true",
+    "mouse_draw_used=true",
+    "old_window_default_takeover=false"
+  ],
+  "debug_log_contains": [
+    "PAINT_PRESSURE_TEST_OK",
+    "saved_to_desktop=true",
+    "real_paint_used=true",
+    "mouse_draw_used=true",
+    "old_window_default_takeover=false"
+  ],
+  "assertions": {
+    "output_contains": [
+      "PAINT_PRESSURE_TEST_OK",
+      "saved_to_desktop=true",
+      "real_paint_used=true",
+      "mouse_draw_used=true",
+      "old_window_default_takeover=false"
+    ]
+  },
+  "alternate_success_paths": [
+    {
+      "name": "existing_paint_safe_refusal",
+      "event_answer_contains": [
+        "旧窗口",
+        "明确授权"
+      ],
+      "debug_log_contains": [
+        "old_window_default_takeover=false"
+      ]
+    }
+  ],
+  "max_permission_sent_count": 4
+}
