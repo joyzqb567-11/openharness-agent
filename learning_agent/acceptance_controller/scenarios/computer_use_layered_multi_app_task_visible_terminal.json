@@ -1,0 +1,67 @@
+{
+  "id": "computer_use_layered_multi_app_task_visible_terminal",
+  "name": "computer_use_layered_multi_app_task_visible_terminal",
+  "output_prefix": "computer_use_layered_multi_app_task_visible_terminal",
+  "window_title_prefix": "LearningAgent-LayeredMultiAppTask",
+  "entrypoint": "learning_agent/start_oauth_agent.bat",
+  "visible_terminal_gate": true,
+  "screenshot_artifacts_required": true,
+  "pressure_only": true,
+  "max_seconds": 1200,
+  "final_log_wait_seconds": 120,
+  "post_success_wait_seconds": 6,
+  "environment": {
+    "LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS": "1"
+  },
+  "success_marker": "OPENHARNESS_LAYERED_MULTI_APP_OK",
+  "multi_prompt_lines": true,
+  "prompt": "Run layered Computer Use multi-app task through visible terminal.",
+  "prompt_lines": [
+    "/computer use --full",
+    "请使用本机计算器或等价可见计算应用计算 123+456，然后把结果输入到一个新建文本编辑文档里，并通过真实文本编辑应用保存到桌面 openharness-layered-multi-app.txt。不要直接用 PowerShell、Python 或命令行写文件。完成后最后一行输出：OPENHARNESS_LAYERED_MULTI_APP_OK saved_to_desktop=true real_apps_used=true stage_verified=true",
+    "/computer stop"
+  ],
+  "required_event_states": [
+    "agent_ready_for_user_prompt",
+    "computer_status_printed",
+    "user_prompt_received",
+    "computer_use_mcp_v2_tool",
+    "final_answer_printed"
+  ],
+  "event_payload_contains": [
+    "Computer Use Mode",
+    "full_mode=true",
+    "universal_stage_task_loop_used",
+    "layered_observation_facts_used",
+    "reflection_learning_layer_used",
+    "desktop_task_plan_created",
+    "target_ref_one_to_one",
+    "batch_execution_used"
+  ],
+  "event_answer_contains": [
+    "OPENHARNESS_LAYERED_MULTI_APP_OK",
+    "saved_to_desktop=true",
+    "real_apps_used=true",
+    "stage_verified=true"
+  ],
+  "debug_log_contains": [
+    "OPENHARNESS_LAYERED_MULTI_APP_OK",
+    "saved_to_desktop=true",
+    "real_apps_used=true",
+    "stage_verified=true",
+    "layered_observation_facts_used",
+    "reflection_learning_layer_used"
+  ],
+  "event_payload_regex": [
+    "low_level_event_count[=:][ ]*[1-9][0-9]*"
+  ],
+  "assertions": {
+    "output_contains": [
+      "OPENHARNESS_LAYERED_MULTI_APP_OK",
+      "saved_to_desktop=true",
+      "real_apps_used=true",
+      "stage_verified=true"
+    ]
+  },
+  "max_permission_sent_count": 0
+}
