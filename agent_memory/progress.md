@@ -774,3 +774,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `Task 0: Study ClaudeCode Harness And Map It To OpenHarness Computer Use`，要求实现前先用 CodeGraph 检查 `D:\ClaudeCode-main\ClaudeCode-main` 的 harness 相关路径，并产出 `learning_agent/computer_use_mcp_v2/harness_research/claudecode_harness_mapping.md`。
 - 方案新增 `harness_context.py` 与 `test_computer_use_harness_context.py`，把 Computer Use 明确建模成挂在主 agent 下的专用桌面任务 harness，而不是只靠 prompt 或单应用脚本推进。
 - 当前仍只是方案补充，未修改运行时代码；后续执行时必须从 Task 0 开始，不能跳过 ClaudeCode harness 映射直接写 Computer Use prompt。
+
+## 2026-06-20 GitHub 备份尝试
+- 用户要求在继续修改前把当前 OpenHarness 项目上传到 GitHub 仓库 `joyzqb567-11/openharness-agent.git`，防止后续代码修改后无法复原。
+- 已新增 GitHub 上传瘦身忽略规则，排除 `.codegraph/`、`.pytest_cache/`、`learning_agent/computer_use_mcp_v2/memory/`、`learning_agent/memory/compact_artifacts/`、`learning_agent/memory/harness/runs/`、`learning_agent/memory/runtime/` 和嵌套验收 runs，避免本机运行日志、截图索引和 runtime 轨迹进入备份仓库。
+- 已确认 staged 快照没有超过 90MB 的文件，也没有 `.env/.pem/.key/id_rsa` 这类明显密钥文件。
+- 已创建本地 Git 快照提交：`chore: snapshot openharness before computer use refactor`。
+- 已添加远端 `openharness-agent=https://github.com/joyzqb567-11/openharness-agent.git`，但当前机器无法连通 GitHub 443，`Test-NetConnection github.com -Port 443` 为 `False`，`curl https://github.com` 超时，push 暂未完成。
+- 已生成本地可恢复 bundle：`H:\codexworkplace\sofeware\openharness-agent-snapshot-20260620.bundle`，用于网络恢复前的临时保护。
