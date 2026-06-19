@@ -1,0 +1,5 @@
+
+{"decision": "drawing_visual_evidence_incomplete", "failure_class": "save_dialog_unhandled", "low_level_event_count": 10, "repair_strategy": "handle_save_dialog_or_request_user", "repeated_count": 2, "stage_id": "stage_003_perform_content_work"}
+{"decision": "", "failure_class": "batch_too_small", "low_level_event_count": 4, "repair_strategy": "compile_larger_stage_batch", "repeated_count": 2, "stage_id": "stage_001_prepare_target"}
+{"decision": "drawing_visual_evidence_incomplete", "failure_class": "save_dialog_unhandled", "low_level_event_count": 10, "repair_strategy": "handle_save_dialog_or_request_user", "repeated_count": 2, "stage_id": "stage_003_perform_content_work"}
+{"decision": "", "failure_class": "batch_too_small", "low_level_event_count": 4, "repair_strategy": "compile_larger_stage_batch", "repeated_count": 2, "stage_id": "stage_001_prepare_target"}

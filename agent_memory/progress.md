@@ -784,3 +784,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已生成本地可恢复 bundle：`H:\codexworkplace\sofeware\openharness-agent-snapshot-20260620.bundle`，用于网络恢复前的临时保护。
 - 用户提示浏览器可访问 GitHub 后，已确认浏览器使用系统代理 `127.0.0.1:7890`，而 Git/curl 原先没有代理配置；已将当前仓库 Git 代理设置为 `http://127.0.0.1:7890`。
 - 已成功执行 `git push -u openharness-agent codex/publish-main:main`，远端 `refs/heads/main` 当前指向 `ad31a03b8a18ffd45945d14896a1175aedd3161e`。
+
+## 2026-06-20 Universal Computer Use 分层 skill/prompt 准确率方案执行
+- 已在隔离 worktree `codex/computer-use-layered-harness` 中逐项执行 `docs/superpowers/plans/2026-06-19-universal-computer-use-layered-skills-prompts-accuracy.md` 的 Task 0 到 Task 12。
+- 已新增 Computer Use 专用分层目录 `learning_agent/computer_use_mcp_v2/layer_skills/`，覆盖意图理解、阶段规划、观察、批执行契约、验证、反思学习，保持在 Computer Use 模块内部，不改全局 agent 系统提示词。
+- 已新增 harness mapping 与 `harness_context.py`，把 ClaudeCode 风格的任务上下文、权限、target ref、验证状态、反思状态映射到 OpenHarness Computer Use 专用桌面任务 harness。
+- 已接入分层主路径：独立意图理解层、结构化观察事实层、阶段规划契约、事件预算批执行、成功标准验证、反思学习层、`desktop_task` 分层证据透传。
+- 已新增三个真实可见终端 acceptance 场景：`computer_use_layered_text_task_visible_terminal.json`、`computer_use_layered_drawing_task_visible_terminal.json`、`computer_use_layered_multi_app_task_visible_terminal.json`，均首行输入 `/computer use --full`，并启用 `LEARNING_AGENT_DANGEROUSLY_SKIP_PERMISSIONS=1` 与 `max_permission_sent_count=0`。
+- 自动化验证已通过：focused layer tests 为 48 passed；Computer Use 回归为 36 passed；完整 `python -m pytest learning_agent/tests -q` 为 194 passed；修改过的 Python 文件 `py_compile` 通过；三个新增 scenario JSON 均通过 `python -m json.tool`。
+- 学习副本已复制到 `learning_agent/test/20260620_layered_task7_13_full_archive/`，共 45 个文件。
+- 剩余任务：将 worktree 改动合入主工作区后同步 CodeGraph，并用 acceptance controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat` 做真实可见终端文本、绘图、多应用验收；未完成前不能声明开发完成。

@@ -361,3 +361,10 @@
 - Regression: `test_desktop_task_incomplete_survives_observe_action_marker` 覆盖该状态机，修复前 RED，修复后 GREEN。
 - Verification: `python -m pytest learning_agent/tests -q` 结果为 145 passed；相关文件 `py_compile` 通过。
 - Remaining risk: 绘图验收仍未完整通过；后续还要解决重复 `desktop_task` 可能新开多个目标窗口的问题，且必须在用户关闭当前 Paint/Notepad 残留窗口后复跑 acceptance。
+
+## 2026-06-20 分层 Computer Use 主路径自动化通过但真实终端验收待执行
+- Status: 自动化层已通过；真实可见终端验收待执行，不能声明开发完成。
+- Evidence: 本轮执行新增/接入意图理解、阶段规划、观察 facts、批执行预算、阶段验证、反思学习和 `desktop_task` 外层分层证据；focused layer tests 48 passed，Computer Use 回归 36 passed，完整 `learning_agent/tests` 194 passed，`py_compile` 通过。
+- Evidence: 新增 layered text/drawing/multi-app acceptance 场景均使用 `/computer use --full` 首行和自动同意配置，JSON 格式校验通过。
+- Fixed during verification: `stage_task_loop.py` 报告里曾引用不存在的 `max_stage_repairs_reached` 变量，端到端测试复现为 NameError；已改为真实变量 `max_repairs_reached`，并删除不可达旧 `return`。
+- Remaining risk: 自动化 fake loop 证明分层链路可运行，但尚未证明真实本机窗口中模型会稳定完成文本、绘图、多应用复杂任务；必须通过 acceptance controller 的真实可见终端场景后才能关闭该风险。
