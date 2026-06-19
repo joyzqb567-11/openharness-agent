@@ -782,3 +782,5 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已创建本地 Git 快照提交：`chore: snapshot openharness before computer use refactor`。
 - 已添加远端 `openharness-agent=https://github.com/joyzqb567-11/openharness-agent.git`，但当前机器无法连通 GitHub 443，`Test-NetConnection github.com -Port 443` 为 `False`，`curl https://github.com` 超时，push 暂未完成。
 - 已生成本地可恢复 bundle：`H:\codexworkplace\sofeware\openharness-agent-snapshot-20260620.bundle`，用于网络恢复前的临时保护。
+- 用户提示浏览器可访问 GitHub 后，已确认浏览器使用系统代理 `127.0.0.1:7890`，而 Git/curl 原先没有代理配置；已将当前仓库 Git 代理设置为 `http://127.0.0.1:7890`。
+- 已成功执行 `git push -u openharness-agent codex/publish-main:main`，远端 `refs/heads/main` 当前指向 `ad31a03b8a18ffd45945d14896a1175aedd3161e`。
