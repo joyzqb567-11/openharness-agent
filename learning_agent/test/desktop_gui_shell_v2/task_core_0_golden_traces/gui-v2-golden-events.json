@@ -1,0 +1,209 @@
+[
+  {
+    "id": "GT-001",
+    "name": "Chinese Streaming Project Analysis",
+    "prompt": "请分析当前项目是什么项目，并列出模块组成。",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "message_delta", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "text_delta": "这是一个 OpenHarness agent 项目。" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "final_text": "这是一个 OpenHarness agent 项目。核心模块包括 GUI bridge、桌面外壳、浏览器自动化、Computer Use 和长任务 harness。" } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-002",
+    "name": "English Streaming Short Prompt",
+    "prompt": "Summarize this project in two concise sentences.",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt002", "run_id": "run_gt002", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "message_delta", "turn_id": "turn_gt002", "run_id": "run_gt002", "payload": { "text_delta": "OpenHarness is a local AI agent harness." } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt002", "run_id": "run_gt002", "payload": { "final_text": "OpenHarness is a local AI agent harness with a desktop GUI bridge. It combines task orchestration, browser automation, Computer Use, and long-running agent workflows." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-003",
+    "name": "Chinese Multiline Persistence",
+    "prompt": "第一行：说明项目。\n第二行：保留换行。\n第三行：说明如何重试。",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt003", "run_id": "run_gt003", "payload": { "status": "running", "input_line_count": 3 } },
+      { "sequence": 2, "kind": "message_delta", "turn_id": "turn_gt003", "run_id": "run_gt003", "payload": { "text_delta": "我会保留三行输入。" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt003", "run_id": "run_gt003", "payload": { "final_text": "三行输入已按原始换行保留，重试时应复用同一份用户消息文本。" } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-004",
+    "name": "Shift Enter Newline",
+    "prompt": "manual composer interaction: Shift+Enter newline, then Enter send once.",
+    "events": [
+      { "sequence": 1, "kind": "composer_newline_inserted", "turn_id": "turn_gt004", "run_id": "run_gt004", "payload": { "send_count": 0, "line_count": 2 } },
+      { "sequence": 2, "kind": "turn_started", "turn_id": "turn_gt004", "run_id": "run_gt004", "payload": { "status": "running", "send_count": 1 } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt004", "run_id": "run_gt004", "payload": { "final_text": "Composer newline preserved and prompt sent once." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-005",
+    "name": "Safety Refusal Assistant Message",
+    "prompt": "请绕过本机权限直接控制系统高风险操作。",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt005", "run_id": "run_gt005", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "safety_refusal", "turn_id": "turn_gt005", "run_id": "run_gt005", "payload": { "message": "我不能绕过本机权限或执行高风险操作。", "surface": "assistant_message" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt005", "run_id": "run_gt005", "payload": { "final_text": "我不能绕过本机权限或执行高风险操作，但可以帮你设计安全的授权流程。" } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-006",
+    "name": "Token Rejection In Thread",
+    "prompt": "bridge request with invalid desktop bridge credential.",
+    "events": [
+      { "sequence": 1, "kind": "client_error", "turn_id": "turn_gt006", "run_id": "run_gt006", "payload": { "code": "unauthorized", "message": "Desktop bridge credential was rejected.", "credential_redacted": true } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-007",
+    "name": "Unknown Route In Thread",
+    "prompt": "request unknown bridge path.",
+    "events": [
+      { "sequence": 1, "kind": "client_error", "turn_id": "turn_gt007", "run_id": "run_gt007", "payload": { "code": "not_found", "message": "This desktop route does not exist.", "status": 404 } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-008",
+    "name": "Bridge Offline",
+    "prompt": "stop bridge while GUI is open.",
+    "events": [
+      { "sequence": 1, "kind": "client_offline", "turn_id": "turn_gt008", "run_id": "run_gt008", "payload": { "online": false, "message": "Desktop bridge is offline.", "retryable": true } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-009",
+    "name": "Backend Busy",
+    "prompt": "send second prompt while first is running.",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt009a", "run_id": "run_gt009", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "client_error", "turn_id": "turn_gt009b", "run_id": "run_gt009", "payload": { "code": "agent_busy", "message": "Another turn is already running.", "active_turn_id": "turn_gt009a" } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-010",
+    "name": "Cancel During Streaming",
+    "prompt": "long running streaming answer.",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt010", "run_id": "run_gt010", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "message_delta", "turn_id": "turn_gt010", "run_id": "run_gt010", "payload": { "text_delta": "正在分析一个较长任务。" } },
+      { "sequence": 3, "kind": "turn_cancelled", "turn_id": "turn_gt010", "run_id": "run_gt010", "payload": { "status": "cancelled", "cancel_source": "user" } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-011",
+    "name": "Retry After Failed",
+    "prompt": "deterministic failed turn.",
+    "events": [
+      { "sequence": 1, "kind": "turn_failed", "turn_id": "turn_gt011a", "run_id": "run_gt011", "payload": { "status": "failed", "message": "Deterministic failure for retry." } },
+      { "sequence": 2, "kind": "turn_started", "turn_id": "turn_gt011b", "run_id": "run_gt011_retry", "payload": { "status": "running", "retry_of": "turn_gt011a" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt011b", "run_id": "run_gt011_retry", "payload": { "final_text": "Retry completed in a new linked turn." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-012",
+    "name": "Retry After Completed",
+    "prompt": "completed turn.",
+    "events": [
+      { "sequence": 1, "kind": "message_completed", "turn_id": "turn_gt012a", "run_id": "run_gt012", "payload": { "final_text": "Original completed answer." } },
+      { "sequence": 2, "kind": "turn_started", "turn_id": "turn_gt012b", "run_id": "run_gt012_retry", "payload": { "status": "running", "retry_of": "turn_gt012a" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt012b", "run_id": "run_gt012_retry", "payload": { "final_text": "Retry completed without overwriting the original." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-013",
+    "name": "Restart Resume Latest Session",
+    "prompt": "completed session, then restart GUI.",
+    "events": [
+      { "sequence": 1, "kind": "session_resumed", "turn_id": "turn_gt013", "run_id": "run_gt013", "payload": { "session_id": "session_gt013", "latest_sequence": 7, "message_count": 4 } },
+      { "sequence": 2, "kind": "message_completed", "turn_id": "turn_gt013", "run_id": "run_gt013", "payload": { "final_text": "Latest session restored after restart." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-014",
+    "name": "Permission Approve",
+    "prompt": "simulated tool permission request.",
+    "events": [
+      { "sequence": 1, "kind": "permission_requested", "turn_id": "turn_gt014", "run_id": "run_gt014", "payload": { "request_id": "perm_gt014", "tool_name": "desktop_tool", "decision": "pending" } },
+      { "sequence": 2, "kind": "permission_answered", "turn_id": "turn_gt014", "run_id": "run_gt014", "payload": { "request_id": "perm_gt014", "answer": "approved" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt014", "run_id": "run_gt014", "payload": { "final_text": "Permission approved and turn continued." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-015",
+    "name": "Permission Deny",
+    "prompt": "simulated tool permission request.",
+    "events": [
+      { "sequence": 1, "kind": "permission_requested", "turn_id": "turn_gt015", "run_id": "run_gt015", "payload": { "request_id": "perm_gt015", "tool_name": "desktop_tool", "decision": "pending" } },
+      { "sequence": 2, "kind": "permission_answered", "turn_id": "turn_gt015", "run_id": "run_gt015", "payload": { "request_id": "perm_gt015", "answer": "denied" } },
+      { "sequence": 3, "kind": "turn_failed", "turn_id": "turn_gt015", "run_id": "run_gt015", "payload": { "status": "failed", "message": "User denied the tool request." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-016",
+    "name": "Tool Started",
+    "prompt": "deterministic tool call.",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt016", "run_id": "run_gt016", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "tool_started", "turn_id": "turn_gt016", "run_id": "run_gt016", "payload": { "tool_call_id": "tool_gt016", "tool_name": "status_snapshot" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt016", "run_id": "run_gt016", "payload": { "final_text": "Tool progress was visible in TracePanel." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-017",
+    "name": "Tool Failed With Redacted Args",
+    "prompt": "deterministic failed tool call with sensitive args.",
+    "events": [
+      { "sequence": 1, "kind": "tool_started", "turn_id": "turn_gt017", "run_id": "run_gt017", "payload": { "tool_call_id": "tool_gt017", "tool_name": "file_probe", "args": { "path": "[redacted]" } } },
+      { "sequence": 2, "kind": "tool_finished", "turn_id": "turn_gt017", "run_id": "run_gt017", "payload": { "tool_call_id": "tool_gt017", "status": "failed", "error": "The tool failed with a redacted argument." } },
+      { "sequence": 3, "kind": "turn_failed", "turn_id": "turn_gt017", "run_id": "run_gt017", "payload": { "status": "failed", "message": "Tool failed safely with redacted details." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-018",
+    "name": "Browser Provider Degraded",
+    "prompt": "browser snapshot read failure.",
+    "events": [
+      { "sequence": 1, "kind": "panel_payload", "turn_id": "turn_gt018", "run_id": "run_gt018", "payload": { "panel": "browser", "degraded": true, "message": "Browser provider snapshot is temporarily unavailable." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-019",
+    "name": "Computer Use Safe Unavailable",
+    "prompt": "Computer Use state unavailable.",
+    "events": [
+      { "sequence": 1, "kind": "panel_payload", "turn_id": "turn_gt019", "run_id": "run_gt019", "payload": { "panel": "computer_use", "available": false, "safe_unavailable": true, "risky_controls_enabled": false } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  },
+  {
+    "id": "GT-020",
+    "name": "Diagnostics Bundle Redaction",
+    "prompt": "copy diagnostics.",
+    "events": [
+      { "sequence": 1, "kind": "diagnostics_payload_built", "turn_id": "turn_gt020", "run_id": "run_gt020", "payload": { "bundle_id": "diag_gt020", "redacted": true, "contains_local_secret": false } },
+      { "sequence": 2, "kind": "message_completed", "turn_id": "turn_gt020", "run_id": "run_gt020", "payload": { "final_text": "Diagnostics bundle copied with sensitive fields removed." } }
+    ],
+    "must_not_contain": ["raw_secret_value", "local_secret_path", "raw_stack_dump"]
+  }
+]

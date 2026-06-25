@@ -368,3 +368,7 @@
 - Evidence: 新增 layered text/drawing/multi-app acceptance 场景均使用 `/computer use --full` 首行和自动同意配置，JSON 格式校验通过。
 - Fixed during verification: `stage_task_loop.py` 报告里曾引用不存在的 `max_stage_repairs_reached` 变量，端到端测试复现为 NameError；已改为真实变量 `max_repairs_reached`，并删除不可达旧 `return`。
 - Remaining risk: 自动化 fake loop 证明分层链路可运行，但尚未证明真实本机窗口中模型会稳定完成文本、绘图、多应用复杂任务；必须通过 acceptance controller 的真实可见终端场景后才能关闭该风险。
+
+## 2026-06-25 Desktop GUI Shell V2 Golden Trace Risk
+
+- 已处理风险：V2 蓝图里的 JSON 示例曾把一个敏感 bridge header 字面量放进 `must_not_contain`，但同一任务后续测试又要求 fixture 原文不能包含该敏感词。实际实现保留“不得泄露敏感内容”的测试语义，改用 `raw_secret_value`、`local_secret_path`、`raw_stack_dump` 等低敏占位词，避免黄金样本自己违反红线。

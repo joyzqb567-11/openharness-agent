@@ -833,3 +833,9 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增门禁：加入 `Task Core-0: Golden Traces And Eval Corpus`，要求先定义 20 条 GUI golden traces，并用后端 fixture 合同测试与前端 reducer 测试锁定尾部失败分布。
 - 风险收敛：Task 3 从“直接接真实 Agent Adapter”改成“deterministic fake streaming adapter 先行，真实 harness 接线进入 V2-Trust”，避免真实 runtime 不确定性污染 V2-Core。
 - 当前未触发 Layer C 真实终端 gate：本次只升级方案和进度记录，没有修改 agent runtime、MCP routing、模型调用、浏览器自动化、Computer Use 执行或后端权限 enforcement。
+
+## 2026-06-25 Desktop GUI Shell V2 Execution
+
+- 当前目标：逐项完成 `2026-06-25-codex-style-desktop-gui-shell-v2.md`，先过 V2-Core，再过 V2-Trust，最后过 V2-Product。
+- 当前进度：Task Core-0 已新增 golden trace 文档、20 条 JSON fixture、后端合同测试、前端 fixture 测试、prompt matrix 更新，并已复制到 `learning_agent/test/desktop_gui_shell_v2/task_core_0_golden_traces/`。
+- 已验证：`python -m unittest learning_agent.tests.test_gui_golden_trace_contract` 通过；`npm test -- --run goldenTraceReducer.test.ts` 通过；`npm run lint` 通过。

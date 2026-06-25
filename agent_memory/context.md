@@ -191,3 +191,9 @@
 - Cua Driver 借鉴矩阵和 UIPI 完整性诊断合同也已迁入 learning_agent/computer_use_mcp_v2/windows_runtime，仅作为验收/诊断支持，不表示旧目录仍存在。
 - 后续新增或修复 Windows Computer Use 功能时，禁止新增 learning_agent.computer_use.* 或 computer_use.* 导入；应使用 learning_agent.computer_use_mcp_v2.windows_runtime.*。
 - 该边界已由真实可见终端 acceptance controller 场景验证通过：agent_capability_computer_use_mcp_v2_legacy_folder_removed_visible_terminal-20260618_202959。
+
+## 2026-06-25 Desktop GUI Shell V2
+
+当前长任务目标是逐项完成 `docs/superpowers/plans/2026-06-25-codex-style-desktop-gui-shell-v2.md`。执行顺序按蓝图分为 `V2-Core`、`V2-Trust`、`V2-Product`，先建立 golden traces 和可回归 UI 状态基线，再推进真实桥接、安全、诊断、搜索、插件入口和最终可见 GUI 验收。
+
+Task Core-0 的边界是只建立 20 条 `GT-001` 到 `GT-020` golden traces、后端 fixture 合同测试、前端 fixture 消费测试和 prompt matrix 记录。它不代表 20 个场景都已经在可见 GUI 中跑通；可见 GUI 执行会在后续 V2-Core、V2-Trust、V2-Product 任务中逐项完成。
