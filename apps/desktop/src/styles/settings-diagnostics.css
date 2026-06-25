@@ -1,0 +1,105 @@
+.settings-panel { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义设置面板布局；如果没有这段，设置内容会退回普通文档流。 */
+  display: grid; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用网格纵向排列设置区块；如果没有这行，区块间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopSettingsDiagnosticsStyle：让设置内容从顶部开始；如果没有这行，少量内容可能被拉散。 */
+  gap: 12px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置区块之间的固定间距；如果没有这行，设置项会挤在一起。 */
+  min-width: 0; /* 新增代码+DesktopSettingsDiagnosticsStyle：允许长路径在右栏内截断；如果没有这行，路径可能撑破布局。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：设置面板规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-section { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义设置分组；如果没有这段，后端、开关和文件区域缺少边界。 */
+  display: grid; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直组织分组内容；如果没有这行，标题和内容会自然粘连。 */
+  gap: 8px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置组内间距；如果没有这行，字段会靠得太近。 */
+  border-top: 1px solid #e5e9f0; /* 新增代码+DesktopSettingsDiagnosticsStyle：用细线分隔分组；如果没有这行，设置区块边界不清。 */
+  padding-top: 10px; /* 新增代码+DesktopSettingsDiagnosticsStyle：给分隔线上方留呼吸空间；如果没有这行，文字会贴着线。 */
+  min-width: 0; /* 新增代码+DesktopSettingsDiagnosticsStyle：允许分组内容收缩；如果没有这行，长文本会撑宽右栏。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：设置分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-section-title { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义设置分组标题行；如果没有这段，图标和标题无法对齐。 */
+  display: flex; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用弹性布局对齐图标和文字；如果没有这行，标题行会错位。 */
+  align-items: center; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直居中标题内容；如果没有这行，图标可能偏上。 */
+  gap: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置图标和文字间距；如果没有这行，标题会显得拥挤。 */
+  color: #30363d; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用主文本色；如果没有这行，标题层级不明显。 */
+  font-size: 12px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用紧凑标题字号；如果没有这行，右侧面板会显得拥挤。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：设置分组标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-flags { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义功能开关 chip 容器；如果没有这段，开关列表会缺少紧凑排列。 */
+  display: flex; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用弹性布局排列 chips；如果没有这行，chips 会纵向堆叠。 */
+  flex-wrap: wrap; /* 新增代码+DesktopSettingsDiagnosticsStyle：允许 chips 换行；如果没有这行，长列表会横向溢出。 */
+  gap: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置 chips 间距；如果没有这行，开关标签会贴在一起。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：功能开关容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-flag { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义单个功能开关 chip；如果没有这段，开关状态会像普通文本。 */
+  border: 1px solid #b7e4c7; /* 新增代码+DesktopSettingsDiagnosticsStyle：给启用开关绿色边框；如果没有这行，启用状态不易扫描。 */
+  border-radius: 999px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用胶囊形 chip；如果没有这行，标签不像状态控件。 */
+  background: #ecfdf3; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用浅绿色背景；如果没有这行，启用状态不够清楚。 */
+  color: #027a48; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用深绿色文字；如果没有这行，对比度不足。 */
+  font-size: 11px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用小字号；如果没有这行，右侧面板密度下降。 */
+  padding: 2px 8px; /* 新增代码+DesktopSettingsDiagnosticsStyle：给 chip 留内边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：功能开关 chip 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-flag-muted { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义关闭或空态开关 chip；如果没有这段，关闭状态会和启用状态混淆。 */
+  border-color: #d8dee8; /* 新增代码+DesktopSettingsDiagnosticsStyle：关闭状态使用灰色边框；如果没有这行，状态差异不明显。 */
+  background: #f2f4f7; /* 新增代码+DesktopSettingsDiagnosticsStyle：关闭状态使用灰底；如果没有这行，关闭状态像启用状态。 */
+  color: #667085; /* 新增代码+DesktopSettingsDiagnosticsStyle：关闭状态使用次级文字；如果没有这行，关闭状态过重。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：关闭 chip 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-copy-row { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义设置页复制行；如果没有这段，复制路径按钮会像普通按钮。 */
+  display: grid; /* 新增代码+DesktopSettingsDiagnosticsStyle：用网格排列文本和图标；如果没有这行，路径和图标对齐不稳。 */
+  grid-template-columns: minmax(0, 1fr) auto; /* 新增代码+DesktopSettingsDiagnosticsStyle：让路径列自适应并保留图标列；如果没有这行，长路径会挤走图标。 */
+  align-items: center; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直居中内容；如果没有这行，图标可能偏上。 */
+  gap: 8px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置文本和图标间距；如果没有这行，图标会贴着文本。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopSettingsDiagnosticsStyle：给复制行边界；如果没有这行，按钮点击区域不清楚。 */
+  border-radius: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用小圆角；如果没有这行，按钮和系统风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用白底；如果没有这行，按钮会埋在背景里。 */
+  color: #30363d; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用主文本色；如果没有这行，可读性下降。 */
+  cursor: pointer; /* 新增代码+DesktopSettingsDiagnosticsStyle：显示可点击光标；如果没有这行，用户不知道可复制。 */
+  padding: 8px; /* 新增代码+DesktopSettingsDiagnosticsStyle：给复制行内边距；如果没有这行，点击目标太小。 */
+  text-align: left; /* 新增代码+DesktopSettingsDiagnosticsStyle：左对齐路径文本；如果没有这行，按钮默认居中会难扫读。 */
+  min-width: 0; /* 新增代码+DesktopSettingsDiagnosticsStyle：允许长路径截断；如果没有这行，路径会撑破右栏。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：复制行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-copy-row span { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义复制行文本组；如果没有这段，标题和路径无法垂直排列。 */
+  display: grid; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直排列标题和路径；如果没有这行，两段文本会挤在一行。 */
+  gap: 2px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置标题和路径间距；如果没有这行，文本会粘连。 */
+  min-width: 0; /* 新增代码+DesktopSettingsDiagnosticsStyle：允许路径截断；如果没有这行，长路径会溢出。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：复制行文本组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-copy-row small { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义路径文本；如果没有这段，路径会和标题同级。 */
+  color: #667085; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用次级文字色；如果没有这行，路径会抢标题层级。 */
+  font-size: 11px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用小字号显示路径；如果没有这行，路径会占过多空间。 */
+  overflow: hidden; /* 新增代码+DesktopSettingsDiagnosticsStyle：隐藏溢出文本；如果没有这行，长路径会越界。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用省略号；如果没有这行，截断不明显。 */
+  white-space: nowrap; /* 新增代码+DesktopSettingsDiagnosticsStyle：保持单行路径；如果没有这行，路径会撑高按钮。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：路径文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-state { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义诊断状态横幅；如果没有这段，在线/降级状态不醒目。 */
+  display: flex; /* 新增代码+DesktopSettingsDiagnosticsStyle：用弹性布局对齐图标和文案；如果没有这行，图标会错位。 */
+  align-items: center; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直居中状态内容；如果没有这行，图标和文字不齐。 */
+  gap: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置图标和文字间距；如果没有这行，状态横幅拥挤。 */
+  border: 1px solid #b7e4c7; /* 新增代码+DesktopSettingsDiagnosticsStyle：正常状态绿色边框；如果没有这行，状态不够可见。 */
+  border-radius: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用小圆角；如果没有这行，横幅风格不统一。 */
+  background: #ecfdf3; /* 新增代码+DesktopSettingsDiagnosticsStyle：正常状态浅绿背景；如果没有这行，正常状态不易扫描。 */
+  color: #027a48; /* 新增代码+DesktopSettingsDiagnosticsStyle：正常状态深绿文字；如果没有这行，对比度不足。 */
+  font-size: 12px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用紧凑字号；如果没有这行，右侧面板会显得拥挤。 */
+  padding: 8px; /* 新增代码+DesktopSettingsDiagnosticsStyle：给横幅留内边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：诊断状态横幅规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-state-warning { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义降级状态横幅；如果没有这段，降级会和正常状态混淆。 */
+  border-color: #fedf89; /* 新增代码+DesktopSettingsDiagnosticsStyle：降级状态使用黄色边框；如果没有这行，警告不明显。 */
+  background: #fffbeb; /* 新增代码+DesktopSettingsDiagnosticsStyle：降级状态使用浅黄背景；如果没有这行，警告层级不足。 */
+  color: #7a4b00; /* 新增代码+DesktopSettingsDiagnosticsStyle：降级状态使用深黄文字；如果没有这行，对比度不足。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：降级横幅规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-copy-button { /* 新增代码+DesktopSettingsDiagnosticsStyle：定义复制诊断包按钮；如果没有这段，复制动作缺少稳定视觉。 */
+  display: inline-flex; /* 新增代码+DesktopSettingsDiagnosticsStyle：让图标和文字水平排列；如果没有这行，按钮内容可能换行。 */
+  align-items: center; /* 新增代码+DesktopSettingsDiagnosticsStyle：垂直居中图标和文字；如果没有这行，按钮显得不精致。 */
+  justify-content: center; /* 新增代码+DesktopSettingsDiagnosticsStyle：居中按钮内容；如果没有这行，内容会偏左。 */
+  gap: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置图标和文字间距；如果没有这行，按钮拥挤。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopSettingsDiagnosticsStyle：给按钮边界；如果没有这行，按钮点击区域不清。 */
+  border-radius: 6px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用小圆角；如果没有这行，按钮风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用白底；如果没有这行，按钮会沉在背景里。 */
+  color: #30363d; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用主文本色；如果没有这行，可读性下降。 */
+  cursor: pointer; /* 新增代码+DesktopSettingsDiagnosticsStyle：显示可点击光标；如果没有这行，用户不知道可复制。 */
+  font-size: 12px; /* 新增代码+DesktopSettingsDiagnosticsStyle：使用紧凑字号；如果没有这行，按钮会过大。 */
+  min-height: 32px; /* 新增代码+DesktopSettingsDiagnosticsStyle：固定按钮高度；如果没有这行，图标和文字可能造成跳动。 */
+  padding: 0 10px; /* 新增代码+DesktopSettingsDiagnosticsStyle：设置水平内边距；如果没有这行，按钮太窄。 */
+} /* 新增代码+DesktopSettingsDiagnosticsStyle：复制诊断按钮规则结束；如果没有这行，CSS 块语法不完整。 */

@@ -907,3 +907,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增样式文件 `apps/desktop/src/styles/runtime-panels.css`，由 `apps/desktop/src/renderer/main.tsx` 引入，避免继续膨胀主 `layout.css`。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task09_browser_computer_panel/`。
 - 已验证：红灯阶段 `python -m unittest learning_agent.tests.test_gui_browser_computer_panel_contract` 首先失败于缺少 `build_gui_runtime_panels_payload` 和 `/v2/gui/runtime/panels` 路由；实现后相关后端测试通过；前端 `npm test -- --run` 为 38 tests passed；`npm run lint` 通过；`python -m unittest learning_agent.tests.test_gui_browser_computer_panel_contract learning_agent.tests.test_gui_bridge_contract learning_agent.tests.test_gui_bridge_security_contract` 为 16 tests OK。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 11
+
+- Task 11：设置、诊断和崩溃恢复已完成。后端新增 `learning_agent/app/gui_diagnostics.py`，提供 `build_gui_health_payload()`、`build_gui_diagnostics_payload()`、`redact_diagnostic_text()`。
+- `gui_bridge.py` 已接入 `/v2/gui/health` 与 `/v2/gui/diagnostics`，V2 health 需要 token 并返回 schema、uptime、workspace、feature flags、model/provider；V2 diagnostics 返回脱敏健康摘要、snapshot 摘要、release gate 状态、safe_error 和可复制诊断包。
+- 前端新增 `settingsStore.ts`、`SettingsPanel.tsx`、`DiagnosticsPanel.tsx` 和 `settings-diagnostics.css`；`StatusInspector.tsx` 继续保持五页签，把“设置/诊断”替换为真实面板；`AppShell.tsx` 启动时并行读取 bootstrap、sessions、runtime panels、health、diagnostics。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task11_settings_diagnostics/`。
+- 已验证：红灯阶段 `python -m unittest learning_agent.tests.test_gui_diagnostics_contract` 首先失败于缺少 `gui_diagnostics.py` 和 `/v2/gui/health` 路由；实现后该测试 5 tests OK；`npm test -- --run settingsStore.test.ts guiClient.test.ts` 为 14 tests passed；`npm test -- --run` 为 9 files / 43 tests passed；`npm run lint` 通过；相关后端 bridge 合同 21 tests OK。

@@ -401,3 +401,10 @@
 - Closed risk: 浏览器 provider 和 Computer Use panel 在状态快照读取失败时可能把 Windows 本机路径或异常细节显示给用户。现在 `/v2/gui/runtime/panels` 失败时只返回 `状态快照暂时不可读。`，测试覆盖序列化 payload 不包含用户路径片段。
 - Closed risk: 前端此前只显示浏览器 provider 状态，Computer Use 锁、急停、权限模式和允许动作不可见。现在右侧“浏览器”页签同时显示 `BrowserPanel` 和 `ComputerUsePanel`，用户能看到桌面自动化是否 off、是否锁定、是否有急停请求和待处理权限。
 - Remaining risk: Computer Use 面板当前展示的是安全摘要和 mode session 状态，不等于完整真实 Windows lock/abort controller 已接入 GUI。后续真实 adapter/runtime 接入时，必须把真实 lock owner、abort requested、hotkey/fallback 状态映射到同一 `/v2/gui/runtime/panels` payload，不能新增旁路 API。
+
+## 2026-06-25 Desktop GUI Shell V2 Settings Diagnostics Risks
+
+- Status: 本轮诊断泄露风险已关闭，真实崩溃恢复深度仍待后续任务扩展。
+- Closed risk: `diagnostics` payload 最初复用完整 health，测试发现序列化结果包含 `C:\Users\joyzq...` 临时路径。现在 `build_gui_diagnostics_payload()` 会对内嵌 `health.workspace` 脱敏，诊断复制包也只包含安全摘要。
+- Closed risk: snapshot 读取失败可能把原始异常路径显示到前端。现在 diagnostics 失败时固定返回 `状态快照暂时不可读。`，并且测试覆盖 token、Bearer、`sk-*`、Windows 用户路径和工作区路径脱敏。
+- Remaining risk: 当前诊断页能显示 online/schema/degraded/last error/release gate/copy bundle，但还不是完整 crash recovery manager。后续如果要做崩溃自动恢复、日志打包上传或历史 gate 浏览，应继续复用 `/v2/gui/diagnostics` 和 `settingsStore.ts`，不能新增会泄露绝对路径或 token 的旁路接口。

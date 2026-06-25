@@ -211,3 +211,7 @@ Task 7 已把工具轨迹收敛到前端纯 reducer 边界：`reduceGuiEventToTr
 Task 9 已建立 V2 运行时面板边界：`learning_agent/app/gui_bridge.py` 中的 `build_gui_runtime_panels_payload(workspace)` 是 `/v2/gui/runtime/panels` 的唯一 payload 生成点，输出 `browser/computer_use/permissions/status_degraded/safe_error`。浏览器状态继续从 `build_status_snapshot(workspace)` 取事实，失败时只返回安全文案，不泄露本机路径。Computer Use 面板当前以安全摘要为主，锁和急停是 GUI 层可显示字段，真实 lock owner/abort runtime 后续接入时必须沿用该 payload 形状。
 
 前端 Task 9 的数据流是：`createGuiClient().runtimePanels()` 拉取 `/v2/gui/runtime/panels`，`AppShell.tsx` 保存到 `runtimePanels` state，`StatusInspector.tsx` 在“浏览器”页签中把 `runtimePanels.browser` 传给 `BrowserPanel`，把 `runtimePanels.computer_use` 和 `runtimePanels.permissions` 传给 `ComputerUsePanel`。后续不要再新增独立右侧栏；Task 11 诊断导出应继续扩展 `StatusInspector` 的“诊断”页签。
+
+Task 11 已建立设置/诊断边界：`learning_agent/app/gui_diagnostics.py` 是 V2 health、diagnostics 和诊断文本脱敏的唯一后端 helper；`/v2/gui/health` 给设置页显示完整 workspace、uptime、provider/model 和 feature flags；`/v2/gui/diagnostics` 更保守，内嵌 health.workspace 会脱敏，诊断包只保留安全摘要、release gate 状态和相对目录。
+
+前端 Task 11 的数据流是：`createGuiClient().health()` 拉取 `/v2/gui/health`，`createGuiClient().diagnostics()` 拉取 `/v2/gui/diagnostics`，`AppShell.tsx` 保存到 `healthPayload` 和 `diagnosticsPayload`，`StatusInspector.tsx` 把它们传给 `SettingsPanel` 与 `DiagnosticsPanel`。设置页的数据合成统一在 `apps/desktop/src/state/settingsStore.ts`，组件不直接拼 token URL 或任意后端 JSON。后续新增诊断字段时应扩展 `settingsStore` 的纯函数和测试，而不是在 JSX 中散写解析逻辑。
