@@ -863,3 +863,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已使用主仓库 CodeGraph 调查真实接线点，并记录到 `docs/desktop_gui_shell_v2_agent_adapter_mapping.md`：未来真实入口应围绕 `LearningAgent.run(...) -> run_agent_with_harness_session(...) -> agent.run_events(...)`，通过 `event_callback` 和 `StatusEventStore` 映射到 GUI V2 events。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task03_fake_agent_adapter/`。
 - 已验证：红灯阶段 `test_gui_agent_adapter_contract` 最初失败在默认 manager 没有 `message_delta`；修复后 `python -m unittest learning_agent.tests.test_gui_agent_adapter_contract learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_stream_contract learning_agent.tests.test_gui_bridge_security_contract learning_agent.tests.test_gui_bridge_events_contract` 为 19 tests OK；`python -m py_compile learning_agent\app\gui_agent_adapter.py learning_agent\app\gui_bridge.py learning_agent\app\gui_stream.py learning_agent\tests\test_gui_agent_adapter_contract.py` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 4
+
+- Task 4：Thread 流式渲染和一等消息已完成。新增 `apps/desktop/src/state/eventReducer.ts`，把 `message_delta`、`message_completed`、`safety_refusal`、`turn_failed`、V2 原生 turn 事件和旧 `gui_turn_*` 事件统一转换成 `ThreadAction`。
+- `threadStore.ts` 已扩展 `ThreadMessage.kind`、`assistant_message_upserted`、`message_delta_received`，支持按 `turnId` 更新助手消息、增量追加文本、创建孤立失败/拒绝消息，并保留旧生命周期 reducer 兼容。
+- `ThreadView.tsx` 已把拒绝和错误渲染为线程内一等助手消息：显示“安全拒绝/错误”标签，错误终态保留重试入口，消息正文支持 Markdown 代码围栏转 `<pre><code>` 并横向滚动。
+- `AppShell.tsx` 已移除本地旧事件映射函数，轮询和补拉统一调用 `reduceGuiEventToThreadActions()`；`layout.css` 已补齐消息正文、语义标签和代码块样式。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task04_thread_streaming_messages/`。
+- 已验证：先跑红灯 `npm test -- --run threadStore.test.ts eventReducer.test.ts` 失败于 `eventReducer` 不存在；实现后 `npm test -- --run threadStore.test.ts eventReducer.test.ts` 为 9 tests passed；`npm run lint` 通过。
