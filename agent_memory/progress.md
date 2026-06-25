@@ -932,3 +932,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `AppShell.tsx` 已维护 `archivedCount/searchOpen/searchArchivedMode/searchQuery/searchResults/searchLoading`，普通搜索和归档过滤分开处理；提交或重试成功后会刷新侧栏 sessions。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task08_sessions_search/`。
 - 已验证：`python -m unittest learning_agent.tests.test_gui_sessions_search_contract` 为 4 tests OK；`npm test -- --run` 为 9 files / 44 tests passed；`npm run lint` 通过；`python -m unittest learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_sessions_search_contract` 为 7 tests OK。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 10
+
+- Task 10：长任务 Harness GUI 面板已完成。后端 `learning_agent/app/gui_bridge.py` 新增 `/v2/gui/harness/status`、`/v2/gui/harness/pause`、`/v2/gui/harness/resume`，状态 payload 包含 `active_goal`、`queue`、`checkpoints`、`last_progress`、`blocked_reason`、`safe_error` 和 `controls`。
+- 当前 pause/resume 是结构化 unsupported 响应，不伪造真实暂停能力；前端 `HarnessPanel.tsx` 只有在 `controls.pause_supported` 或 `controls.resume_supported` 为真时才显示控制按钮。
+- 前端 `guiClient.ts` 已新增 `harnessStatus()`、`pauseHarness()`、`resumeHarness()`；`AppShell.tsx` 启动时和 3 秒轮询读取 Harness 状态，并把 payload 与控制回调传给 `StatusInspector.tsx` 的“任务”页签。
+- `runtime-panels.css` 已增加 Harness 面板样式，覆盖当前目标、队列、checkpoint、阻塞警告和控制按钮，避免长 prompt 或路径撑破右侧栏。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task10_harness_panel/`。
+- 已验证：`python -m unittest learning_agent.tests.test_gui_harness_panel_contract` 为 2 tests OK；`npm test -- --run` 为 9 files / 45 tests passed；`npm run lint` 通过。

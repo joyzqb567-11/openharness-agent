@@ -422,3 +422,10 @@
 - Closed risk: 侧栏此前只读 V1 sessions，缺少 title/archive/pin/updated_at 字段，搜索按钮也只是静态入口。现在后端 V2 sessions/search/rename/archive 有合同测试，前端 client 和 Sidebar/SearchPanel 均接入真实 endpoint。
 - Closed risk: 归档入口如果只是打开普通搜索，会让用户看不到已归档会话。现在归档入口会调用 `sessions(true)`，只展示 archived 会话；归档模式下继续输入关键词会调用 `searchSessions(query, true)`。
 - Remaining risk: `pinned` 字段已经在 payload、排序和 Sidebar 标记中预留，但当前没有 pin/unpin 写入 endpoint 或 UI 控件。后续实现时应新增后端合同和 GUI 控件，不要只在前端临时标记。
+
+## 2026-06-25 Desktop GUI Shell V2 Harness Panel Risks
+
+- Status: 本轮长任务可视化风险已关闭，真实 pause/resume 能力仍是后续边界。
+- Closed risk: 长任务 goal、队列、checkpoint 和 blocked reason 此前没有右侧 GUI 入口，用户只能从日志或终端推断长任务位置。现在 `/v2/gui/harness/status` 和“任务”页签把这些字段作为一等状态展示，并有后端合同测试覆盖。
+- Closed risk: 前端如果无条件显示暂停/恢复按钮，会误导用户以为 Harness 已支持真实控制。现在后端 `controls.pause_supported/resume_supported` 默认为 false，控制 endpoint 返回结构化 `unsupported`，前端只有能力为真时才显示按钮。
+- Remaining risk: 当前 pause/resume 只是结构化占位，不代表真实 Harness runtime 已具备安全暂停和恢复。后续实现前必须先建立 runtime 级状态机、审计事件和恢复合同测试，不能只改 GUI。
