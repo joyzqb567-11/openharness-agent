@@ -817,3 +817,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Task 14 最新验证：`python -m unittest learning_agent.tests.test_gui_bridge_contract learning_agent.tests.test_gui_bridge_events_contract learning_agent.tests.test_gui_bridge_security_contract learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_bridge_permission_contract` 为 24 tests OK；`npm run lint` 通过；`npm test -- --run` 为 16 tests passed；可见 GUI 截图归档在 `learning_agent/test/desktop_gui_shell_20260625/`。
 - Task 14 剩余后续矩阵项已明确记录为非本切片完成项：安全拒绝一等消息、多行中文持久化、Shift+Enter 可见光标行为、token/unknown route 的 polished in-thread GUI 错误面；未伪装为已完成。
 - 已完成 Task 15：新增 `apps/desktop/scripts/release-gate.ps1`，串联 Python GUI bridge 合同/事件/安全/生命周期/权限测试、前端 lint、Vitest 和生产 build；PowerShell parser 通过，完整 release gate 已通过：24 Python tests OK、16 frontend tests passed、lint/build passed；学习副本保存到 `learning_agent/test/desktop_gui_shell_20260625/task15_release_gate/`。
+
+## 2026-06-25 Codex 风格桌面 GUI 外壳 V2 蓝图
+
+- Status: 已新增 V2 书面蓝图，尚未开始修改运行时代码。
+- 蓝图文件：`docs/superpowers/plans/2026-06-25-codex-style-desktop-gui-shell-v2.md`。
+- 目标：把 V1 可见垂直切片升级为接近 Codex 桌面体验的成熟外壳，覆盖流式输出、真实 Agent Adapter、会话恢复、工具轨迹、权限与安全、浏览器/Computer Use 面板、项目搜索、长任务 Harness、设置诊断、打包和分层验收。
+- 推荐执行方式：使用 `superpowers:subagent-driven-development` 逐任务执行，主 agent 负责审核、release gate 和真实可见 GUI 验收。
+- 当前未触发 Layer C 真实终端 gate：本次只写方案和进度记录，没有修改 agent runtime、MCP routing、模型调用、浏览器自动化、Computer Use 执行或后端权限 enforcement。
