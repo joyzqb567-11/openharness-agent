@@ -394,3 +394,10 @@
 - Closed risk: 工具事件此前只散落在原始状态时间线，用户无法快速看到某个工具的参数、耗时、结果或失败码。现在 `reduceGuiEventToTraceRows()` 和 `TracePanel.tsx` 把工具轨迹作为右侧“工具”页签一等展示。
 - Closed risk: 工具参数和诊断文本可能显示本机路径、`sk-*` 密钥或 bearer token。现在 trace reducer 在 `argsPreview` 和 `diagnosticText` 中统一输出 `[redacted]`，并有前端 reducer 回归测试覆盖。
 - Remaining risk: 当前 trace row 仍消费 fake/default GUI events；真实 agent adapter 接入后必须确认真实工具事件也统一发出 `tool_started/tool_finished` 或等价字段，不能只把工具日志写到主线程消息里。
+
+## 2026-06-25 Desktop GUI Shell V2 Runtime Panel Risks
+
+- Status: 本轮路径泄露风险已关闭，真实 runtime 深度接入风险仍保留。
+- Closed risk: 浏览器 provider 和 Computer Use panel 在状态快照读取失败时可能把 Windows 本机路径或异常细节显示给用户。现在 `/v2/gui/runtime/panels` 失败时只返回 `状态快照暂时不可读。`，测试覆盖序列化 payload 不包含用户路径片段。
+- Closed risk: 前端此前只显示浏览器 provider 状态，Computer Use 锁、急停、权限模式和允许动作不可见。现在右侧“浏览器”页签同时显示 `BrowserPanel` 和 `ComputerUsePanel`，用户能看到桌面自动化是否 off、是否锁定、是否有急停请求和待处理权限。
+- Remaining risk: Computer Use 面板当前展示的是安全摘要和 mode session 状态，不等于完整真实 Windows lock/abort controller 已接入 GUI。后续真实 adapter/runtime 接入时，必须把真实 lock owner、abort requested、hotkey/fallback 状态映射到同一 `/v2/gui/runtime/panels` payload，不能新增旁路 API。

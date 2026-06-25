@@ -1,0 +1,182 @@
+.runtime-panels { /* 新增代码+DesktopRuntimePanelsStyle：定义右侧运行时面板组；如果没有这段，浏览器和 Computer Use 面板会贴在一起缺少扫描节奏。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：使用网格纵向排列两个面板；如果没有这行，面板之间的间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopRuntimePanelsStyle：让面板从顶部开始排列；如果没有这行，少量内容可能被拉散。 */
+  gap: 12px; /* 新增代码+DesktopRuntimePanelsStyle：设置面板之间的固定间距；如果没有这行，两个状态区会黏在一起。 */
+  min-width: 0; /* 新增代码+DesktopRuntimePanelsStyle：允许长文本在右栏内截断；如果没有这行，长标题可能撑破右侧栏。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：运行时面板组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel { /* 修改代码+DesktopRuntimePanelsStyle：定义浏览器面板布局；如果没有这段，V2 provider chips 和 active target 缺少稳定容器。 */
+  display: grid; /* 修改代码+DesktopRuntimePanelsStyle：用网格垂直组织浏览器信息；如果没有这行，内容会自然流导致间距混乱。 */
+  gap: 10px; /* 修改代码+DesktopRuntimePanelsStyle：设置浏览器面板内部间距；如果没有这行，chip、摘要和警告会贴得太近。 */
+  border-bottom: 1px solid #e5e9f0; /* 修改代码+DesktopRuntimePanelsStyle：保留浏览器区与下方内容的分隔；如果没有这行，两个运行时区边界不清楚。 */
+  padding-bottom: 12px; /* 修改代码+DesktopRuntimePanelsStyle：给分隔线前留出呼吸空间；如果没有这行，内容会贴着边界。 */
+  min-width: 0; /* 修改代码+DesktopRuntimePanelsStyle：允许浏览器面板在窄栏内收缩；如果没有这行，长 URL 会撑破布局。 */
+} /* 修改代码+DesktopRuntimePanelsStyle：浏览器面板规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header, /* 修改代码+DesktopRuntimePanelsStyle：复用标题行布局给浏览器面板；如果没有这行，标题和数量无法左右对齐。 */
+.computer-use-header { /* 新增代码+DesktopRuntimePanelsStyle：复用标题行布局给 Computer Use 面板；如果没有这段，模式标签会和标题错位。 */
+  display: flex; /* 新增代码+DesktopRuntimePanelsStyle：使用弹性布局对齐标题和状态；如果没有这行，标题和标签会堆叠。 */
+  align-items: center; /* 新增代码+DesktopRuntimePanelsStyle：垂直居中标题和标签；如果没有这行，小标签会偏上或偏下。 */
+  justify-content: space-between; /* 新增代码+DesktopRuntimePanelsStyle：把标题和摘要推到两端；如果没有这行，信息层级不够清楚。 */
+  gap: 8px; /* 新增代码+DesktopRuntimePanelsStyle：给标题和状态留间距；如果没有这行，窄栏里文字可能贴住。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：标题行布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header h2, /* 修改代码+DesktopRuntimePanelsStyle：定义浏览器标题样式；如果没有这行，标题会继承不稳定默认值。 */
+.computer-use-header h2 { /* 新增代码+DesktopRuntimePanelsStyle：定义 Computer Use 标题样式；如果没有这段，两个面板标题大小不一致。 */
+  color: #30363d; /* 新增代码+DesktopRuntimePanelsStyle：使用主文本色；如果没有这行，标题层级可能过淡。 */
+  font-size: 13px; /* 新增代码+DesktopRuntimePanelsStyle：使用紧凑工具面板标题字号；如果没有这行，右侧面板会显得拥挤。 */
+  font-weight: 600; /* 新增代码+DesktopRuntimePanelsStyle：加粗标题；如果没有这行，标题和正文不易区分。 */
+  margin: 0; /* 新增代码+DesktopRuntimePanelsStyle：移除浏览器默认外边距；如果没有这行，标题行高度会跳动。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：标题样式规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header span { /* 修改代码+DesktopRuntimePanelsStyle：定义浏览器 tab 数量标签；如果没有这段，数量摘要会像普通正文。 */
+  color: #667085; /* 修改代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，数量会抢标题层级。 */
+  font-size: 11px; /* 修改代码+DesktopRuntimePanelsStyle：压低数量字号；如果没有这行，标题行视觉密度过高。 */
+} /* 修改代码+DesktopRuntimePanelsStyle：浏览器数量标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-runtime-alert, /* 新增代码+DesktopRuntimePanelsStyle：定义浏览器降级提示；如果没有这行，安全错误缺少醒目但克制的样式。 */
+.computer-use-banner { /* 新增代码+DesktopRuntimePanelsStyle：定义 Computer Use 降级提示；如果没有这段，不可用状态没有稳定样式。 */
+  border: 1px solid #fedf89; /* 新增代码+DesktopRuntimePanelsStyle：使用温和警告边框；如果没有这行，降级提示和普通文本难区分。 */
+  border-radius: 6px; /* 新增代码+DesktopRuntimePanelsStyle：使用小圆角；如果没有这行，提示块和整体控件风格不一致。 */
+  background: #fffbeb; /* 新增代码+DesktopRuntimePanelsStyle：使用浅黄色背景；如果没有这行，警告状态不明显。 */
+  color: #7a4b00; /* 新增代码+DesktopRuntimePanelsStyle：使用深琥珀文字；如果没有这行，对比度不足。 */
+  font-size: 12px; /* 新增代码+DesktopRuntimePanelsStyle：使用紧凑说明字号；如果没有这行，提示会压缩面板空间。 */
+  line-height: 1.4; /* 新增代码+DesktopRuntimePanelsStyle：提高警告文本可读性；如果没有这行，多字提示会拥挤。 */
+  margin: 0; /* 新增代码+DesktopRuntimePanelsStyle：移除默认段落外边距；如果没有这行，提示块会破坏节奏。 */
+  padding: 8px; /* 新增代码+DesktopRuntimePanelsStyle：给提示文字留边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：降级提示规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chips { /* 新增代码+DesktopRuntimePanelsStyle：定义 provider chip 容器；如果没有这段，浏览器轨道会缺少紧凑排列。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：使用网格排列 chips；如果没有这行，多 provider 会自然堆叠不稳。 */
+  gap: 8px; /* 新增代码+DesktopRuntimePanelsStyle：设置 chips 间距；如果没有这行，轨道条目会黏在一起。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：provider chip 容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chip { /* 新增代码+DesktopRuntimePanelsStyle：定义单个 provider chip；如果没有这段，轨道状态会像普通文本。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：用网格组织名称、状态和原因；如果没有这行，三段文字难对齐。 */
+  gap: 2px; /* 新增代码+DesktopRuntimePanelsStyle：设置 chip 内部紧凑间距；如果没有这行，状态块会过高。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopRuntimePanelsStyle：给 chip 加轻边框；如果没有这行，轨道条目边界不清。 */
+  border-left-width: 3px; /* 新增代码+DesktopRuntimePanelsStyle：给状态色留出左侧强调线；如果没有这行，可用性不易扫描。 */
+  border-radius: 6px; /* 新增代码+DesktopRuntimePanelsStyle：使用小圆角；如果没有这行，chip 与系统风格不一致。 */
+  background: #ffffff; /* 新增代码+DesktopRuntimePanelsStyle：使用白底提升可读性；如果没有这行，chip 会埋在灰底里。 */
+  padding: 8px; /* 新增代码+DesktopRuntimePanelsStyle：给 chip 内容留空间；如果没有这行，文字会贴边。 */
+  min-width: 0; /* 新增代码+DesktopRuntimePanelsStyle：允许长原因截断；如果没有这行，provider reason 会撑破右栏。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：provider chip 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-ready { /* 新增代码+DesktopRuntimePanelsStyle：定义可用 provider 状态；如果没有这段，在线轨道缺少正向视觉反馈。 */
+  border-left-color: #12b76a; /* 新增代码+DesktopRuntimePanelsStyle：使用绿色强调线；如果没有这行，用户难以快速识别可用轨道。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：可用 provider 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-muted { /* 新增代码+DesktopRuntimePanelsStyle：定义未连接 provider 状态；如果没有这段，离线轨道会和在线轨道混淆。 */
+  border-left-color: #98a2b3; /* 新增代码+DesktopRuntimePanelsStyle：使用灰色强调线；如果没有这行，离线状态不够克制清楚。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：未连接 provider 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chip span, /* 新增代码+DesktopRuntimePanelsStyle：定义 chip 名称文本；如果没有这行，名称层级不稳定。 */
+.browser-provider-chip strong, /* 新增代码+DesktopRuntimePanelsStyle：定义 chip 状态文本；如果没有这行，状态层级不稳定。 */
+.browser-provider-chip small { /* 新增代码+DesktopRuntimePanelsStyle：定义 chip 原因文本；如果没有这段，长原因可能溢出。 */
+  overflow: hidden; /* 新增代码+DesktopRuntimePanelsStyle：隐藏超长文本；如果没有这行，长字段会越界。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopRuntimePanelsStyle：用省略号提示截断；如果没有这行，截断不够清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopRuntimePanelsStyle：保持单行显示；如果没有这行，chip 高度会跳动。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：chip 文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chip span { /* 新增代码+DesktopRuntimePanelsStyle：定义 provider 名称样式；如果没有这段，名称和原因会抢层级。 */
+  color: #30363d; /* 新增代码+DesktopRuntimePanelsStyle：使用主文本色；如果没有这行，名称不够清晰。 */
+  font-size: 12px; /* 新增代码+DesktopRuntimePanelsStyle：使用紧凑字号；如果没有这行，chip 会过高。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：provider 名称规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chip strong { /* 新增代码+DesktopRuntimePanelsStyle：定义 provider 状态样式；如果没有这段，状态不易扫读。 */
+  color: #1f2328; /* 新增代码+DesktopRuntimePanelsStyle：使用深色状态文字；如果没有这行，对比度不够。 */
+  font-size: 12px; /* 新增代码+DesktopRuntimePanelsStyle：保持状态字号紧凑；如果没有这行，右栏密度会下降。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：provider 状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-chip small { /* 新增代码+DesktopRuntimePanelsStyle：定义 provider 原因样式；如果没有这段，原因会抢主状态层级。 */
+  color: #667085; /* 新增代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，原因文本过重。 */
+  font-size: 11px; /* 新增代码+DesktopRuntimePanelsStyle：使用更小字号；如果没有这行，chip 高度会变大。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：provider 原因规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-active-target { /* 新增代码+DesktopRuntimePanelsStyle：定义活跃浏览器目标摘要；如果没有这段，当前页面上下文不可扫描。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：垂直组织标题、地址和类型；如果没有这行，三段信息会挤在一行。 */
+  gap: 2px; /* 新增代码+DesktopRuntimePanelsStyle：设置紧凑间距；如果没有这行，摘要块过高。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopRuntimePanelsStyle：给摘要加边界；如果没有这行，active target 不像独立状态。 */
+  border-radius: 6px; /* 新增代码+DesktopRuntimePanelsStyle：使用小圆角；如果没有这行，摘要块风格不统一。 */
+  background: #fbfcfe; /* 新增代码+DesktopRuntimePanelsStyle：使用轻背景；如果没有这行，摘要和面板底色混在一起。 */
+  padding: 8px; /* 新增代码+DesktopRuntimePanelsStyle：给摘要内容留边距；如果没有这行，文字会贴边。 */
+  min-width: 0; /* 新增代码+DesktopRuntimePanelsStyle：允许长 URL 截断；如果没有这行，地址会撑破右栏。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：active target 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-active-target strong, /* 新增代码+DesktopRuntimePanelsStyle：定义 active target 标题；如果没有这行，标题可能溢出。 */
+.browser-active-target span, /* 新增代码+DesktopRuntimePanelsStyle：定义 active target 地址；如果没有这行，地址可能溢出。 */
+.browser-active-target small { /* 新增代码+DesktopRuntimePanelsStyle：定义 active target 类型；如果没有这段，类型文本可能溢出。 */
+  overflow: hidden; /* 新增代码+DesktopRuntimePanelsStyle：隐藏超长文本；如果没有这行，页面标题会撑破右栏。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopRuntimePanelsStyle：用省略号提示截断；如果没有这行，截断不够清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopRuntimePanelsStyle：保持单行显示；如果没有这行，摘要高度会跳动。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：active target 文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-summary { /* 修改代码+DesktopRuntimePanelsStyle：定义浏览器摘要行；如果没有这段，扩展状态没有固定位置。 */
+  display: grid; /* 修改代码+DesktopRuntimePanelsStyle：使用网格排列摘要；如果没有这行，长文案会挤压。 */
+  gap: 4px; /* 修改代码+DesktopRuntimePanelsStyle：设置摘要行间距；如果没有这行，两个摘要会黏在一起。 */
+  color: #667085; /* 修改代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，摘要会抢主状态层级。 */
+  font-size: 11px; /* 修改代码+DesktopRuntimePanelsStyle：使用小字号；如果没有这行，摘要会占太多空间。 */
+} /* 修改代码+DesktopRuntimePanelsStyle：浏览器摘要规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-panel { /* 新增代码+DesktopRuntimePanelsStyle：定义 Computer Use 面板布局；如果没有这段，桌面自动化状态会散乱。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：用网格垂直组织状态行；如果没有这行，锁和急停布局不稳定。 */
+  gap: 10px; /* 新增代码+DesktopRuntimePanelsStyle：设置内部间距；如果没有这行，状态行会贴在一起。 */
+  min-width: 0; /* 新增代码+DesktopRuntimePanelsStyle：允许面板在窄栏内收缩；如果没有这行，长动作名会撑破布局。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：Computer Use 面板规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-state { /* 新增代码+DesktopRuntimePanelsStyle：定义 Computer Use 模式标签；如果没有这段，模式会像普通文本。 */
+  border: 1px solid #b7e4c7; /* 新增代码+DesktopRuntimePanelsStyle：使用绿色系边框提示可用范围；如果没有这行，模式状态不够醒目。 */
+  border-radius: 999px; /* 新增代码+DesktopRuntimePanelsStyle：使用胶囊标签；如果没有这行，状态标签不够独立。 */
+  background: #ecfdf3; /* 新增代码+DesktopRuntimePanelsStyle：使用浅绿色背景；如果没有这行，可用状态不清楚。 */
+  color: #027a48; /* 新增代码+DesktopRuntimePanelsStyle：使用深绿色文字；如果没有这行，对比度不足。 */
+  font-size: 11px; /* 新增代码+DesktopRuntimePanelsStyle：保持标签紧凑；如果没有这行，标题行会变高。 */
+  padding: 2px 8px; /* 新增代码+DesktopRuntimePanelsStyle：给标签留内边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：Computer Use 状态标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-state-muted { /* 新增代码+DesktopRuntimePanelsStyle：定义禁用模式标签；如果没有这段，off 状态会误显可用。 */
+  border-color: #d8dee8; /* 新增代码+DesktopRuntimePanelsStyle：使用灰色边框；如果没有这行，禁用状态不够明确。 */
+  background: #f2f4f7; /* 新增代码+DesktopRuntimePanelsStyle：使用灰底；如果没有这行，off 状态像可用状态。 */
+  color: #667085; /* 新增代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，禁用状态过重。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：禁用模式标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-row { /* 新增代码+DesktopRuntimePanelsStyle：定义 Computer Use 状态行；如果没有这段，锁、急停和权限无法稳定扫描。 */
+  display: grid; /* 新增代码+DesktopRuntimePanelsStyle：用网格组织字段名、值和备注；如果没有这行，状态行对齐不稳。 */
+  grid-template-columns: 48px minmax(0, 1fr); /* 新增代码+DesktopRuntimePanelsStyle：固定字段名列并让值列自适应；如果没有这行，中文字段名会挤压状态值。 */
+  gap: 2px 8px; /* 新增代码+DesktopRuntimePanelsStyle：设置行内间距；如果没有这行，字段名和值会贴住。 */
+  border-top: 1px solid #e5e9f0; /* 新增代码+DesktopRuntimePanelsStyle：给状态行加分隔线；如果没有这行，多个状态会混在一起。 */
+  padding-top: 8px; /* 新增代码+DesktopRuntimePanelsStyle：给分隔线上方留空间；如果没有这行，分隔线会压住文字。 */
+  min-width: 0; /* 新增代码+DesktopRuntimePanelsStyle：允许状态值截断；如果没有这行，owner 文本可能撑破右栏。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：Computer Use 状态行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-row strong { /* 新增代码+DesktopRuntimePanelsStyle：定义状态行字段名；如果没有这段，字段名层级不稳定。 */
+  color: #475467; /* 新增代码+DesktopRuntimePanelsStyle：使用次级强调色；如果没有这行，字段名会抢主值层级。 */
+  font-size: 12px; /* 新增代码+DesktopRuntimePanelsStyle：使用紧凑字号；如果没有这行，行高会过大。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：状态行字段名规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-row span, /* 新增代码+DesktopRuntimePanelsStyle：定义状态值文本；如果没有这行，状态值可能溢出。 */
+.computer-use-row small { /* 新增代码+DesktopRuntimePanelsStyle：定义状态备注文本；如果没有这段，备注可能溢出。 */
+  overflow: hidden; /* 新增代码+DesktopRuntimePanelsStyle：隐藏超长文本；如果没有这行，owner 或动作名会越界。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopRuntimePanelsStyle：用省略号提示截断；如果没有这行，截断不够清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopRuntimePanelsStyle：保持单行显示；如果没有这行，状态行高度会跳动。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：状态值文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-row small { /* 新增代码+DesktopRuntimePanelsStyle：定义状态备注位置；如果没有这段，备注会挤在字段名列。 */
+  grid-column: 2; /* 新增代码+DesktopRuntimePanelsStyle：让备注对齐状态值列；如果没有这行，备注和字段名会错位。 */
+  color: #667085; /* 新增代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，备注会抢主值层级。 */
+  font-size: 11px; /* 新增代码+DesktopRuntimePanelsStyle：使用小字号；如果没有这行，行高会增加。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：状态备注规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-actions { /* 新增代码+DesktopRuntimePanelsStyle：定义允许动作 chip 容器；如果没有这段，可用动作缺少紧凑布局。 */
+  display: flex; /* 新增代码+DesktopRuntimePanelsStyle：使用弹性布局自动换行；如果没有这行，动作列表会堆成一列。 */
+  flex-wrap: wrap; /* 新增代码+DesktopRuntimePanelsStyle：允许动作 chip 换行；如果没有这行，长列表会横向溢出。 */
+  gap: 6px; /* 新增代码+DesktopRuntimePanelsStyle：设置 chip 间距；如果没有这行，动作标签会贴在一起。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：允许动作容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.computer-use-actions span { /* 新增代码+DesktopRuntimePanelsStyle：定义单个动作 chip；如果没有这段，动作项会像普通文本。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopRuntimePanelsStyle：给 chip 加边框；如果没有这行，动作项边界不清。 */
+  border-radius: 999px; /* 新增代码+DesktopRuntimePanelsStyle：使用胶囊形状；如果没有这行，动作标签不够清晰。 */
+  background: #ffffff; /* 新增代码+DesktopRuntimePanelsStyle：使用白底；如果没有这行，chip 会埋在灰底中。 */
+  color: #475467; /* 新增代码+DesktopRuntimePanelsStyle：使用次级文字色；如果没有这行，动作标签过重。 */
+  font-size: 11px; /* 新增代码+DesktopRuntimePanelsStyle：使用小字号；如果没有这行，右栏会拥挤。 */
+  padding: 2px 8px; /* 新增代码+DesktopRuntimePanelsStyle：给 chip 留内边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopRuntimePanelsStyle：动作 chip 规则结束；如果没有这行，CSS 块语法不完整。 */

@@ -897,3 +897,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `layout.css` 已补齐右侧页签栏、工具轨迹卡片、失败/完成/运行中状态、参数代码块、复制按钮和诊断列表样式，所有卡片圆角保持 6px。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task07_trace_inspector/`。
 - 已验证：红灯阶段 `npm test -- --run eventReducer.test.ts` 首先失败于缺少 `reduceGuiEventToTraceRows`；实现后 `npm test -- --run` 为 37 tests passed；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 9
+
+- Task 9：浏览器和 Computer Use 成熟面板已完成。后端新增 `/v2/gui/runtime/panels`，统一返回 `browser`、`computer_use`、`permissions`、`status_degraded` 和 `safe_error`。
+- 后端面板 payload 已做安全降级：当状态快照读取失败时只返回安全错误文案，不泄露本机路径；Computer Use 当前暴露安全字段 `mode/full_mode/stopped/expired/allowed_action_classes/permission_mode/lock/abort`，不暴露 state file 路径。
+- 前端 `guiClient.runtimePanels()` 已接入 V2 endpoint；`AppShell.tsx` 启动时与 bootstrap/sessions 并行读取 runtime panels，并把完整 payload 传给右侧 `StatusInspector`。
+- `StatusInspector.tsx` 保持五页签不变，在“浏览器”页签中同时渲染 `BrowserPanel` 和新增 `ComputerUsePanel`；浏览器面板显示 provider chips、active target、扩展队列和降级 banner，Computer Use 面板显示锁、急停、权限模式和允许动作摘要。
+- 新增样式文件 `apps/desktop/src/styles/runtime-panels.css`，由 `apps/desktop/src/renderer/main.tsx` 引入，避免继续膨胀主 `layout.css`。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task09_browser_computer_panel/`。
+- 已验证：红灯阶段 `python -m unittest learning_agent.tests.test_gui_browser_computer_panel_contract` 首先失败于缺少 `build_gui_runtime_panels_payload` 和 `/v2/gui/runtime/panels` 路由；实现后相关后端测试通过；前端 `npm test -- --run` 为 38 tests passed；`npm run lint` 通过；`python -m unittest learning_agent.tests.test_gui_browser_computer_panel_contract learning_agent.tests.test_gui_bridge_contract learning_agent.tests.test_gui_bridge_security_contract` 为 16 tests OK。
