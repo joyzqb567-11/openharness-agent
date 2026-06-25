@@ -1,4 +1,4 @@
-﻿# 问题与风险摘要（2026-06-16）
+# 问题与风险摘要（2026-06-16）
 
 历史全文归档：`agent_memory/archive/2026-06-16-computer-use-mcp-v2-parity/`。
 
@@ -446,10 +446,7 @@
 
 ## 2026-06-25 Desktop GUI Shell V2 Final Acceptance Risks
 
-- Status: V2 可见 GUI 矩阵风险已关闭，正式安装器和真实 runtime 深度接入仍是后续边界。
+- Status: 核心 V2 可见 GUI smoke 已完成，完整负向可见矩阵仍有剩余未勾选行。
 - Closed risk: 只跑 release gate 会误判视觉成熟度。现在 `layer_a_visible_acceptance` 目录包含真实 Electron 初始截图、CDP 驱动后截图、全屏最终截图和 JSON 结果，证明窗口真实可见且核心交互通过。
 - Closed risk: Layer A smoke 进程可能残留占用端口。验收后已按 pid 和监听端口关闭本轮 backend、renderer、Electron、CDP，确认 8776、5177、9223 均不再监听。
-- Closed risk: V2 visible rows 曾缺少 English streaming、safety refusal、Shift+Enter visual caret、token rejection GUI error、unknown route GUI error、bridge offline banner、browser degraded state、Computer Use unavailable state、settings panel opens 的可见证据。现在 `layer_a_visible_acceptance_round2/layer_a_round2_completion_result.json` 和对应 PNG 已覆盖这些行，`apps/desktop/tests/gui-prompt-matrix.md` 已全部勾选。
-- Closed risk: 安全拒绝最初只能靠特殊 trace 或隐藏合同测试证明。现在 fake adapter 能识别真实高风险 prompt 并发出 `safety_refusal`，前端把它保留为带 `安全拒绝` 标签的一等助手消息，且完成事件不会覆盖 refusal kind。
-- Closed risk: token/unknown-route/offline 错误最初缺少可点击、可截图的 GUI 表面。现在坏 token 会进入主线程错误消息，诊断页有未知路由探针，bridge 连接失败会显示 `bridge-offline-banner`。
-- Remaining risk: 当前 V2 成熟度是 GUI shell 和 fake/default bridge adapter 的成熟度；真实 agent adapter、真实模型/OAuth、真实 browser automation execution、真实 Computer Use execution、签名安装器和真实 pause/resume Harness 仍需要后续任务单独设计、实现和验收。
+- Remaining risk: `apps/desktop/tests/gui-prompt-matrix.md` 仍有未勾选 V2 visible rows：English streaming、safety refusal、Shift+Enter visual caret、token rejection GUI error、unknown route GUI error、bridge offline banner、browser degraded state、Computer Use unavailable state、settings panel opens。后续需要为这些行补专门可见窗口证据后再声明 15/15 可见矩阵完成。

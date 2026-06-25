@@ -1,0 +1,26 @@
+=http://127.0.0.1:8776 : �޷�����=http://127.0.0.1:8776����ʶ��Ϊ cmdlet���������ű��ļ�������г�������ơ���������
+��ƴд���������·������ȷ��·����ȷ��Ȼ������һ�Ρ�
+����λ�� ��:1 �ַ�: 1
++ ='http://127.0.0.1:8776'; ='openharness-desktop-dev-token'; ='http:// ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=http://127.0.0.1:8776:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+=openharness-desktop-dev-token : �޷�����=openharness-desktop-dev-token����ʶ��Ϊ cmdlet���������ű��ļ�������г����
+���ơ��������Ƶ�ƴд���������·������ȷ��·����ȷ��Ȼ������һ�Ρ�
+����λ�� ��:1 �ַ�: 27
++ ='http://127.0.0.1:8776'; ='openharness-desktop-dev-token'; ='http:// ...
++                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=openharness-desktop-dev-token:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+=http://127.0.0.1:5177 : �޷�����=http://127.0.0.1:5177����ʶ��Ϊ cmdlet���������ű��ļ�������г�������ơ���������
+��ƴд���������·������ȷ��·����ȷ��Ȼ������һ�Ρ�
+����λ�� ��:1 �ַ�: 61
++ ... '; ='openharness-desktop-dev-token'; ='http://127.0.0.1:5177'; & '.\n ...
++                                          ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=http://127.0.0.1:5177:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+
+DevTools listening on ws://127.0.0.1:9223/devtools/browser/8ed4da78-5e59-4eeb-a523-8404eec5a403

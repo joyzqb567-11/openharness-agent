@@ -1,4 +1,4 @@
-﻿# 问题与风险摘要（2026-06-16）
+# 问题与风险摘要（2026-06-16）
 
 历史全文归档：`agent_memory/archive/2026-06-16-computer-use-mcp-v2-parity/`。
 

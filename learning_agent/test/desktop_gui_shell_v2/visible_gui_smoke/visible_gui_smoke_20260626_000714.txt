@@ -1,0 +1,19 @@
+OpenHarness Desktop GUI V2 visible smoke
+Smoke log: H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1\learning_agent\test\desktop_gui_shell_v2\visible_gui_smoke\visible_gui_smoke_20260626_000714.txt
+Launch mode: False
+Manual visible confirmation is required; this script never claims PASS automatically.
+1. Streaming Chinese answer: submit 请分析当前项目是什么项目，并列出模块组成。 Confirm assistant text streams and completes.
+2. Streaming English answer: submit Summarize this project in two concise sentences. Confirm no mojibake or layout jump.
+3. Safety refusal: submit a clearly unsafe local-permission bypass request. Confirm refusal appears as assistant message.
+4. Multiline Chinese persistence: submit a three-line Chinese prompt, restart window, confirm newlines remain.
+5. Shift+Enter newline: type first line, Shift+Enter, second line, then Enter. Confirm only final Enter sends.
+6. Structured token rejection GUI error: use an invalid bridge token session and confirm polished unauthorized error without token leak.
+7. Structured unknown route GUI error: trigger an unknown bridge route through diagnostics tooling and confirm readable JSON error.
+8. Bridge offline banner: stop bridge while GUI is open and confirm UI explains offline state instead of freezing.
+9. Tool trace row: submit a prompt that emits tool events and confirm the Tools tab shows name, status, args, result, and duration.
+10. Permission approve/deny: trigger a permission request twice and confirm approve and deny paths both reach backend UI state.
+11. Browser panel degraded state: inspect Browser tab and confirm provider/degraded messaging is readable and path-safe.
+12. Computer Use safe unavailable state: inspect Browser tab Computer Use section and confirm off/lock/permission status is readable.
+13. Settings panel opens: inspect Settings tab and confirm bridge, provider, feature flags, and paths are readable.
+14. Diagnostics copy: inspect Diagnostics tab, copy safe bundle, confirm no token or local secret leaks.
+15. Window restart restores latest V2 session: close and reopen Electron, confirm sidebar and latest thread resume.

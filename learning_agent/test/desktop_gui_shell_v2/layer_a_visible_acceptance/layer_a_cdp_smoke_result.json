@@ -1,0 +1,41 @@
+{
+  "targetUrl": "http://127.0.0.1:5177/#openharnessBridgeUrl=http%3A%2F%2F127.0.0.1%3A8776&openharnessBridgeToken=openharness-desktop-dev-token",
+  "results": [
+    {
+      "prompt": "Chinese streaming",
+      "status": "completed"
+    },
+    {
+      "prompt": "Chinese multiline",
+      "status": "completed"
+    },
+    {
+      "prompt": "Tool trace",
+      "status": "completed",
+      "toolCards": 2
+    },
+    {
+      "prompt": "Permission approve",
+      "status": "completed"
+    },
+    {
+      "prompt": "Cancel slow turn",
+      "status": "cancelled"
+    },
+    {
+      "prompt": "Retry cancelled turn",
+      "status": "completed"
+    }
+  ],
+  "summary": {
+    "title": "OpenHarness Desktop",
+    "messages": 24,
+    "assistantMessages": 19,
+    "toolCards": 2,
+    "permissionDialogOpen": false,
+    "activeInspectorText": "        诊断 #89    正常   后端在线 Schema- 降级否 最近错误无 Release Gatenot_run    复制诊断包   ",
+    "composerVisible": true
+  },
+  "screenshotPath": "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\desktop_gui_shell_v2\\layer_a_visible_acceptance\\electron_cdp_after_smoke.png",
+  "capturedAt": "2026-06-25T15:26:20.813Z"
+}

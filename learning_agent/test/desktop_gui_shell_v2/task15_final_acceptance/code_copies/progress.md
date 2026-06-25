@@ -1,4 +1,4 @@
-﻿# 当前任务进度摘要（2026-06-16）
+# 当前任务进度摘要（2026-06-16）
 
 历史全文归档：`agent_memory/archive/2026-06-16-computer-use-mcp-v2-parity/`。
 
@@ -969,11 +969,3 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - Layer A 真实 Electron smoke 证据保存到 `learning_agent/test/desktop_gui_shell_v2/layer_a_visible_acceptance/`，包含 `electron_initial.png`、`electron_cdp_after_smoke.png`、`electron_final_fullscreen.png`、`layer_a_cdp_smoke_result.json` 和 `runtime_pids.json`。
 - 已验证：Layer B release gate 通过；Layer A CDP 驱动真实 Electron 窗口完成中文流式、多行、工具卡、权限允许、取消、重试、诊断页打开；验收后已关闭本轮 8776/5177/9223 进程。
 - Layer C 判定：未触发。原因是本轮 V2 改动属于 GUI shell、bridge display contracts、diagnostics、release gate、packaging 和 visual acceptance；未修改 agent runtime、MCP routing、model call path、browser automation execution、Computer Use execution 或 backend permission enforcement。
-
-## 2026-06-25 Desktop GUI Shell V2 Task 15 Matrix Completion
-
-- Task 15 补充验收：已完成剩余 V2 visible GUI release rows，证据保存到 `learning_agent/test/desktop_gui_shell_v2/layer_a_visible_acceptance_round2/`。
-- 新增可见证据：`layer_a_round2_completion_result.json`、`english_streaming.png`、`safety_refusal_visible_final.png`、`shift_enter_newline_final.png`、`token_rejection_error_final.png`、`unknown_route_gui_error_final.png`、`bridge_offline_banner_final.png`、`browser_computer_panel_final.png`、`settings_panel_final.png`。
-- `apps/desktop/tests/gui-prompt-matrix.md` 已把 streaming English、安全拒绝、Shift+Enter、token rejection、unknown route、bridge offline、browser degraded、Computer Use unavailable、settings panel 等 V2 行全部勾选并链接证据。
-- 本轮补齐中发现并修复两个 GUI 可见验收缺口：fake streaming adapter 现在能把高风险 prompt 映射成 `safety_refusal` 事件；前端现在能显示 bridge offline banner，并提供诊断页未知路由探针，让结构化错误能在 GUI 主线程中截图验收。
-- 已验证：`python -m unittest learning_agent.tests.test_gui_agent_adapter_contract` 为 7 tests OK；`python -m unittest discover -s learning_agent/tests -p "test_gui*.py"` 为 59 tests OK；`npm test -- --run` 为 46 tests passed；`npm run lint` 通过；`npm run build` 通过；`powershell -NoProfile -ExecutionPolicy Bypass -File .\apps\desktop\scripts\release-gate.ps1` 通过；可见 Electron CDP 证据显示 `bodyHasTraceback=false` 且 `bodyHasToken=false`。

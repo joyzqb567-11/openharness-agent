@@ -1,0 +1,10 @@
+
+> openharness-desktop@0.1.0 dev:renderer
+> vite --host 127.0.0.1 --port 5177
+
+Port 5177 is in use, trying another one...
+Port 5178 is in use, trying another one...
+
+  VITE v5.4.21  ready in 275 ms
+
+  ➜  Local:   http://127.0.0.1:5179/

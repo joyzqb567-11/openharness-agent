@@ -63,20 +63,18 @@ The 2026-06-25 V2 automated release gate passes on branch `codex/desktop-gui-she
 
 Layer B evidence:
 
-- Python GUI tests: 59 tests OK.
+- Python GUI tests: 58 tests OK.
 - Frontend lint: passed.
-- Frontend Vitest: 46 tests passed.
+- Frontend Vitest: 45 tests passed.
 - Frontend production build: passed.
 - Visible GUI smoke instructions: generated.
 - Layer C trigger decision: printed.
 
-Layer A visible Electron smoke evidence is archived in `learning_agent/test/desktop_gui_shell_v2/layer_a_visible_acceptance/` and `learning_agent/test/desktop_gui_shell_v2/layer_a_visible_acceptance_round2/`.
+Layer A visible Electron smoke evidence is archived in `learning_agent/test/desktop_gui_shell_v2/layer_a_visible_acceptance/`.
 
-The observed visible Electron flows include Chinese streaming completion, English streaming completion, multiline Chinese prompt completion, Shift+Enter newline behavior, safety refusal as a first-class assistant message, tool trace card rendering, permission approve/deny evidence, cancel, retry, token-rejection GUI error, unknown-route GUI error, bridge-offline banner, browser degraded panel, Computer Use safe unavailable panel, settings panel visibility, diagnostics panel visibility, and latest-session restore after launch.
+The observed visible Electron flows include Chinese streaming completion, multiline Chinese prompt completion, tool trace card rendering, permission approve, cancel, retry, diagnostics panel visibility, and latest-session restore after launch.
 
-The V2 visible GUI release rows in `apps/desktop/tests/gui-prompt-matrix.md` are now all checked with evidence links.
-
-Layer C was not triggered for this V2 pass because the change set remained in GUI shell, bridge display contracts, diagnostics, release gate, packaging, and visual acceptance. It did not modify agent runtime behavior, MCP routing, model call paths, browser automation execution, Computer Use execution, or backend permission enforcement.
+Current limitation: not every V2 visible GUI matrix row is checked yet. Negative/error rows such as safety refusal, invalid-token GUI error, unknown-route GUI error, and bridge-offline banner remain listed in `apps/desktop/tests/gui-prompt-matrix.md` until they receive their own visible-window evidence.
 
 ## V1 Bridge Behavior
 

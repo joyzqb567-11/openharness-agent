@@ -1,0 +1,8 @@
+Bridge port 8776 is already occupied. Close the existing bridge or pass -Port <free-port>.
+����λ�� H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1\apps\desktop\scripts\start-backend
+.ps1:35 �ַ�: 3
++   throw "Bridge port $Port is already occupied. Close the existing br ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Bridge port 877...rt <free-port>.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Bridge port 8776 is already occupied. Close the existing bridge or pass -Port <free-port
+   >.
