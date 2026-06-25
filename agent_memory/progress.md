@@ -846,3 +846,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 前端 client 已能把 V2 错误解析成 `GuiClientError(status, code, message, requestId)`，避免只显示 HTTP 状态码。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task01_protocol_contract/`。
 - 已验证：`python -m unittest learning_agent.tests.test_gui_protocol_contract learning_agent.tests.test_gui_bridge_contract learning_agent.tests.test_gui_bridge_security_contract learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_bridge_permission_contract` 通过；`npm test -- --run guiClient.test.ts` 通过；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 2
+
+- Task 2：V2 事件流和断线恢复已完成。新增 `learning_agent/app/gui_stream.py`、`apps/desktop/src/api/streamClient.ts`，并在 `gui_bridge.py` 增加 `/v2/gui/events` JSON fallback 与 `/v2/gui/events/stream` SSE 路由。
+- 事件流支持空事件 heartbeat、旧 status event 到 V2 kind 的映射、query token 的 EventSource 认证入口，以及 fallback long polling 的 lastSequence 更新。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task02_event_stream_recovery/`。
+- 已验证：`python -m unittest learning_agent.tests.test_gui_stream_contract learning_agent.tests.test_gui_bridge_events_contract learning_agent.tests.test_gui_bridge_security_contract` 通过；`npm test -- --run streamClient.test.ts guiClient.test.ts` 通过；`npm run lint` 通过。
