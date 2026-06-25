@@ -872,3 +872,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `AppShell.tsx` 已移除本地旧事件映射函数，轮询和补拉统一调用 `reduceGuiEventToThreadActions()`；`layout.css` 已补齐消息正文、语义标签和代码块样式。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task04_thread_streaming_messages/`。
 - 已验证：先跑红灯 `npm test -- --run threadStore.test.ts eventReducer.test.ts` 失败于 `eventReducer` 不存在；实现后 `npm test -- --run threadStore.test.ts eventReducer.test.ts` 为 9 tests passed；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 5
+
+- Task 5：Composer 多行中文和发送体验已完成。`Composer.tsx` 已抽出 `composerKeyIntent()`、`canSubmitComposerDraft()`、`submitComposerDraft()`、`composerButtonState()` 纯规则，并由 React 组件复用。
+- 发送行为已改为支持同步/异步 `onSubmit`，只在提交成功后清空草稿；Shift+Enter 不阻止浏览器默认换行，保留原生 caret 行为；运行中或提交中禁用发送并通过按钮 `title/aria-label` 给出简短原因。
+- 新增 `apps/desktop/tests/composer.test.ts` 覆盖 Enter 发送、Shift+Enter 换行、中文多行标点和换行原样提交、空白不可发送、运行中禁用原因；`gui-prompt-matrix.md` 已增加 V2 Composer 自动合同覆盖项。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task05_composer_input/`。
+- 已验证：`npm test -- --run composer.test.ts` 为 5 tests passed；`npm run lint` 通过。
