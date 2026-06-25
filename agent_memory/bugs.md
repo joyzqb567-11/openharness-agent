@@ -408,3 +408,10 @@
 - Closed risk: `diagnostics` payload 最初复用完整 health，测试发现序列化结果包含 `C:\Users\joyzq...` 临时路径。现在 `build_gui_diagnostics_payload()` 会对内嵌 `health.workspace` 脱敏，诊断复制包也只包含安全摘要。
 - Closed risk: snapshot 读取失败可能把原始异常路径显示到前端。现在 diagnostics 失败时固定返回 `状态快照暂时不可读。`，并且测试覆盖 token、Bearer、`sk-*`、Windows 用户路径和工作区路径脱敏。
 - Remaining risk: 当前诊断页能显示 online/schema/degraded/last error/release gate/copy bundle，但还不是完整 crash recovery manager。后续如果要做崩溃自动恢复、日志打包上传或历史 gate 浏览，应继续复用 `/v2/gui/diagnostics` 和 `settingsStore.ts`，不能新增会泄露绝对路径或 token 的旁路接口。
+
+## 2026-06-25 Desktop GUI Shell V2 Visual Accessibility Risks
+
+- Status: 本轮布局风险已关闭，依赖审计风险未处理。
+- Closed risk: 1100px 以下媒体查询曾把 `.status-inspector` 直接 `display:none`，这会让 1024x720 视觉验收丢失右侧状态/工具/浏览器/设置/诊断 tabs。现在紧凑布局保持三栏，并通过收窄侧栏、右栏和 tab 间距保留右侧检查器。
+- Closed risk: composer 输入框曾允许 `resize: vertical` 且最大高度 160px，用户拖拽或长输入可能挤压消息区。现在 composer 和 textarea 都有稳定 min/max，长 prompt 在 textarea 内部滚动。
+- Open risk: `apps/desktop/scripts/start-desktop-dev.ps1` 运行 `npm install` 时报告 6 个 npm audit vulnerabilities（3 moderate、2 high、1 critical）。本轮 Task 12 未升级依赖，因为视觉任务范围只做布局/可访问性；后续包装或发布门禁任务应决定是否升级 Electron/Vite 相关依赖并复跑 GUI 验收。

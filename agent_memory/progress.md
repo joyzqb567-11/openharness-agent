@@ -915,3 +915,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 前端新增 `settingsStore.ts`、`SettingsPanel.tsx`、`DiagnosticsPanel.tsx` 和 `settings-diagnostics.css`；`StatusInspector.tsx` 继续保持五页签，把“设置/诊断”替换为真实面板；`AppShell.tsx` 启动时并行读取 bootstrap、sessions、runtime panels、health、diagnostics。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task11_settings_diagnostics/`。
 - 已验证：红灯阶段 `python -m unittest learning_agent.tests.test_gui_diagnostics_contract` 首先失败于缺少 `gui_diagnostics.py` 和 `/v2/gui/health` 路由；实现后该测试 5 tests OK；`npm test -- --run settingsStore.test.ts guiClient.test.ts` 为 14 tests passed；`npm test -- --run` 为 9 files / 43 tests passed；`npm run lint` 通过；相关后端 bridge 合同 21 tests OK。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 12
+
+- Task 12：视觉成熟度和可访问性已完成。`layout.css` 已把 1100px 以下从隐藏右侧检查器改为三栏紧凑布局，1024x720 仍保留侧栏、主线程、右侧状态/工具/浏览器/设置/诊断 tabs。
+- `theme.css` 已补全 keyboard focus 可见描边和 `prefers-reduced-motion` 规则；`SettingsPanel.tsx` 已给路径复制按钮补显式 `aria-label`；`settings-diagnostics.css` 已让设置页在右栏内部滚动。
+- `apps/desktop/tests/smoke.md` 已增加并勾选 V2 视觉验收清单，覆盖 1280x800、1024x720、按钮可访问标签、右侧 tabs、composer 稳定高度、工具卡片布局和内部滚动。
+- 学习副本和截图证据已保存到 `learning_agent/test/desktop_gui_shell_v2/task12_visual_accessibility/`。
+- 已验证：`npm test -- --run` 为 9 files / 43 tests passed；`npm run lint` 通过；`git diff --check` 无空白错误；真实 Electron GUI 已打开并截图验证 1280x800 与 1024x720 两种窗口尺寸。
