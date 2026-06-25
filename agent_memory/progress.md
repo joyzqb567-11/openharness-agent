@@ -853,3 +853,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 事件流支持空事件 heartbeat、旧 status event 到 V2 kind 的映射、query token 的 EventSource 认证入口，以及 fallback long polling 的 lastSequence 更新。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task02_event_stream_recovery/`。
 - 已验证：`python -m unittest learning_agent.tests.test_gui_stream_contract learning_agent.tests.test_gui_bridge_events_contract learning_agent.tests.test_gui_bridge_security_contract` 通过；`npm test -- --run streamClient.test.ts guiClient.test.ts` 通过；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 3
+
+- Task 3：Agent Adapter 边界和 fake streaming 默认路径已完成。新增 `learning_agent/app/gui_agent_adapter.py`，包含 `GuiAgentRunRequest`、`GuiAgentRunResult`、`GuiAgentAdapter`、`FakeStreamingGuiAgentAdapter`、`DefaultHarnessGuiAgentAdapter(enabled=False)`。
+- `GuiRunManager` 默认在未显式注入 `answer_runner` 时走 fake streaming adapter，并把 `turn_started`、`message_delta`、`message_completed`、`turn_failed`、`turn_cancelled` 等 adapter 事件写入统一 `StatusEventStore`；同时继续补写 `gui_turn_completed/failed/cancelled` 兼容旧 GUI lifecycle。
+- `gui_stream.py` 已补齐 V2 原生事件名透传，避免 adapter 事件在 SSE/long-poll fallback 中被降级成 heartbeat。
+- 真实 harness adapter 只保留 feature-flagged shell；显式真实模式触发词会返回结构化 `adapter_unavailable`，没有在 V2-Core 中导入模型、OAuth、浏览器或 Computer Use runtime。
+- 已使用主仓库 CodeGraph 调查真实接线点，并记录到 `docs/desktop_gui_shell_v2_agent_adapter_mapping.md`：未来真实入口应围绕 `LearningAgent.run(...) -> run_agent_with_harness_session(...) -> agent.run_events(...)`，通过 `event_callback` 和 `StatusEventStore` 映射到 GUI V2 events。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task03_fake_agent_adapter/`。
+- 已验证：红灯阶段 `test_gui_agent_adapter_contract` 最初失败在默认 manager 没有 `message_delta`；修复后 `python -m unittest learning_agent.tests.test_gui_agent_adapter_contract learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_stream_contract learning_agent.tests.test_gui_bridge_security_contract learning_agent.tests.test_gui_bridge_events_contract` 为 19 tests OK；`python -m py_compile learning_agent\app\gui_agent_adapter.py learning_agent\app\gui_bridge.py learning_agent\app\gui_stream.py learning_agent\tests\test_gui_agent_adapter_contract.py` 通过。

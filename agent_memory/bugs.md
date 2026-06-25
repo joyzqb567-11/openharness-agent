@@ -372,3 +372,10 @@
 ## 2026-06-25 Desktop GUI Shell V2 Golden Trace Risk
 
 - 已处理风险：V2 蓝图里的 JSON 示例曾把一个敏感 bridge header 字面量放进 `must_not_contain`，但同一任务后续测试又要求 fixture 原文不能包含该敏感词。实际实现保留“不得泄露敏感内容”的测试语义，改用 `raw_secret_value`、`local_secret_path`、`raw_stack_dump` 等低敏占位词，避免黄金样本自己违反红线。
+
+## 2026-06-25 Desktop GUI Shell V2 Real Adapter Boundary
+
+- Status: 设计边界已明确，未启用真实 adapter。
+- Evidence: Task 3 CodeGraph 映射确认真实入口应围绕 `LearningAgent.run(...)`、`run_agent_with_harness_session(...)`、`agent.run_events(...)`、`StatusEventStore` 和 `stop_event`，但 V2-Core 只实现 deterministic fake streaming。
+- Risk: 如果后续误把 `DefaultHarnessGuiAgentAdapter(enabled=False)` 当作真实 agent 接线，会造成 GUI 看似可切真实模式但实际只返回 `adapter_unavailable`。
+- Required fix direction: 到 V2-Trust 再接真实 adapter，并先补 `AgentEvent -> GUI V2`、取消、权限 approve/deny、懒导入、脱敏和 Layer C trigger decision 的合同测试；不能在 V2-Core 为了演示直接导入模型/OAuth/浏览器/Computer Use runtime。

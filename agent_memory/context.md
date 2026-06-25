@@ -197,3 +197,5 @@
 当前长任务目标是逐项完成 `docs/superpowers/plans/2026-06-25-codex-style-desktop-gui-shell-v2.md`。执行顺序按蓝图分为 `V2-Core`、`V2-Trust`、`V2-Product`，先建立 golden traces 和可回归 UI 状态基线，再推进真实桥接、安全、诊断、搜索、插件入口和最终可见 GUI 验收。
 
 Task Core-0 的边界是只建立 20 条 `GT-001` 到 `GT-020` golden traces、后端 fixture 合同测试、前端 fixture 消费测试和 prompt matrix 记录。它不代表 20 个场景都已经在可见 GUI 中跑通；可见 GUI 执行会在后续 V2-Core、V2-Trust、V2-Product 任务中逐项完成。
+
+Task 3 已把 GUI run 默认路径切到 deterministic fake streaming adapter。真实 agent/harness 接线当前只做 CodeGraph 映射，不在 V2-Core 启用；未来 V2-Trust 应从 `LearningAgent.run(...) -> run_agent_with_harness_session(...) -> agent.run_events(...)` 接入，并通过 `event_callback`、`StatusEventStore`、`stop_event` 和 GUI permission handshake 形成真实 adapter。
