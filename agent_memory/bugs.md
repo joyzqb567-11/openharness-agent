@@ -415,3 +415,10 @@
 - Closed risk: 1100px 以下媒体查询曾把 `.status-inspector` 直接 `display:none`，这会让 1024x720 视觉验收丢失右侧状态/工具/浏览器/设置/诊断 tabs。现在紧凑布局保持三栏，并通过收窄侧栏、右栏和 tab 间距保留右侧检查器。
 - Closed risk: composer 输入框曾允许 `resize: vertical` 且最大高度 160px，用户拖拽或长输入可能挤压消息区。现在 composer 和 textarea 都有稳定 min/max，长 prompt 在 textarea 内部滚动。
 - Open risk: `apps/desktop/scripts/start-desktop-dev.ps1` 运行 `npm install` 时报告 6 个 npm audit vulnerabilities（3 moderate、2 high、1 critical）。本轮 Task 12 未升级依赖，因为视觉任务范围只做布局/可访问性；后续包装或发布门禁任务应决定是否升级 Electron/Vite 相关依赖并复跑 GUI 验收。
+
+## 2026-06-25 Desktop GUI Shell V2 Sessions Search Risks
+
+- Status: 本轮搜索和归档入口风险已关闭，pin 写入 UI 仍是后续产品边界。
+- Closed risk: 侧栏此前只读 V1 sessions，缺少 title/archive/pin/updated_at 字段，搜索按钮也只是静态入口。现在后端 V2 sessions/search/rename/archive 有合同测试，前端 client 和 Sidebar/SearchPanel 均接入真实 endpoint。
+- Closed risk: 归档入口如果只是打开普通搜索，会让用户看不到已归档会话。现在归档入口会调用 `sessions(true)`，只展示 archived 会话；归档模式下继续输入关键词会调用 `searchSessions(query, true)`。
+- Remaining risk: `pinned` 字段已经在 payload、排序和 Sidebar 标记中预留，但当前没有 pin/unpin 写入 endpoint 或 UI 控件。后续实现时应新增后端合同和 GUI 控件，不要只在前端临时标记。

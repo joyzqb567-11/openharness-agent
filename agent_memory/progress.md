@@ -923,3 +923,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `apps/desktop/tests/smoke.md` 已增加并勾选 V2 视觉验收清单，覆盖 1280x800、1024x720、按钮可访问标签、右侧 tabs、composer 稳定高度、工具卡片布局和内部滚动。
 - 学习副本和截图证据已保存到 `learning_agent/test/desktop_gui_shell_v2/task12_visual_accessibility/`。
 - 已验证：`npm test -- --run` 为 9 files / 43 tests passed；`npm run lint` 通过；`git diff --check` 无空白错误；真实 Electron GUI 已打开并截图验证 1280x800 与 1024x720 两种窗口尺寸。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 8
+
+- Task 8：项目、会话和搜索入口已完成。`learning_agent/app/gui_bridge.py` 已扩展 `GuiSession`，新增 `title/archived/pinned/updated_at` 字段，并提供 `sessions_payload(include_archived)`、`rename_session()`、`archive_session()`、`search_sessions()`。
+- 后端已接入 `/v2/gui/sessions`、`/v2/gui/search?q=...`、`/v2/gui/sessions/{session_id}/rename`、`/v2/gui/sessions/{session_id}/archive`；V1 sessions/resume 保持兼容。
+- 前端 `guiClient.ts` 已切到 V2 sessions，并新增 `searchSessions()`、`renameSession()`、`archiveSession()`；`Sidebar.tsx` 已支持新对话、搜索、active 会话、固定标记和真实归档计数；新增 `SearchPanel.tsx` 显示搜索结果并可恢复会话。
+- `AppShell.tsx` 已维护 `archivedCount/searchOpen/searchArchivedMode/searchQuery/searchResults/searchLoading`，普通搜索和归档过滤分开处理；提交或重试成功后会刷新侧栏 sessions。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task08_sessions_search/`。
+- 已验证：`python -m unittest learning_agent.tests.test_gui_sessions_search_contract` 为 4 tests OK；`npm test -- --run` 为 9 files / 44 tests passed；`npm run lint` 通过；`python -m unittest learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_sessions_search_contract` 为 7 tests OK。
