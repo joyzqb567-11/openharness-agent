@@ -794,3 +794,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 自动化验证已通过：focused layer tests 为 48 passed；Computer Use 回归为 36 passed；完整 `python -m pytest learning_agent/tests -q` 为 194 passed；修改过的 Python 文件 `py_compile` 通过；三个新增 scenario JSON 均通过 `python -m json.tool`。
 - 学习副本已复制到 `learning_agent/test/20260620_layered_task7_13_full_archive/`，共 45 个文件。
 - 剩余任务：将 worktree 改动合入主工作区后同步 CodeGraph，并用 acceptance controller 启动 `H:\codexworkplace\sofeware\OpenHarness-main\learning_agent\start_oauth_agent.bat` 做真实可见终端文本、绘图、多应用验收；未完成前不能声明开发完成。
+# 2026-06-25 Codex 风格桌面 GUI 外壳长期目标执行
+
+- Status: 已在隔离 worktree `H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1` 开始执行 `docs/superpowers/plans/2026-06-25-codex-style-desktop-gui-shell.md`。
+- 当前目标：逐项完成蓝图 15 个任务，优先完成 V1 Bridge-First Vertical Slice，而不是先堆宽 UI。
+- 当前分支：`codex/desktop-gui-shell-v1`。
+- 执行技能：已使用 `superpowers:executing-plans` 和 `superpowers:using-git-worktrees`。
+- 基线风险：`python -m unittest discover learning_agent.tests -q` 在 Python 3.13 下因 unittest discovery 处理测试包 `__file__ None` 失败；后续使用蓝图中明确测试模块作为验证入口。
+- 已完成 Task 1-3：`learning_agent/app/gui_bridge.py` 支持 bootstrap、HTTP server、token/origin 安全、events polling；目标测试 `7 tests OK`，语法检查通过；提交 `8b065638`、`73824a67`、`8fc04dc4`。
+- 已完成 Task 4：新增 `apps/desktop` Electron + React + Vite 桌面骨架，包含主进程、preload、渲染入口、主题和基础两栏布局；`npm install` 首次卡在 Electron 默认下载源，改用 `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/` 后安装完成；`npm run lint` 和 `npm run build` 均通过，确认 `dist/main/index.js`、`dist/preload/index.js`、`dist/renderer/index.html` 存在；学习副本已保存到 `learning_agent/test/desktop_gui_shell_20260625/task04_bootstrap/`。

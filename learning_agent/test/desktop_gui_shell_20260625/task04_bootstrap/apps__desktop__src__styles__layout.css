@@ -1,0 +1,35 @@
+.app-shell { /* 新增代码+DesktopLayout：定义桌面两栏布局；如果没有这段，左侧栏和主线程区会纵向堆叠。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格布局；如果没有这行，固定侧栏和弹性主区难以稳定实现。 */
+  grid-template-columns: 304px minmax(0, 1fr); /* 新增代码+DesktopLayout：左栏固定、右栏自适应；如果没有这行，主对话区会被侧栏挤压。 */
+  min-height: 100vh; /* 新增代码+DesktopLayout：让应用填满窗口高度；如果没有这行，浅色背景不会铺满视口。 */
+} /* 新增代码+DesktopLayout：主布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.left-rail { /* 新增代码+DesktopLayout：定义第一版左侧栏；如果没有这段，导航区没有 Codex 风格的独立区域。 */
+  border-right: 1px solid #d8dee8; /* 新增代码+DesktopLayout：给侧栏和主区加分隔线；如果没有这行，两个区域边界不清楚。 */
+  background: #eef2f7; /* 新增代码+DesktopLayout：设置侧栏浅灰背景；如果没有这行，侧栏和主区视觉上混在一起。 */
+  padding: 16px; /* 新增代码+DesktopLayout：给侧栏内容留空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopLayout：左侧栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-panel { /* 新增代码+DesktopLayout：定义主对话面板；如果没有这段，标题、内容、输入区无法固定三段。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格划分对话区域；如果没有这行，composer 会被内容自然流推挤。 */
+  grid-template-rows: 56px minmax(0, 1fr) 96px; /* 新增代码+DesktopLayout：固定标题和输入区，中间消息区自适应；如果没有这行，长消息会挤掉 composer。 */
+  background: #ffffff; /* 新增代码+DesktopLayout：设置主工作区背景；如果没有这行，阅读区会和窗口背景混淆。 */
+} /* 新增代码+DesktopLayout：主对话面板规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-header { /* 新增代码+DesktopLayout：定义线程标题栏；如果没有这段，顶部导航没有稳定高度和分隔。 */
+  display: flex; /* 新增代码+DesktopLayout：让标题垂直居中；如果没有这行，标题文字会贴顶部。 */
+  align-items: center; /* 新增代码+DesktopLayout：标题垂直居中；如果没有这行，标题栏视觉不稳。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopLayout：标题栏底部分隔；如果没有这行，标题和消息会粘在一起。 */
+  padding: 0 20px; /* 新增代码+DesktopLayout：标题左右留白；如果没有这行，标题会贴边。 */
+  font-weight: 600; /* 新增代码+DesktopLayout：加强标题层级；如果没有这行，标题和正文不易区分。 */
+} /* 新增代码+DesktopLayout：线程标题栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-body { /* 新增代码+DesktopLayout：定义消息滚动区；如果没有这段，长对话无法独立滚动。 */
+  padding: 24px; /* 新增代码+DesktopLayout：给消息内容留出阅读空间；如果没有这行，文字会贴边。 */
+  overflow: auto; /* 新增代码+DesktopLayout：允许消息区滚动；如果没有这行，长内容会把 composer 推出屏幕。 */
+} /* 新增代码+DesktopLayout：消息滚动区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer { /* 新增代码+DesktopLayout：定义底部输入区占位；如果没有这段，输入区域没有明确边界。 */
+  border-top: 1px solid #e5e9f0; /* 新增代码+DesktopLayout：给 composer 顶部分隔线；如果没有这行，输入区和消息区会混在一起。 */
+  padding: 20px; /* 新增代码+DesktopLayout：给输入区留白；如果没有这行，占位文字会贴边。 */
+} /* 新增代码+DesktopLayout：输入区占位规则结束；如果没有这行，CSS 块语法不完整。 */

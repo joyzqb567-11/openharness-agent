@@ -1,0 +1,4 @@
+# 新增代码+DesktopBootstrap：忽略本地依赖目录；如果没有这行，node_modules 会被误提交，仓库会变得巨大且不可维护。
+node_modules/
+# 新增代码+DesktopBootstrap：忽略构建产物目录；如果没有这行，dist 里的机器生成文件会污染源码提交。
+dist/

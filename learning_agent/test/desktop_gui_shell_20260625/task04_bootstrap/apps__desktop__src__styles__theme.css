@@ -1,0 +1,22 @@
+:root { /* 新增代码+DesktopTheme：定义全局主题变量和基础视觉；如果没有这段，桌面壳会退回浏览器默认样式。 */
+  color-scheme: light; /* 新增代码+DesktopTheme：声明当前先做浅色主题；如果没有这行，系统深色模式可能让颜色不可控。 */
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif; /* 新增代码+DesktopTheme：使用接近 Codex 桌面的系统字体栈；如果没有这行，界面字体会不统一。 */
+  color: #1f2328; /* 新增代码+DesktopTheme：设置默认文字色；如果没有这行，正文颜色可能过浅或过深。 */
+  background: #f6f8fb; /* 新增代码+DesktopTheme：设置应用背景；如果没有这行，窗口边缘会显示浏览器默认白色。 */
+} /* 新增代码+DesktopTheme：根主题定义结束；如果没有这行，CSS 块语法不完整。 */
+
+* { /* 新增代码+DesktopTheme：统一盒模型；如果没有这段，边框和内边距会让控件尺寸难以预测。 */
+  box-sizing: border-box; /* 新增代码+DesktopTheme：让宽高包含 padding 和 border；如果没有这行，布局容易在不同控件上溢出。 */
+} /* 新增代码+DesktopTheme：盒模型规则结束；如果没有这行，CSS 块语法不完整。 */
+
+body { /* 新增代码+DesktopTheme：设置页面主体基础尺寸；如果没有这段，Electron 窗口内会出现默认外边距。 */
+  margin: 0; /* 新增代码+DesktopTheme：移除浏览器默认边距；如果没有这行，GUI 四周会有不该出现的空白。 */
+  min-width: 980px; /* 新增代码+DesktopTheme：匹配主进程最小窗口宽度；如果没有这行，页面布局可能比窗口约束更小。 */
+  min-height: 640px; /* 新增代码+DesktopTheme：匹配主进程最小窗口高度；如果没有这行，首屏垂直布局没有底线。 */
+} /* 新增代码+DesktopTheme：body 基础样式结束；如果没有这行，CSS 块语法不完整。 */
+
+button, /* 新增代码+DesktopTheme：把按钮纳入字体继承；如果没有这行，按钮字体会和正文不一致。 */
+input, /* 新增代码+DesktopTheme：把输入框纳入字体继承；如果没有这行，输入文字会显得突兀。 */
+textarea { /* 新增代码+DesktopTheme：把多行输入框纳入字体继承；如果没有这行，composer 输入体验会不一致。 */
+  font: inherit; /* 新增代码+DesktopTheme：继承全局字体；如果没有这行，表单控件会使用浏览器默认字体。 */
+} /* 新增代码+DesktopTheme：表单控件字体规则结束；如果没有这行，CSS 块语法不完整。 */
