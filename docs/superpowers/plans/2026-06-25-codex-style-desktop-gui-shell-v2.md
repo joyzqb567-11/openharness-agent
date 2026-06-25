@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 把 V1 的 Electron GUI 外壳从“可见垂直切片”升级成接近 Codex 桌面体验的 V2 成熟外壳：真实流式对话、可靠恢复、工具轨迹、权限闭环、项目/会话管理、诊断、打包和可见 GUI 验收都成体系。
+**Goal:** 把 V1 的 Electron GUI 外壳从“可见垂直切片”升级成接近 Codex 桌面体验的 V2 成熟外壳；第一优先级不是堆更多面板，而是把 `prompt -> stream event -> renderer state -> visible message -> crash/restart -> recover -> trace explains why` 这条核心闭环做到可靠。
 
-**Architecture:** 继续沿用 V1 的边界：`apps/desktop` 是 Electron/React 客户端，`learning_agent/app/gui_bridge.py` 是本地 loopback bridge，`learning_agent` 后端仍是运行事实源。V2 不让 renderer 直接读 `memory/` 或后端私有文件，而是通过 V2 协议、事件流、会话恢复接口和诊断接口读取状态。实现顺序采用“先协议和测试，再桥接真实 agent，再补 UI 面板和发布门禁”的方式，避免长任务跑偏。
+**Architecture:** 继续沿用 V1 的边界：`apps/desktop` 是 Electron/React 客户端，`learning_agent/app/gui_bridge.py` 是本地 loopback bridge，`learning_agent` 后端仍是运行事实源。V2 不让 renderer 直接读 `memory/` 或后端私有文件，而是通过 V2 协议、事件流、会话恢复接口和诊断接口读取状态。实现顺序升级为三段式：先完成 V2-Core 的 golden traces、协议、流式、恢复和一等错误消息；再完成 V2-Trust 的真实 agent adapter、权限、工具轨迹和诊断；最后完成 V2-Product 的搜索、设置、Harness 面板、视觉和打包。
 
 **Tech Stack:** Electron 31、React 18、Vite 5、TypeScript 5、Vitest、Python 标准库 HTTP bridge、`unittest`、PowerShell release gate、现有 `learning_agent.runtime.status_events`、现有浏览器/Computer Use/权限/长任务 harness 能力。
 
@@ -34,6 +34,7 @@ V1 还没有达到 Codex 级成熟的关键差距：
 
 V2 只有同时满足下面条件，才可以说“接近 Codex 级成熟外壳”：
 
+- V2-Core 已经通过固定 golden traces，而不是只靠人工感觉判断“看起来能用”。
 - 用户启动一个桌面入口后，能看到稳定的三栏或四区布局：项目/会话侧栏、对话主区、工具/状态检查区、设置/浏览器/诊断入口。
 - 用户输入中文长 prompt 后，能看到 token 或 chunk 级流式输出，而不是只等最终答案。
 - 用户可以取消、重试、恢复、查看历史 session；窗口重启、bridge 重启后仍能恢复最近会话。
@@ -52,6 +53,7 @@ V2 必须做：
 - 建立 V2 协议和事件流，让后续 UI、测试、真实 agent adapter 都围绕稳定合同演进。
 - 补齐 V1 prompt matrix 中未完成的 GUI polish 项。
 - 把 GUI 验收从“人工记录截图”升级成“有脚本、有矩阵、有可重复步骤”的门禁。
+- 先建立 20 条固定 GUI golden traces，把最难的失败分布变成可重复评测数据。
 - 为后续自我开发 agent 项目保留可解释的 trace、session、权限、诊断数据结构。
 
 V2 不强行做：
@@ -112,6 +114,89 @@ V2 不强行做：
 - 用户最终目标是桌面外壳，Electron 的菜单、窗口、preload、token、可见验收仍要再做一次。
 
 结论：采用方案 A。
+
+## 4.1 三段式交付策略
+
+这份蓝图按 Karpathy 风格的工程现实主义升级：不要把“成熟”理解成“功能面很宽”。成熟先来自一个核心闭环在尾部场景里稳定工作，然后才扩展到更多产品面。
+
+### V2-Core：可靠对话闭环
+
+目标：
+
+- 固定 golden traces/eval corpus。
+- 建立 V2 protocol schema。
+- 建立 stream/long-poll fallback。
+- 建立 deterministic fake streaming adapter。
+- 让 ThreadView 能稳定渲染流式、拒绝、失败和恢复消息。
+- 让 Composer 支持中文多行和 Shift+Enter。
+- 让 crash/restart recovery 进入可见验收。
+
+完成标准：
+
+- 20 条 golden traces 全部可被 reducer 和 visible prompt matrix 覆盖。
+- `prompt -> stream event -> renderer state -> visible message -> restart -> recover` 这条链路有自动化测试和可见 GUI 验收。
+- Task 8 之后的搜索、设置、打包等宽功能不得阻塞 V2-Core 完成。
+
+### V2-Trust：可解释、可控制、可审计
+
+目标：
+
+- 把 fake streaming adapter 后面的真实 agent/harness adapter 接稳。
+- 权限、安全拒绝、工具轨迹、浏览器状态、Computer Use 状态、诊断脱敏都变成可解释 GUI。
+- 高风险动作仍走可见权限门禁。
+
+完成标准：
+
+- 真实 agent adapter 的入口、取消、失败、权限语义都有合同测试。
+- TracePanel 能解释每次工具调用发生了什么、为什么失败、哪些字段被脱敏。
+- Layer C 触发条件被自动打印并人工确认。
+
+### V2-Product：产品完整度
+
+目标：
+
+- 项目/会话/搜索、设置、Harness 面板、视觉可访问性、打包和启动体验补齐。
+- 这些功能服务核心闭环，不反过来拉低核心可靠性。
+
+完成标准：
+
+- Product 任务不能引入新的 renderer 直读后端文件路径。
+- Product 任务不能绕过 V2 protocol/event reducer。
+- release gate 能区分 Core、Trust、Product 三段结果。
+
+## 4.2 Golden Traces 先行原则
+
+V2 的核心资产不是组件数量，而是一组固定、可重复、能捕捉尾部失败的 GUI 事件轨迹。实现任何 V2 运行时代码前，先把这些轨迹写成文件和测试。
+
+第一批 20 条 golden traces：
+
+1. 中文项目分析流式输出。
+2. 英文短 prompt 流式输出。
+3. 中文多行 prompt 保留换行。
+4. Shift+Enter 插入换行，Enter 发送。
+5. 安全拒绝作为 assistant message。
+6. token rejection 作为线程内错误。
+7. unknown route 作为线程内错误。
+8. bridge offline 顶部诊断和线程内提示。
+9. backend busy 可读提示。
+10. cancel during streaming。
+11. retry after failed。
+12. retry after completed。
+13. restart resume latest session。
+14. permission approve。
+15. permission deny。
+16. tool started。
+17. tool failed with redacted args。
+18. browser provider degraded without path leak。
+19. Computer Use unavailable safe state。
+20. diagnostics bundle copied without token。
+
+Golden trace 文件必须是普通 JSON/Markdown，便于用户学习和人工检查：
+
+- Create: `apps/desktop/tests/fixtures/gui-v2-golden-events.json`
+- Create: `docs/desktop_gui_shell_v2_golden_traces.md`
+- Create: `learning_agent/tests/test_gui_golden_trace_contract.py`
+- Create: `apps/desktop/tests/goldenTraceReducer.test.ts`
 
 ## 5. V2 模块组成
 
@@ -223,6 +308,7 @@ flowchart LR
 - Test: `learning_agent/tests/test_gui_agent_adapter_contract.py`
 - Test: `learning_agent/tests/test_gui_diagnostics_contract.py`
 - Test: `learning_agent/tests/test_gui_permissions_v2_contract.py`
+- Test: `learning_agent/tests/test_gui_golden_trace_contract.py`
 
 前端新增或调整：
 
@@ -257,6 +343,8 @@ flowchart LR
 - Test: `apps/desktop/tests/eventReducer.test.ts`
 - Test: `apps/desktop/tests/composer.test.ts`
 - Test: `apps/desktop/tests/settingsStore.test.ts`
+- Test: `apps/desktop/tests/goldenTraceReducer.test.ts`
+- Create: `apps/desktop/tests/fixtures/gui-v2-golden-events.json`
 - Update: `apps/desktop/tests/gui-prompt-matrix.md`
 - Update: `apps/desktop/tests/smoke.md`
 
@@ -265,6 +353,7 @@ flowchart LR
 - Modify: `apps/desktop/scripts/release-gate.ps1`
 - Create: `apps/desktop/scripts/visible-gui-smoke.ps1`
 - Update: `docs/desktop_gui_shell_architecture.md`
+- Create: `docs/desktop_gui_shell_v2_golden_traces.md`
 - Create: `docs/desktop_gui_shell_v2_acceptance.md`
 - Update: `learning_agent/test/desktop_gui_shell_20260625/README.md` or create a V2 archive folder.
 - Update: `agent_memory/progress.md`
@@ -294,6 +383,287 @@ Layer C：真实可见终端 agent gate。
 - 一旦触发，必须按 `learning_agent/start_oauth_agent.bat` 的真实可见终端交互定义执行，不能用单元测试、stdin、HTTP bridge、自测脚本替代。
 
 ## 9. 实施任务
+
+Implementation order is stage-gated:
+
+- **V2-Core first:** Task Core-0, Task 0, Task 1, Task 2, Task 3 fake adapter path, Task 4, Task 5, the Core rows of Task 14, and the Core archive subset of Task 15.
+- **V2-Trust second:** Task 3 real adapter mapping, Task 6, Task 7, Task 9, Task 11 diagnostics, and the Trust rows of Task 14.
+- **V2-Product last:** Task 8, Task 10, Task 11 settings, Task 12, Task 13, and the Product rows of Task 14.
+
+Do not start V2-Product tasks until V2-Core passes. This prevents search/settings/packaging work from hiding failures in streaming, recovery, cancellation, retry, or first-class error messages.
+
+### Task Core-0: Golden Traces And Eval Corpus
+
+**Stage:** V2-Core
+
+**Files:**
+- Create: `apps/desktop/tests/fixtures/gui-v2-golden-events.json`
+- Create: `docs/desktop_gui_shell_v2_golden_traces.md`
+- Create: `learning_agent/tests/test_gui_golden_trace_contract.py`
+- Create: `apps/desktop/tests/goldenTraceReducer.test.ts`
+- Update: `apps/desktop/tests/gui-prompt-matrix.md`
+
+- [ ] **Step 1: Write the golden trace document**
+
+Create `docs/desktop_gui_shell_v2_golden_traces.md` with 20 named scenarios:
+
+```markdown
+# Desktop GUI Shell V2 Golden Traces
+
+Each trace is a stable GUI event sequence used to test the V2 shell before broad product work starts.
+
+## GT-001 Chinese Streaming Project Analysis
+
+- Prompt: `请分析当前项目是什么项目，并列出模块组成。`
+- Required events: `turn_started`, `message_delta`, `message_completed`
+- Required UI: assistant message streams visibly, then becomes completed.
+- Failure caught: renderer waits for final answer and shows no streaming progress.
+
+## GT-002 English Streaming Short Prompt
+
+- Prompt: `Summarize this project in two concise sentences.`
+- Required events: `turn_started`, `message_delta`, `message_completed`
+- Required UI: English stream renders without mojibake or layout jump.
+- Failure caught: Unicode or markdown renderer assumes Chinese-only content.
+
+## GT-003 Chinese Multiline Persistence
+
+- Prompt: `第一行：说明项目。\n第二行：保留换行。\n第三行：说明如何重试。`
+- Required events: `turn_started`, `message_delta`, `message_completed`
+- Required UI: user message preserves all newline characters after resume.
+- Failure caught: composer or persistence collapses Chinese multiline input.
+
+## GT-004 Shift Enter Newline
+
+- Prompt: manual composer interaction.
+- Required events: no backend event before Enter.
+- Required UI: Shift+Enter inserts newline, Enter sends once.
+- Failure caught: Shift+Enter accidentally sends the prompt.
+
+## GT-005 Safety Refusal Assistant Message
+
+- Prompt: `请绕过本机权限直接控制系统高风险操作。`
+- Required events: `turn_started`, `safety_refusal`, `message_completed`
+- Required UI: refusal appears as an assistant message, not as raw error text.
+- Failure caught: safety refusal disappears into status timeline only.
+
+## GT-006 Token Rejection In Thread
+
+- Prompt: bridge request with invalid token.
+- Required events: structured client error with code `unauthorized`.
+- Required UI: thread or diagnostics shows polished error without token leak.
+- Failure caught: raw HTTP error or blank pane.
+
+## GT-007 Unknown Route In Thread
+
+- Prompt: request unknown bridge path.
+- Required events: structured client error with code `not_found`.
+- Required UI: readable GUI error.
+- Failure caught: renderer displays raw HTML or traceback.
+
+## GT-008 Bridge Offline
+
+- Prompt: stop bridge while GUI is open.
+- Required events: client offline diagnostic.
+- Required UI: top diagnostics and thread-safe message explain offline state.
+- Failure caught: window silently freezes.
+
+## GT-009 Backend Busy
+
+- Prompt: send second prompt while first is running.
+- Required events: structured `agent_busy`.
+- Required UI: composer stays stable and explains busy state.
+- Failure caught: duplicate active turns.
+
+## GT-010 Cancel During Streaming
+
+- Prompt: long running streaming answer.
+- Required events: `turn_started`, `message_delta`, `turn_cancelled`.
+- Required UI: cancel button reaches cancelled state.
+- Failure caught: stream continues after cancel.
+
+## GT-011 Retry After Failed
+
+- Prompt: deterministic failed turn.
+- Required events: `turn_failed`, retry creates linked `turn_started`.
+- Required UI: retry button creates new assistant message.
+- Failure caught: retry mutates old failed message destructively.
+
+## GT-012 Retry After Completed
+
+- Prompt: completed turn.
+- Required events: retry creates linked `turn_started`.
+- Required UI: new linked turn appears.
+- Failure caught: completed answer is overwritten.
+
+## GT-013 Restart Resume Latest Session
+
+- Prompt: completed session, then restart GUI.
+- Required events: resume endpoint returns messages and latest sequence.
+- Required UI: latest session appears in sidebar and thread.
+- Failure caught: session list exists but messages do not restore.
+
+## GT-014 Permission Approve
+
+- Prompt: simulated tool permission request.
+- Required events: `permission_requested`, `permission_answered`.
+- Required UI: approve button reaches backend and closes pending state.
+- Failure caught: approve is only local UI state.
+
+## GT-015 Permission Deny
+
+- Prompt: simulated tool permission request.
+- Required events: `permission_requested`, `permission_answered`, `turn_failed`.
+- Required UI: denied turn shows readable assistant/error message.
+- Failure caught: deny leaves turn stuck in running.
+
+## GT-016 Tool Started
+
+- Prompt: deterministic tool call.
+- Required events: `tool_started`.
+- Required UI: TracePanel row appears.
+- Failure caught: tool progress only appears in raw timeline.
+
+## GT-017 Tool Failed With Redacted Args
+
+- Prompt: deterministic failed tool call with sensitive args.
+- Required events: `tool_started`, `tool_finished` with failed status.
+- Required UI: args show `[redacted]`, error message is readable.
+- Failure caught: local path, token, or secret leaks.
+
+## GT-018 Browser Provider Degraded
+
+- Prompt: browser snapshot read failure.
+- Required events: panel payload has `degraded: true`.
+- Required UI: browser panel shows safe degraded banner.
+- Failure caught: bridge traceback or local path leak.
+
+## GT-019 Computer Use Safe Unavailable
+
+- Prompt: Computer Use state unavailable.
+- Required events: runtime panel payload has safe unavailable state.
+- Required UI: ComputerUsePanel disables risky controls.
+- Failure caught: panel implies high-risk controls are available.
+
+## GT-020 Diagnostics Bundle Redaction
+
+- Prompt: copy diagnostics.
+- Required events: diagnostics payload built.
+- Required UI: copied bundle excludes bridge token and local secrets.
+- Failure caught: debug output leaks token or credential paths.
+```
+
+- [ ] **Step 2: Write the JSON fixture**
+
+Create `apps/desktop/tests/fixtures/gui-v2-golden-events.json` with one object per trace:
+
+```json
+[
+  {
+    "id": "GT-001",
+    "name": "Chinese Streaming Project Analysis",
+    "prompt": "请分析当前项目是什么项目，并列出模块组成。",
+    "events": [
+      { "sequence": 1, "kind": "turn_started", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "status": "running" } },
+      { "sequence": 2, "kind": "message_delta", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "text_delta": "这是一个 OpenHarness agent 项目。" } },
+      { "sequence": 3, "kind": "message_completed", "turn_id": "turn_gt001", "run_id": "run_gt001", "payload": { "final_text": "这是一个 OpenHarness agent 项目。核心模块包括 GUI bridge、桌面外壳、浏览器自动化、Computer Use 和长任务 harness。" } }
+    ],
+    "must_not_contain": ["traceback", "X-OpenHarness-Desktop-Token"]
+  }
+]
+```
+
+Then add the remaining 19 traces using the same field shape. Each trace must include `id`, `name`, `prompt`, `events`, and `must_not_contain`.
+
+- [ ] **Step 3: Write backend fixture contract test**
+
+Create `learning_agent/tests/test_gui_golden_trace_contract.py`:
+
+```python
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+
+class GuiGoldenTraceContractTest(unittest.TestCase):
+    def test_all_golden_traces_have_required_shape(self) -> None:
+        fixture_path = Path("apps/desktop/tests/fixtures/gui-v2-golden-events.json")
+        traces = json.loads(fixture_path.read_text(encoding="utf-8"))
+        self.assertEqual(20, len(traces))
+        ids = {trace["id"] for trace in traces}
+        self.assertEqual(20, len(ids))
+        for trace in traces:
+            self.assertIn("GT-", trace["id"])
+            self.assertIsInstance(trace["prompt"], str)
+            self.assertGreater(len(trace["events"]), 0)
+            self.assertIsInstance(trace["must_not_contain"], list)
+            for event in trace["events"]:
+                self.assertIn("sequence", event)
+                self.assertIn("kind", event)
+                self.assertIn("payload", event)
+
+    def test_golden_traces_do_not_store_tokens_or_tracebacks(self) -> None:
+        fixture_path = Path("apps/desktop/tests/fixtures/gui-v2-golden-events.json")
+        raw_text = fixture_path.read_text(encoding="utf-8").lower()
+        self.assertNotIn("x-openharness-desktop-token", raw_text)
+        self.assertNotIn("traceback", raw_text)
+        self.assertNotIn("authorization", raw_text)
+
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+- [ ] **Step 4: Write frontend reducer fixture test**
+
+Create `apps/desktop/tests/goldenTraceReducer.test.ts`:
+
+```typescript
+import { describe, expect, it } from "vitest";
+import goldenTraces from "./fixtures/gui-v2-golden-events.json";
+
+describe("gui v2 golden traces", () => {
+  it("contains the required 20 trace scenarios", () => {
+    expect(goldenTraces).toHaveLength(20);
+    expect(new Set(goldenTraces.map((trace) => trace.id)).size).toBe(20);
+  });
+
+  it("keeps every trace free of raw secrets and tracebacks", () => {
+    const serialized = JSON.stringify(goldenTraces).toLowerCase();
+    expect(serialized).not.toContain("x-openharness-desktop-token");
+    expect(serialized).not.toContain("traceback");
+    expect(serialized).not.toContain("authorization");
+  });
+});
+```
+
+- [ ] **Step 5: Run golden trace tests**
+
+Run:
+
+```powershell
+python -m unittest learning_agent.tests.test_gui_golden_trace_contract
+cd H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1\apps\desktop
+npm test -- --run goldenTraceReducer.test.ts
+```
+
+Expected:
+
+```text
+OK
+PASS
+```
+
+- [ ] **Step 6: Commit**
+
+Run:
+
+```powershell
+git add docs/desktop_gui_shell_v2_golden_traces.md apps/desktop/tests/fixtures/gui-v2-golden-events.json learning_agent/tests/test_gui_golden_trace_contract.py apps/desktop/tests/goldenTraceReducer.test.ts apps/desktop/tests/gui-prompt-matrix.md
+git commit -m "test: add desktop gui v2 golden traces"
+```
 
 ### Task 0: V2 基线冻结
 
@@ -544,22 +914,26 @@ git add learning_agent/app/gui_stream.py learning_agent/app/gui_bridge.py learni
 git commit -m "feat: stream desktop gui v2 events"
 ```
 
-### Task 3: 真实 Agent Adapter
+### Task 3: Agent Adapter Boundary And Fake Streaming First
+
+**Stage:** V2-Core for `FakeStreamingGuiAgentAdapter`; V2-Trust for `DefaultHarnessGuiAgentAdapter`.
+
+**Risk boundary:** Do not wire the GUI directly into a real agent/harness until the adapter entry point, cancellation semantics, permission semantics, and failure semantics are identified and covered by tests. V2-Core must be able to pass with deterministic fake streaming so the GUI reliability loop can mature before real model/runtime variability enters.
 
 **Files:**
 - Create: `learning_agent/app/gui_agent_adapter.py`
 - Modify: `learning_agent/app/gui_bridge.py`
 - Create: `learning_agent/tests/test_gui_agent_adapter_contract.py`
 
-- [ ] **Step 1: 写 adapter 合同测试**
+- [ ] **Step 1: 写 fake streaming adapter 合同测试**
 
 Test cases:
 
 - GUI prompt creates a run with `session_id`, `turn_id`, `run_id`, `prompt`.
-- Adapter emits `turn_started`, at least one `message_delta`, and `message_completed`.
-- Adapter propagates cancellation to the running turn.
-- Adapter converts backend exceptions into `turn_failed` event.
-- Adapter can run in deterministic fake mode for frontend tests.
+- `FakeStreamingGuiAgentAdapter` emits `turn_started`, at least one `message_delta`, and `message_completed`.
+- `FakeStreamingGuiAgentAdapter` propagates cancellation to the running turn.
+- `FakeStreamingGuiAgentAdapter` converts deterministic exceptions into `turn_failed` event.
+- Fake mode can replay `apps/desktop/tests/fixtures/gui-v2-golden-events.json` traces for frontend and bridge tests.
 
 Run:
 
@@ -573,7 +947,7 @@ Expected first run:
 FAILED
 ```
 
-- [ ] **Step 2: Create adapter interface**
+- [ ] **Step 2: Create adapter interface and fake streaming adapter**
 
 Create `learning_agent/app/gui_agent_adapter.py` with:
 
@@ -583,17 +957,45 @@ Create `learning_agent/app/gui_agent_adapter.py` with:
 - `FakeStreamingGuiAgentAdapter`
 - `DefaultHarnessGuiAgentAdapter`
 
-The default adapter should use existing harness/runtime entry points available in this repository. If an exact stable entry point is not available, keep the default adapter behind a feature flag and fail with a structured `adapter_unavailable` event, not a traceback.
+V2-Core requirement:
 
-- [ ] **Step 3: Wire bridge run manager to adapter**
+- `FakeStreamingGuiAgentAdapter` must be fully implemented and deterministic.
+- `DefaultHarnessGuiAgentAdapter` may exist as a feature-flagged shell that returns structured `adapter_unavailable` until Task 6 starts.
+- The adapter module must not import model/OAuth/browser/Computer Use runtime modules at import time; real runtime imports happen lazily inside the enabled default adapter path.
+
+- [ ] **Step 3: Wire bridge run manager to fake adapter first**
 
 Modify `GuiRunManager` in `learning_agent/app/gui_bridge.py`:
 
 - Accept `agent_adapter`.
-- Use adapter for V2 turns.
+- Use `FakeStreamingGuiAgentAdapter` for V2-Core turns by default.
 - Keep V1 answer runner path for compatibility tests.
+- Return `adapter_unavailable` when the caller explicitly requests real harness mode but the real entry point is not yet enabled.
 
-- [ ] **Step 4: Run backend adapter tests**
+- [ ] **Step 4: Identify real harness entry point without wiring it**
+
+Use CodeGraph to inspect likely entry points before writing real adapter code:
+
+```powershell
+codegraph explore "agent executor harness run prompt cancellation status events"
+codegraph explore "learning_agent harness agent_executor command queue task registry"
+```
+
+Record findings in:
+
+```text
+docs/desktop_gui_shell_v2_agent_adapter_mapping.md
+```
+
+Expected content:
+
+- candidate function/class names.
+- how cancellation is represented.
+- how status events are emitted.
+- how permission requests are represented.
+- why the chosen entry point is stable enough or why it remains blocked.
+
+- [ ] **Step 5: Run backend adapter tests**
 
 Run:
 
@@ -607,13 +1009,13 @@ Expected:
 OK
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit V2-Core fake adapter boundary**
 
 Run:
 
 ```powershell
-git add learning_agent/app/gui_agent_adapter.py learning_agent/app/gui_bridge.py learning_agent/tests/test_gui_agent_adapter_contract.py
-git commit -m "feat: connect desktop gui to agent adapter"
+git add learning_agent/app/gui_agent_adapter.py learning_agent/app/gui_bridge.py learning_agent/tests/test_gui_agent_adapter_contract.py docs/desktop_gui_shell_v2_agent_adapter_mapping.md
+git commit -m "feat: add desktop gui fake streaming adapter"
 ```
 
 ### Task 4: Thread 流式渲染和一等消息
@@ -1430,6 +1832,9 @@ git commit -m "docs: record desktop gui v2 acceptance evidence"
 
 V2 can be declared complete only when:
 
+- V2-Core is declared complete first with 20/20 golden traces covered by backend fixture tests and frontend reducer tests.
+- V2-Trust is declared complete only after real adapter mapping, permission flow, trace inspector, diagnostics redaction, and Layer C trigger decision are verified.
+- V2-Product is declared complete only after search/settings/Harness/visual/packaging tasks pass without weakening V2-Core or V2-Trust checks.
 - All checked tasks in this plan are completed.
 - `apps/desktop/tests/gui-prompt-matrix.md` has V2 rows checked with evidence links.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File .\apps\desktop\scripts\release-gate.ps1` passes.
@@ -1442,6 +1847,8 @@ V2 can be declared complete only when:
 
 Stop and report to the user before continuing if:
 
+- Any V2-Product task is about to start while V2-Core golden traces are still failing.
+- Golden trace fixture expectations conflict with the V2 protocol schema.
 - The real agent adapter entry point cannot be identified from code after focused investigation.
 - A V2 task requires modifying model account/OAuth behavior or using real credentials.
 - Browser or Computer Use changes would perform real high-risk desktop actions without a visible permission gate.
@@ -1453,17 +1860,20 @@ Stop and report to the user before continuing if:
 
 Use `superpowers:subagent-driven-development` for implementation because tasks are separable:
 
-- One subagent per backend protocol/stream/adapter task.
-- One subagent per frontend state/UI task.
-- One review pass between backend and frontend integration.
+- One subagent for Task Core-0 golden traces.
+- One subagent per backend protocol/stream/fake-adapter task during V2-Core.
+- One subagent per frontend state/UI task during V2-Core.
+- One review pass at the V2-Core gate before any V2-Trust or V2-Product task starts.
 - Main agent owns release gate, visible GUI acceptance, and final evidence archive.
 
 Use inline execution only for small follow-up fixes or if subagents are unavailable.
 
-## 13. First Three Commits To Make
+## 13. First Five Commits To Make
 
 1. `docs: add desktop gui shell v2 blueprint`
-2. `feat: add desktop gui v2 protocol contract`
-3. `feat: stream desktop gui v2 events`
+2. `test: add desktop gui v2 golden traces`
+3. `feat: add desktop gui v2 protocol contract`
+4. `feat: stream desktop gui v2 events`
+5. `feat: add desktop gui fake streaming adapter`
 
-This order gives the project a stable written target, a stable protocol, then a real-time event backbone. After that, the rest of the Codex-like shell becomes a set of visible panels and acceptance slices instead of a vague long task.
+This order gives the project a stable written target, a fixed eval set, a stable protocol, a real-time event backbone, and a deterministic fake adapter before real runtime variability enters. After that, the rest of the Codex-like shell becomes a set of visible panels and acceptance slices instead of a vague long task.

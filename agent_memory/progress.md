@@ -825,3 +825,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 目标：把 V1 可见垂直切片升级为接近 Codex 桌面体验的成熟外壳，覆盖流式输出、真实 Agent Adapter、会话恢复、工具轨迹、权限与安全、浏览器/Computer Use 面板、项目搜索、长任务 Harness、设置诊断、打包和分层验收。
 - 推荐执行方式：使用 `superpowers:subagent-driven-development` 逐任务执行，主 agent 负责审核、release gate 和真实可见 GUI 验收。
 - 当前未触发 Layer C 真实终端 gate：本次只写方案和进度记录，没有修改 agent runtime、MCP routing、模型调用、浏览器自动化、Computer Use 执行或后端权限 enforcement。
+
+## 2026-06-25 Codex 风格桌面 GUI 外壳 V2 蓝图升级
+
+- Status: 已按 Karpathy 风格评估报告升级 V2 蓝图，尚未开始修改运行时代码。
+- 核心变化：V2 从单条 15 任务大长线升级为 `V2-Core / V2-Trust / V2-Product` 三段式交付，要求先把核心流式对话与恢复闭环做硬，再扩展宽功能。
+- 新增门禁：加入 `Task Core-0: Golden Traces And Eval Corpus`，要求先定义 20 条 GUI golden traces，并用后端 fixture 合同测试与前端 reducer 测试锁定尾部失败分布。
+- 风险收敛：Task 3 从“直接接真实 Agent Adapter”改成“deterministic fake streaming adapter 先行，真实 harness 接线进入 V2-Trust”，避免真实 runtime 不确定性污染 V2-Core。
+- 当前未触发 Layer C 真实终端 gate：本次只升级方案和进度记录，没有修改 agent runtime、MCP routing、模型调用、浏览器自动化、Computer Use 执行或后端权限 enforcement。
