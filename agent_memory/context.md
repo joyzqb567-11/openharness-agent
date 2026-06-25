@@ -231,3 +231,9 @@ Task 10 已建立长任务 Harness GUI 边界：`learning_agent/app/gui_bridge.p
 前端 Task 10 数据流是：`createGuiClient().harnessStatus()` 拉取 `/v2/gui/harness/status`，`AppShell.tsx` 首屏和 3 秒轮询保存到 `harnessPayload`，`StatusInspector.tsx` 在“任务”页签渲染 `HarnessPanel`。`pauseHarness()` 和 `resumeHarness()` 已有 API client 与 AppShell 回调，但后端当前返回结构化 `unsupported`，所以 `HarnessPanel` 只在 `controls.pause_supported/resume_supported` 为真时显示按钮。
 
 后续如果要实现真实暂停/恢复，必须先给 Harness runtime 增加可审计 pause/resume 状态机，再把支持能力切到 `controls` 字段；不能只让前端按钮显示并调用空 endpoint。真实能力接入后仍应复用 `/v2/gui/harness/status`，不要新增旁路任务面板 API。
+
+Task 13 已建立包装和启动体验边界：`apps/desktop/scripts/package-windows.ps1` 是 Windows 开发包装入口，生成 `apps/desktop/dist/package-windows/openharness-desktop-windows-dev` 和 `learning_agent/test/desktop_gui_shell_v2/package_summary.txt`。它不生成签名安装器，不应在文档或 UI 中称为正式 installer。
+
+启动脚本边界是：`start-backend.ps1` 负责 bridge 端口 `8776` 和后端 URL 输出；`start-desktop-dev.ps1` 负责 renderer 端口 `5177`、Vite dev server 和 Electron shell。两个脚本都要保留“URL + evidence folder + port occupied”诊断输出，后续新增 launcher 不应把这些诊断藏到日志里。
+
+所有新增/修改的 PowerShell 启动与包装脚本必须保留 UTF-8 BOM + CRLF。Windows PowerShell 5.1 在无 BOM UTF-8 中文注释下会把多行脚本错误解析，曾导致 `$DesktopRoot` 为空并让 `Set-Location` 失败。

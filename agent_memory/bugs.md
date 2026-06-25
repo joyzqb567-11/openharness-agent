@@ -429,3 +429,10 @@
 - Closed risk: 长任务 goal、队列、checkpoint 和 blocked reason 此前没有右侧 GUI 入口，用户只能从日志或终端推断长任务位置。现在 `/v2/gui/harness/status` 和“任务”页签把这些字段作为一等状态展示，并有后端合同测试覆盖。
 - Closed risk: 前端如果无条件显示暂停/恢复按钮，会误导用户以为 Harness 已支持真实控制。现在后端 `controls.pause_supported/resume_supported` 默认为 false，控制 endpoint 返回结构化 `unsupported`，前端只有能力为真时才显示按钮。
 - Remaining risk: 当前 pause/resume 只是结构化占位，不代表真实 Harness runtime 已具备安全暂停和恢复。后续实现前必须先建立 runtime 级状态机、审计事件和恢复合同测试，不能只改 GUI。
+
+## 2026-06-25 Desktop GUI Shell V2 Packaging Risks
+
+- Status: 本轮包装脚本可运行风险已关闭，正式安装器和依赖漏洞风险仍保留。
+- Closed risk: `package-windows.ps1` 最初以无 BOM UTF-8 保存，Windows PowerShell 5.1 解析中文注释后把后续语句吞进同一行，导致 `$DesktopRoot` 为空。现在包装和启动 PS1 已统一转换为 UTF-8 BOM + CRLF，并验证脚本可运行或可解析。
+- Closed risk: 启动脚本此前没有提前检查端口占用，renderer/bridge 失败时错误不够直观。现在 backend 脚本检查 bridge 端口，desktop dev 脚本检查 renderer 端口，并输出修复提示。
+- Remaining risk: 当前 Task 13 只生成 Windows development artifact，不是签名安装器；后续如果要面向普通用户分发，需要决定 electron-builder/electron-forge、代码签名、自动更新、依赖漏洞升级和真实安装路径策略。

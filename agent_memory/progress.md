@@ -941,3 +941,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `runtime-panels.css` 已增加 Harness 面板样式，覆盖当前目标、队列、checkpoint、阻塞警告和控制按钮，避免长 prompt 或路径撑破右侧栏。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task10_harness_panel/`。
 - 已验证：`python -m unittest learning_agent.tests.test_gui_harness_panel_contract` 为 2 tests OK；`npm test -- --run` 为 9 files / 45 tests passed；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 13
+
+- Task 13：打包和启动体验已完成。`apps/desktop/package.json` 新增 `package:windows` 脚本，调用 `apps/desktop/scripts/package-windows.ps1`。
+- 新增 `package-windows.ps1`：缺少 `node_modules` 时运行 `npm ci`，随后运行 `npm run build`，生成 `apps/desktop/dist/package-windows/openharness-desktop-windows-dev`，写入 `package-manifest.json` 和 `learning_agent/test/desktop_gui_shell_v2/package_summary.txt`。
+- `start-backend.ps1` 已打印 bridge URL、renderer 启动提示、证据目录，并在 bridge 端口被占用时提前给出清楚错误。
+- `start-desktop-dev.ps1` 已打印 bridge URL、renderer URL、证据目录，并在 renderer 端口被占用时提前给出清楚错误；依赖已存在时跳过 `npm install`，仍保留 `npm rebuild electron`。
+- `docs/desktop_gui_shell_architecture.md` 已增加 Windows Packaging And Startup 章节，明确当前产物是 Windows development artifact，不是签名安装器。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task13_packaging_flow/`。
+- 已验证：`npm run build` 通过；`powershell -NoProfile -ExecutionPolicy Bypass -File .\apps\desktop\scripts\package-windows.ps1` 通过并输出 `Desktop package artifact created.`；两个启动脚本 `scriptblock` 语法解析通过。

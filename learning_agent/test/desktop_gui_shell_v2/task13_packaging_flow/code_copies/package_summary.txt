@@ -1,0 +1,5 @@
+﻿Desktop package artifact created.
+Artifact: H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1\apps\desktop\dist\package-windows\openharness-desktop-windows-dev
+Commit: 27fba3f2
+Build: npm run build passed
+Type: Windows development artifact, not a signed installer
