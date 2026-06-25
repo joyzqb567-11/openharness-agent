@@ -1017,3 +1017,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `gui_bridge.py` 已接入 `/v2/gui/provider-settings/auth`、`/disconnect`、`/custom-provider`、`/model-visibility` 四个 POST 路由，并把 provider 校验错误转换为结构化 V2 错误响应。
 - 测试覆盖：主配置只保存 `secret_ref`、raw key 只进入 `secrets.dev.json`、保留 id `custom` 返回 `reserved_provider_id`、非法 base URL 返回 `invalid_base_url`、模型可见性跨 server 重启持久。
 - 已验证：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 3 passed。
+
+## 2026-06-26 Provider Settings V1 Task 3
+
+- Task 3 已完成 Provider connection probe 合同。
+- `gui_provider_settings.py` 新增 `test_provider_connection()`、`probe_openai_compatible_models()`、`build_probe_result()` 和 header secret 读取 helper。
+- `gui_bridge.py` 已接入 `POST /v2/gui/provider-settings/test-connection`，只做 `/models` metadata 探针，不切换真实 agent runtime。
+- 测试使用本地假 `/v1/models` HTTP server 验证成功探针，并覆盖 `unsupported`、`missing_secret`、`network_failed` 三类失败状态。
+- 已验证：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 4 passed。
