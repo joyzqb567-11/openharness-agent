@@ -1025,3 +1025,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `gui_bridge.py` 已接入 `POST /v2/gui/provider-settings/test-connection`，只做 `/models` metadata 探针，不切换真实 agent runtime。
 - 测试使用本地假 `/v1/models` HTTP server 验证成功探针，并覆盖 `unsupported`、`missing_secret`、`network_failed` 三类失败状态。
 - 已验证：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 4 passed。
+
+## 2026-06-26 Provider Settings V1 Task 4
+
+- Task 4 已完成 Renderer Provider Types、GUI client methods 和 provider settings store。
+- `apps/desktop/src/api/guiProviderTypes.ts` 新增 Provider Settings 后端响应、连接请求和探针响应 TypeScript 类型。
+- `apps/desktop/src/api/guiClient.ts` 新增 `providerSettings()`、`connectProvider()`、`disconnectProvider()`、`saveCustomProvider()`、`setModelVisibility()` 和 `testProviderConnection()`，统一把前端 camelCase 请求转换为 bridge snake_case 合同。
+- `apps/desktop/src/state/providerSettingsStore.ts` 新增纯 view model builder，负责 provider 排序、unsupported 状态、dev secret warning、模型分组和危险字段脱敏。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v1/task04_renderer_contract/`。
+- 已验证：`npm test -- --run tests/guiProviderClient.test.ts tests/providerSettingsStore.test.ts tests/settingsDialogViewModel.test.ts` 为 3 files / 4 tests passed。
