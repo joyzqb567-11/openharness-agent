@@ -1009,3 +1009,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `learning_agent/app/gui_provider_settings.py`，提供 provider catalog、secret store 摘要、内置 provider、虚拟 `custom-provider-cta` 和响应脱敏。
 - `learning_agent/app/gui_bridge.py` 已接入 `GET /v2/gui/provider-settings/providers`，沿用现有 V2 token 门禁。
 - 红灯验证先失败于缺少 `gui_provider_secret_store` 和 route 404；实现后 `python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 2 passed。
+
+## 2026-06-26 Provider Settings V1 Task 2
+
+- Task 2 已完成 Provider auth、disconnect、自定义 provider 和模型可见性持久化。
+- `gui_provider_settings.py` 新增结构化错误、provider id/base URL/model/header 校验、`set_provider_auth()`、`disconnect_provider()`、`save_custom_provider()` 和 `set_model_visibility()`。
+- `gui_bridge.py` 已接入 `/v2/gui/provider-settings/auth`、`/disconnect`、`/custom-provider`、`/model-visibility` 四个 POST 路由，并把 provider 校验错误转换为结构化 V2 错误响应。
+- 测试覆盖：主配置只保存 `secret_ref`、raw key 只进入 `secrets.dev.json`、保留 id `custom` 返回 `reserved_provider_id`、非法 base URL 返回 `invalid_base_url`、模型可见性跨 server 重启持久。
+- 已验证：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 3 passed。
