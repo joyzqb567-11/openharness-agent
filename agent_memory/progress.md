@@ -1001,3 +1001,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已按用户要求补充蓝图：Provider Settings V1 验收必须包含肉眼可见的真实 Electron GUI 界面验收。
 - 蓝图已明确：自动截图、DOM 断言、单元测试、bridge 调用和日志只能辅助验收，不能替代最终可见 GUI 检查。
 - 蓝图已明确：可见 GUI 验收发现 bug 或异常行为时，必须使用 `superpowers:systematic-debugging` 先复现、定位根因、修复、重新测试，通过后才能继续下一个任务。
+
+## 2026-06-26 Provider Settings V1 Task 1
+
+- Task 1 已完成后端 Provider catalog 和开发密钥存储合同。
+- 新增 `learning_agent/app/gui_provider_secret_store.py`，提供 `GuiProviderSecretStore`、`DevJsonSecretStore`、`safe_secret_ref()` 和 `mask_secret_value()`。
+- 新增 `learning_agent/app/gui_provider_settings.py`，提供 provider catalog、secret store 摘要、内置 provider、虚拟 `custom-provider-cta` 和响应脱敏。
+- `learning_agent/app/gui_bridge.py` 已接入 `GET /v2/gui/provider-settings/providers`，沿用现有 V2 token 门禁。
+- 红灯验证先失败于缺少 `gui_provider_secret_store` 和 route 404；实现后 `python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 2 passed。
