@@ -237,3 +237,9 @@ Task 13 已建立包装和启动体验边界：`apps/desktop/scripts/package-win
 启动脚本边界是：`start-backend.ps1` 负责 bridge 端口 `8776` 和后端 URL 输出；`start-desktop-dev.ps1` 负责 renderer 端口 `5177`、Vite dev server 和 Electron shell。两个脚本都要保留“URL + evidence folder + port occupied”诊断输出，后续新增 launcher 不应把这些诊断藏到日志里。
 
 所有新增/修改的 PowerShell 启动与包装脚本必须保留 UTF-8 BOM + CRLF。Windows PowerShell 5.1 在无 BOM UTF-8 中文注释下会把多行脚本错误解析，曾导致 `$DesktopRoot` 为空并让 `Set-Location` 失败。
+
+Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps1` 是自动门禁入口，必须输出 `Python GUI tests OK.`、`Frontend lint passed.`、`Frontend unit tests passed.`、`Frontend production build passed.`、`Layer A visible GUI smoke instructions generated.` 和 `Layer C trigger decision printed.`。
+
+`apps/desktop/scripts/visible-gui-smoke.ps1` 是可见 GUI smoke 指令入口。默认模式只生成 `learning_agent/test/desktop_gui_shell_v2/visible_gui_smoke/visible_gui_smoke_*.txt`，不启动 GUI，不宣称 PASS；人工验收时可用 `-Launch` 启动 bridge 和 Electron，但仍需要真实视觉确认。
+
+后续如果修改 release gate，不能把 Layer A 可见 GUI smoke 当作自动通过；release gate 只能证明自动合同、构建和“人工检查清单已生成”。真正的 GUI 成熟验收还需要截图/用户反馈/可见窗口观察证据。

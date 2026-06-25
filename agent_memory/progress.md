@@ -951,3 +951,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `docs/desktop_gui_shell_architecture.md` 已增加 Windows Packaging And Startup 章节，明确当前产物是 Windows development artifact，不是签名安装器。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task13_packaging_flow/`。
 - 已验证：`npm run build` 通过；`powershell -NoProfile -ExecutionPolicy Bypass -File .\apps\desktop\scripts\package-windows.ps1` 通过并输出 `Desktop package artifact created.`；两个启动脚本 `scriptblock` 语法解析通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 14
+
+- Task 14：Release gate V2 已完成。`apps/desktop/scripts/release-gate.ps1` 已升级为 V2 自动门禁，运行 Python GUI V1/V2 tests、前端 lint、Vitest、production build、visible GUI smoke 指令生成和 Layer C trigger decision 输出。
+- 新增 `apps/desktop/scripts/visible-gui-smoke.ps1`，默认只生成人工可见 GUI smoke 指令和日志；传 `-Launch` 时才启动 bridge 和桌面 dev shell，且仍不会自动宣称视觉通过。
+- `apps/desktop/tests/gui-prompt-matrix.md` 已新增 `V2 Visible GUI Release Rows`，覆盖中文/英文流式、安全拒绝、多行、Shift+Enter、token/unknown route、bridge offline、工具轨迹、权限、浏览器、Computer Use、设置、诊断和会话恢复。
+- 新增 `docs/desktop_gui_shell_v2_acceptance.md`，定义 Layer A 可见 GUI smoke、Layer B 自动 release gate、Layer C 条件真实后端终端门禁。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task14_release_gate_v2/`。
+- 已验证：`powershell -NoProfile -ExecutionPolicy Bypass -File .\apps\desktop\scripts\release-gate.ps1` 通过，输出 58 个 Python GUI tests OK、45 个前端 tests passed、lint passed、production build passed、visible GUI smoke instructions generated、Layer C trigger decision printed。

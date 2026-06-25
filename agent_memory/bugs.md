@@ -436,3 +436,10 @@
 - Closed risk: `package-windows.ps1` 最初以无 BOM UTF-8 保存，Windows PowerShell 5.1 解析中文注释后把后续语句吞进同一行，导致 `$DesktopRoot` 为空。现在包装和启动 PS1 已统一转换为 UTF-8 BOM + CRLF，并验证脚本可运行或可解析。
 - Closed risk: 启动脚本此前没有提前检查端口占用，renderer/bridge 失败时错误不够直观。现在 backend 脚本检查 bridge 端口，desktop dev 脚本检查 renderer 端口，并输出修复提示。
 - Remaining risk: 当前 Task 13 只生成 Windows development artifact，不是签名安装器；后续如果要面向普通用户分发，需要决定 electron-builder/electron-forge、代码签名、自动更新、依赖漏洞升级和真实安装路径策略。
+
+## 2026-06-25 Desktop GUI Shell V2 Release Gate Risks
+
+- Status: 自动门禁风险已关闭，可见 GUI 通过状态仍必须由真实窗口确认。
+- Closed risk: 旧 release gate 只跑少量 Python bridge tests 和前端门禁，没有覆盖新增 V2 diagnostics、sessions、runtime panels、Harness 等 GUI 后端合同。现在用 `python -m unittest discover -s learning_agent/tests -p "test_gui*.py"` 跑完整 GUI 测试集。
+- Closed risk: release gate 以前没有生成 Layer A 可见 GUI smoke 指令，容易把自动测试通过误读成视觉验收通过。现在 `visible-gui-smoke.ps1` 会生成人工检查清单，release gate 明确输出只是 instructions generated。
+- Remaining risk: `visible-gui-smoke.ps1` 默认不启动 GUI，也不会自动判断 PASS。最终声明 V2 GUI 成熟前仍必须有真实 Electron 窗口可见验收证据。
