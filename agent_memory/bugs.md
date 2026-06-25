@@ -387,3 +387,10 @@
 - Closed risk: 权限原因和风险摘要可能把本机路径、`sk-*` 密钥或 bearer token 直接展示给用户。现在请求、风险和决策理由都会经过 `redact_permission_text()`，并有敏感文本回归测试。
 - Closed risk: 前端允许/拒绝按钮在后端确认前没有禁用态，快速双击可能产生重复请求。现在 `AppShell` 用 `pendingPermissionDecisionId` 阻止重复提交，弹窗和 banner 都显示提交中状态；后端仍保留 `permission_already_answered` 结构化冲突作为最终防线。
 - Remaining risk: 当前仍是 fake streaming/default GUI bridge 权限流；真实 agent adapter 接入时必须把实际工具权限事件映射到同一套 `record_permission_required()` 和 `decide_permission()`，不能新增旁路权限 payload。
+
+## 2026-06-25 Desktop GUI Shell V2 Trace Inspector Risks
+
+- Status: 已关闭本轮自动化风险。
+- Closed risk: 工具事件此前只散落在原始状态时间线，用户无法快速看到某个工具的参数、耗时、结果或失败码。现在 `reduceGuiEventToTraceRows()` 和 `TracePanel.tsx` 把工具轨迹作为右侧“工具”页签一等展示。
+- Closed risk: 工具参数和诊断文本可能显示本机路径、`sk-*` 密钥或 bearer token。现在 trace reducer 在 `argsPreview` 和 `diagnosticText` 中统一输出 `[redacted]`，并有前端 reducer 回归测试覆盖。
+- Remaining risk: 当前 trace row 仍消费 fake/default GUI events；真实 agent adapter 接入后必须确认真实工具事件也统一发出 `tool_started/tool_finished` 或等价字段，不能只把工具日志写到主线程消息里。

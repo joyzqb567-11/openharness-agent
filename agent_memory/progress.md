@@ -888,3 +888,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 前端 `PermissionDialog.tsx`、`PermissionBanner.tsx`、`AppShell.tsx` 和 `layout.css` 已显示应用、工具、动作摘要、风险摘要，并在允许/拒绝提交期间禁用按钮，等待后端确认后再关闭本地请求。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task06_permission_v2_flow/`。
 - 已验证：红灯阶段新 V2 测试首先失败于缺少 `gui_permissions.py` 和 `tool_name` 参数；实现后 `python -m unittest learning_agent.tests.test_gui_permissions_v2_contract learning_agent.tests.test_gui_bridge_permission_contract learning_agent.tests.test_gui_bridge_security_contract` 为 14 tests OK；`python -m py_compile learning_agent\app\gui_permissions.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_permissions_v2_contract.py` 通过；`npm test -- --run` 为 33 tests passed；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 7
+
+- Task 7：Trace Inspector 已完成。`apps/desktop/src/state/eventReducer.ts` 新增 `TraceToolRow` 与 `reduceGuiEventToTraceRows()`，把 `tool_started`、`tool_finished`、失败工具事件和敏感参数统一归约为可渲染工具轨迹。
+- 前端新增 `TracePanel.tsx`，右侧工具页签显示 run id、turn id、工具名、状态、耗时、脱敏 args preview、结果摘要、错误码和复制诊断按钮。
+- `StatusInspector.tsx` 已从单一状态列表升级为五个页签：状态、工具、浏览器、设置、诊断；页签使用 lucide 图标，浏览器状态移动到“浏览器”页签，诊断页显示事件总数和最新游标。
+- `layout.css` 已补齐右侧页签栏、工具轨迹卡片、失败/完成/运行中状态、参数代码块、复制按钮和诊断列表样式，所有卡片圆角保持 6px。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task07_trace_inspector/`。
+- 已验证：红灯阶段 `npm test -- --run eventReducer.test.ts` 首先失败于缺少 `reduceGuiEventToTraceRows`；实现后 `npm test -- --run` 为 37 tests passed；`npm run lint` 通过。
