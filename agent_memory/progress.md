@@ -839,3 +839,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 当前目标：逐项完成 `2026-06-25-codex-style-desktop-gui-shell-v2.md`，先过 V2-Core，再过 V2-Trust，最后过 V2-Product。
 - 当前进度：Task Core-0 已新增 golden trace 文档、20 条 JSON fixture、后端合同测试、前端 fixture 测试、prompt matrix 更新，并已复制到 `learning_agent/test/desktop_gui_shell_v2/task_core_0_golden_traces/`。
 - 已验证：`python -m unittest learning_agent.tests.test_gui_golden_trace_contract` 通过；`npm test -- --run goldenTraceReducer.test.ts` 通过；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 1
+
+- Task 1：V2 协议合同已完成。新增 `learning_agent/app/gui_protocol.py`、`apps/desktop/src/api/guiTypes.ts`，并让 `gui_bridge.py` 暴露 schema_version 2、V2 token header 和结构化错误响应。
+- 前端 client 已能把 V2 错误解析成 `GuiClientError(status, code, message, requestId)`，避免只显示 HTTP 状态码。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task01_protocol_contract/`。
+- 已验证：`python -m unittest learning_agent.tests.test_gui_protocol_contract learning_agent.tests.test_gui_bridge_contract learning_agent.tests.test_gui_bridge_security_contract learning_agent.tests.test_gui_bridge_lifecycle_contract learning_agent.tests.test_gui_bridge_permission_contract` 通过；`npm test -- --run guiClient.test.ts` 通过；`npm run lint` 通过。
