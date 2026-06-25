@@ -203,3 +203,5 @@ Task 3 已把 GUI run 默认路径切到 deterministic fake streaming adapter。
 Task 4 已把 V2 adapter 事件接入前端主线程状态：`eventReducer.ts` 是唯一事件翻译边界，`threadStore.ts` 负责 `message_delta` 追加、`message_completed` 终态、`safety_refusal` 拒绝消息和 `turn_failed` 错误消息；`ThreadView.tsx` 只消费 `ThreadMessage.kind/status/text` 渲染，不再自行理解后端事件。
 
 Task 5 已把 Composer 输入规则抽成可测试纯函数：普通 Enter 发送，Shift+Enter 保持原生换行，中文多行和标点不做 trim/改写；`submitComposerDraft()` 只有在 `onSubmit` 成功后才返回清空草稿，运行中/提交中通过按钮状态说明不能发送。
+
+Task 6 已把 GUI 权限流升级到 V2：`gui_permissions.py` 是权限请求字段清洗、脱敏、动作摘要和决策规范化的唯一后端 helper；`gui_bridge.py` 继续拥有权限事实源，但不再手写 payload 字段。前端权限 UI 的数据流是 `StatusEventStore -> latestPermissionEvent() -> permissionFromEvent() -> PermissionBanner/PermissionDialog`，按钮提交期间由 `pendingPermissionDecisionId` 禁用，后端确认后再通过 `answeredPermissionIds` 隐藏弹窗。

@@ -880,3 +880,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `apps/desktop/tests/composer.test.ts` 覆盖 Enter 发送、Shift+Enter 换行、中文多行标点和换行原样提交、空白不可发送、运行中禁用原因；`gui-prompt-matrix.md` 已增加 V2 Composer 自动合同覆盖项。
 - 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task05_composer_input/`。
 - 已验证：`npm test -- --run composer.test.ts` 为 5 tests passed；`npm run lint` 通过。
+
+## 2026-06-25 Desktop GUI Shell V2 Task 6
+
+- Task 6：权限与安全 V2 已完成。新增 `learning_agent/app/gui_permissions.py`，统一处理权限请求字段规范化、`tool_name`、`action_summary`、`created_at/answered_at` 审计字段、approve/deny 决策别名和本机路径/API token 脱敏。
+- `learning_agent/app/gui_bridge.py` 已把 `GuiPermissionRequest` 扩展到 V2 字段，并让 `record_permission_required()` 和 `decide_permission()` 复用权限 helper；重复回答仍返回结构化 `permission_already_answered`，拒绝权限仍会写入 `gui_turn_failed` 和 `permission_answered`，确保主线程和 trace panel 都可见。
+- 前端 `PermissionDialog.tsx`、`PermissionBanner.tsx`、`AppShell.tsx` 和 `layout.css` 已显示应用、工具、动作摘要、风险摘要，并在允许/拒绝提交期间禁用按钮，等待后端确认后再关闭本地请求。
+- 学习副本已保存到 `learning_agent/test/desktop_gui_shell_v2/task06_permission_v2_flow/`。
+- 已验证：红灯阶段新 V2 测试首先失败于缺少 `gui_permissions.py` 和 `tool_name` 参数；实现后 `python -m unittest learning_agent.tests.test_gui_permissions_v2_contract learning_agent.tests.test_gui_bridge_permission_contract learning_agent.tests.test_gui_bridge_security_contract` 为 14 tests OK；`python -m py_compile learning_agent\app\gui_permissions.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_permissions_v2_contract.py` 通过；`npm test -- --run` 为 33 tests passed；`npm run lint` 通过。

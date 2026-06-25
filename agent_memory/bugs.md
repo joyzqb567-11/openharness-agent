@@ -379,3 +379,11 @@
 - Evidence: Task 3 CodeGraph 映射确认真实入口应围绕 `LearningAgent.run(...)`、`run_agent_with_harness_session(...)`、`agent.run_events(...)`、`StatusEventStore` 和 `stop_event`，但 V2-Core 只实现 deterministic fake streaming。
 - Risk: 如果后续误把 `DefaultHarnessGuiAgentAdapter(enabled=False)` 当作真实 agent 接线，会造成 GUI 看似可切真实模式但实际只返回 `adapter_unavailable`。
 - Required fix direction: 到 V2-Trust 再接真实 adapter，并先补 `AgentEvent -> GUI V2`、取消、权限 approve/deny、懒导入、脱敏和 Layer C trigger decision 的合同测试；不能在 V2-Core 为了演示直接导入模型/OAuth/浏览器/Computer Use runtime。
+
+## 2026-06-25 Desktop GUI Shell V2 Permission V2 Risks
+
+- Status: 已关闭本轮自动化风险。
+- Closed risk: 权限请求 payload 曾缺少 `tool_name`、`action_summary`、`created_at` 和 `answered_at`，导致 GUI 弹窗、主线程和 trace panel 的审计字段不完整。现在 `gui_permissions.py` 统一生成字段，`test_gui_permissions_v2_contract` 覆盖 manager 事件和 payload。
+- Closed risk: 权限原因和风险摘要可能把本机路径、`sk-*` 密钥或 bearer token 直接展示给用户。现在请求、风险和决策理由都会经过 `redact_permission_text()`，并有敏感文本回归测试。
+- Closed risk: 前端允许/拒绝按钮在后端确认前没有禁用态，快速双击可能产生重复请求。现在 `AppShell` 用 `pendingPermissionDecisionId` 阻止重复提交，弹窗和 banner 都显示提交中状态；后端仍保留 `permission_already_answered` 结构化冲突作为最终防线。
+- Remaining risk: 当前仍是 fake streaming/default GUI bridge 权限流；真实 agent adapter 接入时必须把实际工具权限事件映射到同一套 `record_permission_required()` 和 `decide_permission()`，不能新增旁路权限 payload。
