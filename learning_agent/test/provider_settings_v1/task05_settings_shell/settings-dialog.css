@@ -1,0 +1,186 @@
+.settings-dialog-overlay { /* 新增代码+ProviderSettingsShellStyle：定义设置弹窗全屏遮罩；如果没有这段，弹窗无法覆盖主界面形成真实 GUI 验收对象。 */
+  position: fixed; /* 新增代码+ProviderSettingsShellStyle：固定在窗口上；如果没有这行，滚动内容可能把弹窗带走。 */
+  inset: 0; /* 新增代码+ProviderSettingsShellStyle：铺满整个窗口；如果没有这行，遮罩会留下可点击缝隙。 */
+  z-index: 40; /* 新增代码+ProviderSettingsShellStyle：保证位于主界面上方；如果没有这行，侧栏或权限层可能盖住设置页。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格居中弹窗；如果没有这行，弹窗定位会依赖脆弱 margin。 */
+  place-items: center; /* 新增代码+ProviderSettingsShellStyle：让弹窗水平垂直居中；如果没有这行，宽屏下弹窗可能偏移。 */
+  padding: 28px; /* 新增代码+ProviderSettingsShellStyle：给窗口边缘留安全距离；如果没有这行，小窗口下弹窗会贴边。 */
+  background: rgba(15, 23, 42, 0.16); /* 新增代码+ProviderSettingsShellStyle：添加轻量遮罩；如果没有这行，弹窗和主界面边界不清。 */
+} /* 新增代码+ProviderSettingsShellStyle：遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog { /* 新增代码+ProviderSettingsShellStyle：定义设置弹窗主体；如果没有这段，设置页会退回普通文档流。 */
+  width: min(980px, 100%); /* 新增代码+ProviderSettingsShellStyle：限制最大宽度约 980px；如果没有这行，宽屏上设置页会拉得过宽。 */
+  max-height: min(720px, calc(100vh - 56px)); /* 新增代码+ProviderSettingsShellStyle：限制最大高度约 720px；如果没有这行，小窗口下内容会溢出屏幕。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格组织左导航和右内容；如果没有这行，左右两栏无法稳定并排。 */
+  grid-template-columns: 240px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：让左栏接近参考截图宽度；如果没有这行，导航宽度会随内容跳动。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：裁剪内部滚动边界；如果没有这行，内容可能冲出圆角。 */
+  border: 1px solid #d9dee8; /* 新增代码+ProviderSettingsShellStyle：添加细边框；如果没有这行，白色弹窗边界不够清楚。 */
+  border-radius: 8px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，弹窗边缘会过硬且和现有按钮不协调。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsShellStyle：使用白色面板；如果没有这行，弹窗会继承主界面灰底。 */
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18); /* 新增代码+ProviderSettingsShellStyle：添加轻阴影分层；如果没有这行，弹窗缺少浮层感。 */
+} /* 新增代码+ProviderSettingsShellStyle：设置弹窗主体规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-sidebar { /* 新增代码+ProviderSettingsShellStyle：定义左侧设置导航；如果没有这段，分类和 footer 无法固定布局。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格组织分组和 footer；如果没有这行，版本 footer 无法稳定贴底。 */
+  grid-template-rows: auto auto minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：保留分组内容和底部弹性空间；如果没有这行，footer 可能挤到导航中间。 */
+  align-content: start; /* 新增代码+ProviderSettingsShellStyle：让导航从顶部开始；如果没有这行，少量导航可能被拉散。 */
+  gap: 20px; /* 新增代码+ProviderSettingsShellStyle：设置分组间距；如果没有这行，桌面和服务器分组会粘在一起。 */
+  border-right: 1px solid #e3e7ef; /* 新增代码+ProviderSettingsShellStyle：分隔左右区域；如果没有这行，导航和内容边界不清。 */
+  background: #f7f8fa; /* 新增代码+ProviderSettingsShellStyle：使用浅灰导航底；如果没有这行，左栏和右栏缺少层次。 */
+  padding: 16px 12px; /* 新增代码+ProviderSettingsShellStyle：给导航留操作空间；如果没有这行，按钮会贴边。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许弹窗内部收缩；如果没有这行，小窗口下会撑破高度。 */
+} /* 新增代码+ProviderSettingsShellStyle：左侧导航规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-nav-group { /* 新增代码+ProviderSettingsShellStyle：定义导航分组；如果没有这段，分组内部按钮缺少统一节奏。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格纵向排列分组内容；如果没有这行，标题和按钮会自然粘连。 */
+  gap: 6px; /* 新增代码+ProviderSettingsShellStyle：设置按钮间距；如果没有这行，导航项会挤在一起。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许长文本截断；如果没有这行，导航文字可能撑宽左栏。 */
+} /* 新增代码+ProviderSettingsShellStyle：导航分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-nav-heading { /* 新增代码+ProviderSettingsShellStyle：定义导航分区标题；如果没有这段，桌面和服务器层级不明显。 */
+  padding: 0 8px 4px; /* 新增代码+ProviderSettingsShellStyle：给标题留缩进和下间距；如果没有这行，标题会贴住按钮。 */
+  color: #5f6b7a; /* 新增代码+ProviderSettingsShellStyle：使用次级文本色；如果没有这行，分区标题会抢主层级。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsShellStyle：压低标题字号；如果没有这行，左栏会显得拥挤。 */
+  line-height: 1.2; /* 新增代码+ProviderSettingsShellStyle：稳定标题行高；如果没有这行，标题高度会受字体影响跳动。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsShellStyle：增强分区标题识别；如果没有这行，标题容易和普通按钮混淆。 */
+} /* 新增代码+ProviderSettingsShellStyle：导航标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab { /* 新增代码+ProviderSettingsShellStyle：定义设置页签按钮；如果没有这段，按钮会继承浏览器默认样式。 */
+  width: 100%; /* 新增代码+ProviderSettingsShellStyle：让按钮填满导航宽度；如果没有这行，可点击区域会过窄。 */
+  min-height: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮高度；如果没有这行，标签文字变化会导致布局跳动。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格对齐图标和文字；如果没有这行，图标和文字容易错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定图标列并让文字截断；如果没有这行，长文字会挤压图标。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中按钮内容；如果没有这行，图标和文字基线不齐。 */
+  gap: 8px; /* 新增代码+ProviderSettingsShellStyle：设置图标文字间距；如果没有这行，内容会粘在一起。 */
+  border: 1px solid transparent; /* 新增代码+ProviderSettingsShellStyle：预留边框位置；如果没有这行，active 状态会改变按钮尺寸。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，按钮风格和主界面不一致。 */
+  background: transparent; /* 新增代码+ProviderSettingsShellStyle：默认透明背景；如果没有这行，导航会显得过重。 */
+  color: #2f3742; /* 新增代码+ProviderSettingsShellStyle：设置主文本色；如果没有这行，按钮颜色会使用浏览器默认值。 */
+  padding: 0 8px; /* 新增代码+ProviderSettingsShellStyle：设置按钮内边距；如果没有这行，内容会贴边。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsShellStyle：显示可点击光标；如果没有这行，用户不确定能否点击。 */
+  text-align: left; /* 新增代码+ProviderSettingsShellStyle：保持文字左对齐；如果没有这行，导航扫描性下降。 */
+} /* 新增代码+ProviderSettingsShellStyle：设置页签按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab span { /* 新增代码+ProviderSettingsShellStyle：定义页签文字；如果没有这段，长标签可能溢出左栏。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长文本；如果没有这行，文字可能盖住边界。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持单行标签；如果没有这行，按钮高度会被文字撑开。 */
+} /* 新增代码+ProviderSettingsShellStyle：页签文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab:hover { /* 新增代码+ProviderSettingsShellStyle：定义页签悬停状态；如果没有这段，鼠标经过没有反馈。 */
+  background: #eceff4; /* 新增代码+ProviderSettingsShellStyle：悬停时轻微变灰；如果没有这行，交互感不足。 */
+} /* 新增代码+ProviderSettingsShellStyle：页签悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab-active { /* 新增代码+ProviderSettingsShellStyle：定义当前页签状态；如果没有这段，用户看不出当前设置页。 */
+  border-color: #d6dbe5; /* 新增代码+ProviderSettingsShellStyle：给 active 项加边界；如果没有这行，选中状态不够稳定。 */
+  background: #e7ebf1; /* 新增代码+ProviderSettingsShellStyle：给 active 项加浅底；如果没有这行，选中项不明显。 */
+  color: #111827; /* 新增代码+ProviderSettingsShellStyle：增强 active 文本对比；如果没有这行，选中项仍像普通项。 */
+} /* 新增代码+ProviderSettingsShellStyle：当前页签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-footer { /* 新增代码+ProviderSettingsShellStyle：定义左下角 footer；如果没有这段，产品名和版本会随导航滚动或散落。 */
+  align-self: end; /* 新增代码+ProviderSettingsShellStyle：让 footer 靠底；如果没有这行，版本信息会挤在分组后面。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：纵向排列产品名和版本；如果没有这行，两者会挤在一行。 */
+  gap: 3px; /* 新增代码+ProviderSettingsShellStyle：设置 footer 文本间距；如果没有这行，版本号会贴住产品名。 */
+  padding: 0 8px; /* 新增代码+ProviderSettingsShellStyle：对齐导航按钮缩进；如果没有这行，footer 会贴边。 */
+  color: #667085; /* 新增代码+ProviderSettingsShellStyle：使用次级文本色；如果没有这行，footer 会抢导航层级。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsShellStyle：设置紧凑字号；如果没有这行，footer 会占太多空间。 */
+} /* 新增代码+ProviderSettingsShellStyle：footer 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-main { /* 新增代码+ProviderSettingsShellStyle：定义右侧内容区；如果没有这段，设置内容无法滚动和排版。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格组织标题、警告和内容；如果没有这行，结构会变成普通文档流。 */
+  grid-template-rows: auto auto minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定标题和警告，内容区可滚动；如果没有这行，长内容会撑开弹窗。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容横向收缩；如果没有这行，长 provider 名可能撑破弹窗。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容纵向收缩；如果没有这行，滚动区域不会生效。 */
+} /* 新增代码+ProviderSettingsShellStyle：右侧内容区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-header { /* 新增代码+ProviderSettingsShellStyle：定义右侧标题栏；如果没有这段，标题和关闭按钮无法稳定对齐。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格排列标题和关闭按钮；如果没有这行，按钮会跟随标题长度跳动。 */
+  grid-template-columns: minmax(0, 1fr) 34px; /* 新增代码+ProviderSettingsShellStyle：标题占剩余宽度，关闭按钮固定；如果没有这行，关闭按钮位置不稳定。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中标题和按钮；如果没有这行，两者会错位。 */
+  gap: 12px; /* 新增代码+ProviderSettingsShellStyle：标题和关闭按钮保持间距；如果没有这行，长标题可能贴住按钮。 */
+  min-height: 58px; /* 新增代码+ProviderSettingsShellStyle：固定标题栏高度；如果没有这行，切换页签会导致高度跳动。 */
+  border-bottom: 1px solid #edf0f5; /* 新增代码+ProviderSettingsShellStyle：分隔标题和内容；如果没有这行，层级不清。 */
+  padding: 0 20px; /* 新增代码+ProviderSettingsShellStyle：给标题栏留左右空间；如果没有这行，标题和按钮会贴边。 */
+} /* 新增代码+ProviderSettingsShellStyle：标题栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-header h2 { /* 新增代码+ProviderSettingsShellStyle：定义设置页标题；如果没有这段，标题会继承浏览器默认大字号。 */
+  margin: 0; /* 新增代码+ProviderSettingsShellStyle：移除默认外边距；如果没有这行，标题栏高度会被撑开。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长标题；如果没有这行，标题可能盖住关闭按钮。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号处理长标题；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持标题单行；如果没有这行，标题栏高度会跳动。 */
+  color: #111827; /* 新增代码+ProviderSettingsShellStyle：设置标题主色；如果没有这行，标题层级不稳定。 */
+  font-size: 16px; /* 新增代码+ProviderSettingsShellStyle：使用工具界面标题字号；如果没有这行，标题会过大。 */
+  line-height: 1.3; /* 新增代码+ProviderSettingsShellStyle：稳定标题行高；如果没有这行，字体渲染会影响高度。 */
+} /* 新增代码+ProviderSettingsShellStyle：标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-close { /* 新增代码+ProviderSettingsShellStyle：定义关闭按钮；如果没有这段，关闭控件会继承浏览器默认样式。 */
+  width: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮宽度；如果没有这行，按钮尺寸会随图标或 label 跳动。 */
+  height: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮高度；如果没有这行，按钮点击区域不稳定。 */
+  display: inline-flex; /* 新增代码+ProviderSettingsShellStyle：居中关闭图标；如果没有这行，图标可能偏移。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中图标；如果没有这行，图标基线不齐。 */
+  justify-content: center; /* 新增代码+ProviderSettingsShellStyle：水平居中图标；如果没有这行，图标会偏左。 */
+  border: 1px solid #d6dbe5; /* 新增代码+ProviderSettingsShellStyle：添加细边框；如果没有这行，按钮边界不清。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，按钮风格不统一。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsShellStyle：使用白底按钮；如果没有这行，按钮会混入标题栏。 */
+  color: #344054; /* 新增代码+ProviderSettingsShellStyle：设置图标颜色；如果没有这行，关闭图标可能使用默认黑色过重。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsShellStyle：显示可点击光标；如果没有这行，用户不确定能否点击。 */
+} /* 新增代码+ProviderSettingsShellStyle：关闭按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-close:hover { /* 新增代码+ProviderSettingsShellStyle：定义关闭按钮悬停；如果没有这段，鼠标经过没有反馈。 */
+  background: #f7f8fa; /* 新增代码+ProviderSettingsShellStyle：悬停时轻微变灰；如果没有这行，交互感不足。 */
+} /* 新增代码+ProviderSettingsShellStyle：关闭按钮悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-warning { /* 新增代码+ProviderSettingsShellStyle：定义开发密钥警告条；如果没有这段，dev_json 风险提示缺少稳定样式。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格排列图标和文字；如果没有这行，警告内容可能错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定图标列；如果没有这行，长文字会挤压图标。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中警告内容；如果没有这行，图标和文字不齐。 */
+  gap: 8px; /* 新增代码+ProviderSettingsShellStyle：设置图标文字间距；如果没有这行，内容会粘连。 */
+  border-bottom: 1px solid #f0e5c7; /* 新增代码+ProviderSettingsShellStyle：分隔警告和内容；如果没有这行，警告区边界不清。 */
+  background: #fff8e6; /* 新增代码+ProviderSettingsShellStyle：使用浅黄色风险背景；如果没有这行，警告不够醒目。 */
+  color: #7a4d00; /* 新增代码+ProviderSettingsShellStyle：设置警告文字色；如果没有这行，风险语义不明显。 */
+  padding: 10px 20px; /* 新增代码+ProviderSettingsShellStyle：给警告留阅读空间；如果没有这行，文字会贴边。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许长警告收缩；如果没有这行，文本可能撑宽弹窗。 */
+} /* 新增代码+ProviderSettingsShellStyle：开发密钥警告规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-warning span { /* 新增代码+ProviderSettingsShellStyle：定义警告文字；如果没有这段，长警告可能溢出。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长警告；如果没有这行，文字会越界。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号处理过长警告；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持警告单行；如果没有这行，警告区高度会跳动。 */
+} /* 新增代码+ProviderSettingsShellStyle：警告文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-content { /* 新增代码+ProviderSettingsShellStyle：定义右侧内容滚动区；如果没有这段，页签内容无法承载后续 provider rows。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容横向收缩；如果没有这行，长文本会撑破弹窗。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容纵向收缩；如果没有这行，滚动区域无法生效。 */
+  overflow: auto; /* 新增代码+ProviderSettingsShellStyle：内容超出时内部滚动；如果没有这行，小窗口下内容会被裁掉。 */
+  padding: 20px; /* 新增代码+ProviderSettingsShellStyle：给内容留阅读空间；如果没有这行，内容会贴边。 */
+} /* 新增代码+ProviderSettingsShellStyle：内容滚动区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-placeholder { /* 新增代码+ProviderSettingsShellStyle：定义 Task 5 占位内容；如果没有这段，未接入数据前内容区会显得破碎。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格居中占位文字；如果没有这行，占位文字会贴在左上角。 */
+  place-items: center; /* 新增代码+ProviderSettingsShellStyle：居中占位文字；如果没有这行，空状态视觉不稳定。 */
+  min-height: 360px; /* 新增代码+ProviderSettingsShellStyle：给内容区稳定高度；如果没有这行，弹窗高度会显得过空。 */
+  color: #667085; /* 新增代码+ProviderSettingsShellStyle：使用次级文字色；如果没有这行，占位文案会抢主层级。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsShellStyle：设置紧凑字号；如果没有这行，占位文案会过大。 */
+} /* 新增代码+ProviderSettingsShellStyle：占位内容规则结束；如果没有这行，CSS 块语法不完整。 */
+
+@media (max-width: 760px) { /* 新增代码+ProviderSettingsShellStyle：定义窄屏适配；如果没有这段，移动宽度下左右两栏会互相挤压。 */
+  .settings-dialog-overlay { /* 新增代码+ProviderSettingsShellStyle：窄屏遮罩调整；如果没有这行，小屏幕边缘留白过大。 */
+    padding: 12px; /* 新增代码+ProviderSettingsShellStyle：缩小边距；如果没有这行，弹窗可用空间不足。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog { /* 新增代码+ProviderSettingsShellStyle：窄屏弹窗调整；如果没有这行，弹窗仍保持左右两栏。 */
+    grid-template-columns: 1fr; /* 新增代码+ProviderSettingsShellStyle：把左导航折到内容上方；如果没有这行，手机宽度会横向溢出。 */
+    max-height: calc(100vh - 24px); /* 新增代码+ProviderSettingsShellStyle：适配小窗口高度；如果没有这行，底部可能超出屏幕。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏弹窗规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog-sidebar { /* 新增代码+ProviderSettingsShellStyle：窄屏导航调整；如果没有这行，左栏样式会占满高度。 */
+    grid-template-columns: 1fr 1fr; /* 新增代码+ProviderSettingsShellStyle：让两个分组并排；如果没有这行，导航会太高。 */
+    grid-template-rows: auto auto; /* 新增代码+ProviderSettingsShellStyle：让 footer 单独占一行；如果没有这行，版本信息会挤入导航。 */
+    border-right: 0; /* 新增代码+ProviderSettingsShellStyle：移除右边框；如果没有这行，折叠后边框方向错误。 */
+    border-bottom: 1px solid #e3e7ef; /* 新增代码+ProviderSettingsShellStyle：添加底部分隔线；如果没有这行，导航和内容边界不清。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏导航规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog-footer { /* 新增代码+ProviderSettingsShellStyle：窄屏 footer 调整；如果没有这行，版本信息可能被挤到右侧。 */
+    grid-column: 1 / -1; /* 新增代码+ProviderSettingsShellStyle：让 footer 横跨整行；如果没有这行，产品名和版本会被压缩。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏 footer 规则结束；如果没有这行，CSS 块语法不完整。 */
+} /* 新增代码+ProviderSettingsShellStyle：窄屏媒体查询结束；如果没有这行，CSS 媒体规则不完整。 */

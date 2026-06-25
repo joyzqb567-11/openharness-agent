@@ -1034,3 +1034,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `apps/desktop/src/state/providerSettingsStore.ts` 新增纯 view model builder，负责 provider 排序、unsupported 状态、dev secret warning、模型分组和危险字段脱敏。
 - 学习副本已保存到 `learning_agent/test/provider_settings_v1/task04_renderer_contract/`。
 - 已验证：`npm test -- --run tests/guiProviderClient.test.ts tests/providerSettingsStore.test.ts tests/settingsDialogViewModel.test.ts` 为 3 files / 4 tests passed。
+
+## 2026-06-26 Provider Settings V1 Task 5
+
+- Task 5 已完成 Settings Dialog shell 和 Sidebar 左下角设置入口。
+- `Sidebar.tsx` 已把左下角 `设置` 按钮接入 `onOpenSettings` 回调，同时保持快速对话、搜索、归档和会话选择行为。
+- `AppShell.tsx` 新增 `settingsOpen` 状态，并在 `PermissionDialog` 后渲染 `SettingsDialog`，让设置弹窗覆盖完整应用。
+- 新增 `apps/desktop/src/components/settings/SettingsDialog.tsx`，包含桌面/服务器左侧导航、默认提供商页、关闭按钮、Escape 关闭、dev secret warning 区和 `OpenHarness Desktop v0.1.0` footer。
+- 新增 `apps/desktop/src/styles/settings-dialog.css` 并在 `renderer/main.tsx` 导入，满足约 980px 宽、720px 高、窄屏导航折叠、按钮固定尺寸和文本截断要求。
+- 新增 `apps/desktop/tests/settingsDialogShell.test.tsx`，先红灯失败于缺少 `SettingsDialog`，实现后转绿；同时修正 provider store 安全测试 fixture 的 TypeScript 类型边界。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v1/task05_settings_shell/`。
+- 已验证：`npm test -- --run tests/settingsDialogShell.test.tsx` 为 3 passed；相关前端测试 4 files / 7 tests passed；`npm run lint` 通过；`npm run build` 通过。
