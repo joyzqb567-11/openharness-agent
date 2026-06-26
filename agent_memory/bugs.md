@@ -462,3 +462,9 @@
 - Closed risk: 真实 390px 下 `body min-width: 980px` 和背景三栏网格把 document 撑宽。已在 `theme.css` 和 `layout.css` 的 760px 以下规则解除全局宽度下限并收成单栏，最终结果为 `scrollWidth: 390`。
 - Closed risk: 多轮视觉脚本运行后 OpenAI 已连接，可能绕过 API key password 输入框断言。driver 现在每轮先断开 OpenAI 基线，再打开连接弹窗，最终结果中的 `API key input has password type` 详情为 `inputType: password`。
 - Evidence: 详细复现、证据、根因、修复和复测记录见 `learning_agent/test/provider_settings_v1/task09_visual_qa/gui_bug_notes.md`；最终截图和 `provider_settings_visual_qa_result.json` 已保存在同一目录。
+
+## 2026-06-26 Provider Settings V1 Release Gate Secret Scan Risks
+
+- Closed risk: 初版 secret leak scan 直接把 `Authorization: Bearer` 文档示例、脱敏测试夹具和历史 `task-notification` 记录当成真实泄漏，导致门禁不可运行。现在脚本保留蓝图要求的原始 `rg` 扫描，但对测试、文档、Provider Settings 证据、历史运行记忆和固定 `task-notification` 假阳性做过滤，生产路径仍然失败。
+- Closed risk: Windows PowerShell 5.1 对无 BOM UTF-8 + 中文注释解析不稳定，初次运行脚本报语法错误。`assert_no_provider_secret_leaks.ps1` 已转换为 UTF-8 BOM，后续可直接运行。
+- Evidence: `powershell -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\test\provider_settings_v1\scripts\assert_no_provider_secret_leaks.ps1` 输出 `Provider secret leak scan passed.`

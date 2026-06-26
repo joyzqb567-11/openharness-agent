@@ -1095,3 +1095,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - `theme.css` 和 `layout.css` 已补 760px 以下真实窄窗口规则，避免背景三栏和 body 最小宽度撑破设置弹窗。
 - 视觉证据已保存到 `learning_agent/test/provider_settings_v1/task09_visual_qa/`，源码学习副本已保存到 `learning_agent/test/provider_settings_v1/task09_visual_qa/source_copies/`。
 - 已验证：`python -m pytest learning_agent/tests/test_gui_bridge_security_contract.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 8 passed；最终 `provider_settings_visual_qa_result.json` 为 `ok: true`，且 `inputType: password`、`scrollWidth: 390`、`innerWidth: 390`。
+
+## 2026-06-26 Provider Settings V1 Task 10
+
+- Task 10 已完成 Provider Settings V1 release gate。
+- 新增 `assert_no_provider_secret_leaks.ps1`，执行蓝图要求的 `rg` 危险模式扫描和 `unit-test-secret-value` 扫描，并过滤既有测试、文档、视觉证据与历史运行记忆中的非生产示例。
+- Secret leak scan 已通过：`Provider secret leak scan passed.`
+- 后端 release gate 已通过：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py learning_agent/tests/test_gui_diagnostics_contract.py learning_agent/tests/test_gui_bridge_security_contract.py -q` 为 14 passed。
+- 前端 release gate 已通过：`npm test` 为 16 files / 63 tests passed；`npm run lint` 通过；`npm run build` 通过。
+- 最终可见 GUI 验收已通过：默认端口 8776/5177 被现有进程占用，本轮使用 8876/5277/9323 启动真实 Electron 窗口；`provider_settings_visual_qa_result.json` 为 `ok: true`，断言包含 `inputType: password`、raw secret 不泄露、390px 无横向溢出。
+- V1 明确不切换真实模型 runtime；真实大模型请求和 GUI agent adapter 接线仍属于后续 Layer C 计划。

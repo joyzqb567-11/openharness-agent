@@ -1,4 +1,4 @@
 
-DevTools listening on ws://127.0.0.1:9323/devtools/browser/ffa0c553-e610-4c8f-b35f-2914281f17f7
-[42572:0626/084650.844:ERROR:gpu_process_host.cc(1002)] GPU process exited unexpectedly: exit_code=-1
-[42572:0626/084651.100:ERROR:network_service_instance_impl.cc(600)] Network service crashed, restarting service.
+DevTools listening on ws://127.0.0.1:9323/devtools/browser/4705d319-d962-4af4-a292-93529066a614
+[35448:0626/085654.212:ERROR:gpu_process_host.cc(1002)] GPU process exited unexpectedly: exit_code=-1
+[35448:0626/085654.430:ERROR:network_service_instance_impl.cc(600)] Network service crashed, restarting service.
