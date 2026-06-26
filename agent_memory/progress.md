@@ -1072,3 +1072,15 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `customProviderDialog.test.tsx`，先红灯失败于缺少 `CustomProviderDialog`，实现后覆盖字段可见性、精确校验文案、payload 构造和空 header 忽略。
 - 学习副本已保存到 `learning_agent/test/provider_settings_v1/task07_custom_provider/`。
 - 已验证：`npm test -- --run tests/customProviderDialog.test.tsx tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx` 为 3 files / 10 tests passed；`npm run lint` 通过；`npm run build` 通过。
+
+## 2026-06-26 Provider Settings V1 Task 8
+
+- Task 8 已完成 Models Panel 和模型可见性开关。
+- 新增 `SettingsModelsPanel.tsx`，按 provider 显示模型分组，复用 `modelGroupsForDisplay()` 保证已连接 provider 排在未连接 provider 前面。
+- 每个模型行显示模型显示名、模型 id、provider 名称和 `role="switch"` 的可见性开关；无模型时显示 `连接提供商后会在这里显示模型`。
+- `SettingsDialog.tsx` 已把 `models` 页签从占位改为真实模型面板，并新增 `setModelVisibility` client 合同。
+- `handleToggleModelVisibility()` 会调用 `setModelVisibility(providerId, modelId, visible)`，保存中禁用当前模型开关，成功用返回 catalog 刷新 payload，失败保持旧 payload 并显示 `模型可见性保存失败`。
+- `settings-dialog.css` 已补齐模型分组、模型行、状态 badge、错误条和 switch 样式。
+- 新增 `settingsModelsPanel.test.tsx`，先红灯失败于缺少 `SettingsModelsPanel`，实现后覆盖分组排序、模型字段、空态和 switch 回调参数。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v1/task08_models_panel/`。
+- 已验证：`npm test -- --run tests/settingsModelsPanel.test.tsx tests/customProviderDialog.test.tsx tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts` 为 7 files / 17 tests passed；`npm run lint` 通过；`npm run build` 通过。
