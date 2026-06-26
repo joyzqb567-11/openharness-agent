@@ -1,0 +1,8 @@
+﻿{
+    "electron":  38240,
+    "renderer":  26072,
+    "bridgePort":  8876,
+    "cdpPort":  9323,
+    "bridge":  30860,
+    "rendererPort":  5277
+}

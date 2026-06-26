@@ -453,3 +453,12 @@
 - Closed risk: 安全拒绝最初只能靠特殊 trace 或隐藏合同测试证明。现在 fake adapter 能识别真实高风险 prompt 并发出 `safety_refusal`，前端把它保留为带 `安全拒绝` 标签的一等助手消息，且完成事件不会覆盖 refusal kind。
 - Closed risk: token/unknown-route/offline 错误最初缺少可点击、可截图的 GUI 表面。现在坏 token 会进入主线程错误消息，诊断页有未知路由探针，bridge 连接失败会显示 `bridge-offline-banner`。
 - Remaining risk: 当前 V2 成熟度是 GUI shell 和 fake/default bridge adapter 的成熟度；真实 agent adapter、真实模型/OAuth、真实 browser automation execution、真实 Computer Use execution、签名安装器和真实 pause/resume Harness 仍需要后续任务单独设计、实现和验收。
+
+## 2026-06-26 Provider Settings V1 Visual QA Bugs
+
+- Closed risk: 备用 Vite 端口 `5277` 下，Provider Settings 的浏览器 CORS 预检返回 403，真实 Electron 设置页显示 `提供商加载失败`。根因是 `gui_bridge.py` 只允许 5177 来源；已改为允许固定桌面来源和 `http://127.0.0.1:<port>` / `http://localhost:<port>` 本机带端口来源，并用 `test_alternate_loopback_vite_origin_can_load_provider_settings` 锁定回归。
+- Closed risk: 视觉验收 driver 的自定义 provider 等待表达式返回 DOM 元素，`Runtime.evaluate(returnByValue)` 因对象链过深失败。已改为只返回布尔值，避免 CDP 克隆 DOM。
+- Closed risk: 390px 移动截图曾使用 `mobile: true`，实际 `innerWidth` 仍为 980，无法证明窄窗口布局。已改为桌面窗口缩窄式 emulation，最终结果为 `innerWidth: 390`。
+- Closed risk: 真实 390px 下 `body min-width: 980px` 和背景三栏网格把 document 撑宽。已在 `theme.css` 和 `layout.css` 的 760px 以下规则解除全局宽度下限并收成单栏，最终结果为 `scrollWidth: 390`。
+- Closed risk: 多轮视觉脚本运行后 OpenAI 已连接，可能绕过 API key password 输入框断言。driver 现在每轮先断开 OpenAI 基线，再打开连接弹窗，最终结果中的 `API key input has password type` 详情为 `inputType: password`。
+- Evidence: 详细复现、证据、根因、修复和复测记录见 `learning_agent/test/provider_settings_v1/task09_visual_qa/gui_bug_notes.md`；最终截图和 `provider_settings_visual_qa_result.json` 已保存在同一目录。

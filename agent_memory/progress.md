@@ -1084,3 +1084,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `settingsModelsPanel.test.tsx`，先红灯失败于缺少 `SettingsModelsPanel`，实现后覆盖分组排序、模型字段、空态和 switch 回调参数。
 - 学习副本已保存到 `learning_agent/test/provider_settings_v1/task08_models_panel/`。
 - 已验证：`npm test -- --run tests/settingsModelsPanel.test.tsx tests/customProviderDialog.test.tsx tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts` 为 7 files / 17 tests passed；`npm run lint` 通过；`npm run build` 通过。
+
+## 2026-06-26 Provider Settings V1 Task 9
+
+- Task 9 已完成真实 Electron 可见 GUI 视觉验收脚本和证据采集。
+- 新增 `capture_provider_settings_visual_qa.ps1`，自动启动本地 GUI bridge、Vite renderer 和真实 Electron 窗口，并调用 CDP driver 抓取视觉证据。
+- 新增 `provider_settings_visual_qa_driver.mjs`，覆盖左下角设置入口、Provider 行数、自定义 provider CTA、Copilot V1 禁用、OpenAI API key password 输入、raw secret 不泄露、模型页和 390px 窄窗口无横向溢出。
+- 本轮可见 GUI 验收发现并修复 4 个问题：备用 Vite 端口 CORS 预检 403、CDP 表达式返回 DOM 元素链过深、移动缩放未真实测试 390px、全局 980px 最小宽度撑破窄窗口。
+- `gui_bridge.py` 已把 CORS 来源判断升级为固定桌面来源 + 本机带端口 Vite 来源，并新增 `test_alternate_loopback_vite_origin_can_load_provider_settings` 回归测试。
+- `theme.css` 和 `layout.css` 已补 760px 以下真实窄窗口规则，避免背景三栏和 body 最小宽度撑破设置弹窗。
+- 视觉证据已保存到 `learning_agent/test/provider_settings_v1/task09_visual_qa/`，源码学习副本已保存到 `learning_agent/test/provider_settings_v1/task09_visual_qa/source_copies/`。
+- 已验证：`python -m pytest learning_agent/tests/test_gui_bridge_security_contract.py learning_agent/tests/test_gui_provider_settings_contract.py -q` 为 8 passed；最终 `provider_settings_visual_qa_result.json` 为 `ok: true`，且 `inputType: password`、`scrollWidth: 390`、`innerWidth: 390`。

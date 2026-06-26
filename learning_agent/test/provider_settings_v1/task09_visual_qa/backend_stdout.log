@@ -1,0 +1,4 @@
+Starting OpenHarness Desktop GUI bridge...
+Bridge URL: http://127.0.0.1:8876
+Renderer URL: start with apps/desktop/scripts/start-desktop-dev.ps1
+Evidence folder: H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1\learning_agent\test\desktop_gui_shell_v2\launch_logs

@@ -1,0 +1,91 @@
+{
+  "ok": true,
+  "screenshots": [
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\provider_default_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\provider_connected_openai.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\custom_provider_dialog.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\models_tab.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\models_tab_980x720.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v1\\task09_visual_qa\\provider_mobile_390x844.png"
+  ],
+  "assertions": [
+    {
+      "label": "provider row count is at least 5",
+      "passed": true,
+      "details": {
+        "rows": 5,
+        "customVisible": true,
+        "copilotDisabled": true,
+        "rawSecretInText": false
+      }
+    },
+    {
+      "label": "custom provider CTA is visible",
+      "passed": true,
+      "details": {
+        "rows": 5,
+        "customVisible": true,
+        "copilotDisabled": true,
+        "rawSecretInText": false
+      }
+    },
+    {
+      "label": "GitHub Copilot action is disabled in V1",
+      "passed": true,
+      "details": {
+        "rows": 5,
+        "customVisible": true,
+        "copilotDisabled": true,
+        "rawSecretInText": false
+      }
+    },
+    {
+      "label": "no raw unit-test secret in provider page text",
+      "passed": true,
+      "details": {
+        "rows": 5,
+        "customVisible": true,
+        "copilotDisabled": true,
+        "rawSecretInText": false
+      }
+    },
+    {
+      "label": "API key input has password type",
+      "passed": true,
+      "details": {
+        "inputType": "password"
+      }
+    },
+    {
+      "label": "no raw secret appears in DOM text or HTML after submit",
+      "passed": true,
+      "details": {
+        "textLeak": false,
+        "htmlLeak": false
+      }
+    },
+    {
+      "label": "mobile document has no horizontal overflow",
+      "passed": true,
+      "details": {
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflowOk": true
+      }
+    }
+  ],
+  "viewportResults": [
+    {
+      "width": 1365,
+      "height": 768
+    },
+    {
+      "width": 980,
+      "height": 720
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+
+> openharness-desktop@0.1.0 start
+> electron . --remote-debugging-port=9323
+
+
