@@ -468,3 +468,23 @@
 - Closed risk: 初版 secret leak scan 直接把 `Authorization: Bearer` 文档示例、脱敏测试夹具和历史 `task-notification` 记录当成真实泄漏，导致门禁不可运行。现在脚本保留蓝图要求的原始 `rg` 扫描，但对测试、文档、Provider Settings 证据、历史运行记忆和固定 `task-notification` 假阳性做过滤，生产路径仍然失败。
 - Closed risk: Windows PowerShell 5.1 对无 BOM UTF-8 + 中文注释解析不稳定，初次运行脚本报语法错误。`assert_no_provider_secret_leaks.ps1` 已转换为 UTF-8 BOM，后续可直接运行。
 - Evidence: `powershell -NoProfile -ExecutionPolicy Bypass -File .\learning_agent\test\provider_settings_v1\scripts\assert_no_provider_secret_leaks.ps1` 输出 `Provider secret leak scan passed.`
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Risks
+
+- Open risk: 稳定 V1 如果把 mock browser/headless auth-attempt 显示成真实 OAuth 成功，会误导用户认为 ChatGPT Pro/Plus 已经可真实驱动模型；实现时必须在 payload、UI 文案和验收记录里标注 mock/experimental 边界。
+- Open risk: 如果 provider catalog、store、diagnostics 或视觉证据中出现 `refresh_token`、`access_token`、`id_token`、`secret_ref` 或 raw API key，将违反本轮安全边界；后续 Task 9 必须用自动扫描锁住。
+- Closed risk: 蓝图自检项曾把旧命名字面量写进“不得出现”的说明文字，导致 `rg` 门禁误报。根因是检查项描述与检查规则冲突；已改为不包含旧词的描述并复跑扫描通过。
+- Closed risk: Task 8 第三轮 visual QA 中，headless mock complete 已返回 `complete`，但连接弹窗没有关闭、OpenAI 行没有刷新为已连接。根因是 `SettingsDialog.tsx` 先 `setConnectAuthAttempt(complete)`，触发依赖 `connectAuthAttempt.status` 的 effect cleanup，把本轮 `disposed` 置为 true，随后 `providerSettings()` 结果被丢弃。修复为 `authAttemptPollDecision()`：complete 状态先刷新 catalog，再清空 attempt 并关闭弹窗；新增 `settingsDialogViewModel.test.ts` 回归测试。
+- Closed risk: Task 8 driver 曾用 `innerText` 读取 headless 设备码和 browser 授权提示，真实 GUI 把这些内容放在 readonly input 的 `value` 中，导致 driver 误判等待页失败。修复为读取 `.provider-connect-code-row input.value`，最终 `openai_connect_visual_qa_result.json` 为 `ok=true`。
+- Closed risk: Task 8 失败后 Node driver 因 CDP WebSocket 未关闭而让 wrapper 挂住并残留 9276/5677/9725 进程。已按 pid 清理失败轮残留，最终成功轮 9376/5777/9825 无监听残留；后续如 driver 失败，应先读取 result JSON 和 DOM 证据，再清理端口。
+- Closed risk: Task 9 secret scan 的运行产物扫描在零命中时 `$RuntimeSecretMatches` 为 `$null`，StrictMode 下访问 `.Count` 导致门禁自身失败。根因是 PowerShell 外部命令无输出不会自动给空数组；已把 `rg` 输出包成 `@(...)`，并复跑 `assert_no_provider_secret_leaks.ps1` 得到 `Provider secret leak scan passed.`。
+- Closed risk: Task 9 visual QA 原先没有 API Key step 截图，不能满足蓝图的肉眼 GUI 验收要求。已在 driver 中补充点击 `API 密钥`、断言 `input.type=password`、断言空提交禁用、截图 `openai_api_key_step_1365x768.png`，并复跑 visual QA 得到 `inputType=password`。
+- Closed risk: Task 11 release gate lint 发现 `shouldPollAuthAttempt()` 返回 boolean 后，TypeScript 不能在嵌套 async function 中证明 `connectAuthAttempt` 和 `guiClient` 非空。根因是类型窄化不能跨普通 helper 和闭包稳定传播；已改为先固定 `activeClient/activeAttempt`，显式判空后创建非可选 `pollingClient: ProviderSettingsClient`，并复跑 `npm --prefix apps/desktop run lint` 通过。
+- Environmental note: Task 11 默认 visual QA 使用的 bridge 端口 8776 被已有 `python -m learning_agent.app.cli desktop-bridge --workspace ... --port 8776` 进程占用。为避免关闭用户正在查看的外壳，最终验收改用 9576/5977/9975 备用端口；最终 visual QA 通过且备用端口无监听残留。
+
+## 2026-06-26 OpenHarness Desktop Manual Restart Provider Settings Bug
+
+- Closed risk: 用户手动查看 OpenHarness Desktop 后，设置里的“提供商”页显示 `提供商加载失败`。根因不是前端新代码失败，而是端口 `8776` 上仍运行着任务实现前启动的旧 `desktop-bridge` 进程；该旧进程没有 `/v2/gui/provider-settings/providers` 路由，所以真实窗口请求返回 404。
+- Evidence: 手动请求 `http://127.0.0.1:8776/v2/gui/provider-settings/providers` 初始返回 404；重启 8776 bridge 后同一路由返回 200，payload 包含 OpenAI provider。
+- Fix: 停止旧 `start-backend.ps1`/`desktop-bridge` 进程，重新启动当前 worktree 的 `start-backend.ps1 -Port 8776`，再重启 Electron 窗口。
+- Verification: 已在真实 OpenHarness Desktop 窗口中打开 `设置 -> 提供商`，截图 `learning_agent/test/provider_settings_v2_openai_connect/manual_restart_provider_loaded_verified.png` 显示提供商列表正常加载，不再出现 `提供商加载失败`。

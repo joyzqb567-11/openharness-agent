@@ -1105,3 +1105,154 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 前端 release gate 已通过：`npm test` 为 16 files / 63 tests passed；`npm run lint` 通过；`npm run build` 通过。
 - 最终可见 GUI 验收已通过：默认端口 8776/5177 被现有进程占用，本轮使用 8876/5277/9323 启动真实 Electron 窗口；`provider_settings_visual_qa_result.json` 为 `ok: true`，断言包含 `inputType: password`、raw secret 不泄露、390px 无横向溢出。
 - V1 明确不切换真实模型 runtime；真实大模型请求和 GUI agent adapter 接线仍属于后续 Layer C 计划。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Blueprint
+
+- 已按用户要求先读取 `D:\opencode` 相关 CodeGraph 和源代码，再制定 OpenHarness Desktop 的 OpenCode 风格 OpenAI 连接向导蓝图。
+- 关键 OpenCode 证据：`packages/core/src/plugin/provider/openai.ts` 注册 `ChatGPT Pro/Plus (browser)` 与 `ChatGPT Pro/Plus (headless)`，`packages/app/src/components/dialog-connect-provider.tsx` 提供方法选择、API Key、OAuth auto/code UI，`packages/protocol/src/groups/integration.ts` 定义 key/oauth/attempt status/complete/cancel 路由。
+- 新蓝图已保存到 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 蓝图明确验收边界：API Key 路径必须真实连后端和 `/models` 探针；browser/headless OAuth 路径必须实现 attempt 生命周期和真实 GUI 可见验收；完整模型 runtime 使用 OAuth token 不在本蓝图内冒进声明完成。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Karpathy Review
+
+- 已使用 `andrej-karpathy-perspective` skill 评估 `2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 评估结论为 B+：方向正确、证据链扎实、attempt 状态机抽象正确，但 V1 范围偏胖，真实 OAuth token 存储和 OpenCode OAuth client 配置存在成熟度风险。
+- 核心升级建议：增加 Milestone 0 安全/产品决策；把真实 OAuth 改成 gated experimental path；先做 API Key，再做 mock attempt，再做 headless，最后做 browser；把 `auth-session` 命名收敛为 `auth-attempt`；补 tail behavior tests。
+- 评估报告已保存到 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1-karpathy-review.md`。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1-karpathy-review.md`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Blueprint Upgrade
+
+- 已按 Karpathy-style review 升级原蓝图 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 升级后稳定 V1 只承诺 `Slice A + Slice B`：OpenCode 风格 method picker、API Key 真实路径、mock auth-attempt 状态机、视觉 QA 和 secret leak gate。
+- 真实 headless/browser OAuth 已移动到 Post-V1 gated slices：必须满足 `os_encrypted secret store + OPENHARNESS_OPENAI_EXPERIMENTAL=1 + approved client id` 才能保存真实 OAuth refresh token。
+- 合同命名已收敛：使用 `auth-attempt` endpoints；使用 `display_code/display_code_kind`；status enum 固定为 `pending | complete | failed | expired`；auto mode 前端不调用 `complete`。
+- 学习副本已同步到 `learning_agent/test/provider_settings_v2_openai_connect/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`，哈希与主蓝图一致。
+- 自检通过：蓝图中未发现旧词 `auth-session`、`confirmation_code`、`TBD`、`TODO`、`implement later`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect GUI Acceptance Requirement
+
+- 已按用户要求把强制验收文字加入 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 新增要求原文：`验收需要使用肉眼可见的真实GUI界面进行验收，验收时出现bug或发现bug时，请使用systematic debugging技能，修复bug，并重新测试，测试通过后继续执行下一个任务。`
+- 该要求已写入 Product Boundary 和 Task 10 Real Visible GUI Acceptance Gate 两处，学习副本也已同步到 `learning_agent/test/provider_settings_v2_openai_connect/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 0
+
+- Task 0 已启动：按 `superpowers:executing-plans` 建立长任务目标，并把本轮稳定 V1 的产品与安全边界写入 `agent_memory/context.md`。
+- 本轮停止条件：如果自动化测试、密钥扫描、真实可见 GUI 验收或用户可见设置流程任一失败，必须先使用 systematic debugging 查明根因、修复并复测，不能跳过到下一个任务。
+- 已确认当前实现 worktree `H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\desktop-gui-shell-v1` 没有 `.codegraph/`；后续实现读取以该 worktree 的真实文件为准。
+- Task 0 自检发现蓝图检查项本身包含旧命名字面量，会让 `rg` 门禁误报；已按 systematic debugging 追到根因并改成不含旧词的检查描述。
+- 已复跑蓝图门禁：`rg -n "auth-session|confirmation_code|TBD|TODO|implement later" docs\superpowers\plans\2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md` 无命中，学习副本已同步。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 1
+
+- Task 1 已完成后端 Provider Catalog 合同升级。
+- 红测：`test_provider_settings_catalog_route_returns_redacted_catalog` 先要求 schema v3、OpenAI `chatgpt-browser/chatgpt-headless/api-key` 三方法、`type/mode/experimental` 字段和 catalog 不含 `secret_ref`，初次运行失败于 `2 != 3`。
+- 实现：`gui_provider_settings.py` 将 `PROVIDER_SETTINGS_SCHEMA_VERSION` 升到 3，`GuiAuthMethodInfo` 新增 `type/mode/experimental`，OpenAI catalog 改为 `_openai_auth_methods()` 统一输出 browser/headless/api-key。
+- 验证：`python -m pytest learning_agent\tests\test_gui_provider_settings_contract.py -q` 为 3 passed；`python -m py_compile learning_agent\app\gui_provider_settings.py learning_agent\tests\test_gui_provider_settings_contract.py` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task01_backend_catalog/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 2
+
+- Task 2 已完成前端类型和 provider settings store 升级。
+- 红测：`providerSettingsStore.test.ts` 先要求 `secret_ref/access_token/refresh_token/id_token` 递归脱敏，并要求 OpenAI auth method view model 保留 `methodType/mode/experimental`；初次运行 3 个断言失败。
+- 实现：`guiProviderTypes.ts` 新增 `GuiProviderAuthMethodType`、`GuiProviderAuthMethodMode` 和 method `type/mode/experimental` 字段；`providerSettingsStore.ts` 新增 method metadata 映射，并把危险字段判断改为小写归一化。
+- 相关测试夹具已升级到 schema v3 和新 auth method 形状，避免旧合同继续藏在测试里。
+- 验证：`npm test -- --run tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts tests/settingsProvidersPanel.test.tsx` 为 4 files / 10 tests passed；`npm run lint` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task02_frontend_store/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 3
+
+- Task 3 已完成 OpenCode 风格方法选择 UI 的第一屏。
+- 红测：`settingsProvidersPanel.test.tsx` 要求 OpenAI 三方法 provider 打开连接弹窗时先显示 `选择 OpenAI 的登录方式`，并显示 browser、headless、API 密钥三行；初次运行失败，因为旧弹窗直接显示 `type="password"`。
+- 实现：`ProviderConnectDialog.tsx` 增加 method picker 状态，多方法 provider 初始显示方法列表，单方法 provider 保持直接显示 API key 表单；方法列表保留实验 badge 和帮助文案。
+- 样式：`settings-dialog.css` 新增方法列表、按钮、帮助文案、实验 badge 的紧凑设置页样式。
+- 验证：`npm test -- --run tests/settingsProvidersPanel.test.tsx tests/providerSettingsStore.test.ts` 为 2 files / 9 tests passed；`npm run lint` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task03_method_picker_ui/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 4
+
+- Task 4 已完成 API Key step 的新方法 id 提交路径。
+- 红测：`settingsProvidersPanel.test.tsx` 要求 API key 表单带有 `data-active-auth-method="api-key"`，初次运行失败，因为旧表单没有暴露 active method。
+- 实现：`ProviderConnectDialog.tsx` 的 `onSubmit` 改为传出 `authMethodId`；`SettingsDialog.tsx` 改为使用选中的 `api-key` 和 write-only `secret` 字段调用 `connectProvider()`，不再硬编码旧 `api_key`。
+- 后端合同测试也改为用 `auth_method_id: "api-key"` 和 `fields.secret` 写入 OpenAI API key，确认后端兼容新前端请求。
+- 验证：`python -m pytest learning_agent\tests\test_gui_provider_settings_contract.py -q` 为 3 passed；`npm test -- --run tests/settingsProvidersPanel.test.tsx tests/guiProviderClient.test.ts tests/providerSettingsStore.test.ts` 为 3 files / 10 tests passed；`npm run lint` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task04_api_key_path/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 5
+
+- Task 5 已完成 OpenAI Auth 配置门禁 helper。
+- 红测：`test_gui_provider_openai_auth_config.py` 先要求默认 `mock`、真实 OAuth 必须满足 `os_encrypted + experimental flag + client id`、阻断时抛 `openai_real_oauth_blocked` 结构化错误；初次运行失败于模块不存在。
+- 实现：新增 `gui_provider_openai_auth_config.py`，提供 `build_openai_auth_config()`、`OpenAIAuthConfig`、`OpenAIAuthConfigError` 和 `assert_real_oauth_allowed()`。
+- 安全边界：默认开发环境只启用 mock auth-attempt；真实 OAuth 只有 `OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_OPENAI_CLIENT_ID` 同时满足时才允许。
+- 验证：`python -m pytest learning_agent\tests\test_gui_provider_openai_auth_config.py -q` 为 3 passed；`python -m py_compile learning_agent\app\gui_provider_openai_auth_config.py learning_agent\tests\test_gui_provider_openai_auth_config.py` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task05_openai_auth_config/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 6
+
+- Task 6 已完成 OpenAI mock auth-attempt 后端生命周期。
+- 红测：新增 `test_gui_provider_auth_attempts_contract.py`，先要求 `chatgpt-browser/chatgpt-headless` 支持 `start/status/complete/cancel`，且响应和落盘设置不泄露 `refresh_token/access_token/id_token/secret_ref`；初次运行失败于模块缺失和 bridge 路由 404。
+- 实现：新增 `gui_provider_auth_attempts.py`，提供 pending/complete/expired 状态机、确认码 payload、同 provider pending 自动取消、mock complete 落盘为 `oauth_mock` 且不写入任何真实 token。
+- Bridge：`gui_bridge.py` 新增 `/v2/gui/provider-settings/auth-attempt/start`、`/status`、`/complete`、`/cancel` 路由；`gui_provider_settings.py` 能把 `oauth_mock` 显示为已连接且 `source="mock"`。
+- 验证：`python -m pytest learning_agent\tests\test_gui_provider_auth_attempts_contract.py -q` 为 2 passed；`python -m pytest learning_agent\tests\test_gui_provider_settings_contract.py learning_agent\tests\test_gui_provider_openai_auth_config.py learning_agent\tests\test_gui_provider_auth_attempts_contract.py -q` 为 8 passed；`python -m py_compile learning_agent\app\gui_provider_auth_attempts.py learning_agent\app\gui_provider_settings.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_provider_auth_attempts_contract.py` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task06_auth_attempt_backend/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 7
+
+- Task 7 已完成前端 OAuth auto 等待、轮询、取消 UI。
+- 红测：`guiProviderClient.test.ts` 先要求 client 支持 `auth-attempt/start/status/cancel`；`settingsProvidersPanel.test.tsx` 先要求弹窗显示“访问此链接”、设备码和“等待授权”，且不渲染 `refresh_token/access_token/secret_ref`；初次运行失败于 client 方法缺失和等待页未渲染。
+- 实现：`guiProviderTypes.ts` 新增 `ProviderAuthAttemptInfo/Payload`；`guiClient.ts` 新增 start/status/complete/cancel 方法；`ProviderConnectDialog.tsx` 支持 OAuth auto 等待页、复制确认码、返回时取消；`SettingsDialog.tsx` 支持启动 attempt、每秒轮询 status、完成后刷新 catalog、关闭时取消 pending。
+- 样式：`settings-dialog.css` 新增 auth-attempt 等待页、授权链接、确认码输入/复制按钮、状态文案样式，保持 OpenCode 风格紧凑设置弹窗。
+- 验证：`npm test -- --run tests/guiProviderClient.test.ts tests/settingsProvidersPanel.test.tsx` 为 2 files / 7 tests passed；`npm test -- --run tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx` 为 5 files / 15 tests passed；`npm run lint` 通过。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task07_frontend_auth_attempt_ui/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 8
+
+- Task 8 已完成 mock OAuth visual QA，并在真实 Electron GUI 窗口中生成可见截图证据。
+- 视觉验收暴露的 React 竞态已按 TDD 修复：新增 `authAttemptPollDecision()`，要求 `complete` 状态先刷新 provider catalog，不能先把 complete attempt 写回本地等待页，否则 React effect cleanup 会让 `providerSettings()` 结果无法落地。
+- 红测：`npm --prefix apps/desktop test -- --run tests/settingsDialogViewModel.test.ts` 初次失败于 `authAttemptPollDecision is not a function`；修复后该测试为 3 passed。
+- 回归验证：`npm --prefix apps/desktop test -- --run tests/guiProviderClient.test.ts tests/providerSettingsStore.test.ts tests/settingsDialogViewModel.test.ts tests/settingsProvidersPanel.test.tsx` 为 4 files / 14 tests passed；`npm --prefix apps/desktop run lint` 通过。
+- Visual QA driver 同步修复两个断言问题：headless 和 browser 的 `display_code` 实际渲染在 readonly input 的 `value` 中，不会进入 `innerText`，因此 driver 改为读取 `.provider-connect-code-row input.value`。
+- 最终视觉验收命令：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9376 -RendererPort 5777 -CdpPort 9825`，退出码 0。
+- 最终结果：`learning_agent/test/provider_settings_v2_openai_connect/task08_visual_qa/openai_connect_visual_qa_result.json` 中 `ok=true`，截图包含 `openai_method_picker_1365x768.png`、`openai_headless_waiting_1365x768.png`、`openai_mock_connected_1365x768.png`、`openai_browser_waiting_1365x768.png`、`openai_method_picker_mobile_390x844.png`。
+- 肉眼检查截图确认：OpenAI 三方法可见、browser/headless 等待页可见、mock complete 后 provider 行显示已连接、390px 窄屏无横向溢出。
+- 本轮进程清理已确认：9376、5777、9825 无残留 Listen/Established 连接。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task08_visual_qa/source_copies/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 9
+
+- Task 9 已完成 tail behavior tests 与 secret leak gate。
+- 后端 tail tests：`test_gui_provider_auth_attempts_contract.py` 增加重复 start、重复 cancel、未知 attempt、过期 attempt、重复 complete 不重复保存等合同；初次红测暴露未知 attempt 仍抛 404，已改为返回 `expired + auth_attempt_not_found` 的结构化占位 attempt。
+- 前端 tail tests：`settingsDialogViewModel.test.ts` 增加 `shouldPollAuthAttempt()`，覆盖 renderer 关闭、无 client、无 attempt、failed/expired/complete 状态都不能继续轮询；初次红测失败于 helper 缺失，已补实现并让 effect 复用该判断。
+- Secret scan：`assert_no_provider_secret_leaks.ps1` 增加运行产物严格扫描，禁止 `access_token`、`refresh_token`、`id_token`、`secret_ref`、测试密钥样本文本和 Bearer/key 形态进入 visual QA JSON/log/text；源码学习副本用 `!**/source_copies/**` 递归排除，避免把允许的教学副本误判为运行证据。
+- Systematic debugging 修复：secret scan 在零命中时曾因 `$RuntimeSecretMatches` 为 `$null` 且 StrictMode 下访问 `.Count` 报错；根因确认后把 rg 输出包成数组，零命中现在稳定通过。
+- Visual QA driver 增强：补上 API Key step 真实截图和 JSON 顶层字段 `methodCount/inputType/waitingVisible/rawSecretLeakFound`，并复跑真实 Electron visual QA。
+- 验证：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py learning_agent/tests/test_gui_provider_auth_attempts_contract.py learning_agent/tests/test_gui_provider_openai_auth_config.py learning_agent/tests/test_gui_bridge_security_contract.py -q` 为 15 passed。
+- 验证：`npm --prefix apps/desktop test` 为 16 files / 70 tests passed。
+- 验证：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v1/scripts/assert_no_provider_secret_leaks.ps1` 输出 `Provider secret leak scan passed.`。
+- 视觉回归：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9476 -RendererPort 5877 -CdpPort 9925` 退出码 0，结果 JSON 为 `ok=true`、`methodCount=3`、`inputType=password`、`waitingVisible=true`、`rawSecretLeakFound=false`。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/task09_tail_secret_gate/source_copies/`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 10
+
+- Task 10 已完成真实可见 GUI 验收证据整理。
+- 证据来源：真实 Electron visual QA 生成的 `learning_agent/test/provider_settings_v2_openai_connect/task08_visual_qa/` 截图与 JSON，命令为 `powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9476 -RendererPort 5877 -CdpPort 9925`，退出码 0。
+- 最终证据包已保存到 `learning_agent/test/provider_settings_v2_openai_connect/visual_evidence/`：`openai-method-selection.png`、`openai-api-key-step.png`、`openai-oauth-auto-waiting.png`、`openai-connect-complete.png`、`openai_connect_visual_qa_result.json`。
+- 肉眼检查确认：方法选择页显示 browser/headless/API 密钥三种方式；API Key step 使用空密码框且空提交按钮禁用；headless mock OAuth step 显示授权链接、确认码、复制按钮和等待授权；mock complete 后 OpenAI provider 行显示已连接并带 `Mock ChatGPT auth`。
+- Secret scan 已把 `visual_evidence/` 加入运行产物扫描根目录，并复跑 `powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v1/scripts/assert_no_provider_secret_leaks.ps1`，输出 `Provider secret leak scan passed.`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Task 11
+
+- Task 11 已完成文档、学习副本和 release gate。
+- `agent_memory/context.md` 已记录稳定 V1 完成边界：API Key 是当前唯一真实连接路径，browser/headless 是 mock auth-attempt，真实 OAuth 仍需 Post-V1 gate。
+- 总学习副本已保存到 `learning_agent/test/provider_settings_v2_openai_connect/source_copies/`，包含后端 provider/auth-attempt/config/bridge、前端 types/client/store/dialog/style、测试和 visual QA/secret scan 脚本。
+- 蓝图和 Karpathy review 副本已同步到 `learning_agent/test/provider_settings_v2_openai_connect/`。
+- 最终 release gate 后端：`python -m pytest learning_agent/tests/test_gui_provider_secret_store.py learning_agent/tests/test_gui_provider_settings_contract.py learning_agent/tests/test_gui_provider_auth_attempts_contract.py learning_agent/tests/test_gui_provider_openai_auth_config.py learning_agent/tests/test_gui_bridge_security_contract.py -q` 为 15 passed。
+- 最终 release gate 前端测试：`npm --prefix apps/desktop test` 为 16 files / 70 tests passed。
+- 最终 release gate lint：`npm --prefix apps/desktop run lint` 退出码 0。
+- 最终 release gate build：`npm --prefix apps/desktop run build` 退出码 0，Vite production build 成功。
+- 最终 release gate secret scan：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v1/scripts/assert_no_provider_secret_leaks.ps1` 输出 `Provider secret leak scan passed.`。
+- 蓝图默认 visual QA 命令因当前已有 `desktop-bridge --port 8776` 用户进程监听而失败；未关闭该用户可见外壳进程，改用备用端口执行最终 visual QA。
+- 最终 release gate visual QA：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9576 -RendererPort 5977 -CdpPort 9975` 退出码 0，结果 JSON 为 `ok=true`、`methodCount=3`、`inputType=password`、`waitingVisible=true`、`rawSecretLeakFound=false`。
+- 最终 `visual_evidence/` 已用 9576/5977/9975 这一轮截图和 JSON 覆盖，并再次复跑 secret scan 通过。

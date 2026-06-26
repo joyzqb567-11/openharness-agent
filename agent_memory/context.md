@@ -252,3 +252,35 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - Main provider settings JSON stores `secret_ref`, not raw secret values.
 - `custom-provider-cta` is a virtual UI row, not a provider id.
 - Built-in provider ids are `github-copilot`, `openai`, `google`, `openrouter`, and `vercel`.
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Blueprint Context
+
+- 已用 `D:\opencode` 的 CodeGraph 和源代码核对 OpenCode Provider 连接流程：OpenAI 在 `packages/core/src/plugin/provider/openai.ts` 中注册 `chatgpt-browser`、`chatgpt-headless` 两个 OAuth method，UI 在 `packages/app/src/components/dialog-connect-provider.tsx` 中按方法选择、API Key、OAuth auto/code 分支渲染。
+- OpenCode 新协议的 integration attempt 包含 `connect/key`、`connect/oauth`、`attempt/status`、`attempt/complete`、`attempt/cancel`，OpenHarness 后续应按这个状态机设计，而不是只做静态弹窗。
+- 新蓝图保存于 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`，学习副本保存于 `learning_agent/test/provider_settings_v2_openai_connect/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 该蓝图区分稳定路径和实验路径：API Key 必须真实连接后端并做 `/models` 探针；ChatGPT browser/headless OAuth 必须有真实 attempt 生命周期和可见 GUI 验收，但不在本蓝图内宣称完整模型 runtime 已经接入 OAuth token。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Upgraded Blueprint Context
+
+- 已按 Karpathy-style review 升级 OpenAI Connect 蓝图：稳定 V1 范围收敛为 `Slice A: method picker + API Key real path` 与 `Slice B: mock auth-attempt contract + visual QA`。
+- 真实 ChatGPT headless/browser OAuth 已从稳定 V1 移到 Post-V1 gated slices；没有 `OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1` 和显式 client id 时，不能保存真实 OAuth `refresh_token`。
+- 命名统一为 `auth-attempt`，不再使用 `auth-session`；attempt status enum 固定为 `pending | complete | failed | expired`，cancel 表现为 `expired + message=cancelled_by_user`。
+- OAuth 等待页合同使用 `display_code`、`display_code_kind`、`display_code_copyable`，不再把 browser instruction 误命名为 `confirmation_code`。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect Execution Boundary
+
+- 当前长任务目标是逐项完成 `docs/superpowers/plans/2026-06-26-openharness-desktop-opencode-style-openai-connect-v1.md`。
+- 稳定 V1 只允许交付：OpenCode 风格 OpenAI 方法选择器、API Key 真实后端保存与 `/models` 探针、Mock auth-attempt 生命周期、可见 GUI 验收和密钥泄漏门禁。
+- 真实 browser/headless OAuth 只允许作为配置门禁后的 Post-V1 实验路径存在；默认开发 JSON 不允许保存真实 `refresh_token`、`access_token`、`id_token` 或 `secret_ref` 到前端 payload。
+- Auth attempt 命名和状态机是本轮唯一合同：`start/status/cancel/complete`，状态只使用 `pending | complete | failed | expired`，取消统一显示为 `expired + cancelled_by_user`。
+- 前端 auto 模式只能调用 start/status/cancel；mock complete 只能用于测试或 mock driver，不能让用户界面误以为真实 OAuth 已完成。
+
+## 2026-06-26 OpenCode-Style OpenAI Connect V1 Completion Context
+
+- 稳定 V1 已实现到可验收状态：OpenAI `+ 连接` 进入 OpenCode 风格三方法向导，包含 `ChatGPT Pro/Plus (browser)`、`ChatGPT Pro/Plus (headless)`、`API 密钥`。
+- API Key 是当前唯一真实后端连接路径：前端只传 write-only `fields.secret`，后端保存到 provider secret store，并刷新 provider catalog；renderer payload 和截图证据不能包含 raw key。
+- Browser/headless 在稳定 V1 中是 mock auth-attempt：真实 UI、真实 bridge endpoint、真实轮询/取消/complete 状态机都已接通，但不代表真实 ChatGPT OAuth token 或模型 runtime 已接入。
+- 真实 OAuth 仍是 Post-V1 gated slice：必须满足 `OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_OPENAI_CLIENT_ID` 非空，并明确选择 real mode 后，才允许推进真实 `refresh_token` 存储实现。
+- 最终 GUI 验收证据位于 `learning_agent/test/provider_settings_v2_openai_connect/visual_evidence/`，包含方法选择、API Key、OAuth 等待、连接完成截图和 `openai_connect_visual_qa_result.json`。
+- 本轮总学习副本位于 `learning_agent/test/provider_settings_v2_openai_connect/source_copies/`，后续学习或审查应优先从这里对照主文件。
+- Secret leak gate 已覆盖 `task08_visual_qa/` 和 `visual_evidence/` 运行证据目录，禁止 token 字段、测试密钥样本或 Bearer/key 形态进入可交付 JSON/log/text。

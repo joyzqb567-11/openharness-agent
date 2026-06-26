@@ -1,0 +1,313 @@
+{
+  "ok": true,
+  "screenshots": [
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_method_picker_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_api_key_step_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_headless_intermediate_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_headless_waiting_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_mock_connected_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_browser_waiting_1365x768.png",
+    "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\desktop-gui-shell-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\task08_visual_qa\\openai_method_picker_mobile_390x844.png"
+  ],
+  "assertions": [
+    {
+      "label": "clicked provider-action-openai",
+      "passed": true,
+      "details": {
+        "testId": "provider-action-openai"
+      }
+    },
+    {
+      "label": "OpenAI method picker shows browser headless and API key",
+      "passed": true,
+      "details": {
+        "hasBrowser": true,
+        "hasHeadless": true,
+        "hasApiKey": true,
+        "passwordVisible": false,
+        "secretRefLeak": false
+      }
+    },
+    {
+      "label": "method picker does not show password field initially",
+      "passed": true,
+      "details": {
+        "hasBrowser": true,
+        "hasHeadless": true,
+        "hasApiKey": true,
+        "passwordVisible": false,
+        "secretRefLeak": false
+      }
+    },
+    {
+      "label": "method picker does not expose secret locator fields",
+      "passed": true,
+      "details": {
+        "hasBrowser": true,
+        "hasHeadless": true,
+        "hasApiKey": true,
+        "passwordVisible": false,
+        "secretRefLeak": false
+      }
+    },
+    {
+      "label": "clicked provider-auth-method-api-key",
+      "passed": true,
+      "details": {
+        "testId": "provider-auth-method-api-key"
+      }
+    },
+    {
+      "label": "API key step uses password input",
+      "passed": true,
+      "details": {
+        "inputType": "password",
+        "hasRequiredMessage": true,
+        "submitDisabled": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "API key step keeps empty submit disabled",
+      "passed": true,
+      "details": {
+        "inputType": "password",
+        "hasRequiredMessage": true,
+        "submitDisabled": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "API key step has no token or secret locator leak",
+      "passed": true,
+      "details": {
+        "inputType": "password",
+        "hasRequiredMessage": true,
+        "submitDisabled": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "clicked provider-auth-method-chatgpt-headless",
+      "passed": true,
+      "details": {
+        "testId": "provider-auth-method-chatgpt-headless"
+      }
+    },
+    {
+      "label": "headless intermediate visible state",
+      "passed": true,
+      "details": {
+        "text": "快速对话\n搜索\n插件\n自动化\n项目\nOpenHarness-main\n最近对话\n暂无最近对话\n归档\n0\n设置\n快速对话\nOpenHarness Desktop Shell\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：你好\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：请分析当前项目是什么项目，并列出模块组成。\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：请用三行中文说明这个 GUI 外壳现在能做什么。\n第二行必须保留换行。\n第三行说明如何重试。\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：__tool__ 请执行一个模拟工具动作，用于验证工具轨迹。\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：__permission__ 请执行一个需要权限确认的模拟工具动作，并让我在 GUI 里批准。\nOpenHarness\ncancelled\n用户已在桌面 GUI 中取消本轮运行。\nOpenHarness\ncompleted\nOpenHarness Desktop 已收到 GUI prompt：__slow__ 请开始一个较长任务，我会中途点击取消，然后再点击重试。\nOpenHarness\ncompleted\nOpenHarness Desktop 已完成 fake streaming 回答：Summarize this project in two concise sentences.\nOpenHarness\ncompleted\nOpenHarness Desktop 已完成 fake streaming 回答：Line one: Shift Enter visible acceptanceLine two: same textarea after Shift Enter\nOpenHarness\n安全拒绝\ncompleted\n我不能绕过本机权限或执行高风险操作；可以改为说明安全边界、权限确认流程，或生成低风险的模拟验收步骤。\nOpenHarness\ncompleted\nOpenHarness Desktop 已完成 fake streaming 回答：你好\nsmoke_tool\ntool_call_started\n\nGUI 可见验收工具事件已写入。\n\n状态\n工具\n浏览器\n任务\n设置\n诊断\n运行状态\n50 events\n#113\ngui_turn_completed\nturn_f1fdab1af5214bfe\n#112\nmessage_completed\nturn_f1fdab1af5214bfe\n#111\nmessage_delta\nturn_f1fdab1af5214bfe\n#110\nturn_started\nturn_f1fdab1af5214bfe\n#109\ngui_turn_started\nturn_f1fdab1af5214bfe\n#108\ngui_turn_queued\nturn_f1fdab1af5214bfe\n#107\ngui_turn_completed\nturn_3f8df64bd164425b\n#106\nsafety_refusal\nturn_3f8df64bd164425b\n#105\nmessage_delta\nturn_3f8df64bd164425b\n#104\nturn_started\nturn_3f8df64bd164425b\n#103\ngui_turn_started\nturn_3f8df64bd164425b\n#102\ngui_turn_queued\nturn_3f8df64bd164425b\n#101\ngui_turn_completed\nturn_7408878e2904464c\n#100\nmessage_completed\nturn_7408878e2904464c\n#99\nmessage_delta\nturn_7408878e2904464c\n#98\nturn_started\nturn_7408878e2904464c\n#97\ngui_turn_started\nturn_7408878e2904464c\n#96\ngui_turn_queued\nturn_7408878e2904464c\n#95\ngui_turn_completed\nturn_7702e3572c4841d7\n#94\nmessage_completed\nturn_7702e3572c4841",
+        "htmlLeak": false,
+        "attemptId": "auth_attempt_6e5bc1e831e74d9da1"
+      }
+    },
+    {
+      "label": "headless waiting page exposes non-secret attempt id",
+      "passed": true,
+      "details": {
+        "attemptId": "auth_attempt_6e5bc1e831e74d9da1",
+        "hasLink": true,
+        "codeValue": "MOCK-OPENAI-4D9DA1",
+        "hasWaiting": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "headless waiting page shows link code and waiting status",
+      "passed": true,
+      "details": {
+        "attemptId": "auth_attempt_6e5bc1e831e74d9da1",
+        "hasLink": true,
+        "codeValue": "MOCK-OPENAI-4D9DA1",
+        "hasWaiting": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "headless waiting page has no token or secret locator leak",
+      "passed": true,
+      "details": {
+        "attemptId": "auth_attempt_6e5bc1e831e74d9da1",
+        "hasLink": true,
+        "codeValue": "MOCK-OPENAI-4D9DA1",
+        "hasWaiting": true,
+        "tokenLeak": false
+      }
+    },
+    {
+      "label": "bridge POST /v2/gui/provider-settings/auth-attempt/complete ok",
+      "passed": true,
+      "details": {
+        "status": 200,
+        "data": {
+          "ok": true,
+          "schema_version": 3,
+          "attempt": {
+            "attempt_id": "auth_attempt_6e5bc1e831e74d9da1",
+            "provider_id": "openai",
+            "auth_method_id": "chatgpt-headless",
+            "mode": "mock",
+            "url": "http://127.0.0.1:18991/mock/openai/device",
+            "instructions": "访问此链接并输入设备码，以完成 mock ChatGPT 授权。",
+            "display_code": "MOCK-OPENAI-4D9DA1",
+            "display_code_kind": "device_code",
+            "display_code_copyable": true,
+            "status": "complete",
+            "message": "mock_completed",
+            "created_at": 1782452665.9317458,
+            "expires_at": 1782453265.9317458
+          }
+        }
+      }
+    },
+    {
+      "label": "mock complete returns complete status",
+      "passed": true,
+      "details": {
+        "ok": true,
+        "schema_version": 3,
+        "attempt": {
+          "attempt_id": "auth_attempt_6e5bc1e831e74d9da1",
+          "provider_id": "openai",
+          "auth_method_id": "chatgpt-headless",
+          "mode": "mock",
+          "url": "http://127.0.0.1:18991/mock/openai/device",
+          "instructions": "访问此链接并输入设备码，以完成 mock ChatGPT 授权。",
+          "display_code": "MOCK-OPENAI-4D9DA1",
+          "display_code_kind": "device_code",
+          "display_code_copyable": true,
+          "status": "complete",
+          "message": "mock_completed",
+          "created_at": 1782452665.9317458,
+          "expires_at": 1782453265.9317458
+        }
+      }
+    },
+    {
+      "label": "connected mock state has no token or secret locator leak",
+      "passed": true,
+      "details": {
+        "tokenLeak": false,
+        "mockVisible": true
+      }
+    },
+    {
+      "label": "connected mock state is visible",
+      "passed": true,
+      "details": {
+        "tokenLeak": false,
+        "mockVisible": true
+      }
+    },
+    {
+      "label": "clicked provider-action-openai",
+      "passed": true,
+      "details": {
+        "testId": "provider-action-openai"
+      }
+    },
+    {
+      "label": "clicked provider-action-openai",
+      "passed": true,
+      "details": {
+        "testId": "provider-action-openai"
+      }
+    },
+    {
+      "label": "clicked provider-auth-method-chatgpt-browser",
+      "passed": true,
+      "details": {
+        "testId": "provider-auth-method-chatgpt-browser"
+      }
+    },
+    {
+      "label": "browser waiting page exposes non-secret attempt id",
+      "passed": true,
+      "details": {
+        "browserAttemptId": "auth_attempt_3a3237ff1dd545a4aa"
+      }
+    },
+    {
+      "label": "bridge GET /v2/gui/provider-settings/auth-attempt/status?attempt_id=auth_attempt_3a3237ff1dd545a4aa ok",
+      "passed": true,
+      "details": {
+        "status": 200,
+        "data": {
+          "ok": true,
+          "schema_version": 3,
+          "attempt": {
+            "attempt_id": "auth_attempt_3a3237ff1dd545a4aa",
+            "provider_id": "openai",
+            "auth_method_id": "chatgpt-browser",
+            "mode": "mock",
+            "url": "http://127.0.0.1:18991/mock/openai/browser",
+            "instructions": "在浏览器中完成 mock ChatGPT 授权。",
+            "display_code": "Complete authorization in your browser. This window will close automatically.",
+            "display_code_kind": "browser_instruction",
+            "display_code_copyable": false,
+            "status": "expired",
+            "message": "cancelled_by_user",
+            "created_at": 1782452667.4143925,
+            "expires_at": 1782453267.4143925
+          }
+        }
+      }
+    },
+    {
+      "label": "browser cancel marks attempt expired",
+      "passed": true,
+      "details": {
+        "ok": true,
+        "schema_version": 3,
+        "attempt": {
+          "attempt_id": "auth_attempt_3a3237ff1dd545a4aa",
+          "provider_id": "openai",
+          "auth_method_id": "chatgpt-browser",
+          "mode": "mock",
+          "url": "http://127.0.0.1:18991/mock/openai/browser",
+          "instructions": "在浏览器中完成 mock ChatGPT 授权。",
+          "display_code": "Complete authorization in your browser. This window will close automatically.",
+          "display_code_kind": "browser_instruction",
+          "display_code_copyable": false,
+          "status": "expired",
+          "message": "cancelled_by_user",
+          "created_at": 1782452667.4143925,
+          "expires_at": 1782453267.4143925
+        }
+      }
+    },
+    {
+      "label": "clicked provider-action-openai",
+      "passed": true,
+      "details": {
+        "testId": "provider-action-openai"
+      }
+    },
+    {
+      "label": "mobile method picker has no horizontal overflow",
+      "passed": true,
+      "details": {
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflowOk": true,
+        "hasPicker": true
+      }
+    }
+  ],
+  "viewportResults": [
+    {
+      "width": 1365,
+      "height": 768
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "methodCount": 3,
+  "inputType": "password",
+  "waitingVisible": true,
+  "rawSecretLeakFound": false
+}

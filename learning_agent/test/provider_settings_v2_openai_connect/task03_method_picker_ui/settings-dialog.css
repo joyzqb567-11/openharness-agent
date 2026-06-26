@@ -1,0 +1,643 @@
+.settings-dialog-overlay { /* 新增代码+ProviderSettingsShellStyle：定义设置弹窗全屏遮罩；如果没有这段，弹窗无法覆盖主界面形成真实 GUI 验收对象。 */
+  position: fixed; /* 新增代码+ProviderSettingsShellStyle：固定在窗口上；如果没有这行，滚动内容可能把弹窗带走。 */
+  inset: 0; /* 新增代码+ProviderSettingsShellStyle：铺满整个窗口；如果没有这行，遮罩会留下可点击缝隙。 */
+  z-index: 40; /* 新增代码+ProviderSettingsShellStyle：保证位于主界面上方；如果没有这行，侧栏或权限层可能盖住设置页。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格居中弹窗；如果没有这行，弹窗定位会依赖脆弱 margin。 */
+  place-items: center; /* 新增代码+ProviderSettingsShellStyle：让弹窗水平垂直居中；如果没有这行，宽屏下弹窗可能偏移。 */
+  padding: 28px; /* 新增代码+ProviderSettingsShellStyle：给窗口边缘留安全距离；如果没有这行，小窗口下弹窗会贴边。 */
+  background: rgba(15, 23, 42, 0.16); /* 新增代码+ProviderSettingsShellStyle：添加轻量遮罩；如果没有这行，弹窗和主界面边界不清。 */
+} /* 新增代码+ProviderSettingsShellStyle：遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog { /* 新增代码+ProviderSettingsShellStyle：定义设置弹窗主体；如果没有这段，设置页会退回普通文档流。 */
+  width: min(980px, 100%); /* 新增代码+ProviderSettingsShellStyle：限制最大宽度约 980px；如果没有这行，宽屏上设置页会拉得过宽。 */
+  max-height: min(720px, calc(100vh - 56px)); /* 新增代码+ProviderSettingsShellStyle：限制最大高度约 720px；如果没有这行，小窗口下内容会溢出屏幕。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格组织左导航和右内容；如果没有这行，左右两栏无法稳定并排。 */
+  position: relative; /* 修改代码+ProviderSettingsPanelStyle：给连接弹窗遮罩提供定位参照；如果没有这行，API key 弹窗可能覆盖到设置窗以外的位置。 */
+  grid-template-columns: 240px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：让左栏接近参考截图宽度；如果没有这行，导航宽度会随内容跳动。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：裁剪内部滚动边界；如果没有这行，内容可能冲出圆角。 */
+  border: 1px solid #d9dee8; /* 新增代码+ProviderSettingsShellStyle：添加细边框；如果没有这行，白色弹窗边界不够清楚。 */
+  border-radius: 8px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，弹窗边缘会过硬且和现有按钮不协调。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsShellStyle：使用白色面板；如果没有这行，弹窗会继承主界面灰底。 */
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18); /* 新增代码+ProviderSettingsShellStyle：添加轻阴影分层；如果没有这行，弹窗缺少浮层感。 */
+} /* 新增代码+ProviderSettingsShellStyle：设置弹窗主体规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-sidebar { /* 新增代码+ProviderSettingsShellStyle：定义左侧设置导航；如果没有这段，分类和 footer 无法固定布局。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格组织分组和 footer；如果没有这行，版本 footer 无法稳定贴底。 */
+  grid-template-rows: auto auto minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：保留分组内容和底部弹性空间；如果没有这行，footer 可能挤到导航中间。 */
+  align-content: start; /* 新增代码+ProviderSettingsShellStyle：让导航从顶部开始；如果没有这行，少量导航可能被拉散。 */
+  gap: 20px; /* 新增代码+ProviderSettingsShellStyle：设置分组间距；如果没有这行，桌面和服务器分组会粘在一起。 */
+  border-right: 1px solid #e3e7ef; /* 新增代码+ProviderSettingsShellStyle：分隔左右区域；如果没有这行，导航和内容边界不清。 */
+  background: #f7f8fa; /* 新增代码+ProviderSettingsShellStyle：使用浅灰导航底；如果没有这行，左栏和右栏缺少层次。 */
+  padding: 16px 12px; /* 新增代码+ProviderSettingsShellStyle：给导航留操作空间；如果没有这行，按钮会贴边。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许弹窗内部收缩；如果没有这行，小窗口下会撑破高度。 */
+} /* 新增代码+ProviderSettingsShellStyle：左侧导航规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-nav-group { /* 新增代码+ProviderSettingsShellStyle：定义导航分组；如果没有这段，分组内部按钮缺少统一节奏。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格纵向排列分组内容；如果没有这行，标题和按钮会自然粘连。 */
+  gap: 6px; /* 新增代码+ProviderSettingsShellStyle：设置按钮间距；如果没有这行，导航项会挤在一起。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许长文本截断；如果没有这行，导航文字可能撑宽左栏。 */
+} /* 新增代码+ProviderSettingsShellStyle：导航分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-nav-heading { /* 新增代码+ProviderSettingsShellStyle：定义导航分区标题；如果没有这段，桌面和服务器层级不明显。 */
+  padding: 0 8px 4px; /* 新增代码+ProviderSettingsShellStyle：给标题留缩进和下间距；如果没有这行，标题会贴住按钮。 */
+  color: #5f6b7a; /* 新增代码+ProviderSettingsShellStyle：使用次级文本色；如果没有这行，分区标题会抢主层级。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsShellStyle：压低标题字号；如果没有这行，左栏会显得拥挤。 */
+  line-height: 1.2; /* 新增代码+ProviderSettingsShellStyle：稳定标题行高；如果没有这行，标题高度会受字体影响跳动。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsShellStyle：增强分区标题识别；如果没有这行，标题容易和普通按钮混淆。 */
+} /* 新增代码+ProviderSettingsShellStyle：导航标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab { /* 新增代码+ProviderSettingsShellStyle：定义设置页签按钮；如果没有这段，按钮会继承浏览器默认样式。 */
+  width: 100%; /* 新增代码+ProviderSettingsShellStyle：让按钮填满导航宽度；如果没有这行，可点击区域会过窄。 */
+  min-height: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮高度；如果没有这行，标签文字变化会导致布局跳动。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：使用网格对齐图标和文字；如果没有这行，图标和文字容易错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定图标列并让文字截断；如果没有这行，长文字会挤压图标。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中按钮内容；如果没有这行，图标和文字基线不齐。 */
+  gap: 8px; /* 新增代码+ProviderSettingsShellStyle：设置图标文字间距；如果没有这行，内容会粘在一起。 */
+  border: 1px solid transparent; /* 新增代码+ProviderSettingsShellStyle：预留边框位置；如果没有这行，active 状态会改变按钮尺寸。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，按钮风格和主界面不一致。 */
+  background: transparent; /* 新增代码+ProviderSettingsShellStyle：默认透明背景；如果没有这行，导航会显得过重。 */
+  color: #2f3742; /* 新增代码+ProviderSettingsShellStyle：设置主文本色；如果没有这行，按钮颜色会使用浏览器默认值。 */
+  padding: 0 8px; /* 新增代码+ProviderSettingsShellStyle：设置按钮内边距；如果没有这行，内容会贴边。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsShellStyle：显示可点击光标；如果没有这行，用户不确定能否点击。 */
+  text-align: left; /* 新增代码+ProviderSettingsShellStyle：保持文字左对齐；如果没有这行，导航扫描性下降。 */
+} /* 新增代码+ProviderSettingsShellStyle：设置页签按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab span { /* 新增代码+ProviderSettingsShellStyle：定义页签文字；如果没有这段，长标签可能溢出左栏。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长文本；如果没有这行，文字可能盖住边界。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持单行标签；如果没有这行，按钮高度会被文字撑开。 */
+} /* 新增代码+ProviderSettingsShellStyle：页签文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab:hover { /* 新增代码+ProviderSettingsShellStyle：定义页签悬停状态；如果没有这段，鼠标经过没有反馈。 */
+  background: #eceff4; /* 新增代码+ProviderSettingsShellStyle：悬停时轻微变灰；如果没有这行，交互感不足。 */
+} /* 新增代码+ProviderSettingsShellStyle：页签悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-tab-active { /* 新增代码+ProviderSettingsShellStyle：定义当前页签状态；如果没有这段，用户看不出当前设置页。 */
+  border-color: #d6dbe5; /* 新增代码+ProviderSettingsShellStyle：给 active 项加边界；如果没有这行，选中状态不够稳定。 */
+  background: #e7ebf1; /* 新增代码+ProviderSettingsShellStyle：给 active 项加浅底；如果没有这行，选中项不明显。 */
+  color: #111827; /* 新增代码+ProviderSettingsShellStyle：增强 active 文本对比；如果没有这行，选中项仍像普通项。 */
+} /* 新增代码+ProviderSettingsShellStyle：当前页签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-footer { /* 新增代码+ProviderSettingsShellStyle：定义左下角 footer；如果没有这段，产品名和版本会随导航滚动或散落。 */
+  align-self: end; /* 新增代码+ProviderSettingsShellStyle：让 footer 靠底；如果没有这行，版本信息会挤在分组后面。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：纵向排列产品名和版本；如果没有这行，两者会挤在一行。 */
+  gap: 3px; /* 新增代码+ProviderSettingsShellStyle：设置 footer 文本间距；如果没有这行，版本号会贴住产品名。 */
+  padding: 0 8px; /* 新增代码+ProviderSettingsShellStyle：对齐导航按钮缩进；如果没有这行，footer 会贴边。 */
+  color: #667085; /* 新增代码+ProviderSettingsShellStyle：使用次级文本色；如果没有这行，footer 会抢导航层级。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsShellStyle：设置紧凑字号；如果没有这行，footer 会占太多空间。 */
+} /* 新增代码+ProviderSettingsShellStyle：footer 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-main { /* 新增代码+ProviderSettingsShellStyle：定义右侧内容区；如果没有这段，设置内容无法滚动和排版。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格组织标题、警告和内容；如果没有这行，结构会变成普通文档流。 */
+  grid-template-rows: auto auto minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定标题和警告，内容区可滚动；如果没有这行，长内容会撑开弹窗。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容横向收缩；如果没有这行，长 provider 名可能撑破弹窗。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容纵向收缩；如果没有这行，滚动区域不会生效。 */
+} /* 新增代码+ProviderSettingsShellStyle：右侧内容区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-header { /* 新增代码+ProviderSettingsShellStyle：定义右侧标题栏；如果没有这段，标题和关闭按钮无法稳定对齐。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格排列标题和关闭按钮；如果没有这行，按钮会跟随标题长度跳动。 */
+  grid-template-columns: minmax(0, 1fr) 34px; /* 新增代码+ProviderSettingsShellStyle：标题占剩余宽度，关闭按钮固定；如果没有这行，关闭按钮位置不稳定。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中标题和按钮；如果没有这行，两者会错位。 */
+  gap: 12px; /* 新增代码+ProviderSettingsShellStyle：标题和关闭按钮保持间距；如果没有这行，长标题可能贴住按钮。 */
+  min-height: 58px; /* 新增代码+ProviderSettingsShellStyle：固定标题栏高度；如果没有这行，切换页签会导致高度跳动。 */
+  border-bottom: 1px solid #edf0f5; /* 新增代码+ProviderSettingsShellStyle：分隔标题和内容；如果没有这行，层级不清。 */
+  padding: 0 20px; /* 新增代码+ProviderSettingsShellStyle：给标题栏留左右空间；如果没有这行，标题和按钮会贴边。 */
+} /* 新增代码+ProviderSettingsShellStyle：标题栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-header h2 { /* 新增代码+ProviderSettingsShellStyle：定义设置页标题；如果没有这段，标题会继承浏览器默认大字号。 */
+  margin: 0; /* 新增代码+ProviderSettingsShellStyle：移除默认外边距；如果没有这行，标题栏高度会被撑开。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长标题；如果没有这行，标题可能盖住关闭按钮。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号处理长标题；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持标题单行；如果没有这行，标题栏高度会跳动。 */
+  color: #111827; /* 新增代码+ProviderSettingsShellStyle：设置标题主色；如果没有这行，标题层级不稳定。 */
+  font-size: 16px; /* 新增代码+ProviderSettingsShellStyle：使用工具界面标题字号；如果没有这行，标题会过大。 */
+  line-height: 1.3; /* 新增代码+ProviderSettingsShellStyle：稳定标题行高；如果没有这行，字体渲染会影响高度。 */
+} /* 新增代码+ProviderSettingsShellStyle：标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-close { /* 新增代码+ProviderSettingsShellStyle：定义关闭按钮；如果没有这段，关闭控件会继承浏览器默认样式。 */
+  width: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮宽度；如果没有这行，按钮尺寸会随图标或 label 跳动。 */
+  height: 34px; /* 新增代码+ProviderSettingsShellStyle：固定按钮高度；如果没有这行，按钮点击区域不稳定。 */
+  display: inline-flex; /* 新增代码+ProviderSettingsShellStyle：居中关闭图标；如果没有这行，图标可能偏移。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中图标；如果没有这行，图标基线不齐。 */
+  justify-content: center; /* 新增代码+ProviderSettingsShellStyle：水平居中图标；如果没有这行，图标会偏左。 */
+  border: 1px solid #d6dbe5; /* 新增代码+ProviderSettingsShellStyle：添加细边框；如果没有这行，按钮边界不清。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsShellStyle：使用小圆角；如果没有这行，按钮风格不统一。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsShellStyle：使用白底按钮；如果没有这行，按钮会混入标题栏。 */
+  color: #344054; /* 新增代码+ProviderSettingsShellStyle：设置图标颜色；如果没有这行，关闭图标可能使用默认黑色过重。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsShellStyle：显示可点击光标；如果没有这行，用户不确定能否点击。 */
+} /* 新增代码+ProviderSettingsShellStyle：关闭按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-close:hover { /* 新增代码+ProviderSettingsShellStyle：定义关闭按钮悬停；如果没有这段，鼠标经过没有反馈。 */
+  background: #f7f8fa; /* 新增代码+ProviderSettingsShellStyle：悬停时轻微变灰；如果没有这行，交互感不足。 */
+} /* 新增代码+ProviderSettingsShellStyle：关闭按钮悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-warning { /* 新增代码+ProviderSettingsShellStyle：定义开发密钥警告条；如果没有这段，dev_json 风险提示缺少稳定样式。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格排列图标和文字；如果没有这行，警告内容可能错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+ProviderSettingsShellStyle：固定图标列；如果没有这行，长文字会挤压图标。 */
+  align-items: center; /* 新增代码+ProviderSettingsShellStyle：垂直居中警告内容；如果没有这行，图标和文字不齐。 */
+  gap: 8px; /* 新增代码+ProviderSettingsShellStyle：设置图标文字间距；如果没有这行，内容会粘连。 */
+  border-bottom: 1px solid #f0e5c7; /* 新增代码+ProviderSettingsShellStyle：分隔警告和内容；如果没有这行，警告区边界不清。 */
+  background: #fff8e6; /* 新增代码+ProviderSettingsShellStyle：使用浅黄色风险背景；如果没有这行，警告不够醒目。 */
+  color: #7a4d00; /* 新增代码+ProviderSettingsShellStyle：设置警告文字色；如果没有这行，风险语义不明显。 */
+  padding: 10px 20px; /* 新增代码+ProviderSettingsShellStyle：给警告留阅读空间；如果没有这行，文字会贴边。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许长警告收缩；如果没有这行，文本可能撑宽弹窗。 */
+} /* 新增代码+ProviderSettingsShellStyle：开发密钥警告规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-warning span { /* 新增代码+ProviderSettingsShellStyle：定义警告文字；如果没有这段，长警告可能溢出。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsShellStyle：隐藏超长警告；如果没有这行，文字会越界。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsShellStyle：用省略号处理过长警告；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsShellStyle：保持警告单行；如果没有这行，警告区高度会跳动。 */
+} /* 新增代码+ProviderSettingsShellStyle：警告文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-content { /* 新增代码+ProviderSettingsShellStyle：定义右侧内容滚动区；如果没有这段，页签内容无法承载后续 provider rows。 */
+  min-width: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容横向收缩；如果没有这行，长文本会撑破弹窗。 */
+  min-height: 0; /* 新增代码+ProviderSettingsShellStyle：允许内容纵向收缩；如果没有这行，滚动区域无法生效。 */
+  overflow: auto; /* 新增代码+ProviderSettingsShellStyle：内容超出时内部滚动；如果没有这行，小窗口下内容会被裁掉。 */
+  padding: 20px; /* 新增代码+ProviderSettingsShellStyle：给内容留阅读空间；如果没有这行，内容会贴边。 */
+} /* 新增代码+ProviderSettingsShellStyle：内容滚动区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-dialog-placeholder { /* 新增代码+ProviderSettingsShellStyle：定义 Task 5 占位内容；如果没有这段，未接入数据前内容区会显得破碎。 */
+  display: grid; /* 新增代码+ProviderSettingsShellStyle：用网格居中占位文字；如果没有这行，占位文字会贴在左上角。 */
+  place-items: center; /* 新增代码+ProviderSettingsShellStyle：居中占位文字；如果没有这行，空状态视觉不稳定。 */
+  min-height: 360px; /* 新增代码+ProviderSettingsShellStyle：给内容区稳定高度；如果没有这行，弹窗高度会显得过空。 */
+  color: #667085; /* 新增代码+ProviderSettingsShellStyle：使用次级文字色；如果没有这行，占位文案会抢主层级。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsShellStyle：设置紧凑字号；如果没有这行，占位文案会过大。 */
+} /* 新增代码+ProviderSettingsShellStyle：占位内容规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-list { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 列表容器；如果没有这段，提供商行会缺少参考图里的统一边框和行节奏。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：使用网格纵向排列 provider 行；如果没有这行，行间布局会依赖默认文档流。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsPanelStyle：裁剪列表圆角内的分隔线；如果没有这行，子行背景可能冲出边界。 */
+  border: 1px solid #e4e7ec; /* 新增代码+ProviderSettingsPanelStyle：给列表添加浅边框；如果没有这行，provider 区域和页面背景分界不清。 */
+  border-radius: 8px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角匹配桌面设置风格；如果没有这行，列表外框会显得生硬。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsPanelStyle：保证列表保持白底；如果没有这行，内容可能继承外层灰色。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 列表容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-row { /* 新增代码+ProviderSettingsPanelStyle：定义单个 provider 行；如果没有这段，图标、文案和按钮无法稳定横向对齐。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：使用网格控制行内三列；如果没有这行，按钮列会跟随文字长度漂移。 */
+  grid-template-columns: 28px minmax(0, 1fr) auto; /* 新增代码+ProviderSettingsPanelStyle：固定图标列、弹性文案列和操作列；如果没有这行，长描述会挤压按钮。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：让图标、文案和按钮垂直居中；如果没有这行，行内内容会错位。 */
+  gap: 14px; /* 新增代码+ProviderSettingsPanelStyle：设置三列间距；如果没有这行，图标和文字会粘在一起。 */
+  min-height: 76px; /* 新增代码+ProviderSettingsPanelStyle：固定行高接近 OpenCode 设置页；如果没有这行，状态变化会导致行高跳动。 */
+  border: 0; /* 新增代码+ProviderSettingsPanelStyle：清理 button 自带边框；如果没有这行，自定义入口行会出现浏览器默认边框。 */
+  border-bottom: 1px solid #e4e7ec; /* 新增代码+ProviderSettingsPanelStyle：添加行分隔线；如果没有这行，多 provider 扫描性会下降。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsPanelStyle：保持每行白底；如果没有这行，自定义 button 行可能继承按钮灰底。 */
+  padding: 12px 20px; /* 新增代码+ProviderSettingsPanelStyle：给行内容留操作空间；如果没有这行，内容会贴近列表边框。 */
+  color: #202938; /* 新增代码+ProviderSettingsPanelStyle：设置行内主文本色；如果没有这行，button 行会继承不一致颜色。 */
+  text-align: left; /* 新增代码+ProviderSettingsPanelStyle：让自定义入口文字左对齐；如果没有这行，button 默认居中会破坏列表样式。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-row:last-child { /* 新增代码+ProviderSettingsPanelStyle：定义最后一行；如果没有这段，列表底部会多出一条分隔线。 */
+  border-bottom: 0; /* 新增代码+ProviderSettingsPanelStyle：移除最后一行分隔线；如果没有这行，圆角边界处会显得杂乱。 */
+} /* 新增代码+ProviderSettingsPanelStyle：最后一行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-custom-row { /* 新增代码+ProviderSettingsPanelStyle：定义自定义 provider 入口行；如果没有这段，CTA 会缺少可点击反馈。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsPanelStyle：显示可点击光标；如果没有这行，用户不确定能否添加自定义 provider。 */
+} /* 新增代码+ProviderSettingsPanelStyle：自定义入口行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-custom-row:hover { /* 新增代码+ProviderSettingsPanelStyle：定义自定义 provider 入口悬停；如果没有这段，鼠标经过没有反馈。 */
+  background: #f8fafc; /* 新增代码+ProviderSettingsPanelStyle：悬停时轻微变灰；如果没有这行，CTA 的交互感不足。 */
+} /* 新增代码+ProviderSettingsPanelStyle：自定义入口悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-icon { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 图标容器；如果没有这段，左侧图标会随内容尺寸跳动。 */
+  width: 24px; /* 新增代码+ProviderSettingsPanelStyle：固定图标宽度；如果没有这行，列表左边缘无法对齐。 */
+  height: 24px; /* 新增代码+ProviderSettingsPanelStyle：固定图标高度；如果没有这行，行高会被图标内容影响。 */
+  display: inline-flex; /* 新增代码+ProviderSettingsPanelStyle：使用 flex 居中图标文本；如果没有这行，字母标识会偏移。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：垂直居中图标内容；如果没有这行，图标会向上或向下偏。 */
+  justify-content: center; /* 新增代码+ProviderSettingsPanelStyle：水平居中图标内容；如果没有这行，缩写会偏左。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角图标底；如果没有这行，图标块会过硬。 */
+  background: #f2f4f7; /* 新增代码+ProviderSettingsPanelStyle：给图标提供浅色底；如果没有这行，纯字母图标不够清晰。 */
+  color: #344054; /* 新增代码+ProviderSettingsPanelStyle：设置图标文字色；如果没有这行，图标可能过淡。 */
+  font-size: 11px; /* 新增代码+ProviderSettingsPanelStyle：限制缩写字号；如果没有这行，双字母可能撑破图标。 */
+  font-weight: 700; /* 新增代码+ProviderSettingsPanelStyle：增强图标识别；如果没有这行，字母缩写会不够醒目。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 图标规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-icon-custom { /* 新增代码+ProviderSettingsPanelStyle：定义自定义入口图标；如果没有这段，添加入口和普通 provider 缺少区分。 */
+  background: #eef2ff; /* 新增代码+ProviderSettingsPanelStyle：使用轻蓝紫底突出添加动作；如果没有这行，入口图标不够明显。 */
+  color: #475467; /* 新增代码+ProviderSettingsPanelStyle：保持图标色克制；如果没有这行，添加入口会抢主操作层级。 */
+} /* 新增代码+ProviderSettingsPanelStyle：自定义入口图标规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-copy { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 文案区；如果没有这段，标题、描述和状态无法纵向整理。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：用网格纵向排列文案；如果没有这行，描述和状态会自然挤在一起。 */
+  gap: 4px; /* 新增代码+ProviderSettingsPanelStyle：设置文案之间的小间距；如果没有这行，行内文字会粘连。 */
+  min-width: 0; /* 新增代码+ProviderSettingsPanelStyle：允许长 provider 文案收缩；如果没有这行，按钮列会被挤出屏幕。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 文案区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-title-row { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 标题行；如果没有这段，名称、已连接和来源 badge 无法同排。 */
+  display: flex; /* 新增代码+ProviderSettingsPanelStyle：使用 flex 排列标题和标签；如果没有这行，标签会换到不稳定位置。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：垂直居中标题和标签；如果没有这行，badge 会上下错位。 */
+  gap: 8px; /* 新增代码+ProviderSettingsPanelStyle：设置标题与标签间距；如果没有这行，文本会拥挤。 */
+  min-width: 0; /* 新增代码+ProviderSettingsPanelStyle：允许标题行收缩；如果没有这行，长 provider 名会挤压按钮。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-title-row strong { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 名称；如果没有这段，长名称可能溢出。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsPanelStyle：隐藏超长 provider 名；如果没有这行，名称会覆盖 badge 或按钮。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsPanelStyle：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsPanelStyle：保持名称单行；如果没有这行，行高会随名称变化。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 名称规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-copy p { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 描述；如果没有这段，段落默认 margin 会撑高行。 */
+  margin: 0; /* 新增代码+ProviderSettingsPanelStyle：移除浏览器段落外边距；如果没有这行，列表行高会不稳定。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsPanelStyle：隐藏过长描述；如果没有这行，描述会覆盖按钮列。 */
+  color: #667085; /* 新增代码+ProviderSettingsPanelStyle：使用次级文字色；如果没有这行，描述会抢标题层级。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsPanelStyle：设置紧凑描述字号；如果没有这行，描述会显得过大。 */
+  line-height: 1.35; /* 新增代码+ProviderSettingsPanelStyle：稳定描述行高；如果没有这行，不同字体渲染会让行高跳动。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsPanelStyle：用省略号提示描述截断；如果没有这行，隐藏内容不可感知。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsPanelStyle：保持描述单行；如果没有这行，列表行会因长描述变高。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 描述规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-copy small { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 辅助文本；如果没有这段，masked key 和探针结果会继承不稳定样式。 */
+  color: #667085; /* 新增代码+ProviderSettingsPanelStyle：使用次级文字色；如果没有这行，辅助文本会抢主层级。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsPanelStyle：设置辅助文本字号；如果没有这行，masked key 视觉过重。 */
+  line-height: 1.3; /* 新增代码+ProviderSettingsPanelStyle：稳定辅助文本行高；如果没有这行，行高会受字体影响。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 辅助文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-status { /* 新增代码+ProviderSettingsPanelStyle：定义已连接状态 badge；如果没有这段，连接状态会只是普通文字。 */
+  flex: 0 0 auto; /* 新增代码+ProviderSettingsPanelStyle：防止 badge 被压缩；如果没有这行，窄屏下 badge 文字可能变形。 */
+  border-radius: 999px; /* 新增代码+ProviderSettingsPanelStyle：使用胶囊形状态；如果没有这行，状态边界不够清楚。 */
+  background: #ecfdf3; /* 新增代码+ProviderSettingsPanelStyle：使用成功浅绿色；如果没有这行，已连接语义不明显。 */
+  color: #027a48; /* 新增代码+ProviderSettingsPanelStyle：设置成功文字色；如果没有这行，状态对比不足。 */
+  padding: 2px 7px; /* 新增代码+ProviderSettingsPanelStyle：给状态留内边距；如果没有这行，胶囊会贴字。 */
+  font-size: 12px; /* 新增代码+ProviderSettingsPanelStyle：控制状态字号；如果没有这行，badge 会抢标题层级。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsPanelStyle：增强状态可读性；如果没有这行，状态在标题行不够明显。 */
+} /* 新增代码+ProviderSettingsPanelStyle：已连接状态 badge 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-badge { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 来源 badge；如果没有这段，API/ENV/自定义来源难以区分。 */
+  flex: 0 0 auto; /* 新增代码+ProviderSettingsPanelStyle：防止来源 badge 被压扁；如果没有这行，来源文字可能被挤坏。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：添加来源边框；如果没有这行，badge 会和标题混在一起。 */
+  border-radius: 5px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角；如果没有这行，来源标签风格不统一。 */
+  color: #475467; /* 新增代码+ProviderSettingsPanelStyle：设置来源文字色；如果没有这行，来源标签可能过重。 */
+  padding: 1px 6px; /* 新增代码+ProviderSettingsPanelStyle：给来源标签留内边距；如果没有这行，文字会贴边。 */
+  font-size: 11px; /* 新增代码+ProviderSettingsPanelStyle：缩小来源字号；如果没有这行，badge 会抢 provider 名。 */
+  line-height: 1.3; /* 新增代码+ProviderSettingsPanelStyle：稳定来源标签高度；如果没有这行，标签高度会不一致。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 来源 badge 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-probe-result { /* 新增代码+ProviderSettingsPanelStyle：定义测试连接结果；如果没有这段，探针反馈不够醒目。 */
+  color: #175cd3; /* 新增代码+ProviderSettingsPanelStyle：使用信息蓝色；如果没有这行，测试结果和普通辅助文本难以区分。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsPanelStyle：加粗探针结果；如果没有这行，用户可能漏看结果。 */
+} /* 新增代码+ProviderSettingsPanelStyle：测试连接结果规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-actions { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 操作区；如果没有这段，按钮会随内容自然排列而不稳定。 */
+  display: inline-flex; /* 新增代码+ProviderSettingsPanelStyle：用行内 flex 排列按钮；如果没有这行，测试连接和断开按钮可能换行错位。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：垂直居中按钮；如果没有这行，两个按钮高度不齐。 */
+  justify-content: flex-end; /* 新增代码+ProviderSettingsPanelStyle：让按钮贴右对齐；如果没有这行，操作区扫描性下降。 */
+  gap: 8px; /* 新增代码+ProviderSettingsPanelStyle：设置按钮间距；如果没有这行，按钮会粘在一起。 */
+  min-width: 116px; /* 新增代码+ProviderSettingsPanelStyle：保留操作列宽度；如果没有这行，按钮标签变化会让列宽跳动。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 操作区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-primary-button, .settings-provider-secondary-button { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 按钮通用形态；如果没有这段，按钮会回到浏览器默认样式。 */
+  min-height: 30px; /* 新增代码+ProviderSettingsPanelStyle：固定按钮最小高度；如果没有这行，按钮高度会随文字变化。 */
+  display: inline-flex; /* 新增代码+ProviderSettingsPanelStyle：让按钮图标和文字横向居中；如果没有这行，图标按钮内容会错位。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：垂直居中按钮内容；如果没有这行，图标和文字不齐。 */
+  justify-content: center; /* 新增代码+ProviderSettingsPanelStyle：水平居中按钮内容；如果没有这行，短文字按钮会偏左。 */
+  gap: 6px; /* 新增代码+ProviderSettingsPanelStyle：设置图标文字间距；如果没有这行，按钮内容会粘连。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角；如果没有这行，按钮风格和设置页不一致。 */
+  padding: 0 10px; /* 新增代码+ProviderSettingsPanelStyle：设置按钮横向内边距；如果没有这行，文字会贴边。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsPanelStyle：使用工具界面按钮字号；如果没有这行，按钮文字会过大。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsPanelStyle：增强按钮文字可读性；如果没有这行，按钮层级偏弱。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsPanelStyle：显示可点击光标；如果没有这行，用户不确定能否操作。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 按钮通用规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-primary-button { /* 新增代码+ProviderSettingsPanelStyle：定义主操作按钮；如果没有这段，连接和断开按钮缺少主要层级。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：给主按钮添加边框；如果没有这行，白底按钮边界不清。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsPanelStyle：使用白底按钮贴近 OpenCode 风格；如果没有这行，按钮会显得过重。 */
+  color: #111827; /* 新增代码+ProviderSettingsPanelStyle：设置主按钮文字色；如果没有这行，按钮对比不足。 */
+} /* 新增代码+ProviderSettingsPanelStyle：主操作按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-secondary-button { /* 新增代码+ProviderSettingsPanelStyle：定义次级操作按钮；如果没有这段，测试连接和重试按钮缺少统一样式。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：给次级按钮添加边框；如果没有这行，按钮边界不清。 */
+  background: #f9fafb; /* 新增代码+ProviderSettingsPanelStyle：使用浅灰按钮底；如果没有这行，次级按钮和主按钮难以区分。 */
+  color: #344054; /* 新增代码+ProviderSettingsPanelStyle：设置次级按钮文字色；如果没有这行，按钮文字可能过黑。 */
+} /* 新增代码+ProviderSettingsPanelStyle：次级操作按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-primary-button:hover:not(:disabled), .settings-provider-secondary-button:hover:not(:disabled) { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 按钮悬停状态；如果没有这段，鼠标经过没有反馈。 */
+  background: #f2f4f7; /* 新增代码+ProviderSettingsPanelStyle：悬停时轻微变灰；如果没有这行，按钮缺少交互反馈。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 按钮悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-primary-button:disabled, .settings-provider-secondary-button:disabled { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 按钮禁用状态；如果没有这段，暂未支持和等待态不明显。 */
+  cursor: not-allowed; /* 新增代码+ProviderSettingsPanelStyle：禁用时显示禁止光标；如果没有这行，用户可能继续点击。 */
+  opacity: 0.56; /* 新增代码+ProviderSettingsPanelStyle：降低禁用按钮透明度；如果没有这行，禁用按钮看起来仍可用。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 按钮禁用规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-provider-error { /* 新增代码+ProviderSettingsPanelStyle：定义 provider 加载错误块；如果没有这段，加载失败会像普通占位一样不醒目。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：用网格组织错误文字和重试按钮；如果没有这行，错误内容会散落。 */
+  gap: 10px; /* 新增代码+ProviderSettingsPanelStyle：设置错误块间距；如果没有这行，错误标题和按钮会粘连。 */
+  align-content: start; /* 新增代码+ProviderSettingsPanelStyle：让错误内容从顶部开始；如果没有这行，错误块可能被拉伸。 */
+  border: 1px solid #fecdca; /* 新增代码+ProviderSettingsPanelStyle：添加错误边框；如果没有这行，失败状态边界不明显。 */
+  border-radius: 8px; /* 新增代码+ProviderSettingsPanelStyle：保持错误块圆角；如果没有这行，错误块风格不统一。 */
+  background: #fffbfa; /* 新增代码+ProviderSettingsPanelStyle：使用浅红背景；如果没有这行，失败语义不明显。 */
+  color: #912018; /* 新增代码+ProviderSettingsPanelStyle：设置错误文字色；如果没有这行，错误文本对比不足。 */
+  padding: 14px; /* 新增代码+ProviderSettingsPanelStyle：给错误内容留空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+ProviderSettingsPanelStyle：provider 加载错误块规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-overlay { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗遮罩；如果没有这段，API key 表单会和列表混在一起。 */
+  position: absolute; /* 新增代码+ProviderSettingsPanelStyle：相对设置弹窗定位覆盖；如果没有这行，连接弹窗无法盖住当前设置页。 */
+  inset: 0; /* 新增代码+ProviderSettingsPanelStyle：铺满设置弹窗区域；如果没有这行，遮罩会留下可点击空隙。 */
+  z-index: 2; /* 新增代码+ProviderSettingsPanelStyle：确保连接弹窗位于设置内容上方；如果没有这行，列表按钮可能盖住弹窗。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：使用网格居中连接弹窗；如果没有这行，弹窗定位会依赖 margin。 */
+  place-items: center; /* 新增代码+ProviderSettingsPanelStyle：让连接弹窗居中；如果没有这行，弹窗会贴左上角。 */
+  padding: 24px; /* 新增代码+ProviderSettingsPanelStyle：给小窗口留边距；如果没有这行，弹窗会贴边。 */
+  background: rgba(17, 24, 39, 0.18); /* 新增代码+ProviderSettingsPanelStyle：添加轻遮罩；如果没有这行，焦点层级不清。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-dialog { /* 新增代码+ProviderSettingsPanelStyle：定义连接表单弹窗；如果没有这段，API key 表单缺少成熟弹层样式。 */
+  width: min(440px, 100%); /* 新增代码+ProviderSettingsPanelStyle：限制连接弹窗宽度；如果没有这行，输入框会在宽屏上过长。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：用网格纵向排列表单；如果没有这行，字段和按钮布局会散乱。 */
+  gap: 16px; /* 新增代码+ProviderSettingsPanelStyle：设置表单区间距；如果没有这行，字段和按钮会挤在一起。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：给弹窗添加边框；如果没有这行，白底弹窗边界不清。 */
+  border-radius: 8px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角；如果没有这行，弹窗和设置页风格不一致。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsPanelStyle：设置弹窗白底；如果没有这行，表单会继承遮罩底色。 */
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.2); /* 新增代码+ProviderSettingsPanelStyle：添加弹窗阴影；如果没有这行，连接表单缺少浮层感。 */
+  padding: 18px; /* 新增代码+ProviderSettingsPanelStyle：给表单留内边距；如果没有这行，输入框会贴边。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接表单弹窗规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-header { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗标题行；如果没有这段，标题和关闭按钮无法稳定对齐。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：用网格排列标题和关闭按钮；如果没有这行，关闭按钮位置会漂移。 */
+  grid-template-columns: minmax(0, 1fr) 30px; /* 新增代码+ProviderSettingsPanelStyle：标题占剩余空间，关闭按钮固定；如果没有这行，长 provider 名会挤压关闭按钮。 */
+  align-items: center; /* 新增代码+ProviderSettingsPanelStyle：垂直居中标题和关闭按钮；如果没有这行，两者会错位。 */
+  gap: 10px; /* 新增代码+ProviderSettingsPanelStyle：设置标题和关闭按钮间距；如果没有这行，长标题会贴住按钮。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-header strong { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗标题文字；如果没有这段，长标题可能溢出。 */
+  overflow: hidden; /* 新增代码+ProviderSettingsPanelStyle：隐藏超长 provider 名；如果没有这行，标题会盖住关闭按钮。 */
+  text-overflow: ellipsis; /* 新增代码+ProviderSettingsPanelStyle：用省略号提示截断；如果没有这行，标题截断不清楚。 */
+  white-space: nowrap; /* 新增代码+ProviderSettingsPanelStyle：保持标题单行；如果没有这行，弹窗高度会跳动。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗标题文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-close { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗关闭按钮；如果没有这段，关闭按钮会继承浏览器默认样式。 */
+  width: 30px; /* 新增代码+ProviderSettingsPanelStyle：固定关闭按钮宽度；如果没有这行，点击区域不稳定。 */
+  height: 30px; /* 新增代码+ProviderSettingsPanelStyle：固定关闭按钮高度；如果没有这行，按钮视觉不稳定。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：添加关闭按钮边框；如果没有这行，关闭入口不明显。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角；如果没有这行，按钮风格不统一。 */
+  background: #ffffff; /* 新增代码+ProviderSettingsPanelStyle：使用白底按钮；如果没有这行，关闭按钮会混入标题行。 */
+  color: #344054; /* 新增代码+ProviderSettingsPanelStyle：设置关闭按钮文字色；如果没有这行，关闭符号可能过重。 */
+  cursor: pointer; /* 新增代码+ProviderSettingsPanelStyle：显示可点击光标；如果没有这行，用户不确定能否关闭。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗关闭按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-picker { /* 新增代码+OpenAIConnectDialogStyle：定义连接方法选择区域；如果没有这段，OpenAI 三方法会退回散乱按钮。 */
+  display: grid; /* 新增代码+OpenAIConnectDialogStyle：使用网格纵向排列标题和列表；如果没有这行，标题和按钮间距不稳定。 */
+  gap: 12px; /* 新增代码+OpenAIConnectDialogStyle：设置标题和方法列表间距；如果没有这行，方法选择区会显得拥挤。 */
+} /* 新增代码+OpenAIConnectDialogStyle：连接方法选择区域规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-title { /* 新增代码+OpenAIConnectDialogStyle：定义方法选择标题；如果没有这段，标题会继承普通段落默认边距。 */
+  margin: 0; /* 新增代码+OpenAIConnectDialogStyle：清除段落默认外边距；如果没有这行，弹窗间距会被浏览器默认样式影响。 */
+  color: #344054; /* 新增代码+OpenAIConnectDialogStyle：设置标题文字色；如果没有这行，标题和正文层级不清。 */
+  font-size: 13px; /* 新增代码+OpenAIConnectDialogStyle：使用设置页正文尺寸；如果没有这行，标题会比弹窗标题抢眼。 */
+  font-weight: 600; /* 新增代码+OpenAIConnectDialogStyle：加粗标题；如果没有这行，用户不容易看出当前步骤。 */
+} /* 新增代码+OpenAIConnectDialogStyle：方法选择标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-list { /* 新增代码+OpenAIConnectDialogStyle：定义方法按钮列表；如果没有这段，多方法无法形成整齐列表。 */
+  display: grid; /* 新增代码+OpenAIConnectDialogStyle：使用网格纵向排列方法按钮；如果没有这行，按钮会按默认文档流堆叠。 */
+  gap: 8px; /* 新增代码+OpenAIConnectDialogStyle：设置方法按钮间距；如果没有这行，按钮边框会粘在一起。 */
+} /* 新增代码+OpenAIConnectDialogStyle：方法按钮列表规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-button { /* 新增代码+OpenAIConnectDialogStyle：定义单个认证方法按钮；如果没有这段，按钮会继承浏览器默认样式。 */
+  display: grid; /* 新增代码+OpenAIConnectDialogStyle：使用网格排列标题、说明和 badge；如果没有这行，长帮助文案会挤压标题。 */
+  grid-template-columns: minmax(0, 1fr) auto; /* 新增代码+OpenAIConnectDialogStyle：左侧文字自适应、右侧 badge 固定；如果没有这行，实验标签会挤乱标题。 */
+  gap: 3px 10px; /* 新增代码+OpenAIConnectDialogStyle：设置按钮内部行列间距；如果没有这行，标题和帮助文案会贴在一起。 */
+  align-items: center; /* 新增代码+OpenAIConnectDialogStyle：垂直居中按钮内容；如果没有这行，badge 会偏上或偏下。 */
+  width: 100%; /* 新增代码+OpenAIConnectDialogStyle：让按钮填满弹窗宽度；如果没有这行，不同方法按钮宽度会不一致。 */
+  min-height: 58px; /* 新增代码+OpenAIConnectDialogStyle：固定方法按钮最小高度；如果没有这行，帮助文案长短会造成列表跳动。 */
+  border: 1px solid #d0d5dd; /* 新增代码+OpenAIConnectDialogStyle：添加按钮边框；如果没有这行，方法行边界不清。 */
+  border-radius: 8px; /* 新增代码+OpenAIConnectDialogStyle：使用小圆角；如果没有这行，按钮风格和设置页不统一。 */
+  background: #ffffff; /* 新增代码+OpenAIConnectDialogStyle：使用白底按钮；如果没有这行，列表会混入弹窗背景。 */
+  padding: 10px 12px; /* 新增代码+OpenAIConnectDialogStyle：给按钮内容留空间；如果没有这行，文字会贴边。 */
+  text-align: left; /* 新增代码+OpenAIConnectDialogStyle：左对齐方法文案；如果没有这行，按钮文案可读性变差。 */
+  cursor: pointer; /* 新增代码+OpenAIConnectDialogStyle：显示可点击光标；如果没有这行，用户不确定方法行可点。 */
+} /* 新增代码+OpenAIConnectDialogStyle：认证方法按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-button:hover { /* 新增代码+OpenAIConnectDialogStyle：定义方法按钮悬停态；如果没有这段，鼠标经过没有反馈。 */
+  border-color: #98a2b3; /* 新增代码+OpenAIConnectDialogStyle：加深悬停边框；如果没有这行，hover 状态不明显。 */
+  background: #f9fafb; /* 新增代码+OpenAIConnectDialogStyle：轻微改变背景；如果没有这行，列表交互感不足。 */
+} /* 新增代码+OpenAIConnectDialogStyle：方法按钮悬停态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-label { /* 新增代码+OpenAIConnectDialogStyle：定义方法名称文字；如果没有这段，方法标题会继承按钮默认字体。 */
+  min-width: 0; /* 新增代码+OpenAIConnectDialogStyle：允许标题在网格内收缩；如果没有这行，长方法名会撑破按钮。 */
+  overflow: hidden; /* 新增代码+OpenAIConnectDialogStyle：隐藏超长方法名；如果没有这行，标题可能盖住实验标签。 */
+  text-overflow: ellipsis; /* 新增代码+OpenAIConnectDialogStyle：用省略号提示截断；如果没有这行，截断不清晰。 */
+  white-space: nowrap; /* 新增代码+OpenAIConnectDialogStyle：保持方法名称单行；如果没有这行，按钮高度会被长标题撑高。 */
+  color: #101828; /* 新增代码+OpenAIConnectDialogStyle：设置方法名称颜色；如果没有这行，标题层级不明显。 */
+  font-size: 13px; /* 新增代码+OpenAIConnectDialogStyle：使用紧凑标题字号；如果没有这行，按钮内部文字会过大。 */
+  font-weight: 600; /* 新增代码+OpenAIConnectDialogStyle：加粗方法名称；如果没有这行，方法名和说明难区分。 */
+} /* 新增代码+OpenAIConnectDialogStyle：方法名称文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-help { /* 新增代码+OpenAIConnectDialogStyle：定义方法帮助文案；如果没有这段，说明文字会和标题同层级。 */
+  grid-column: 1 / -1; /* 新增代码+OpenAIConnectDialogStyle：让帮助文案跨满按钮宽度；如果没有这行，说明会被 badge 挤窄。 */
+  overflow: hidden; /* 新增代码+OpenAIConnectDialogStyle：隐藏超长说明；如果没有这行，长文案会撑破按钮。 */
+  text-overflow: ellipsis; /* 新增代码+OpenAIConnectDialogStyle：用省略号提示说明截断；如果没有这行，截断不清晰。 */
+  white-space: nowrap; /* 新增代码+OpenAIConnectDialogStyle：保持说明单行；如果没有这行，按钮高度会随着文案换行跳动。 */
+  color: #667085; /* 新增代码+OpenAIConnectDialogStyle：设置说明文字色；如果没有这行，说明会抢过标题。 */
+  font-size: 12px; /* 新增代码+OpenAIConnectDialogStyle：使用较小说明字号；如果没有这行，列表密度不足。 */
+} /* 新增代码+OpenAIConnectDialogStyle：方法帮助文案规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-method-badge { /* 新增代码+OpenAIConnectDialogStyle：定义实验 badge；如果没有这段，mock OAuth 边界无法被视觉标注。 */
+  border: 1px solid #d0d5dd; /* 新增代码+OpenAIConnectDialogStyle：给 badge 添加边框；如果没有这行，标签边界不清。 */
+  border-radius: 6px; /* 新增代码+OpenAIConnectDialogStyle：使用小圆角 badge；如果没有这行，标签风格不统一。 */
+  padding: 1px 5px; /* 新增代码+OpenAIConnectDialogStyle：给 badge 留紧凑内边距；如果没有这行，标签文字会贴边。 */
+  color: #475467; /* 新增代码+OpenAIConnectDialogStyle：设置 badge 文字色；如果没有这行，实验标记可能过重。 */
+  font-size: 11px; /* 新增代码+OpenAIConnectDialogStyle：设置 badge 字号；如果没有这行，标签会压过方法名。 */
+  font-weight: 600; /* 新增代码+OpenAIConnectDialogStyle：加粗 badge；如果没有这行，实验标记不够清楚。 */
+} /* 新增代码+OpenAIConnectDialogStyle：实验 badge 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-field { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗字段；如果没有这段，API key 标签和输入框无法稳定纵向排列。 */
+  display: grid; /* 新增代码+ProviderSettingsPanelStyle：用网格排列 label 和 input；如果没有这行，字段会在一行内拥挤。 */
+  gap: 6px; /* 新增代码+ProviderSettingsPanelStyle：设置 label 和输入框间距；如果没有这行，二者会粘连。 */
+  color: #344054; /* 新增代码+ProviderSettingsPanelStyle：设置字段文字色；如果没有这行，字段标签颜色不稳定。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsPanelStyle：设置字段标签字号；如果没有这行，标签会过大。 */
+  font-weight: 600; /* 新增代码+ProviderSettingsPanelStyle：增强字段标签识别；如果没有这行，用户不容易看出输入项。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗字段规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-field input { /* 新增代码+ProviderSettingsPanelStyle：定义 API key 输入框；如果没有这段，密码框会使用浏览器默认样式。 */
+  width: 100%; /* 新增代码+ProviderSettingsPanelStyle：让输入框填满弹窗宽度；如果没有这行，输入框宽度不稳定。 */
+  min-height: 34px; /* 新增代码+ProviderSettingsPanelStyle：固定输入框高度；如果没有这行，输入区域会过小。 */
+  border: 1px solid #d0d5dd; /* 新增代码+ProviderSettingsPanelStyle：添加输入框边框；如果没有这行，输入区域边界不清。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsPanelStyle：使用小圆角；如果没有这行，输入框和按钮风格不一致。 */
+  padding: 0 10px; /* 新增代码+ProviderSettingsPanelStyle：给输入文字留边距；如果没有这行，文字会贴边。 */
+  color: #111827; /* 新增代码+ProviderSettingsPanelStyle：设置输入文字色；如果没有这行，输入内容可能过淡。 */
+  font: inherit; /* 新增代码+ProviderSettingsPanelStyle：继承应用字体；如果没有这行，输入框会使用系统默认字体造成割裂。 */
+} /* 新增代码+ProviderSettingsPanelStyle：API key 输入框规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-error { /* 新增代码+ProviderSettingsPanelStyle：定义连接错误文案；如果没有这段，后端失败反馈不够醒目。 */
+  border-radius: 6px; /* 新增代码+ProviderSettingsPanelStyle：给错误提示添加圆角；如果没有这行，错误块会显得生硬。 */
+  background: #fffbfa; /* 新增代码+ProviderSettingsPanelStyle：使用浅红错误底；如果没有这行，失败语义不明显。 */
+  color: #b42318; /* 新增代码+ProviderSettingsPanelStyle：设置错误文字色；如果没有这行，错误提示对比不足。 */
+  padding: 8px 10px; /* 新增代码+ProviderSettingsPanelStyle：给错误提示留空间；如果没有这行，文字会贴边。 */
+  font-size: 13px; /* 新增代码+ProviderSettingsPanelStyle：设置错误文案字号；如果没有这行，错误提示会过大。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接错误文案规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.provider-connect-actions { /* 新增代码+ProviderSettingsPanelStyle：定义连接弹窗按钮区；如果没有这段，取消和连接按钮无法右对齐。 */
+  display: flex; /* 新增代码+ProviderSettingsPanelStyle：使用 flex 横向排列按钮；如果没有这行，按钮会自然换行。 */
+  justify-content: flex-end; /* 新增代码+ProviderSettingsPanelStyle：让按钮靠右；如果没有这行，表单确认动作不符合桌面习惯。 */
+  gap: 8px; /* 新增代码+ProviderSettingsPanelStyle：设置按钮间距；如果没有这行，按钮会粘在一起。 */
+} /* 新增代码+ProviderSettingsPanelStyle：连接弹窗按钮区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-dialog { /* 新增代码+CustomProviderDialogStyle：定义自定义 provider 弹窗；如果没有这段，自定义表单会复用过窄的连接弹窗。 */
+  width: min(640px, 100%); /* 新增代码+CustomProviderDialogStyle：限制弹窗宽度；如果没有这行，宽屏下表单会被拉得过长。 */
+  max-height: min(680px, calc(100vh - 80px)); /* 新增代码+CustomProviderDialogStyle：限制弹窗高度；如果没有这行，多模型和 header 会撑出屏幕。 */
+  display: grid; /* 新增代码+CustomProviderDialogStyle：用网格纵向排列表单区域；如果没有这行，字段会退回普通文档流。 */
+  gap: 16px; /* 新增代码+CustomProviderDialogStyle：设置表单区域间距；如果没有这行，字段组会挤在一起。 */
+  overflow: auto; /* 新增代码+CustomProviderDialogStyle：内容过长时在弹窗内滚动；如果没有这行，小窗口下底部按钮会不可见。 */
+  border: 1px solid #d0d5dd; /* 新增代码+CustomProviderDialogStyle：给弹窗添加边框；如果没有这行，白底弹窗边界不清。 */
+  border-radius: 8px; /* 新增代码+CustomProviderDialogStyle：使用小圆角；如果没有这行，弹窗风格和设置页不一致。 */
+  background: #ffffff; /* 新增代码+CustomProviderDialogStyle：设置弹窗白底；如果没有这行，表单会继承遮罩颜色。 */
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.2); /* 新增代码+CustomProviderDialogStyle：添加浮层阴影；如果没有这行，自定义弹窗层级不明显。 */
+  padding: 18px; /* 新增代码+CustomProviderDialogStyle：给表单留内边距；如果没有这行，输入框会贴边。 */
+} /* 新增代码+CustomProviderDialogStyle：自定义 provider 弹窗规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-grid { /* 新增代码+CustomProviderDialogStyle：定义基础字段网格；如果没有这段，Provider ID、显示名和 URL 无法稳定排列。 */
+  display: grid; /* 新增代码+CustomProviderDialogStyle：使用网格排列基础字段；如果没有这行，字段会自然堆叠且宽度不稳定。 */
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 新增代码+CustomProviderDialogStyle：桌面宽度下使用两列；如果没有这行，短字段会浪费横向空间。 */
+  gap: 12px; /* 新增代码+CustomProviderDialogStyle：设置字段间距；如果没有这行，输入框会粘在一起。 */
+  min-width: 0; /* 新增代码+CustomProviderDialogStyle：允许网格收缩；如果没有这行，小窗口下输入框可能溢出。 */
+} /* 新增代码+CustomProviderDialogStyle：基础字段网格规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-wide { /* 新增代码+CustomProviderDialogStyle：定义跨列字段；如果没有这段，Base URL 和 API key 会过短。 */
+  grid-column: 1 / -1; /* 新增代码+CustomProviderDialogStyle：让宽字段占满两列；如果没有这行，长 URL 输入体验会很差。 */
+} /* 新增代码+CustomProviderDialogStyle：跨列字段规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-section { /* 新增代码+CustomProviderDialogStyle：定义模型/header 分区；如果没有这段，重复行缺少边界和标题层级。 */
+  display: grid; /* 新增代码+CustomProviderDialogStyle：用网格纵向排列标题和行；如果没有这行，行间距会不稳定。 */
+  gap: 8px; /* 新增代码+CustomProviderDialogStyle：设置分区内部间距；如果没有这行，标题和输入行会粘连。 */
+  min-width: 0; /* 新增代码+CustomProviderDialogStyle：允许分区收缩；如果没有这行，长模型 id 会撑宽弹窗。 */
+} /* 新增代码+CustomProviderDialogStyle：模型/header 分区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-section-title { /* 新增代码+CustomProviderDialogStyle：定义分区标题行；如果没有这段，标题和添加按钮无法对齐。 */
+  display: flex; /* 新增代码+CustomProviderDialogStyle：使用 flex 排列标题和按钮；如果没有这行，添加按钮会换到奇怪位置。 */
+  align-items: center; /* 新增代码+CustomProviderDialogStyle：垂直居中标题和按钮；如果没有这行，按钮和标题不齐。 */
+  justify-content: space-between; /* 新增代码+CustomProviderDialogStyle：标题靠左按钮靠右；如果没有这行，操作入口扫描性下降。 */
+  gap: 12px; /* 新增代码+CustomProviderDialogStyle：设置标题和按钮间距；如果没有这行，小窗口下会拥挤。 */
+} /* 新增代码+CustomProviderDialogStyle：分区标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-section-title strong { /* 新增代码+CustomProviderDialogStyle：定义分区标题文字；如果没有这段，模型和 Headers 标题层级不清。 */
+  color: #202938; /* 新增代码+CustomProviderDialogStyle：设置标题文字色；如果没有这行，标题颜色可能不稳定。 */
+  font-size: 13px; /* 新增代码+CustomProviderDialogStyle：设置分区标题字号；如果没有这行，标题会过大。 */
+} /* 新增代码+CustomProviderDialogStyle：分区标题文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-row { /* 新增代码+CustomProviderDialogStyle：定义模型/header 输入行；如果没有这段，两列输入无法稳定对齐。 */
+  display: grid; /* 新增代码+CustomProviderDialogStyle：使用网格排列 key/value 或 id/name；如果没有这行，输入框宽度会不一致。 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* 新增代码+CustomProviderDialogStyle：两列均分；如果没有这行，第二列可能被挤压。 */
+  gap: 8px; /* 新增代码+CustomProviderDialogStyle：设置行内输入间距；如果没有这行，输入框会粘在一起。 */
+  min-width: 0; /* 新增代码+CustomProviderDialogStyle：允许输入行收缩；如果没有这行，小窗口下会横向溢出。 */
+} /* 新增代码+CustomProviderDialogStyle：模型/header 输入行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.custom-provider-row input { /* 新增代码+CustomProviderDialogStyle：定义重复行输入框；如果没有这段，模型/header 输入会使用浏览器默认样式。 */
+  width: 100%; /* 新增代码+CustomProviderDialogStyle：让输入框填满网格列；如果没有这行，输入宽度不稳定。 */
+  min-height: 34px; /* 新增代码+CustomProviderDialogStyle：固定输入框高度；如果没有这行，重复行高度会不一致。 */
+  border: 1px solid #d0d5dd; /* 新增代码+CustomProviderDialogStyle：添加输入框边框；如果没有这行，输入区域边界不清。 */
+  border-radius: 6px; /* 新增代码+CustomProviderDialogStyle：使用小圆角；如果没有这行，输入框和按钮风格不一致。 */
+  padding: 0 10px; /* 新增代码+CustomProviderDialogStyle：给输入文字留边距；如果没有这行，文字会贴边。 */
+  color: #111827; /* 新增代码+CustomProviderDialogStyle：设置输入文字色；如果没有这行，输入内容可能过淡。 */
+  font: inherit; /* 新增代码+CustomProviderDialogStyle：继承应用字体；如果没有这行，输入框字体会和界面割裂。 */
+} /* 新增代码+CustomProviderDialogStyle：重复行输入框规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-list { /* 新增代码+SettingsModelsPanelStyle：定义模型列表容器；如果没有这段，模型分组会缺少统一纵向节奏。 */
+  display: grid; /* 新增代码+SettingsModelsPanelStyle：用网格纵向排列模型分组；如果没有这行，分组间距会依赖默认文档流。 */
+  gap: 14px; /* 新增代码+SettingsModelsPanelStyle：设置分组间距；如果没有这行，不同 provider 的模型会粘在一起。 */
+  min-width: 0; /* 新增代码+SettingsModelsPanelStyle：允许列表收缩；如果没有这行，长模型 id 会撑破设置弹窗。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型列表容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-error { /* 新增代码+SettingsModelsPanelStyle：定义模型保存错误条；如果没有这段，保存失败不够醒目。 */
+  border: 1px solid #fecdca; /* 新增代码+SettingsModelsPanelStyle：添加错误边框；如果没有这行，错误区域边界不清。 */
+  border-radius: 8px; /* 新增代码+SettingsModelsPanelStyle：使用小圆角；如果没有这行，错误条风格不统一。 */
+  background: #fffbfa; /* 新增代码+SettingsModelsPanelStyle：使用浅红背景；如果没有这行，失败语义不明显。 */
+  color: #b42318; /* 新增代码+SettingsModelsPanelStyle：设置错误文字色；如果没有这行，错误文案对比不足。 */
+  padding: 10px 12px; /* 新增代码+SettingsModelsPanelStyle：给错误文案留空间；如果没有这行，文字会贴边。 */
+  font-size: 13px; /* 新增代码+SettingsModelsPanelStyle：设置错误文案字号；如果没有这行，错误条会显得过大。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型保存错误条规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-group { /* 新增代码+SettingsModelsPanelStyle：定义单个 provider 模型分组；如果没有这段，provider 名和模型行缺少边界。 */
+  overflow: hidden; /* 新增代码+SettingsModelsPanelStyle：裁剪分组内部边界；如果没有这行，行背景可能冲出圆角。 */
+  border: 1px solid #e4e7ec; /* 新增代码+SettingsModelsPanelStyle：给分组添加浅边框；如果没有这行，模型行和背景边界不清。 */
+  border-radius: 8px; /* 新增代码+SettingsModelsPanelStyle：使用小圆角；如果没有这行，分组框会显得生硬。 */
+  background: #ffffff; /* 新增代码+SettingsModelsPanelStyle：保持分组白底；如果没有这行，行内容可能继承外层灰底。 */
+} /* 新增代码+SettingsModelsPanelStyle：provider 模型分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-group-header { /* 新增代码+SettingsModelsPanelStyle：定义分组标题行；如果没有这段，provider 名和状态无法对齐。 */
+  display: flex; /* 新增代码+SettingsModelsPanelStyle：使用 flex 横向排列标题和状态；如果没有这行，状态 badge 会换到不稳定位置。 */
+  align-items: center; /* 新增代码+SettingsModelsPanelStyle：垂直居中标题和状态；如果没有这行，badge 会上下错位。 */
+  gap: 8px; /* 新增代码+SettingsModelsPanelStyle：设置标题和 badge 间距；如果没有这行，文字会拥挤。 */
+  border-bottom: 1px solid #e4e7ec; /* 新增代码+SettingsModelsPanelStyle：分隔标题和模型行；如果没有这行，层级不清。 */
+  background: #f9fafb; /* 新增代码+SettingsModelsPanelStyle：标题行使用浅灰底；如果没有这行，分组标题不明显。 */
+  padding: 10px 14px; /* 新增代码+SettingsModelsPanelStyle：给标题行留空间；如果没有这行，内容会贴边。 */
+} /* 新增代码+SettingsModelsPanelStyle：分组标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-group-body { /* 新增代码+SettingsModelsPanelStyle：定义模型行容器；如果没有这段，行分隔无法统一控制。 */
+  display: grid; /* 新增代码+SettingsModelsPanelStyle：用网格纵向排列模型行；如果没有这行，行布局会退回普通文档流。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型行容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-row { /* 新增代码+SettingsModelsPanelStyle：定义单个模型行；如果没有这段，模型文案和 switch 无法稳定对齐。 */
+  display: grid; /* 新增代码+SettingsModelsPanelStyle：使用网格控制文案列和开关列；如果没有这行，开关会随模型 id 长度漂移。 */
+  grid-template-columns: minmax(0, 1fr) auto; /* 新增代码+SettingsModelsPanelStyle：文案列弹性、开关列固定；如果没有这行，长 id 会挤压开关。 */
+  align-items: center; /* 新增代码+SettingsModelsPanelStyle：垂直居中文案和开关；如果没有这行，两列会错位。 */
+  gap: 14px; /* 新增代码+SettingsModelsPanelStyle：设置文案和开关间距；如果没有这行，内容会粘连。 */
+  min-height: 64px; /* 新增代码+SettingsModelsPanelStyle：固定模型行高度；如果没有这行，状态变化会造成布局跳动。 */
+  border-bottom: 1px solid #edf0f5; /* 新增代码+SettingsModelsPanelStyle：添加行分隔线；如果没有这行，多模型扫描性会下降。 */
+  padding: 10px 14px; /* 新增代码+SettingsModelsPanelStyle：给行内容留空间；如果没有这行，文字和开关会贴边。 */
+} /* 新增代码+SettingsModelsPanelStyle：单个模型行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-row:last-child { /* 新增代码+SettingsModelsPanelStyle：定义最后一个模型行；如果没有这段，分组底部会多出分隔线。 */
+  border-bottom: 0; /* 新增代码+SettingsModelsPanelStyle：移除最后一行分隔线；如果没有这行，圆角边界会显得杂乱。 */
+} /* 新增代码+SettingsModelsPanelStyle：最后模型行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-copy { /* 新增代码+SettingsModelsPanelStyle：定义模型文案区；如果没有这段，显示名、id 和 provider 名无法纵向整理。 */
+  display: grid; /* 新增代码+SettingsModelsPanelStyle：用网格纵向排列模型文本；如果没有这行，文本会挤在一行。 */
+  gap: 3px; /* 新增代码+SettingsModelsPanelStyle：设置模型文本间距；如果没有这行，id 和 provider 会粘连。 */
+  min-width: 0; /* 新增代码+SettingsModelsPanelStyle：允许长模型 id 收缩；如果没有这行，开关列会被挤出。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型文案区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-copy strong, .settings-model-copy span, .settings-model-copy small { /* 新增代码+SettingsModelsPanelStyle：定义模型文本截断；如果没有这段，长模型名称或 id 可能越界。 */
+  overflow: hidden; /* 新增代码+SettingsModelsPanelStyle：隐藏超长模型文本；如果没有这行，文本会盖住开关。 */
+  text-overflow: ellipsis; /* 新增代码+SettingsModelsPanelStyle：用省略号提示截断；如果没有这行，用户不知道文本被截断。 */
+  white-space: nowrap; /* 新增代码+SettingsModelsPanelStyle：保持模型文本单行；如果没有这行，行高会随长 id 变化。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型文本截断规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-copy span, .settings-model-copy small { /* 新增代码+SettingsModelsPanelStyle：定义模型辅助文本；如果没有这段，模型 id 和 provider 名会抢主标题层级。 */
+  color: #667085; /* 新增代码+SettingsModelsPanelStyle：使用次级文本色；如果没有这行，辅助文本会过重。 */
+  font-size: 12px; /* 新增代码+SettingsModelsPanelStyle：设置辅助文本字号；如果没有这行，模型 id 会显得过大。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型辅助文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-switch { /* 新增代码+SettingsModelsPanelStyle：定义模型可见性 switch 容器；如果没有这段，开关和状态文字无法稳定对齐。 */
+  display: inline-flex; /* 新增代码+SettingsModelsPanelStyle：横向排列 checkbox 和文案；如果没有这行，开关布局会依赖 label 默认行为。 */
+  align-items: center; /* 新增代码+SettingsModelsPanelStyle：垂直居中 checkbox 和文字；如果没有这行，状态文字会错位。 */
+  gap: 8px; /* 新增代码+SettingsModelsPanelStyle：设置 checkbox 和文字间距；如果没有这行，内容会粘连。 */
+  color: #344054; /* 新增代码+SettingsModelsPanelStyle：设置 switch 文案颜色；如果没有这行，文案可能过黑。 */
+  font-size: 13px; /* 新增代码+SettingsModelsPanelStyle：设置 switch 文案字号；如果没有这行，状态文案会过大。 */
+  font-weight: 600; /* 新增代码+SettingsModelsPanelStyle：增强 switch 状态可读性；如果没有这行，状态容易被忽略。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型 switch 容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-switch input { /* 新增代码+SettingsModelsPanelStyle：定义模型 switch 输入；如果没有这段，checkbox 尺寸会使用浏览器默认值。 */
+  width: 38px; /* 新增代码+SettingsModelsPanelStyle：固定 switch 宽度；如果没有这行，开关尺寸不稳定。 */
+  height: 20px; /* 新增代码+SettingsModelsPanelStyle：固定 switch 高度；如果没有这行，开关会和文案不协调。 */
+  margin: 0; /* 新增代码+SettingsModelsPanelStyle：清除默认 margin；如果没有这行，switch 对齐会偏移。 */
+  cursor: pointer; /* 新增代码+SettingsModelsPanelStyle：显示可点击光标；如果没有这行，用户不确定能否切换。 */
+} /* 新增代码+SettingsModelsPanelStyle：模型 switch 输入规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.settings-model-switch input:disabled { /* 新增代码+SettingsModelsPanelStyle：定义禁用 switch；如果没有这段，pending 状态不明显。 */
+  cursor: not-allowed; /* 新增代码+SettingsModelsPanelStyle：禁用时显示禁止光标；如果没有这行，用户可能继续点击。 */
+  opacity: 0.55; /* 新增代码+SettingsModelsPanelStyle：降低禁用 switch 透明度；如果没有这行，保存中状态看起来仍可用。 */
+} /* 新增代码+SettingsModelsPanelStyle：禁用 switch 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+@media (max-width: 760px) { /* 新增代码+ProviderSettingsShellStyle：定义窄屏适配；如果没有这段，移动宽度下左右两栏会互相挤压。 */
+  .settings-dialog-overlay { /* 新增代码+ProviderSettingsShellStyle：窄屏遮罩调整；如果没有这行，小屏幕边缘留白过大。 */
+    padding: 12px; /* 新增代码+ProviderSettingsShellStyle：缩小边距；如果没有这行，弹窗可用空间不足。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog { /* 新增代码+ProviderSettingsShellStyle：窄屏弹窗调整；如果没有这行，弹窗仍保持左右两栏。 */
+    grid-template-columns: 1fr; /* 新增代码+ProviderSettingsShellStyle：把左导航折到内容上方；如果没有这行，手机宽度会横向溢出。 */
+    max-height: calc(100vh - 24px); /* 新增代码+ProviderSettingsShellStyle：适配小窗口高度；如果没有这行，底部可能超出屏幕。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏弹窗规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog-sidebar { /* 新增代码+ProviderSettingsShellStyle：窄屏导航调整；如果没有这行，左栏样式会占满高度。 */
+    grid-template-columns: 1fr 1fr; /* 新增代码+ProviderSettingsShellStyle：让两个分组并排；如果没有这行，导航会太高。 */
+    grid-template-rows: auto auto; /* 新增代码+ProviderSettingsShellStyle：让 footer 单独占一行；如果没有这行，版本信息会挤入导航。 */
+    border-right: 0; /* 新增代码+ProviderSettingsShellStyle：移除右边框；如果没有这行，折叠后边框方向错误。 */
+    border-bottom: 1px solid #e3e7ef; /* 新增代码+ProviderSettingsShellStyle：添加底部分隔线；如果没有这行，导航和内容边界不清。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏导航规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .settings-dialog-footer { /* 新增代码+ProviderSettingsShellStyle：窄屏 footer 调整；如果没有这行，版本信息可能被挤到右侧。 */
+    grid-column: 1 / -1; /* 新增代码+ProviderSettingsShellStyle：让 footer 横跨整行；如果没有这行，产品名和版本会被压缩。 */
+  } /* 新增代码+ProviderSettingsShellStyle：窄屏 footer 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .custom-provider-grid, .custom-provider-row { /* 新增代码+CustomProviderDialogStyle：窄屏下自定义 provider 字段改为单列；如果没有这段，两个输入框会互相挤压。 */
+    grid-template-columns: 1fr; /* 新增代码+CustomProviderDialogStyle：小窗口使用单列输入；如果没有这行，长 URL、模型名和 header 会横向溢出。 */
+  } /* 新增代码+CustomProviderDialogStyle：窄屏自定义 provider 单列规则结束；如果没有这行，CSS 块语法不完整。 */
+} /* 新增代码+ProviderSettingsShellStyle：窄屏媒体查询结束；如果没有这行，CSS 媒体规则不完整。 */
