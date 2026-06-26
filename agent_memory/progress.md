@@ -1059,3 +1059,16 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 本轮 lint 首次发现 `guiClient` 在异步副作用中可能为 `undefined`；已按证据定位并改用 `activeClient` 固定本轮引用。
 - 学习副本已保存到 `learning_agent/test/provider_settings_v1/task06_providers_panel/`。
 - 已验证：`npm test -- --run tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx` 为 5 files / 11 tests passed；`npm run lint` 通过；`npm run build` 通过。
+
+## 2026-06-26 Provider Settings V1 Task 7
+
+- Task 7 已完成 Custom Provider Dialog。
+- 新增 `CustomProviderDialog.tsx`，管理 Provider ID、显示名称、Base URL、API key、模型行和 header 行；API key 与 header value 均使用 password 输入。
+- `customProviderValidationError()` 已实现蓝图要求的四类精确校验文案：Provider ID 格式、系统保留 id、Base URL 协议和至少一个模型。
+- `buildCustomProviderRequest()` 会构造 `saveCustomProvider()` payload，空 header 行会被忽略，模型默认 `visible: true`。
+- `SettingsDialog.tsx` 已新增 `saveCustomProvider` client 合同，点击 `自定义提供商` CTA 后打开弹窗，保存成功后使用后端返回 catalog 刷新 provider 列表，失败只显示 `保存自定义提供商失败`。
+- `SettingsProvidersPanel.tsx` 已给自定义 CTA 补 `aria-label="添加自定义提供商"`，避免虚拟行被误理解为真实 provider mutation。
+- `settings-dialog.css` 已补齐自定义 provider 弹窗、两列基础字段、模型/header 行、内部滚动和窄屏单列样式。
+- 新增 `customProviderDialog.test.tsx`，先红灯失败于缺少 `CustomProviderDialog`，实现后覆盖字段可见性、精确校验文案、payload 构造和空 header 忽略。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v1/task07_custom_provider/`。
+- 已验证：`npm test -- --run tests/customProviderDialog.test.tsx tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx` 为 3 files / 10 tests passed；`npm run lint` 通过；`npm run build` 通过。
