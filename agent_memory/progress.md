@@ -1045,3 +1045,17 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 新增 `apps/desktop/tests/settingsDialogShell.test.tsx`，先红灯失败于缺少 `SettingsDialog`，实现后转绿；同时修正 provider store 安全测试 fixture 的 TypeScript 类型边界。
 - 学习副本已保存到 `learning_agent/test/provider_settings_v1/task05_settings_shell/`。
 - 已验证：`npm test -- --run tests/settingsDialogShell.test.tsx` 为 3 passed；相关前端测试 4 files / 7 tests passed；`npm run lint` 通过；`npm run build` 通过。
+
+## 2026-06-26 Provider Settings V1 Task 6
+
+- Task 6 已完成 Providers Panel、连接弹窗、断开入口和测试连接反馈。
+- 新增 `SettingsProvidersPanel.tsx`，支持 provider 行、连接状态、来源 badge、unsupported 禁用态、测试连接按钮、安全探针文案、加载/空/错误/重试状态和自定义 provider CTA。
+- 新增 `ProviderConnectDialog.tsx`，使用 password 输入 API key，空 key 禁用提交，成功后由父组件清空 key，失败时只显示安全错误文案。
+- 新增 `ProviderIcon.tsx`，为 provider 列表提供稳定左侧图标列，避免列表退化成纯文字。
+- `SettingsDialog.tsx` 已接入 `guiClient.providerSettings()`、`connectProvider()`、`disconnectProvider()` 和 `testProviderConnection()`，并把后端 payload 转成 renderer view model 后再渲染。
+- `AppShell.tsx` 已把真实 `guiClient` 传入设置弹窗，避免桌面 GUI 只显示静态外壳。
+- `settings-dialog.css` 已补齐 provider 列表、状态 badge、按钮、错误块和连接弹窗样式；连接弹窗定位在设置窗口内部。
+- 新增 `settingsProvidersPanel.test.tsx`，先红灯失败于缺少组件；实现后覆盖列表安全文案、按钮回调、password 输入、空 key 禁用和 probe 状态映射。
+- 本轮 lint 首次发现 `guiClient` 在异步副作用中可能为 `undefined`；已按证据定位并改用 `activeClient` 固定本轮引用。
+- 学习副本已保存到 `learning_agent/test/provider_settings_v1/task06_providers_panel/`。
+- 已验证：`npm test -- --run tests/providerSettingsStore.test.ts tests/guiProviderClient.test.ts tests/settingsDialogViewModel.test.ts tests/settingsProvidersPanel.test.tsx tests/settingsDialogShell.test.tsx` 为 5 files / 11 tests passed；`npm run lint` 通过；`npm run build` 通过。
