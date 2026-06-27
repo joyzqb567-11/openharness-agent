@@ -582,3 +582,10 @@
 - Fix: 新增 `start_openharness_desktop_oauth.bat` + `start-openharness-desktop-oauth.ps1`，把真实 OAuth、Direct SSE、os_encrypted secret store、callback 端口、client id 和旧端口清理统一到一个入口。
 - Evidence: 一键脚本启动时已在后端层验证 OpenAI auth-attempt 为 `real_browser`，授权 URL host 为 `auth.openai.com`，并取消测试 attempt；真实 GUI 中设置页显示 OpenAI OAuth 已连接且 Direct ChatGPT OAuth SSE 已就绪。
 - Regression guard: `learning_agent/tests/test_openharness_desktop_oauth_one_click_launch_scripts.py` 会检查一键脚本是否仍包含真实 OAuth 门禁、Direct SSE、provider endpoint 验证、`auth.openai.com` 验证和临时日志目录覆盖。
+## 2026-06-27 OAuth One-Click Bat Codepage Failure
+
+- Closed risk: 用户双击 `start_openharness_desktop_oauth.bat` 无法启动 OpenHarness Desktop GUI。
+- Evidence: 直接执行 bat 复现错误：`'不会启动' is not recognized as an internal or external command` 等中文 REM 注释片段被 `cmd.exe` 当成命令执行，说明脚本在进入 PowerShell 前已经失败。
+- Root cause: bat 文件使用 UTF-8 中文注释，但 Windows `cmd.exe` 双击默认代码页不是 UTF-8；中文字节在默认代码页下可能被误解析出命令分隔符，导致 REM 行后半段变成可执行命令。
+- Fix: bat 第一行 `@echo off` 后立即执行 `chcp 65001 >nul`，并新增回归测试要求任何中文文本出现前必须先切换 UTF-8。
+- Verification: `.bat` 入口重新执行后完整启动 bridge/renderer/Electron；computer-use 在真实 GUI 输入 `hello`，模型经 Direct SSE 返回 `Hello! How can I help you today?`，事件包含 `direct_sse_completed`、`message_completed`、`gui_turn_completed`。

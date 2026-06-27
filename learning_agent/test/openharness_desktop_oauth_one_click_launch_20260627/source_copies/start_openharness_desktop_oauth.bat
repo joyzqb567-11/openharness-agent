@@ -1,4 +1,6 @@
-﻿@echo off
+@echo off
+chcp 65001 >nul
+REM 修改代码+DesktopOAuthBatCodepageFix：先把 cmd 切到 UTF-8 再读取中文注释；如果没有这一行，双击 bat 时中文 REM 可能被默认代码页误解析成命令。
 REM 新增代码+DesktopOAuthOneClickLaunch：关闭命令回显，让用户看到的启动信息更清楚；如果没有这一行，批处理每条命令都会刷屏。
 setlocal
 REM 新增代码+DesktopOAuthOneClickLaunch：开启局部环境，避免临时变量污染用户终端；如果没有这一行，OPENHARNESS_ROOT 可能泄漏到后续命令。

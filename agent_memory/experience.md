@@ -170,3 +170,8 @@ Computer Use complex GUI tasks must not rely on primitive tool-loop convergence.
 - 经验：OpenAI OAuth 官网打不开不一定是前端按钮坏了，常见原因是 GUI 虽然启动了，但 bridge 没有带 `real_browser`、`direct_sse`、`os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL` 和正确 client id。
 - 做法：以后真实 OAuth GUI 验收和用户手动启动都优先用 `start_openharness_desktop_oauth.bat`，并在脚本内先验证 `auth-attempt/start` 返回 `mode=real_browser` 和 `auth.openai.com`，再交给用户点击认证。
 - 门禁：不能只看设置页有没有 OpenAI 行，也不能只看 renderer 窗口是否打开；必须同时确认 callback 1455 属于当前 bridge、provider catalog 可加载、OpenAI browser attempt 是真实官方 OAuth 链路。
+## 2026-06-27 Windows bat 中文注释经验：先切 UTF-8，再写中文
+
+- 经验：`.bat` 文件即使第一眼看起来只是 `REM 中文注释`，在 Windows 默认代码页下也可能把 UTF-8 中文字节误解析成命令分隔符，导致双击入口还没进入 PowerShell 就失败。
+- 做法：需要保留中文注释的 bat，第一条可执行命令必须是 ASCII 的 `@echo off`，第二条必须是 ASCII 的 `chcp 65001 >nul`，中文注释和中文 echo 只能放在这之后。
+- 门禁：后续一键启动 bat 必须有测试检查 `chcp 65001 >nul` 出现在任何非 ASCII 文本之前；不能只靠 PowerShell 脚本测试，因为 bug 发生在进入 PowerShell 之前。

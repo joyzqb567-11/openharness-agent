@@ -1485,3 +1485,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已保存学习副本到 `learning_agent/test/openharness_desktop_oauth_one_click_launch_20260627/source_copies/`，包含新增脚本、被修改启动脚本和测试。
 - 自动化验证已通过：一键启动脚本静态合同测试 4 passed；provider/OAuth 回归 12 passed；桌面前端 vitest 19 files / 82 tests passed；PowerShell parser 和 Python py_compile 均通过。
 - 真实可见 GUI 验收已用 computer-use 完成：脚本真实拉起 OpenHarness Desktop，设置 -> 提供商页面可见 OpenAI `已连接`、`ChatGPT OAuth`、`Direct ChatGPT OAuth SSE 已就绪`，右侧事件流可见 `direct_sse_completed` 和 `model_call_completed`。
+## 2026-06-27 OpenHarness Desktop OAuth One-Click Bat Codepage Fix
+
+- 已复现用户反馈的双击失败：bat 中 UTF-8 中文 REM 在默认 cmd 代码页下被误解析成命令，输出 `'不会启动' is not recognized as an internal or external command`。
+- 已按 TDD 新增 `test_root_batch_sets_utf8_codepage_before_chinese_text`，先确认红灯失败，再在 bat 第二行加入 `chcp 65001 >nul` 并转绿。
+- 已用同一个 bat 入口重新执行启动：脚本释放旧 8776/5177 端口，启动 bridge，验证 OpenAI OAuth URL 为 `auth.openai.com`，启动 Desktop launcher。
+- 已用 computer-use 在真实 OpenHarness Desktop GUI 输入 `hello` 并发送，模型返回 `Hello! How can I help you today?`，事件流显示 `direct_sse_completed`、`message_completed`、`gui_turn_completed`。
+- 学习副本已同步到 `learning_agent/test/openharness_desktop_oauth_one_click_launch_20260627/source_copies/`。
