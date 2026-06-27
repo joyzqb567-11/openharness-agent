@@ -1532,3 +1532,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 重新运行提交前门禁并通过：`git diff --check` clean；后端 real harness 相关 pytest 19 passed；provider secret leak scan passed；关键 Python 文件内存 compile syntax ok。
 - 重新运行桌面前端门禁并通过：`npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
 - 当前准备提交的范围已精确限定为 real agent harness adapter V2 所需文件，下一步是创建 feature commit，再评估主工作区脏改动是否允许安全合并。
+
+## 2026-06-27 AGENTS Visible Acceptance Gate Hardening
+
+- 按当前下一步建议，先收紧 `AGENTS.md` 的真实可见验收规则，避免主链路后续开发只用单元测试、日志或命令桥接替代真实终端/真实 GUI 验收。
+- 已把规则十七升级为“真实终端和真实 GUI 场景验收强制门禁”：终端能力必须走用户可见终端入口，GUI 能力必须用 `computer-use` 观察和操作真实 OpenHarness Desktop 窗口。
+- 已修正技能名为 `systematic-debugging`，并明确验收发现 bug 或异常时必须先查根因、修复、重新执行真实可见验收。
+- 已补回规则二十二：简单 bug 直接修复，复杂 bug 必须给治本方案，不允许只给治标补丁。
