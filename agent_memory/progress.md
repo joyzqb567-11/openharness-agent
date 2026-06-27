@@ -1467,3 +1467,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已复查 `codegraph status .`：索引状态为 `[OK] Index is up to date`，当前统计为 1,154 files、30,114 nodes、41,300 edges。
 - 已用 `codegraph query ModelCallStatus --limit 10` 验证新近主链路符号可被查询到，结果包含 `apps/desktop/src/components/ModelCallStatus.tsx`。
 - 已确认 `.worktrees` 目录不存在，`git worktree list` 只剩主工作区；知识图谱已经对齐到旧 worktree 删除后的当前主链路。
+
+## 2026-06-27 Restore OpenAI OAuth Connect UI
+
+- 用户指出上一轮把默认 OpenAI OAuth 入口禁用为只剩 API key 的方向不对；真实需求是恢复 Codex/OpenCode 风格 OAuth 界面，并修复 OAuth 官网打不开。
+- 已用 `git revert ce510b38` 恢复上一轮隐藏 OAuth 入口的代码和测试改动，OpenAI 连接弹窗重新保留 `ChatGPT Pro/Plus (browser)`、`ChatGPT Pro/Plus (headless)`、`API 密钥` 三种方式。
+- 已重新用真实 OAuth 环境启动 OpenHarness Desktop：`OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID=app_EMoamEEZ73f0CkXaXp7hrann`、`OPENHARNESS_OPENAI_RUNTIME=direct_sse`。
+- 运行时验证：调用 `/v2/gui/provider-settings/auth-attempt/start` 创建 OpenAI browser attempt，返回 `mode=real_browser`，授权 URL host 为 `auth.openai.com`，callback 端口 `1455` 已监听；测试 attempt 已取消，用户可在 GUI 中重新点击正式连接。
+- 当前 GUI 已重新拉起：bridge 监听 `8776`，renderer 监听 `5177`，Electron renderer 连接 `http://127.0.0.1:8776`。

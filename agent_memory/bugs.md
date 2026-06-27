@@ -568,3 +568,10 @@
 - Evidence: 直接调用 `/v2/gui/provider-settings/auth-attempt/start` 创建 `openai/chatgpt-browser` 授权尝试，返回 `attempt_mode=mock`，URL host 为 `127.0.0.1`，URL 前缀为 `http://127.0.0.1:18991/mock/openai/browser`，不是 `auth.openai.com`。
 - Root cause: 当前 GUI 是为了用户手动填 API key 拉起的运行模式，只设置了 `OPENHARNESS_GUI_MODEL_MODE=real` 和 `OPENHARNESS_OPENAI_RUNTIME=direct_sse`，没有设置真实 OAuth 门禁所需的 `OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID=<OpenHarness client id>`。
 - Required next action: 若用户要手动填 API key，应点击 OpenAI 的 `API 密钥` 认证方式；若要打开 OpenAI 官方 OAuth 官网，必须停止当前 API key 启动模式，并以真实 OAuth 配置重新启动 GUI。
+
+## 2026-06-27 Restore OAuth UI After Wrong API-Key-Only Fix
+
+- Closed risk: 上一轮把默认 OAuth 入口禁用为 `oauth_config_required`，导致用户看到“只剩 OpenAI key 接口”，偏离用户需求。
+- Fix: 已通过 revert 恢复 OpenAI 三方法界面；不再把 OAuth browser/headless 从连接弹窗中隐藏。
+- Evidence: 当前以真实 OAuth env 重启后，auth-attempt start 返回 `mode=real_browser`，URL host 是 `auth.openai.com`，说明 OAuth 官网链接可以由后端生成；不是 API key-only 路径。
+- Remaining note: 默认 mock 和真实 OAuth 的显示文案仍有历史包袱，catalog 里 browser/headless 状态仍显示 `mock_available`；但在真实 OAuth env 下，实际 start 走 `real_browser`。后续可单独做一个小修复，把 catalog 状态在真实 OAuth 模式下改成 `available`，避免文案误导。

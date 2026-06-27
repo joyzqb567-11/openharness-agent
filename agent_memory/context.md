@@ -310,6 +310,13 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 当前与 OpenCode 对齐的官方 OAuth URL 参数包括 `client_id=app_EMoamEEZ73f0CkXaXp7hrann`、`redirect_uri=http://localhost:<port>/auth/callback`、`codex_cli_simplified_flow=true`、`id_token_add_organizations=true`、`originator=opencode`。
 - 后续如果用户报告“浏览器显示 Authorization Successful 但 GUI 未连接”，第一步检查 `Get-NetTCPConnection -LocalPort 1455` 和对应进程命令行，确认没有旧 `desktop-bridge --port 8876` 或其他测试进程抢占 callback。
 
+## 2026-06-27 OpenAI OAuth UI Restoration Context
+
+- 不要用“隐藏 ChatGPT browser/headless OAuth，只保留 API key”的方式修复用户说的“OAuth 官网打不开”；这会偏离用户目标。
+- 用户需要的是 Codex/OpenCode 风格的 OpenAI 连接界面：`ChatGPT Pro/Plus (browser)`、`ChatGPT Pro/Plus (headless)`、`API 密钥` 都应保留。
+- 如果 OAuth 官网打不开，优先检查当前 bridge 启动环境是否包含 `OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID`。
+- 判断是否真正走官方 OAuth，不要只看 catalog 文案；应调用 `/v2/gui/provider-settings/auth-attempt/start` 并确认返回 `attempt.mode=real_browser`、URL host 为 `auth.openai.com`。
+
 ## 2026-06-27 OpenHarness Desktop GUI Context Compact Context
 
 - GUI 消息窗口现在不是只发送最新 prompt：后端会从 session messages 构建 Responses API input，把历史 user/assistant 消息一并交给 Direct ChatGPT OAuth SSE runtime。
