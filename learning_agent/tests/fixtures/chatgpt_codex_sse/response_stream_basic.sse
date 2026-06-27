@@ -1,0 +1,16 @@
+event: response.created
+data: {"type":"response.created","response":{"id":"resp_test_001","model":"gpt-5.5"}}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","delta":"OPENHARNESS_"}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","delta":"OK"}
+
+event: response.output_text.done
+data: {"type":"response.output_text.done","text":"OPENHARNESS_OK"}
+
+event: response.completed
+data: {"type":"response.completed","response":{"id":"resp_test_001","status":"completed"}}
+
+data: [DONE]

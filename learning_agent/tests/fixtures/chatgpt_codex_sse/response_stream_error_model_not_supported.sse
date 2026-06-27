@@ -1,0 +1,2 @@
+event: error
+data: {"error":{"code":"model_not_supported","message":"The requested test model is not supported for this account."}}
