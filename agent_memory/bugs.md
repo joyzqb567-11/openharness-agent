@@ -613,3 +613,9 @@
 - Root cause: 旧 OpenHarness bridge/renderer 进程占用了固定端口，`visible-gui-smoke.ps1 -Launch` 隐藏启动的新 launcher 因端口占用退出，真实 GUI 实际连到了旧进程。
 - Fix: 停止旧 `5177` renderer 和旧 `8776` bridge，使用当前 worktree 的 `start-backend.ps1` 与 `start-desktop-dev.ps1` 重启，再用 computer-use 刷新并验证真实窗口。
 - Guard: 后续 GUI 验收若出现“代码已通过测试但窗口看不到新功能”，先检查 `8776`、`5177` 端口 owner 和 `/v2/gui/*` endpoint 是否来自当前 worktree，再判断是否为代码 bug。
+## 2026-06-27 Desktop GUI Harness Controls Task 2 Environment Note
+
+- Closed risk: Task 2 验收前再次遇到固定端口环境干扰风险；旧 renderer 曾占用 `5177`，可能让真实 OpenHarness Desktop 窗口连到旧前端或旧后端，从而看不到当前 worktree 的 Harness 控制按钮。
+- Evidence: 本轮在可见 GUI 验收前先确认并停止旧 `5177` renderer PID `29776`，随后从当前 worktree 重启 `8776` bridge 与 Electron renderer；computer-use 才能在 `任务` 页签看到 `暂停`、`恢复`、`停止`、`Checkpoint`。
+- Root cause: 这是长任务多次重启 GUI 时的本地运行环境残留，不是 Task 2 源码 bug；固定端口 `8776/5177` 被旧进程占用时，新窗口可能仍显示旧 bundle 或连旧 bridge。
+- Guard: 后续每个 GUI 任务验收前，先确认 `8776`、`5177` 的 owner 来自当前 `.worktrees/gui-toolchain-control-center`，再判断真实 GUI 现象；如果端口 owner 不一致，先重启当前 worktree bridge/renderer，再做代码级 systematic debugging。

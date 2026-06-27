@@ -1572,3 +1572,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 自动化验证已通过：`python -m unittest discover -s learning_agent/tests -p test_gui_toolchain_contract.py -v` 为 2 passed；`npm --prefix apps/desktop run test` 为 20 files / 84 tests passed；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
 - 真实 GUI 验收已用 computer-use 完成：重启当前 worktree 的 bridge 和 renderer 后，OpenHarness Desktop 右侧“链路”页签可见，显示 `65 tools`、`11 groups`、工具分组、`read_last_observation` 和 `learning_agent.tools.catalog` 复用来源；未发现空白面板或明显文字重叠。
 - 验收中发现旧 `8776` bridge 和旧 `5177` renderer 占用端口会让 GUI 连接旧后端/旧前端；已按 systematic debugging 确认根因并通过停止旧进程、重启当前 worktree bridge/renderer 解决，本轮代码本身无需为该环境问题改动。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 2
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 2：把 `HarnessPanel` 从状态展示升级为真实长任务控制面板。
+- 后端新增 `learning_agent/app/gui_harness_controls.py`，复用既有 `HarnessStore`、`HarnessRun`、`StatusEventStore` 和 `_harness_store_for_workspace`，没有重写平行 harness。
+- `learning_agent/app/gui_bridge.py` 已把 `/v2/gui/harness/pause`、`/resume`、`/stop`、`/checkpoint` 接到真实 adapter；`build_gui_harness_status_payload()` 返回 pause/resume/stop/checkpoint 能力。
+- 前端已扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `HarnessPanel.tsx`，真实 GUI 现在显示 `暂停`、`恢复`、`停止`、`Checkpoint` 四个控制按钮和最近控制结果。
+- 自动化验证已通过：`python -m unittest learning_agent.tests.test_gui_harness_panel_contract -v` 通过；`npm --prefix apps/desktop run test -- guiClient harnessPanel` 通过；完整桌面 `npm --prefix apps/desktop run test` 为 21 files / 85 tests passed；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `任务` 页签可见 `Visible GUI acceptance for real Harness controls`，面板展示当前目标、队列、Checkpoints，以及 `暂停`、`恢复`、`停止`、`Checkpoint` 按钮。
+- 真实 GUI 操作验收已通过：点击 `Checkpoint` 后，GUI 显示 `checkpointed · 手动 checkpoint 已写入。`，当前目标和 Checkpoints 列表同步追加 `Desktop GUI checkpoint 2026-06-27T14:57:46Z`。
+- 验收证据已保存到 `learning_agent/test/gui_harness_controls_task2/visible_gui_acceptance_20260627.md`；本轮改动源码将同步复制到 `learning_agent/test/gui_harness_controls_task2/source_copies/`。
