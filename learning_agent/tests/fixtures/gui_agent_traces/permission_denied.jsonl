@@ -1,0 +1,3 @@
+{"event_type":"tool_use_seen","run_id":"agent_run_permission_denied","sequence":1,"session_id":"agent_session","timestamp":"2026-06-27T00:03:01Z","payload":{"tool_call":{"name":"write_file","call_id":"call_write_1","arguments":{"path":"blocked.txt","content":"no"}}}}
+{"event_type":"tool_result_seen","run_id":"agent_run_permission_denied","sequence":2,"session_id":"agent_session","timestamp":"2026-06-27T00:03:02Z","payload":{"tool_call":{"name":"write_file","call_id":"call_write_1","arguments":{"path":"blocked.txt"}},"result":"permission denied by GUI"}}
+{"event_type":"run_failed","run_id":"agent_run_permission_denied","sequence":3,"session_id":"agent_session","timestamp":"2026-06-27T00:03:03Z","payload":{"error":"permission denied by GUI"}}

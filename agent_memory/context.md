@@ -331,3 +331,22 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 该脚本固定启动当前主链路：bridge 默认 `http://127.0.0.1:8776`，renderer 默认 `http://127.0.0.1:5177`，OpenAI callback 默认 `http://localhost:1455/auth/callback`。
 - 该脚本启动前会验证 OpenAI browser auth attempt 返回 `mode=real_browser` 且 URL host 为 `auth.openai.com`；如果验证失败，说明启动环境不是官方 OAuth 链路，不能继续让用户手动认证。
 - 该脚本启动后日志在 `%TEMP%\openharness-desktop-oauth-*`，排查启动失败时先看该目录下 backend/desktop stdout/stderr，再看 provider catalog。
+
+## 2026-06-27 OpenHarness Desktop Real Agent Harness Adapter Context
+
+- 新真实 GUI agent 入口是 feature-flagged：prompt 包含 `__real_harness__` 或 `__harness_adapter__`，或环境变量 `OPENHARNESS_GUI_AGENT_DEFAULT_MODE=agent|real|harness` 时，bridge 才会选择 `DefaultHarnessGuiAgentAdapter`。
+- 真实 runtime 必须再由 `OPENHARNESS_GUI_AGENT_RUNTIME=enabled|real|true|1` 显式开启；未开启时会稳定返回 `adapter_unavailable`，避免普通 GUI prompt 误入 core agent。
+- 模型工厂 `build_chat_model_for_gui_request()` 支持离线测试开关 `OPENHARNESS_GUI_AGENT_TEST_MODEL=enabled`，真实 OpenAI 路径必须读取 GUI provider OAuth settings 和 secret refs，不会在 agent runtime 里弹浏览器登录。
+- Phase 1 默认 `allowed_tool_names=set()`，即真实 agent 首轮不暴露任何工具；只读工具需要 `OPENHARNESS_GUI_AGENT_READ_ONLY_TOOLS=enabled`、prompt 标记 `__read_only_tool__` 或 `permission_mode=read_only` 才开放 `read_file/list_dir` 级别白名单。
+- 写工具、shell、MCP 和 Computer Use 都必须先经过 GUI `permission_requested` / `permission_answered` 可见闭环；没有权限回调时 `RealHarnessGuiAgentAdapter._ask_permission()` 默认拒绝。
+- `GuiRunManager._run_turn_worker()` 不能持锁执行真实 adapter；长任务运行时只能在短临界区读写状态，否则 cancel endpoint 和权限 decision endpoint 会被阻塞。
+- 重启恢复规则：落盘的非终态 GUI turn 不恢复为 active，而是标记 failed，并写入 `recovered_after_restart=true` 的 `gui_turn_failed` 事件，防止历史 running 永久阻塞新 prompt。
+
+## 2026-06-27 OpenHarness Desktop Real Agent Harness Adapter V2 Completion Context
+
+- `codex/real-agent-harness-adapter-v2` worktree 已完成 Phase 0-6：模型工厂、真实 `LearningAgent.run_events()` GUI 入口、AgentEvent 映射、只读工具轨迹、GUI 权限握手、取消恢复、Computer Use 默认安全门禁。
+- 当前真实 GUI agent 运行路径由 `OPENHARNESS_GUI_AGENT_RUNTIME=enabled` 显式开启；prompt 可用 `__real_harness__` 进入 `DefaultHarnessGuiAgentAdapter`，第一等证据是 `runtime_path runtime=agent_harness transport=in_process_learning_agent`。
+- 离线验收模型开关 `OPENHARNESS_GUI_AGENT_TEST_MODEL=enabled` 已支持三类稳定用例：`AGENT_HARNESS_SMOKE`、`READ_ONLY_TOOL_TRACE` 只读工具调用、以及 GUI 权限/取消 smoke。
+- 只读工具轨迹当前只开放安全白名单：`OPENHARNESS_GUI_AGENT_READ_ONLY_TOOLS=enabled` 时允许 `read_file/list_dir` 级别工具；写工具、shell、MCP、Computer Use 默认不暴露。
+- Computer Use Phase 6 当前选择安全默认：GUI 面板可见锁、急停、权限模式和 provider 状态，但 real harness 默认不暴露 `mcp__computer-use__*` 工具；模型伪造桌面点击工具调用会被 allowed_tools 拒绝，并留下可见工具拒绝轨迹。
+- 真实可见 GUI 验收已用 `computer-use` 完成并保存证据：`learning_agent/test/real_agent_harness_adapter_v2/visible_gui_acceptance_20260627.json` 与 `learning_agent/test/gui_agent_harness_computer_use/computer_use_visible_gui_evidence_20260627.json`。

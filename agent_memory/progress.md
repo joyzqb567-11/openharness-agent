@@ -1492,3 +1492,43 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已用同一个 bat 入口重新执行启动：脚本释放旧 8776/5177 端口，启动 bridge，验证 OpenAI OAuth URL 为 `auth.openai.com`，启动 Desktop launcher。
 - 已用 computer-use 在真实 OpenHarness Desktop GUI 输入 `hello` 并发送，模型返回 `Hello! How can I help you today?`，事件流显示 `direct_sse_completed`、`message_completed`、`gui_turn_completed`。
 - 学习副本已同步到 `learning_agent/test/openharness_desktop_oauth_one_click_launch_20260627/source_copies/`。
+
+## 2026-06-27 OpenHarness Desktop Real Agent Harness Adapter Blueprint V2
+
+- 已根据 Karpathy-style 工程评估升级书面蓝图：`docs/superpowers/plans/2026-06-27-openharness-desktop-real-agent-harness-adapter.md`。
+- V2 蓝图核心变化：不再先铺满完整架构，而是新增 Phase 0 模型工厂与 `AgentEvent` 探针，先证明 GUI provider 凭据能创建 `LearningAgent` 可用的 `ChatModel`，并记录真实 `run_events()` JSONL 轨迹。
+- V2 蓝图把 Phase 1 收敛为最小真实闭环：GUI Agent mode prompt -> `RealHarnessGuiAgentAdapter` -> `LearningAgent.run(...)` -> `LearningAgent.run_events(...)` -> GUI `message_completed`，明确不接写文件、shell、MCP、Computer Use 或复杂恢复。
+- V2 蓝图要求事件映射来自 `learning_agent/tests/fixtures/gui_agent_traces/*.jsonl` 轨迹语料，而不是靠猜测事件名；`gui_agent_event_mapper.py` 负责中心化脱敏、稳定事件名和未知安全事件诊断。
+- V2 蓝图把 GUI 权限握手前置为写能力门禁：没有 `permission_requested` / `permission_answered` 可见闭环前，不允许上线写文件、shell、MCP 或 Computer Use。
+- V2 蓝图最终阶段才接受控 Computer Use agent mode，并要求沿用现有 Computer Use MCP v2 权限、lock、abort、trace 和真实可见 GUI 验收边界。
+- 已按用户补充要求加入 Mandatory Visible GUI Acceptance Rule：所有可见 GUI 验收必须使用肉眼可见的真实 OpenHarness Desktop GUI，并用 `computer-use` 确认；若验收发现 bug，必须先用 `superpowers:systematic-debugging` 查根因、修复、重新测试，通过后才继续下一个任务。
+- 本轮只修改书面蓝图和进度记录，没有改运行代码；占位词和旧乱码中文 prompt 扫描已通过。
+
+## 2026-06-27 Real Agent Harness Adapter V2 Execution
+
+- 已在隔离 worktree `.worktrees/real-agent-harness-adapter-v2` 创建分支 `codex/real-agent-harness-adapter-v2`，按蓝图逐项执行 Phase 0-6。
+- Phase 0/1 已完成：新增 `gui_model_factory.py`、`gui_harness_adapter.py`、`gui_agent_event_mapper.py`，GUI 真实模式可通过 `DefaultHarnessGuiAgentAdapter(enabled=True)` 进入 `LearningAgent.run(...)` 主循环，第一条事件为 `runtime_path runtime=agent_harness`。
+- Phase 2 已完成：新增 `learning_agent/tests/fixtures/gui_agent_traces/*.jsonl` 五类轨迹样本和 `test_gui_agent_event_mapper.py`，覆盖无工具成功、模型失败、中途取消、权限拒绝、只读工具成功，并加入长 stdout/stderr 截断门禁。
+- Phase 3 已完成：真实 `LearningAgent` 主循环可在只读白名单下执行 `read_file`，并把 `tool_started` / `tool_finished` 写入 GUI 事件流。
+- Phase 4 已完成：真实 adapter 的 `ask_permission` 已接入 GUI `permission_requested` / `permission_answered` 事件，approve 返回 True，deny/cancel 返回 False；`write_file` 被拒绝时测试确认目标文件不落盘。
+- Phase 5 已完成：`GuiRunManager._run_turn_worker()` 不再持锁执行长 adapter，取消和权限决策可并发进入；重启后遗留 `queued/running/needs_permission/cancelling` turn 会自动收敛为 failed，并释放 active turn。
+- Phase 6 已完成：默认真实 agent harness 不暴露 Computer Use 工具，模型伪造 `mcp__computer-use__click` 会被 allowed_tools 门禁拒绝，只留下可见工具拒绝轨迹，不执行桌面动作。
+- 自动化验证已阶段性通过：`test_gui_agent_event_mapper.py` 6 passed；`test_gui_agent_permission_handshake.py` 4 passed；`test_gui_agent_cancellation_recovery.py` 2 passed；`test_gui_agent_computer_use_guard.py` 1 passed；`test_gui_real_harness_adapter.py` 包含真实主循环和只读工具测试。
+- 待完成最终门禁：同步学习副本、运行更宽测试集、执行 provider secret leak scan、运行前端测试，并使用真实可见 OpenHarness Desktop GUI + computer-use 完成验收。
+
+## 2026-06-27 Real Agent Harness Adapter V2 Final Completion
+
+- Phase 0/1 最小真实闭环已在真实 OpenHarness Desktop GUI 中通过：发送 `__real_harness__ AGENT_HARNESS_SMOKE` 后，主消息区显示 `AGENT_HARNESS_SMOKE_OK`，右侧事件包含 `runtime_path`、`run_completed`、`message_completed`、`gui_turn_completed`。
+- Phase 3 只读工具轨迹已在真实 GUI 中通过：发送 `__real_harness__ __read_only_tool__ READ_ONLY_TOOL_TRACE` 后，事件流出现 `read_file` 的 `tool_started/tool_finished`，最终回答为 `READ_ONLY_TOOL_TRACE_OK`。
+- Phase 4 权限握手已在真实 GUI 中通过：发送 `__real_harness__ __permission__ AGENT_HARNESS_SMOKE` 后，事件出现 `permission_requested`、`permission_answered`，决策为 `approve/approved`，随后 real harness 完成。
+- Phase 5 取消恢复已在真实 GUI 中通过：发送 `__real_harness__ __slow__ AGENT_HARNESS_SMOKE` 后点击红色取消按钮，后端写出 `gui_turn_cancel_requested` 与 `gui_turn_cancelled`；之后再次发送普通 real harness smoke 可正常完成。
+- Phase 6 Computer Use 安全门禁已在真实 GUI 中通过：右侧“浏览器”页签显示 `visible_chromium`、`real_chrome_cdp` 可用，Computer Use 区块显示 `mode=off`、`permission_mode=off`、`lock=unlocked`、`abort requested=false`，说明默认未放开桌面动作。
+- 最终自动化门禁通过：后端 real harness 相关 pytest 19 passed；provider secret leak scan passed；关键 Python 文件内存 compile syntax ok；桌面 Vitest 19 files / 82 tests passed；桌面 lint/typecheck passed；桌面 production build passed。
+- 验收期间启动的 bridge 为 `http://127.0.0.1:8776`，真实可见 Electron 窗口标题为 `OpenHarness Desktop`；最终证据 JSON 位于 `learning_agent/test/real_agent_harness_adapter_v2/visible_gui_acceptance_20260627.json`。
+
+## 2026-06-27 Real Agent Harness Adapter V2 Branch Closeout
+
+- 按“先收口分支、再验证、再提交/合并”的下一步执行：清理 worktree 临时调试产物后，只保留蓝图任务相关代码、测试、证据、学习副本和 agent_memory 记录。
+- 重新运行提交前门禁并通过：`git diff --check` clean；后端 real harness 相关 pytest 19 passed；provider secret leak scan passed；关键 Python 文件内存 compile syntax ok。
+- 重新运行桌面前端门禁并通过：`npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 当前准备提交的范围已精确限定为 real agent harness adapter V2 所需文件，下一步是创建 feature commit，再评估主工作区脏改动是否允许安全合并。

@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "date": "2026-06-27",
+  "probe": "agent_event_payload_redaction",
+  "sensitive_keys": ["token", "secret", "authorization", "password", "api_key", "apikey", "bearer", "credential"],
+  "sensitive_value_prefixes": ["sk-", "sess-", "Bearer "],
+  "workspace_replacement": "[workspace]",
+  "redacted_value": "[redacted]",
+  "max_payload_text_chars": 1000,
+  "verified_by": "learning_agent/tests/test_gui_agent_event_mapper.py"
+}

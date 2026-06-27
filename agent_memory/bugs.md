@@ -1,4 +1,4 @@
-﻿# 问题与风险摘要（2026-06-16）
+# 问题与风险摘要（2026-06-16）
 
 历史全文归档：`agent_memory/archive/2026-06-16-computer-use-mcp-v2-parity/`。
 
@@ -589,3 +589,19 @@
 - Root cause: bat 文件使用 UTF-8 中文注释，但 Windows `cmd.exe` 双击默认代码页不是 UTF-8；中文字节在默认代码页下可能被误解析出命令分隔符，导致 REM 行后半段变成可执行命令。
 - Fix: bat 第一行 `@echo off` 后立即执行 `chcp 65001 >nul`，并新增回归测试要求任何中文文本出现前必须先切换 UTF-8。
 - Verification: `.bat` 入口重新执行后完整启动 bridge/renderer/Electron；computer-use 在真实 GUI 输入 `hello`，模型经 Direct SSE 返回 `Hello! How can I help you today?`，事件包含 `direct_sse_completed`、`message_completed`、`gui_turn_completed`。
+
+## 2026-06-27 Real Harness Tool Name Mapping Bug
+
+- Closed risk: Phase 3 真实只读工具测试中，`tool_started` 事件存在但 `payload.tool_name` 为空，导致 GUI TracePanel 无法显示真实工具名。
+- Evidence: 复现脚本打印真实事件发现 core `tool_use_seen` / `tool_call_started` 的 payload 形状为 `tool_call.tool_name=read_file`，而 mapper 只读取 `tool_call.name`。
+- Root cause: `gui_agent_event_mapper._tool_payload()` 对 core 事件字段形状假设过窄，只兼容 fixture 里的 `name`，没有兼容真实 core 发出的 `tool_name`。
+- Fix: `_tool_payload()` 现在按 `name -> tool_name -> base_payload.tool_name` 顺序抽取工具名。
+- Verification: 失败测试 `test_default_harness_adapter_emits_read_only_tool_trace` 已转绿；同时重跑 `test_gui_agent_event_mapper.py`，7 项相关测试通过。
+
+## 2026-06-27 Real Agent Harness Adapter V2 Verification Notes
+
+- Closed risk: Phase 3 真实只读工具轨迹最初需要兼容 core 事件里的 `tool_call.tool_name` 字段；已在 mapper 中按 `name -> tool_name -> payload.tool_name` 读取，真实 GUI 中 `read_file` 工具名已可见。
+- Closed risk: 真实 GUI 验收中首个 real harness turn 一度看起来停在 running；继续采集 `/v1/gui/bootstrap` 证据后确认不是死锁，后续事件依次出现 `model_response_completed`、`continuation_decision`、`session_saved`、`run_completed`、`message_completed`、`gui_turn_completed`。
+- Environmental note: `python -m py_compile` 在本 Windows 沙箱中会因为 `.pyc` 写入/替换权限触发 `WinError 5`，本轮改用内存 `compile()` 验证关键 Python 文件语法。
+- Environmental note: `npm --prefix apps/desktop test -- --run` 和 `npm --prefix apps/desktop run build` 在沙箱内首次失败为 `esbuild spawn EPERM`；按权限规则切到沙箱外重跑后均通过。
+- Closed risk: 恢复验收时一次 GUI 输入未落入输入框并提示“请输入内容”，未计为通过；重新确认后端真实恢复 turn 已进入运行并最终 `gui_turn_completed`，取消后的恢复能力通过。

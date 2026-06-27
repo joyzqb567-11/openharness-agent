@@ -1,0 +1,2 @@
+{"event_type":"model_request_started","run_id":"agent_run_failure","sequence":1,"session_id":"agent_session","timestamp":"2026-06-27T00:01:01Z","payload":{"model":"test-fake"}}
+{"event_type":"run_failed","run_id":"agent_run_failure","sequence":2,"session_id":"agent_session","timestamp":"2026-06-27T00:01:02Z","payload":{"error":"model exploded","access_token":"sk-test-secret"}}

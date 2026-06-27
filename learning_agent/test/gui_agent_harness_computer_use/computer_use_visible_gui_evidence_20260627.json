@@ -1,0 +1,45 @@
+﻿{
+    "browser_providers":  {
+                              "visible_chromium":  {
+                                                       "available":  true,
+                                                       "reason":  "visible_chromium_adapter_ready"
+                                                   },
+                              "real_chrome_cdp":  {
+                                                      "available":  true,
+                                                      "reason":  "real_chrome_cdp_adapter_ready"
+                                                  },
+                              "chrome_extension":  {
+                                                       "available":  false,
+                                                       "reason":  "chrome_extension_bridge_not_connected"
+                                                   }
+                          },
+    "computer_use":  {
+                         "mode":  "off",
+                         "full_mode":  false,
+                         "stopped":  false,
+                         "expired":  false,
+                         "allowed_action_classes":  [
+
+                                                    ],
+                         "permission_mode":  "off",
+                         "lock":  {
+                                      "locked":  false,
+                                      "owner":  "",
+                                      "safe_state":  "unlocked"
+                                  },
+                         "abort":  {
+                                       "requested":  false,
+                                       "global_hotkey_registered":  false,
+                                       "terminal_abort_fallback":  true
+                                   },
+                         "status_degraded":  false,
+                         "safe_error":  ""
+                     },
+    "permissions":  {
+                        "pending_count":  0,
+                        "latest_request_id":  "",
+                        "latest_tool_name":  "",
+                        "mode":  "interactive"
+                    },
+    "visible_observation":  "Browser tab showed visible_chromium and real_chrome_cdp available; Computer Use section showed mode off, lock unlocked, abort not requested, permission off."
+}

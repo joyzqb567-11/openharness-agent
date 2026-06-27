@@ -1,0 +1,5 @@
+{"event_type":"model_request_started","run_id":"agent_run_success","sequence":1,"session_id":"agent_session","timestamp":"2026-06-27T00:00:01Z","payload":{"model":"test-fake","prompt_preview":"hello"}}
+{"event_type":"model_message_delta","run_id":"agent_run_success","sequence":2,"session_id":"agent_session","timestamp":"2026-06-27T00:00:02Z","payload":{"text_delta":"Hello "}}
+{"event_type":"model_message_delta","run_id":"agent_run_success","sequence":3,"session_id":"agent_session","timestamp":"2026-06-27T00:00:03Z","payload":{"text_delta":"world"}}
+{"event_type":"model_message_completed","run_id":"agent_run_success","sequence":4,"session_id":"agent_session","timestamp":"2026-06-27T00:00:04Z","payload":{"text":"Hello world"}}
+{"event_type":"run_completed","run_id":"agent_run_success","sequence":5,"session_id":"agent_session","timestamp":"2026-06-27T00:00:05Z","payload":{"text":"Hello world"}}

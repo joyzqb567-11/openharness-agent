@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "date": "2026-06-27",
+  "passed_test_files": [
+    "learning_agent/tests/test_gui_real_harness_adapter.py",
+    "learning_agent/tests/test_gui_agent_event_mapper.py",
+    "learning_agent/tests/test_gui_agent_permission_handshake.py",
+    "learning_agent/tests/test_gui_agent_cancellation_recovery.py",
+    "learning_agent/tests/test_gui_agent_computer_use_guard.py"
+  ],
+  "covered_phases": ["phase_0", "phase_1", "phase_2", "phase_3", "phase_4", "phase_5", "phase_6"],
+  "visible_gui_acceptance": "pending_final_gate"
+}

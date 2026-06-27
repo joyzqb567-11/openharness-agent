@@ -1,0 +1,3 @@
+{"event_type":"model_request_started","run_id":"agent_run_cancel","sequence":1,"session_id":"agent_session","timestamp":"2026-06-27T00:02:01Z","payload":{"model":"test-fake"}}
+{"event_type":"model_message_delta","run_id":"agent_run_cancel","sequence":2,"session_id":"agent_session","timestamp":"2026-06-27T00:02:02Z","payload":{"text_delta":"partial"}}
+{"event_type":"run_completed","run_id":"agent_run_cancel","sequence":3,"session_id":"agent_session","timestamp":"2026-06-27T00:02:03Z","payload":{"text":"partial","reason":"stop_requested"}}

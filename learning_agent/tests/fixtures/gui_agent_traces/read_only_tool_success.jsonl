@@ -1,0 +1,4 @@
+{"event_type":"model_request_started","run_id":"agent_run_read_only","sequence":1,"session_id":"agent_session","timestamp":"2026-06-27T00:04:01Z","payload":{"model":"test-fake"}}
+{"event_type":"tool_use_seen","run_id":"agent_run_read_only","sequence":2,"session_id":"agent_session","timestamp":"2026-06-27T00:04:02Z","payload":{"tool_call":{"name":"read_file","call_id":"call_read_1","arguments":{"path":"AGENTS.md"}}}}
+{"event_type":"tool_result_seen","run_id":"agent_run_read_only","sequence":3,"session_id":"agent_session","timestamp":"2026-06-27T00:04:03Z","payload":{"tool_call":{"name":"read_file","call_id":"call_read_1","arguments":{"path":"AGENTS.md"}},"stdout":"read_file success"}}
+{"event_type":"run_completed","run_id":"agent_run_read_only","sequence":4,"session_id":"agent_session","timestamp":"2026-06-27T00:04:04Z","payload":{"text":"I read AGENTS.md."}}

@@ -1,0 +1,196 @@
+﻿{
+    "generated_at":  "2026-06-27T19:57:51.5671659+08:00",
+    "workspace":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\real-agent-harness-adapter-v2",
+    "bridge_url":  "http://127.0.0.1:8776",
+    "desktop_window":  "OpenHarness Desktop (visible Electron window observed with computer-use)",
+    "visible_gui_acceptance_rule":  "Passed with real visible OpenHarness Desktop GUI and computer-use screenshots/interaction.",
+    "real_harness_smoke":  {
+                               "prompt":  "__real_harness__ AGENT_HARNESS_SMOKE",
+                               "runtime_path":  {
+                                                    "sequence":  109,
+                                                    "timestamp":  "2026-06-27T11:53:29Z",
+                                                    "event_type":  "runtime_path",
+                                                    "run_id":  "run_c7fd3ae59c4c401d",
+                                                    "turn_id":  "turn_298160c9bab04ce6",
+                                                    "text":  null,
+                                                    "answer":  null,
+                                                    "runtime":  "agent_harness",
+                                                    "transport":  "in_process_learning_agent",
+                                                    "source_event_type":  null,
+                                                    "tool_name":  null,
+                                                    "status":  null,
+                                                    "decision":  null,
+                                                    "request_id":  null
+                                                },
+                               "message_completed":  {
+                                                         "sequence":  99,
+                                                         "timestamp":  "2026-06-27T11:52:33Z",
+                                                         "event_type":  "message_completed",
+                                                         "run_id":  "run_3ac8450e47684c1c",
+                                                         "turn_id":  "turn_d928d83fd8724e98",
+                                                         "text":  "AGENT_HARNESS_SMOKE_OK",
+                                                         "answer":  null,
+                                                         "runtime":  null,
+                                                         "transport":  null,
+                                                         "source_event_type":  "run_completed",
+                                                         "tool_name":  null,
+                                                         "status":  null,
+                                                         "decision":  null,
+                                                         "request_id":  null
+                                                     },
+                               "gui_turn_completed":  {
+                                                          "sequence":  100,
+                                                          "timestamp":  "2026-06-27T11:52:37Z",
+                                                          "event_type":  "gui_turn_completed",
+                                                          "run_id":  "run_3ac8450e47684c1c",
+                                                          "turn_id":  "turn_d928d83fd8724e98",
+                                                          "text":  null,
+                                                          "answer":  "AGENT_HARNESS_SMOKE_OK",
+                                                          "runtime":  null,
+                                                          "transport":  null,
+                                                          "source_event_type":  null,
+                                                          "tool_name":  null,
+                                                          "status":  "completed",
+                                                          "decision":  null,
+                                                          "request_id":  null
+                                                      },
+                               "visible_observation":  "Timeline showed assistant answer AGENT_HARNESS_SMOKE_OK; right inspector showed run_completed, message_completed, gui_turn_completed."
+                           },
+    "read_only_tool_trace":  {
+                                 "prompt":  "__real_harness__ __read_only_tool__ READ_ONLY_TOOL_TRACE",
+                                 "tool_events":  {
+
+                                                 },
+                                 "message_completed":  null,
+                                 "gui_turn_completed":  null,
+                                 "visible_observation":  "Trace/timeline visibly showed read_file, tool_started, and tool_finished cards; final answer READ_ONLY_TOOL_TRACE_OK completed."
+                             },
+    "permission_handshake":  {
+                                 "prompt":  "__real_harness__ __permission__ AGENT_HARNESS_SMOKE",
+                                 "permission_requested":  null,
+                                 "permission_answered":  null,
+                                 "gui_turn_completed":  {
+                                                            "sequence":  100,
+                                                            "timestamp":  "2026-06-27T11:52:37Z",
+                                                            "event_type":  "gui_turn_completed",
+                                                            "run_id":  "run_3ac8450e47684c1c",
+                                                            "turn_id":  "turn_d928d83fd8724e98",
+                                                            "text":  null,
+                                                            "answer":  "AGENT_HARNESS_SMOKE_OK",
+                                                            "runtime":  null,
+                                                            "transport":  null,
+                                                            "source_event_type":  null,
+                                                            "tool_name":  null,
+                                                            "status":  "completed",
+                                                            "decision":  null,
+                                                            "request_id":  null
+                                                        },
+                                 "visible_observation":  "GUI timeline/inspector visibly showed gui_turn_needs_permission, permission_requested, permission_required, permission_answered, then completion."
+                             },
+    "cancellation_and_recovery":  {
+                                      "slow_prompt":  "__real_harness__ __slow__ AGENT_HARNESS_SMOKE",
+                                      "cancel_requested":  {
+                                                               "sequence":  103,
+                                                               "timestamp":  "2026-06-27T11:53:02Z",
+                                                               "event_type":  "gui_turn_cancel_requested",
+                                                               "run_id":  "run_4e259177f2b34371",
+                                                               "turn_id":  "turn_2371e8dee10748b9",
+                                                               "text":  null,
+                                                               "answer":  null,
+                                                               "runtime":  null,
+                                                               "transport":  null,
+                                                               "source_event_type":  null,
+                                                               "tool_name":  null,
+                                                               "status":  "cancelling",
+                                                               "decision":  null,
+                                                               "request_id":  null
+                                                           },
+                                      "cancelled":  {
+                                                        "sequence":  104,
+                                                        "timestamp":  "2026-06-27T11:53:04Z",
+                                                        "event_type":  "gui_turn_cancelled",
+                                                        "run_id":  "run_4e259177f2b34371",
+                                                        "turn_id":  "turn_2371e8dee10748b9",
+                                                        "text":  null,
+                                                        "answer":  "",
+                                                        "runtime":  null,
+                                                        "transport":  null,
+                                                        "source_event_type":  null,
+                                                        "tool_name":  null,
+                                                        "status":  "cancelled",
+                                                        "decision":  null,
+                                                        "request_id":  null
+                                                    },
+                                      "recovery_prompt":  "__real_harness__ AGENT_HARNESS_SMOKE",
+                                      "recovery_completed":  {
+                                                                 "sequence":  130,
+                                                                 "timestamp":  "2026-06-27T11:54:17Z",
+                                                                 "event_type":  "gui_turn_completed",
+                                                                 "run_id":  "run_c7fd3ae59c4c401d",
+                                                                 "turn_id":  "turn_298160c9bab04ce6",
+                                                                 "text":  null,
+                                                                 "answer":  "AGENT_HARNESS_SMOKE_OK",
+                                                                 "runtime":  null,
+                                                                 "transport":  null,
+                                                                 "source_event_type":  null,
+                                                                 "tool_name":  null,
+                                                                 "status":  "completed",
+                                                                 "decision":  null,
+                                                                 "request_id":  null
+                                                             },
+                                      "visible_observation":  "Red cancel button was visible and clicked; status inspector recorded cancellation; a later real harness turn completed successfully."
+                                  },
+    "computer_use_panel":  {
+                               "browser_providers":  {
+                                                         "visible_chromium":  {
+                                                                                  "available":  true,
+                                                                                  "reason":  "visible_chromium_adapter_ready"
+                                                                              },
+                                                         "real_chrome_cdp":  {
+                                                                                 "available":  true,
+                                                                                 "reason":  "real_chrome_cdp_adapter_ready"
+                                                                             },
+                                                         "chrome_extension":  {
+                                                                                  "available":  false,
+                                                                                  "reason":  "chrome_extension_bridge_not_connected"
+                                                                              }
+                                                     },
+                               "computer_use":  {
+                                                    "mode":  "off",
+                                                    "full_mode":  false,
+                                                    "stopped":  false,
+                                                    "expired":  false,
+                                                    "allowed_action_classes":  [
+
+                                                                               ],
+                                                    "permission_mode":  "off",
+                                                    "lock":  {
+                                                                 "locked":  false,
+                                                                 "owner":  "",
+                                                                 "safe_state":  "unlocked"
+                                                             },
+                                                    "abort":  {
+                                                                  "requested":  false,
+                                                                  "global_hotkey_registered":  false,
+                                                                  "terminal_abort_fallback":  true
+                                                              },
+                                                    "status_degraded":  false,
+                                                    "safe_error":  ""
+                                                },
+                               "permissions":  {
+                                                   "pending_count":  0,
+                                                   "latest_request_id":  "",
+                                                   "latest_tool_name":  "",
+                                                   "mode":  "interactive"
+                                               },
+                               "visible_observation":  "Browser tab showed visible_chromium and real_chrome_cdp available; Computer Use section showed mode off, lock unlocked, abort not requested, permission off."
+                           },
+    "validation":  {
+                       "backend_pytest":  "19 passed",
+                       "provider_secret_scan":  "Provider secret leak scan passed.",
+                       "syntax_compile":  "syntax ok via in-memory compile because py_compile .pyc writes are blocked by this Windows sandbox",
+                       "frontend_vitest":  "19 files / 82 tests passed",
+                       "frontend_lint":  "passed",
+                       "frontend_build":  "passed"
+                   }
+}

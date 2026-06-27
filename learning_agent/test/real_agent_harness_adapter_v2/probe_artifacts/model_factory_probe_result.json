@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "date": "2026-06-27",
+  "probe": "gui_model_factory_offline_and_unconnected_paths",
+  "offline_test_model": {
+    "env": "OPENHARNESS_GUI_AGENT_TEST_MODEL=enabled",
+    "provider_id": "openai",
+    "expected_text": "AGENT_HARNESS_SMOKE_OK"
+  },
+  "unconnected_provider": {
+    "provider_id": "openai",
+    "expected_error_code": "provider_not_connected",
+    "expected_event_kind": "provider_not_connected"
+  },
+  "secret_policy": "raw provider tokens are read only through backend secret refs and are not emitted to GUI payloads"
+}
