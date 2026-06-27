@@ -369,3 +369,11 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 后续 Task 7+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。
 - Task 7 真实 GUI 验收补充：Electron 可能同时残留多个 `OpenHarness Desktop` 窗口；如果 accessibility tree 一度看不到新增页签，应先重新 `list_apps()` 并选择包含当前 worktree 项目名和完整页签的窗口，再判断代码问题。
 - Task 8 真实 GUI 验收补充：accessibility tree 在点击 `验收` 后可能仍返回旧页签内容，但 computer-use 截图已经显示验收面板；此时以截图和直接 HTTP endpoint 双证据为准，不要仅凭旧 accessibility 文本误判为前端未渲染。
+
+## 2026-06-28 Desktop GUI Toolchain Control Center Task 9 Context
+
+- Task 9 已把 `/v2/gui/diagnostics` 扩展为诊断控制中心摘要：payload 同时包含 health、release gate、trace、compact、resume report、LSP diagnostics 和 REPL availability。
+- `learning_agent/app/gui_diagnostics.py` 仍是 thin adapter：状态来源优先复用 `build_status_snapshot(workspace_path)`，工具面来源复用 `learning_agent.tools.catalog.build_builtin_tool_catalog()`，不要在 GUI 里新建平行 LSP/REPL registry。
+- 诊断 payload 的安全边界是“短摘要、计数、状态、工具名白名单”：不返回 raw log blob、绝对 workspace 路径、secret、Authorization、Bearer、token、raw traceback 或大段事件流。
+- `DiagnosticsPanel.tsx` 当前通过 Trace、Trace Tail、Compact、Resume、Health、LSP、REPL 七行展示新摘要；后续新增诊断类能力时应继续扩展同一 `/v2/gui/diagnostics` payload 和同一面板，而不是新增散落页签。
+- Task 9 真实 GUI 验收曾出现旧 Electron/旧 Vite 环境干扰：`npm --prefix apps/desktop exec vite` 从 repo root 启动会让 `5178` 返回 404，正确做法是在 `apps/desktop` 目录执行 `npm exec vite -- --host 127.0.0.1 --port <port>`，再用独立 Electron user-data-dir 验收。

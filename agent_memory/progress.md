@@ -1653,3 +1653,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `验收` 页签可见 `验收控制器`、`160 scenarios`、`controller ready`、`visible gate`，并显示多条 scenario 卡片和 `运行` 按钮；本轮未点击真实运行按钮，避免启动长时间可见验收流程。
 - 直接 HTTP 验证 `GET /v2/gui/acceptance/scenarios` 返回安全 smoke 场景 `agent_capability_computer_use_mcp_smoke_visible_terminal`，说明 GUI 面板读取的是当前 worktree 的真实 `acceptance_controller` 场景目录。
 - 本轮改动源码已同步复制到 `learning_agent/test/gui_acceptance_dashboard_task8/source_copies/`；CodeGraph 已执行 `codegraph sync` 并同步 9 个变更文件。
+
+## 2026-06-28 Desktop GUI Toolchain Control Center Task 9
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 9：扩展 Diagnostics / LSP / REPL 面板，把诊断页从基础 health 摘要升级为工具链状态总览。
+- 后端在 `learning_agent/app/gui_diagnostics.py` 复用 `build_status_snapshot()`、`build_builtin_tool_catalog()` 和既有 health/release gate 状态，新增 `trace_summary`、`compact_status`、`resume_report_summary`、`health_status_summary`、`lsp_diagnostics_summary`、`repl_summary`，没有读取或返回原始大日志。
+- 前端扩展 `DiagnosticsPanel.tsx` 和 `guiClient.ts`，真实 GUI 现在可见 Trace、Trace Tail、Compact、Resume、Health、LSP、REPL 行，所有字段都来自 `/v2/gui/diagnostics` 的安全摘要。
+- 自动化验证已通过：`python -m py_compile learning_agent\app\gui_diagnostics.py learning_agent\tests\test_gui_diagnostics_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_diagnostics_contract -v` 为 7 tests 通过；`npm --prefix apps/desktop run test -- diagnosticsPanel guiClient` 为 2 files / 22 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `诊断` 页签可见 `Trace gui_browser_action`、`Compact not_run · no boundary`、`Resume not_run · no session · 正常`、`Health 正常 · 0 warnings`、`LSP 可用 · lsp_symbols, lsp_d...`、`REPL 可用 · 35 tools · 5 calls`。
+- 直接 HTTP 验证 `/v2/gui/diagnostics` 返回 `trace_summary`、`compact_status`、`resume_report_summary`、`lsp_diagnostics_summary`、`repl_summary`，并确认 JSON 不包含 `"None"` 原文。
+- 本轮修复了 `_safe_short_text(None)` 会把 Python `None` 渲染成用户可见 `"None"` 的问题，并新增回归测试；本轮改动源码已同步复制到 `learning_agent/test/gui_diagnostics_panel_task9/source_copies/`。

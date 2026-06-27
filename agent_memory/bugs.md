@@ -646,6 +646,22 @@
 - Fix: 重新 `list_apps()`，选择 `ai.opencode.desktop.dev` 中包含完整主界面的 `OpenHarness Desktop` 窗口，必要时用最新截图坐标点击右侧 `命令` 页签，而不是复用旧 element index。
 - Verification: 最终真实截图显示 `后台命令` 面板、`GUI acceptance command` 卡片、`[REDACTED]` 脱敏命令、tail 输出和禁用的 `停止` 按钮；证据保存于 `learning_agent/test/gui_command_console_task7/command_panel_visible_gui_20260627.jpg`。
 
+## 2026-06-28 Desktop GUI Diagnostics Task 9 None Text Regression
+
+- Closed risk: Task 9 扩展诊断摘要后，空 snapshot 字段可能被 `_safe_short_text()` 转成 Python 字符串 `"None"`，导致真实 GUI 里出现对用户没有意义的 `None` 文案。
+- Evidence: 新增回归测试 `test_diagnostics_empty_snapshot_does_not_render_python_none_text` 在修复前失败，证明问题不是猜测，而是可复现的 payload 文案错误。
+- Root cause: `_safe_short_text(value, fallback)` 先执行 `str(value)`，当 `value is None` 时得到 `"None"`，没有走 fallback。
+- Fix: `_safe_short_text()` 现在先判断 `value is None` 并返回 fallback；空 trace、compact、resume、health、LSP、REPL 摘要都不会再把 Python 内部空值暴露到 GUI。
+- Verification: `python -m unittest learning_agent.tests.test_gui_diagnostics_contract -v`、`npm --prefix apps/desktop run test -- diagnosticsPanel guiClient`、`npm --prefix apps/desktop run lint`、`npm --prefix apps/desktop run build` 均通过；真实 GUI 诊断页可见 LSP/REPL 摘要且没有 `None` 文案。
+
+## 2026-06-28 Desktop GUI Diagnostics Task 9 Vite Root 404 Note
+
+- Closed risk: Task 9 真实 GUI 验收中，Electron 一度显示白屏或旧诊断 payload，看起来像 `DiagnosticsPanel` 未接入新字段。
+- Evidence: 直接访问 `http://127.0.0.1:5178` 返回 404；DevTools 目标显示 Electron 指向该 dev URL，但 Vite 是从 repo root 通过 `npm --prefix apps/desktop exec vite` 启动的。
+- Root cause: `npm --prefix` 会在目标 package 上执行脚本，但直接 `exec vite` 的工作目录仍可能不是 `apps/desktop`；Vite root 错误时，Electron 加载不到当前桌面前端入口。
+- Fix: 从 `apps/desktop` 目录启动 `npm exec vite -- --host 127.0.0.1 --port 5178`，再用独立 `--user-data-dir` 和 remote debugging port 启动 Electron。
+- Guard: 后续真实 GUI 验收如果出现白屏、旧 bundle、旧 payload，先确认 dev server HTTP 200、DevTools URL、bridge endpoint 和 Electron user-data-dir，再进入代码级 debugging。
+
 ## 2026-06-28 Desktop GUI Acceptance Dashboard Task 8 Accessibility Snapshot Note
 
 - Closed risk: Task 8 真实 GUI 验收时，Computer Use 截图已经显示 `验收控制器` 面板，但随后一次 accessibility tree 读取仍返回旧的 `计划协作控制中心` 内容，容易误判为验收页签没有真正渲染。
