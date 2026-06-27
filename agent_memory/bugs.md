@@ -560,3 +560,11 @@
 - Fix: `learning_agent/app/gui_context.py` 现在按 role 选择 content type：assistant 历史使用 `output_text`，user/developer/system 输入使用 `input_text`；相关 Direct SSE adapter/context body 测试夹具同步更新。
 - Verification: 最小真实 HTTP SSE 诊断在修复前返回 HTTP 400，修复后返回 HTTP 200 且首行为 `event: response.created`；`python -m pytest learning_agent\tests\test_gui_context_builder.py learning_agent\tests\test_gui_direct_oauth_sse_adapter_context.py learning_agent\tests\test_chatgpt_codex_sse_client_context_body.py -q` 为 9 passed。
 - Visible GUI verification: 修复并重启 OpenHarness Desktop 后，no-compact recall 返回 `ALPHA_CONTEXT_927`；继续强制压缩后，最终 recall 事件显示 `compacted=true`、`compact_completed`、`direct_sse_completed`、`gui_turn_completed`，最终 answer 仍为 `ALPHA_CONTEXT_927`。
+
+## 2026-06-27 Manual API Key Launch OAuth Link Is Mock
+
+- Open risk: 用户在“手动连接 OpenAI API key”的启动模式下点击 OpenAI 的 ChatGPT browser OAuth 链接，期望打开 OpenAI 官方 OAuth 官网，但实际没有进入官网。
+- Evidence: 当前运行中的 provider catalog 返回 `secret_store_kind=dev_json`、OpenAI `connected=false`、`chatgpt-browser status=mock_available`、`chatgpt-headless status=mock_available`。
+- Evidence: 直接调用 `/v2/gui/provider-settings/auth-attempt/start` 创建 `openai/chatgpt-browser` 授权尝试，返回 `attempt_mode=mock`，URL host 为 `127.0.0.1`，URL 前缀为 `http://127.0.0.1:18991/mock/openai/browser`，不是 `auth.openai.com`。
+- Root cause: 当前 GUI 是为了用户手动填 API key 拉起的运行模式，只设置了 `OPENHARNESS_GUI_MODEL_MODE=real` 和 `OPENHARNESS_OPENAI_RUNTIME=direct_sse`，没有设置真实 OAuth 门禁所需的 `OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID=<OpenHarness client id>`。
+- Required next action: 若用户要手动填 API key，应点击 OpenAI 的 `API 密钥` 认证方式；若要打开 OpenAI 官方 OAuth 官网，必须停止当前 API key 启动模式，并以真实 OAuth 配置重新启动 GUI。
