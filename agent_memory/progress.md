@@ -1674,3 +1674,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 自动化验证已通过：`python -m py_compile learning_agent\app\gui_memory.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_memory_panel_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_memory_panel_contract -v` 为 3 tests 通过；`npm --prefix apps/desktop run test -- memoryPanel guiClient` 为 2 files / 23 tests 通过；`npm --prefix apps/desktop run test -- memoryPanel` 通过；`npm --prefix apps/desktop run lint` passed。
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `记忆` 页签可见 `记忆与预算`、`Context`、`Progress`、`Bugs`、`24 max messages`、`60000 max chars`、`prompt_surface_report`、`token_budget_report`、`read-only first pass`、`notebook_read` 和 `notebook_edit`，未观察到空白面板、崩溃或明显文字重叠。
 - 直接 HTTP 验证三个只读 endpoint 均使用既有 `X-OpenHarness-Desktop-Token` 门禁，返回 `MemoryFiles = 4`、`PromptTools = 2`、`NotebookTools = 2`、`NotebookDegraded = False`；本轮改动源码已同步复制到 `learning_agent/test/gui_memory_panel_task10/source_copies/`，验收证据保存到 `learning_agent/test/gui_memory_panel_task10/visible_gui_acceptance_20260627.md`。
+
+## 2026-06-28 Desktop GUI Toolchain Control Center Final Gate
+
+- 已完成蓝图 Final Integration Gate：`npm --prefix apps/desktop run test` 为 29 files / 105 tests 通过；`npm --prefix apps/desktop run lint` 通过；`npm --prefix apps/desktop run build` 通过，Vite 构建完成并转换 1621 modules。
+- 后端 GUI 合同门禁已整组运行：所有 `test_gui_*contract/workbench` 模块共 95 tests 通过，覆盖 GUI bridge、sessions/search、stream、permissions、provider、toolchain、harness、computer-use、browser、MCP、planning、commands、acceptance、diagnostics 和 memory。
+- `apps/desktop/scripts/visible-gui-smoke.ps1` 默认模式已生成人工 smoke 指令；`visible-gui-smoke.ps1 -Launch` 已启动真实 Desktop GUI，并用 computer-use 完成最终可视巡检。
+- 最终真实 GUI 巡检确认：Chat 仍可完成一轮 fake streaming；右侧页签可见 Tool Trace、Toolchain inventory、Harness controls、MCP、Memory、Planning、Command、Acceptance、Browser、Computer Use、Settings、Diagnostics；未观察到空白主面板、崩溃屏或明显文字重叠。
+- 最终门禁证据保存到 `learning_agent/test/gui_toolchain_control_center_final_gate/visible_gui_acceptance_20260628.md`。
