@@ -284,3 +284,36 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 最终 GUI 验收证据位于 `learning_agent/test/provider_settings_v2_openai_connect/visual_evidence/`，包含方法选择、API Key、OAuth 等待、连接完成截图和 `openai_connect_visual_qa_result.json`。
 - 本轮总学习副本位于 `learning_agent/test/provider_settings_v2_openai_connect/source_copies/`，后续学习或审查应优先从这里对照主文件。
 - Secret leak gate 已覆盖 `task08_visual_qa/` 和 `visual_evidence/` 运行证据目录，禁止 token 字段、测试密钥样本或 Bearer/key 形态进入可交付 JSON/log/text。
+
+## 2026-06-27 OpenHarness Desktop Direct ChatGPT OAuth SSE V3 Context
+
+- V3 的目标是让 OpenHarness Desktop 在真实 ChatGPT OAuth 已连接时，优先走 `OPENHARNESS_OPENAI_RUNTIME=direct_sse` 的直接 HTTPS SSE 通道，而不是默认绕到 Codex CLI WebSocket 重试链路。
+- GUI composer 现在会把用户选择的 provider、model、reasoning effort、permission mode 一起提交到后端；如果 provider 断开或模型被判定为当前账户不支持，composer 会清空或禁用对应选择，避免继续请求错误模型。
+- provider settings payload 现在会暴露脱敏账户标签、direct route 状态和 OAuth client 来源；这些字段只用于 GUI 和诊断，不允许携带 refresh token、access token、client secret 等敏感值。
+- direct SSE adapter 的第一条运行事件必须是 `runtime_path`，并记录 provider、model、runtime、transport、`websocket=false`、`codex_cli=false`、OAuth client source 和 5 秒首 token 预算。
+- 如果第一条可见 delta 超过 5 秒，`message_delta` 事件会标记 `first_delta_budget_exceeded=true`，用于把“真实模型慢”从“WebSocket 回退慢”里分离出来。
+- 新 runbook 位于 `docs/desktop/openai-chatgpt-oauth-direct-sse.md`，后续排查真实 OAuth、direct SSE、fixture、fallback、模型选择和断开连接时应优先参考这份文档。
+
+## 2026-06-27 OpenHarness Desktop OAuth Callback Loop Context
+
+- Desktop 真实 OpenAI OAuth 不再只生成授权 URL；auth-attempt start 会保存后端私有 `OpenAIRealOAuthAttemptSecret`，并根据 `redirect_uri` 启动本机 callback listener。
+- callback listener 是 `learning_agent/app/gui_provider_auth_attempts.py` 内的进程内 HTTP server，路径只接受 `/auth/callback`，职责是校验 OAuth state、接收 authorization code、调用 token exchange、复用现有 token 保存逻辑刷新 provider catalog。
+- token exchange 边界在 `learning_agent/app/gui_provider_openai_oauth.py`：`exchange_openai_oauth_code_for_tokens()` 只负责把 callback code 换成 token payload；保存 token refs 仍由 `store_openai_oauth_token_response()` 负责。
+- 安全边界：renderer 仍不能看到 code_verifier、raw token、secret ref 原文或 callback code；callback 默认 HTTP 日志关闭；失败只向 GUI/浏览器显示结构化短错误。
+- 后续真实 GUI 验收流程：启动 OpenHarness Desktop，设置页连接 OpenAI browser，系统浏览器完成官方授权，callback 页应显示 `Authorization Successful`，设置页轮询后 OpenAI provider 应变为 OAuth 已连接并显示 `direct_sse_ready`，然后在 composer 底部选择支持模型发真实 prompt，右侧事件必须证明 `runtime=direct_sse`、`websocket=false`、`codex_cli=false`。
+
+## 2026-06-27 OpenHarness Desktop OAuth Callback Owner Context
+
+- OpenAI OAuth redirect URI 仍是固定本机端口 `http://localhost:1455/auth/callback`，所以真实 GUI 验收前必须确认这个端口属于当前要测试的 OpenHarness Desktop bridge。
+- `gui_provider_auth_attempts.py` 的 callback server 现在会分配进程内 owner token，并通过 `/auth/callback/health?owner=...` 自检 `localhost:<port>` 是否真的路由到当前 server。
+- 如果 `localhost:1455` 被旧 bridge 或其他进程占用，OpenAI connect start 应快速失败为 `openai_oauth_callback_listener_unavailable`，不要继续让用户打开必然无法保持连接状态的官方授权页。
+- 当前与 OpenCode 对齐的官方 OAuth URL 参数包括 `client_id=app_EMoamEEZ73f0CkXaXp7hrann`、`redirect_uri=http://localhost:<port>/auth/callback`、`codex_cli_simplified_flow=true`、`id_token_add_organizations=true`、`originator=opencode`。
+- 后续如果用户报告“浏览器显示 Authorization Successful 但 GUI 未连接”，第一步检查 `Get-NetTCPConnection -LocalPort 1455` 和对应进程命令行，确认没有旧 `desktop-bridge --port 8876` 或其他测试进程抢占 callback。
+
+## 2026-06-27 OpenHarness Desktop GUI Context Compact Context
+
+- GUI 消息窗口现在不是只发送最新 prompt：后端会从 session messages 构建 Responses API input，把历史 user/assistant 消息一并交给 Direct ChatGPT OAuth SSE runtime。
+- 上下文预算由 `OPENHARNESS_GUI_CONTEXT_MAX_MESSAGES` 和 `OPENHARNESS_GUI_CONTEXT_MAX_CHARS` 控制；超过预算时，旧消息会压缩成一条 developer summary，再保留最近几条原始消息，避免无限堆积。
+- 真实 ChatGPT Codex endpoint 的 content type 规则必须牢记：user/developer/system 消息内容用 `input_text`，assistant 历史消息内容用 `output_text`；如果 assistant 历史误用 `input_text`，官方会返回 HTTP 400。
+- 真实 GUI 验收标准已经固定：右侧事件需要看到 `runtime_path` 中 `runtime=direct_sse`、`transport=https_sse`、`websocket_enabled=false`、`codex_cli_used=false`；无压缩场景需要 `compacted=false`；强制压缩场景需要 `context_budget compacted=true` 和 `compact_completed`，并且模型仍能回忆早期测试代码 `ALPHA_CONTEXT_927`。
+- 上下文压缩事件和学习副本位于 `learning_agent/test/gui_context_compact_v4/`；排查后续“记不住上下文”时，先看 `context_budget` 的 `source/input_message_count/output_message_count/reason/compact_generation`，再判断是 GUI session 丢失、压缩阈值问题，还是 Direct SSE body 协议问题。

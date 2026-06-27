@@ -1,5 +1,16 @@
 ﻿# 当前任务进度摘要（2026-06-16）
 
+## GUI 上下文压缩 V4 蓝图（2026-06-27）
+
+- 用户追问 OpenHarness Desktop GUI 消息窗口是否已经接入原有上下文压缩模块；代码证据显示当前 Direct ChatGPT OAuth SSE 路径仍只把本轮 `prompt` 传给模型，没有把 `GuiSession.messages` 历史消息接入 compact pipeline。
+- 已读取相关代码：`learning_agent/core/conversation_context.py`、`learning_agent/core/compact_pipeline.py`、`learning_agent/app/gui_bridge.py`、`learning_agent/app/gui_agent_adapter.py`、`learning_agent/tests/test_gui_direct_oauth_sse_adapter.py`、`learning_agent/tests/test_gui_turn_payload_contract.py`。
+- 已按 `superpowers:writing-plans` 产出 V4 实施蓝图：`docs/superpowers/plans/2026-06-27-openharness-desktop-gui-context-compact-v4.md`。
+- 蓝图核心方案：新增 `learning_agent/app/gui_context.py`，以 GUI 持久化消息 `GuiSession.messages` 为唯一历史源，复用 `learning_agent.core.compact_pipeline.prepare_messages_before_model()` 进行主动压缩，并在 Direct SSE adapter 中支持压缩后的多消息输入和上下文过长后的单次反应式压缩重试。
+- 蓝图验收门禁：自动化测试通过、Direct SSE 请求体可证明包含压缩历史、右侧运行事件面板可见 context/compact 事件、并通过 Computer Use 对真实可见 GUI 执行长上下文回忆验收。
+- 已按 `andrej-karpathy-perspective` 产出评估报告：`docs/superpowers/plans/2026-06-27-openharness-desktop-gui-context-compact-v4-karpathy-review.md`；评估结论是方向正确但计划过重，执行前应补强 TaskState 目标来源、current prompt exact-once、Direct SSE schema contract、reactive retry 状态机、事件隐私边界和真实 GUI 数据层证据。
+- 已按评估报告升级原蓝图为 V4.1：同一文件 `docs/superpowers/plans/2026-06-27-openharness-desktop-gui-context-compact-v4.md` 现在加入 Task 0 Evidence Lock、最小垂直切片、current prompt exact-once、Direct SSE body contract、两次尝试 reactive retry 状态机、隐私安全事件和真实 GUI 双层验收；蓝图从约 1017 行收紧到约 730 行。
+- 已按用户要求补充 V4.1 蓝图的真实 GUI 验收门禁：每个影响 GUI 的任务必须使用 `computer-use` 在真实可见 OpenHarness Desktop GUI 窗口验证；发现 bug 时必须使用 `superpowers:systematic-debugging` 查询 root cause、修复并重新测试，通过后才允许继续执行蓝图下一个任务。
+
 历史全文归档：`agent_memory/archive/2026-06-16-computer-use-mcp-v2-parity/`。
 
 ## 成功标准
@@ -1256,3 +1267,83 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 蓝图默认 visual QA 命令因当前已有 `desktop-bridge --port 8776` 用户进程监听而失败；未关闭该用户可见外壳进程，改用备用端口执行最终 visual QA。
 - 最终 release gate visual QA：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9576 -RendererPort 5977 -CdpPort 9975` 退出码 0，结果 JSON 为 `ok=true`、`methodCount=3`、`inputType=password`、`waitingVisible=true`、`rawSecretLeakFound=false`。
 - 最终 `visual_evidence/` 已用 9576/5977/9975 这一轮截图和 JSON 覆盖，并再次复跑 secret scan 通过。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 Progress
+
+- 已在 worktree `H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\direct-chatgpt-oauth-sse-v3` 执行 V3 蓝图，当前分支为 `codex/direct-chatgpt-oauth-sse-v3`。
+- Task 0-7 已完成：创建隔离 worktree、实现 ChatGPT OAuth token 解析与 os_encrypted 存储、接入直接 SSE client、接入 GUI turn payload、接入 provider/model/composer 状态联动。
+- Task 7 targeted gate 已通过：`python -m py_compile learning_agent\app\gui_provider_settings.py` 成功；`python -m pytest learning_agent\tests\test_gui_provider_settings_contract.py learning_agent\tests\test_gui_provider_oauth_disconnect.py learning_agent\tests\test_openai_provider_runtime_state.py learning_agent\tests\test_openai_model_registry.py -q` 为 10 passed；`npm test -- --run composer.test.ts composerRouteControls.test.ts providerSettingsStore.test.ts settingsProvidersPanel.test.tsx settingsModelsPanel.test.tsx` 为 5 files / 24 tests passed。
+- Task 8 已补充 direct SSE 首事件诊断、首 delta 5 秒预算标记和 runbook 文档；`python -m py_compile learning_agent\app\gui_agent_adapter.py learning_agent\tests\test_gui_direct_oauth_sse_adapter.py` 成功，`python -m pytest learning_agent\tests\test_gui_direct_oauth_sse_adapter.py learning_agent\tests\test_gui_direct_oauth_cancel.py -q` 为 7 passed。
+- 剩余门禁：完整 pytest/npm/lint/build/secret scan 还需要统一跑一遍；fake fixture 与真实 ChatGPT OAuth direct SSE 还需要使用真实可见 OpenHarness Desktop GUI 进行验收。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 Verification Update
+
+- 完整自动化门禁已通过：provider secret leak scanner、GUI turn payload、OS secret store、OAuth disconnect、real OAuth attempt、provider runtime state、model registry、ChatGPT Codex SSE client、legacy wrapper、direct OAuth SSE adapter、cancel 测试均通过。
+- 前端完整门禁已通过：`npm test -- --run` 为 17 files / 76 tests passed，`npm run lint` 退出码 0，`npm run build` 成功生成 Vite production renderer。
+- 真实可见 GUI fake fixture 验收已通过：OpenHarness Desktop 窗口中输入 `请输出 OPENHARNESS_OK` 后，主线程显示 `OPENHARNESS_OK`，右侧事件流可见 `direct_sse_route_selected`、`message_delta`、`message_completed`、`direct_sse_completed`、`gui_turn_completed`。
+- 真实 OAuth direct SSE 验收未完成：已用 `real_browser + experimental + os_encrypted + direct_sse + GUI trace` 启动真实模式，并打开 OpenAI 登录窗口；窗口停在“欢迎回来/电子邮件地址”页面，4 分钟轮询 provider catalog 均为 `connected=false`。
+- 当前停止条件：由于 OpenAI 账号登录/授权属于用户认证动作，agent 不能代替用户输入账号或点击认证步骤；用户手动完成 OAuth 后，需要继续验证 provider 变为 `direct_sse_ready`、底部模型可选、真实 prompt 返回模型 delta。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 External Browser Fix
+
+- 真实 GUI 验收继续推进时发现 OAuth 链接最初会打开到 Electron 内部 `欢迎回来 - OpenAI` 窗口，无法复用用户 Edge/系统浏览器中的 ChatGPT 登录态。
+- 已新增 `apps/desktop/src/main/externalLinks.ts`，并在 `apps/desktop/src/main/index.ts` 里拦截 `target=_blank` 和外部导航：OpenAI/OAuth/http(s) 外链交给系统浏览器，Vite renderer 自身仍留在 Electron 内部。
+- 已新增 `apps/desktop/tests/externalLinks.test.ts`，覆盖 OpenAI OAuth 外链、renderer 同源保留、坏 URL 不崩溃三条规则；`npm test -- --run externalLinks.test.ts` 为 3 passed，`npm run lint` 通过。
+- 已用真实可见 GUI 验证修复效果：点击 OpenAI `访问此链接` 后，授权页打开在 Microsoft Edge，Electron 窗口只保留 OpenHarness Desktop 主窗口。
+- 剩余真实 OAuth 验收仍未完成：provider catalog 当前仍为 `connected=false`，需要用户在 Edge 中完成 OpenAI 登录/授权后继续验证真实 direct SSE 模型调用。
+
+## 2026-06-27 Direct ChatGPT OAuth Callback Debugging
+
+- 用户反馈已手动点击认证，但 OpenAI 官方认证返回后被拒绝；本轮按 systematic debugging 只做证据收集，没有先改代码。
+- 运行时证据：`/v2/gui/provider-settings/providers` 显示 OpenAI 仍为 `connected=false`，secret store 为 `os_encrypted`，但没有账号标签或 direct route 状态。
+- 事件证据：`memory/status/events.jsonl` 只有上一轮 fake fixture `direct_sse_route_selected/message_delta/direct_sse_completed` 事件，没有任何 OAuth callback/token exchange 事件。
+- 路由证据：当前 `gui_bridge.py` 有 `auth-attempt/start/status/complete/cancel`，但没有 `/auth/callback` GET 路由；`complete_real_provider_auth_attempt_with_tokens()` 虽已存在，但没有生产 HTTP callback 调用它。
+- 端口证据：`localhost:1455` 没有监听，`127.0.0.1:8776` 是当前 bridge；`8776/auth/callback` 返回 404，`1455/auth/callback` 超时。
+- 生成 URL 证据：新 auth-attempt 为 `real_browser`，redirect 到 `http://localhost:1455/auth/callback`，client id 来源为 `observed_opencode_reference`，originator 当前为 `openharness`。
+- 当前结论：真实 OAuth 连接失败的已确认根因是 Desktop 新链路缺少 callback server/token exchange 闭环；下一步应按旧 `CodexOAuthChatModel._login_with_browser()` 的工作模式补齐 callback 接收、state 校验、token exchange、状态落盘和 GUI 可见错误面。
+
+## 2026-06-27 Direct ChatGPT OAuth Callback Loop Fix
+
+- 已按 TDD 补齐两个红灯测试：`test_openai_oauth_code_exchange_posts_form_request` 证明 callback code 必须 POST 到 `https://auth.openai.com/oauth/token`，`test_real_oauth_callback_listener_exchanges_code_and_updates_catalog` 证明本机 callback listener 收到 `code/state` 后必须交换 token 并把 OpenAI provider 刷新为 `connected=true`、`source=oauth`、`direct_route_status=direct_sse_ready`。
+- 已实现 `exchange_openai_oauth_code_for_tokens()`，使用标准 OAuth form body 携带 `grant_type=authorization_code`、`code`、`redirect_uri`、`client_id`、`code_verifier`，并把 HTTP/network/bad JSON 错误收敛为 GUI 可显示的结构化错误。
+- 已实现 Desktop provider auth-attempt 的本机 callback 闭环：真实 OAuth start 后启动 `localhost:<callback_port>` listener，`/auth/callback` 校验 state、接收 code、交换 token、复用 `complete_real_provider_auth_attempt_with_tokens()` 安全落盘；失败、取消和端口不可用都会清理进程内 PKCE verifier/state，避免永久 pending。
+- 安全边界：callback handler 关闭默认 HTTP 访问日志，避免 authorization code 进入日志；错误页面只显示短错误消息；主 provider settings 仍只保存 secret refs，不保存明文 access/refresh/id token。
+- 自动化验证已通过：`python -m pytest learning_agent\tests\test_gui_provider_openai_real_oauth_attempts.py -q` 为 4 passed；provider/settings/model/direct SSE 相关 pytest 为 15 passed；`python -m py_compile learning_agent\app\gui_provider_auth_attempts.py learning_agent\app\gui_provider_openai_oauth.py` 通过；`python learning_agent\scripts\assert_no_real_provider_secret_leaks.py` 输出 `Provider secret leak scan passed.`；`apps/desktop` 的 `npm test` 为 18 files / 79 tests passed，`npm run lint` 通过。
+- 真实可见 GUI smoke 已完成：使用隔离端口启动 `bridge=http://127.0.0.1:8876`、`renderer=http://127.0.0.1:5477` 的 OpenHarness Desktop 窗口，设置 -> 提供商页面能正常加载 provider 列表；调用 `auth-attempt/start` 后返回 `mode=real_browser` 的 OpenAI 官方授权 URL，并确认 `localhost:1455` 由 bridge 进程监听；随后取消测试 attempt 并关闭测试连接弹窗，窗口保留在 provider 列表页。
+- 仍未声明真实模型连接最终完成：当前自动化已经证明 callback/token exchange 闭环可用，但真实 OpenAI 官方 OAuth 页面仍需要用户在浏览器中完成授权；完成后还需要真实可见 OpenHarness Desktop GUI 验证 provider 变为 `direct_sse_ready`、底部模型可选、真实 prompt 产生 direct SSE delta。
+
+## 2026-06-27 Direct ChatGPT OAuth Callback Owner Probe Progress
+
+- 已按 systematic debugging 找到“网页认证后 GUI 连接状态无法保持”的更具体根因：旧测试 bridge `8876` 仍占用 `localhost:1455`，官方回调会落到旧进程，当前 GUI bridge 的 OAuth `state` 无法匹配。
+- 已按 TDD 增加回归测试 `test_real_oauth_start_rejects_when_localhost_routes_to_another_callback_owner`，模拟 `localhost:<callback_port>` 被其他 listener 接走时，OpenHarness 必须拒绝开始 OAuth，而不是生成一个必然失败的官方授权 URL。
+- 已实现 callback owner health probe：callback listener 启动后必须通过 `/auth/callback/health?owner=<token>` 证明当前 server 才是真正接收 `localhost:<port>` 的进程；旧进程、错误 listener、HTTP 404/500 都会快速失败。
+- 已把 OpenAI OAuth URL 的 `originator` 从 `openharness` 改为 `opencode`，与 `D:\opencode` 参考实现保持一致。
+- 已保存本次修改学习副本到 `learning_agent/test/openai_oauth_callback_owner_probe_fix/source_copies/`。
+- 自动化验证已通过：`python -m py_compile learning_agent/app/gui_provider_auth_attempts.py learning_agent/app/gui_provider_openai_oauth.py`；`python -m pytest learning_agent/tests/test_gui_provider_openai_real_oauth_attempts.py -q` 为 6 passed；相关 provider/model/OAuth backend group 为 14 passed。
+- 运行时清理已完成：旧 `8876` bridge、`5477` renderer 和对应 Electron smoke 窗口已停止；`Get-NetTCPConnection` 确认没有 `8876/5477` listener。
+- 修复版 OpenHarness Desktop 已重新启动：当前 `8776` listener 为 PID `41600`，`5177` listener 为 PID `16932`，`1455` listener 也归 PID `41600`，说明官方 OAuth callback 会回到当前 bridge。
+- 已用真实后端合同验证：`/v2/gui/provider-settings/providers` 可返回 OpenAI provider；`/v2/gui/provider-settings/auth-attempt/start` 可生成 `mode=real_browser` 的 OpenAI 官方授权 URL，URL 包含 `originator=opencode` 和 `redirect_uri=http://localhost:1455/auth/callback`；测试 attempt 已取消，避免遗留 pending。
+- Remaining open risk: 真实可见 OpenAI 官方网页登录/授权仍需用户手动完成；完成后还要检查 provider catalog 变成 `connected=true/source=oauth/direct_sse_ready`，再发真实 prompt 验证 direct SSE delta。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE Real GUI Reply Fix
+
+- 用户已手动完成 OpenAI OAuth 后，真实 GUI 消息窗口仍不能正常回复；本轮使用真实可见 OpenHarness Desktop 窗口发送 `请只回复 OH_FIXED_OK` 复现问题。
+- 已确认 provider catalog 不是问题：OpenAI provider 返回 `connected=true`、`source=oauth`、`direct_route_status=direct_sse_ready`，说明后端 token 连接成功。
+- 第一层根因：GUI adapter 把 OpenHarness 内部 `metadata` 字段发送给 `https://chatgpt.com/backend-api/codex/responses`，真实后端返回 `{"detail":"Unsupported parameter: metadata"}`。
+- 第二层根因：GUI 底部“超高/ultra”被原样传为 `reasoning.effort=ultra`，真实后端返回 `Invalid value: 'ultra'. Supported values are: 'none', 'minimal', 'low', 'medium', 'high', and 'xhigh'.`
+- 第三层根因：修正请求体后，真实 SSE 进入 HTTP 200，但 parser 不认识 `response.content_part.added` / `response.content_part.done`，误报 `endpoint_drift_detected`。
+- 已按 TDD 修复：`_direct_sse_extra_body()` 现在把 `ultra` 映射为 `xhigh`，并只向真实 ChatGPT Codex API 发送支持的 `reasoning` 字段；`KNOWN_NON_TEXT_EVENT_TYPES` 现在接受真实 content part 事件。
+- 自动化验证通过：`python -m pytest learning_agent\tests\test_gui_direct_oauth_sse_adapter.py learning_agent\tests\test_chatgpt_codex_sse_client.py learning_agent\tests\test_gui_turn_payload_contract.py -q` 为 12 passed。
+- 学习副本已保存到 `learning_agent/test/direct_sse_real_gui_reply_fix/`，包含 `gui_agent_adapter.py`、`chatgpt_codex_sse.py` 和两份相关测试。
+- 当前 GUI 已用新代码重启到 `bridge=8776`、`renderer=5177`；真实可见 GUI 最终验收已通过：在 OpenHarness Desktop 消息窗口发送 `请只回复 OH_FINAL_OK` 后，主消息区返回 `OH_FINAL_OK`，右侧事件流出现 `runtime_path`、`message_delta`、`direct_sse_completed`、`message_completed`、`gui_turn_completed`，且 `runtime_path` 显示 `runtime=direct_sse`、`transport=https_sse`、`websocket_enabled=false`、`codex_cli_used=false`。
+
+## 2026-06-27 OpenHarness Desktop GUI Context Compact V4 Progress
+
+- 已按 `docs/superpowers/plans/2026-06-27-openharness-desktop-gui-context-compact-v4.md` 完成 GUI 消息窗口上下文接入：`gui_bridge.py` 从真实 GUI session messages 构建上下文，`gui_agent_adapter.py` 把完整 context messages 传入 direct SSE，`gui_context.py` 负责按 `OPENHARNESS_GUI_CONTEXT_MAX_MESSAGES` 与 `OPENHARNESS_GUI_CONTEXT_MAX_CHARS` 做可测试压缩。
+- 已接入隐私安全事件：真实 GUI turn 会输出 `context_budget`、必要时输出 `compact_completed`，事件只记录消息数量、字符预算、压缩代数和原因，不输出原文 compact summary、OAuth token、secret ref 或 raw access token。
+- 自动化门禁已通过：上下文 builder、Direct SSE context body、GUI turn payload、ChatGPT Codex SSE client、provider/model runtime、frontend test/lint、py_compile 和 provider secret leak scanner 均完成过验证；最后一轮协议修复后，`test_gui_context_builder.py`、`test_gui_direct_oauth_sse_adapter_context.py`、`test_chatgpt_codex_sse_client_context_body.py` 为 9 passed。
+- 真实可见 GUI no-compact 验收已通过：在 OpenHarness Desktop 输入 `请记住这个测试代码：ALPHA_CONTEXT_927。只回复：已记住。` 后返回 `已记住。`；随后输入 `刚才的测试代码是什么？只输出代码。`，事件显示 `compacted=false`、`reason=compact_not_needed`，模型返回 `ALPHA_CONTEXT_927`。
+- 真实可见 GUI forced-compact 验收已通过：使用 `OPENHARNESS_GUI_CONTEXT_MAX_MESSAGES=5`、`OPENHARNESS_GUI_CONTEXT_MAX_CHARS=900` 启动，连续发送 5 条补充上下文后右侧事件流可见 `compact_completed`；最终输入 `刚才我让你记住的测试代码是什么？只输出代码。`，事件显示 `compacted=true`、`reason=compacted_before_model`、`runtime=direct_sse`、`websocket_enabled=false`、`codex_cli_used=false`，模型返回 `ALPHA_CONTEXT_927`。
+- 验收期间按 systematic debugging 发现并修复真实协议 bug：assistant 历史消息不能以 `input_text` 发送到 ChatGPT Codex endpoint，必须使用 `output_text`；修复后最小真实 HTTP SSE 诊断从 HTTP 400 变为 HTTP 200，并在真实 GUI 中复测通过。
+- 学习副本已保存到 `learning_agent/test/gui_context_compact_v4/` 根目录和 `learning_agent/test/gui_context_compact_v4/source_copies/`，包含 `gui_context.py`、`gui_agent_adapter.py`、`gui_bridge.py`、`gui_protocol.py`、`chatgpt_codex_sse.py` 和相关测试文件。
+- 最终 release gate 已通过：上下文/Direct SSE 相关 `pytest` 为 25 passed；provider/model runtime 相关 `pytest` 为 13 passed；`py_compile` 通过；`assert_no_real_provider_secret_leaks.py` 输出 `Provider secret leak scan passed.`；`npm --prefix apps/desktop test -- --run` 为 18 files / 79 tests passed；`npm --prefix apps/desktop run lint` 通过；`npm --prefix apps/desktop run build` 成功生成 production renderer。
