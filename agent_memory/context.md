@@ -324,3 +324,10 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 真实 ChatGPT Codex endpoint 的 content type 规则必须牢记：user/developer/system 消息内容用 `input_text`，assistant 历史消息内容用 `output_text`；如果 assistant 历史误用 `input_text`，官方会返回 HTTP 400。
 - 真实 GUI 验收标准已经固定：右侧事件需要看到 `runtime_path` 中 `runtime=direct_sse`、`transport=https_sse`、`websocket_enabled=false`、`codex_cli_used=false`；无压缩场景需要 `compacted=false`；强制压缩场景需要 `context_budget compacted=true` 和 `compact_completed`，并且模型仍能回忆早期测试代码 `ALPHA_CONTEXT_927`。
 - 上下文压缩事件和学习副本位于 `learning_agent/test/gui_context_compact_v4/`；排查后续“记不住上下文”时，先看 `context_budget` 的 `source/input_message_count/output_message_count/reason/compact_generation`，再判断是 GUI session 丢失、压缩阈值问题，还是 Direct SSE body 协议问题。
+
+## 2026-06-27 OpenHarness Desktop OAuth One-Click Launch Context
+
+- 后续用户要手动启动真实 OAuth 版 OpenHarness Desktop，优先使用仓库根目录 `start_openharness_desktop_oauth.bat`，不要手动拼多组 PowerShell 环境变量。
+- 该脚本固定启动当前主链路：bridge 默认 `http://127.0.0.1:8776`，renderer 默认 `http://127.0.0.1:5177`，OpenAI callback 默认 `http://localhost:1455/auth/callback`。
+- 该脚本启动前会验证 OpenAI browser auth attempt 返回 `mode=real_browser` 且 URL host 为 `auth.openai.com`；如果验证失败，说明启动环境不是官方 OAuth 链路，不能继续让用户手动认证。
+- 该脚本启动后日志在 `%TEMP%\openharness-desktop-oauth-*`，排查启动失败时先看该目录下 backend/desktop stdout/stderr，再看 provider catalog。

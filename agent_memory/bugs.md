@@ -575,3 +575,10 @@
 - Fix: 已通过 revert 恢复 OpenAI 三方法界面；不再把 OAuth browser/headless 从连接弹窗中隐藏。
 - Evidence: 当前以真实 OAuth env 重启后，auth-attempt start 返回 `mode=real_browser`，URL host 是 `auth.openai.com`，说明 OAuth 官网链接可以由后端生成；不是 API key-only 路径。
 - Remaining note: 默认 mock 和真实 OAuth 的显示文案仍有历史包袱，catalog 里 browser/headless 状态仍显示 `mock_available`；但在真实 OAuth env 下，实际 start 走 `real_browser`。后续可单独做一个小修复，把 catalog 状态在真实 OAuth 模式下改成 `available`，避免文案误导。
+
+## 2026-06-27 OAuth One-Click Launch Prevents Wrong Runtime Mode
+
+- Closed risk: 用户手动启动 OpenHarness Desktop 时容易漏掉真实 OAuth 环境变量，导致 OpenAI 连接界面存在但实际 auth-attempt 走 mock/API-key-only 链路，表现为 OAuth 官网打不开或 provider 状态误导。
+- Fix: 新增 `start_openharness_desktop_oauth.bat` + `start-openharness-desktop-oauth.ps1`，把真实 OAuth、Direct SSE、os_encrypted secret store、callback 端口、client id 和旧端口清理统一到一个入口。
+- Evidence: 一键脚本启动时已在后端层验证 OpenAI auth-attempt 为 `real_browser`，授权 URL host 为 `auth.openai.com`，并取消测试 attempt；真实 GUI 中设置页显示 OpenAI OAuth 已连接且 Direct ChatGPT OAuth SSE 已就绪。
+- Regression guard: `learning_agent/tests/test_openharness_desktop_oauth_one_click_launch_scripts.py` 会检查一键脚本是否仍包含真实 OAuth 门禁、Direct SSE、provider endpoint 验证、`auth.openai.com` 验证和临时日志目录覆盖。

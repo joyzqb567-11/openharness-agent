@@ -164,3 +164,9 @@ Computer Use complex GUI tasks must not rely on primitive tool-loop convergence.
 - 门禁：在该 marker 激活期间，除高层任务、阶段观察和必要授权外，所有桌面原子动作都应被阻断；这不是 Notepad/Paint 专项，而是所有通用 GUI 任务的收敛边界。
 - 经验：文本正文抽取要识别用户常见标签词，例如“输入文本 `hello everyone`”和“准确文本：hello everyone”；标签词是说明，不是正文。否则 Stage Runtime 会正确执行错误内容，形成假进度。
 - 验收：以后遇到复杂 GUI 任务超时或提前 final，必须同时检查 `desktop_task_completed/desktop_task_incomplete`、`stage_count/completed_stage_count`、`actionability_pending`、后续工具是否被限制在 `desktop_task/observe`，不能只看 low-level event 数量。
+
+## 2026-06-27 OpenHarness Desktop OAuth 启动经验：把真实链路封装成一个入口
+
+- 经验：OpenAI OAuth 官网打不开不一定是前端按钮坏了，常见原因是 GUI 虽然启动了，但 bridge 没有带 `real_browser`、`direct_sse`、`os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL` 和正确 client id。
+- 做法：以后真实 OAuth GUI 验收和用户手动启动都优先用 `start_openharness_desktop_oauth.bat`，并在脚本内先验证 `auth-attempt/start` 返回 `mode=real_browser` 和 `auth.openai.com`，再交给用户点击认证。
+- 门禁：不能只看设置页有没有 OpenAI 行，也不能只看 renderer 窗口是否打开；必须同时确认 callback 1455 属于当前 bridge、provider catalog 可加载、OpenAI browser attempt 是真实官方 OAuth 链路。

@@ -1475,3 +1475,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已重新用真实 OAuth 环境启动 OpenHarness Desktop：`OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID=app_EMoamEEZ73f0CkXaXp7hrann`、`OPENHARNESS_OPENAI_RUNTIME=direct_sse`。
 - 运行时验证：调用 `/v2/gui/provider-settings/auth-attempt/start` 创建 OpenAI browser attempt，返回 `mode=real_browser`，授权 URL host 为 `auth.openai.com`，callback 端口 `1455` 已监听；测试 attempt 已取消，用户可在 GUI 中重新点击正式连接。
 - 当前 GUI 已重新拉起：bridge 监听 `8776`，renderer 监听 `5177`，Electron renderer 连接 `http://127.0.0.1:8776`。
+
+## 2026-06-27 OpenHarness Desktop OAuth One-Click Launch Script
+
+- 已新增根目录双击入口 `start_openharness_desktop_oauth.bat`，它会调用 `apps/desktop/scripts/start-openharness-desktop-oauth.ps1`，统一启动真实 OAuth/Direct SSE 版本的 OpenHarness Desktop GUI。
+- 一键脚本会设置真实 OAuth 链路所需环境：`OPENHARNESS_OPENAI_AUTH_MODE=real_browser`、`OPENHARNESS_OPENAI_RUNTIME=direct_sse`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、OpenCode 参考 client id、callback 端口 1455 和 bridge token。
+- 一键脚本会在启动前检查并清理当前仓库旧 OpenHarness 进程占用的 8776/5177/1455 端口；若端口属于非 OpenHarness 进程则拒绝误杀并报错。
+- 已修改 `start-backend.ps1` 与 `start-desktop-dev.ps1` 支持 `OPENHARNESS_DESKTOP_LAUNCH_LOG_DIR`，一键脚本默认把日志写入 `%TEMP%\openharness-desktop-oauth-*`，避免普通用户双击启动污染仓库未跟踪文件。
+- 已保存学习副本到 `learning_agent/test/openharness_desktop_oauth_one_click_launch_20260627/source_copies/`，包含新增脚本、被修改启动脚本和测试。
+- 自动化验证已通过：一键启动脚本静态合同测试 4 passed；provider/OAuth 回归 12 passed；桌面前端 vitest 19 files / 82 tests passed；PowerShell parser 和 Python py_compile 均通过。
+- 真实可见 GUI 验收已用 computer-use 完成：脚本真实拉起 OpenHarness Desktop，设置 -> 提供商页面可见 OpenAI `已连接`、`ChatGPT OAuth`、`Direct ChatGPT OAuth SSE 已就绪`，右侧事件流可见 `direct_sse_completed` 和 `model_call_completed`。
