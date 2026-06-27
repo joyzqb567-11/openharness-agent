@@ -99,17 +99,17 @@
 
 ## Recommended Next Action
 
-- Do not delete `.worktrees/chatgpt-oauth-real-model-v1` yet.
 - The two low-risk plan documents have now been migrated to mainline.
 - Next engineering task: if desired, write a new blueprint for "Transport Diagnostics Tab V1" using only the ideas from `gui_model_latency_diagnostics.py`, not the old implementation wholesale.
-- Cleanup can happen only after one of these decisions is made:
-  - user confirms old uncommitted code/evidence can be abandoned;
-  - additional selected source/document files are migrated and verified;
-  - sensitive/runtime files are explicitly excluded from archival.
+- User confirmed on 2026-06-27: old worktree remaining uncommitted contents can be abandoned.
+- Cleanup completed on 2026-06-27:
+  - removed `.worktrees/chatgpt-oauth-real-model-v1` with `git worktree remove --force`;
+  - deleted branch `codex/chatgpt-oauth-real-model-v1`;
+  - ran `git worktree prune`;
+  - removed the now-empty `.worktrees` directory.
 
 ## Stop Condition
 
-- Stop before deleting or force-removing the old worktree.
-- Stop before staging anything under old `memory/`.
-- Stop before staging raw logs or OAuth acceptance evidence.
-- Ask for explicit user confirmation before discarding old uncommitted worktree contents.
+- Historical stop condition was satisfied by explicit user confirmation on 2026-06-27.
+- Do not recreate or restore the old worktree unless a future task explicitly needs a new clean worktree from `codex/publish-main`.
+- Do not recover old abandoned `memory/`, raw logs, OAuth acceptance evidence, or local state from filesystem backups unless the user explicitly asks for a separate forensic recovery task.

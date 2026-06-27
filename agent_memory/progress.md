@@ -1452,3 +1452,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 迁移前已做两层检查：先查找敏感关键词，再用更严格的 token 形态扫描真实 API key、Bearer token、OAuth token、callback code、client secret；未发现真实凭据形态。
 - 本轮没有迁移旧 worktree 的实验代码、`memory/`、raw logs、PID/evidence JSON；这些内容仍按风险内容处理，不能直接提交或复制。
 - 当前清理状态：低风险计划文档已保留；若用户确认放弃旧 worktree 的剩余未提交内容，下一步可以用 `git worktree remove --force .worktrees/chatgpt-oauth-real-model-v1` 做正式清理。
+
+## 2026-06-27 Old Worktree Final Cleanup
+
+- 用户已明确确认放弃旧 worktree 剩余未提交内容。
+- 已在删除前确认 `.worktrees/chatgpt-oauth-real-model-v1` 路径位于当前项目 `.worktrees` 下，避免误删项目外目录。
+- 已确认旧分支 `codex/chatgpt-oauth-real-model-v1` 的提交 `026d2ba0` 是当前主链路祖先，已提交历史不再阻止清理。
+- 已执行正式 Git 清理：`git worktree remove --force .worktrees/chatgpt-oauth-real-model-v1`、`git branch -D codex/chatgpt-oauth-real-model-v1`、`git worktree prune`。
+- `.worktrees` 目录在清理后为空，已删除空目录；当前 `git worktree list` 只剩主工作区 `H:/codexworkplace/sofeware/OpenHarness-main`。
