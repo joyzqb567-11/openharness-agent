@@ -1460,3 +1460,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已确认旧分支 `codex/chatgpt-oauth-real-model-v1` 的提交 `026d2ba0` 是当前主链路祖先，已提交历史不再阻止清理。
 - 已执行正式 Git 清理：`git worktree remove --force .worktrees/chatgpt-oauth-real-model-v1`、`git branch -D codex/chatgpt-oauth-real-model-v1`、`git worktree prune`。
 - `.worktrees` 目录在清理后为空，已删除空目录；当前 `git worktree list` 只剩主工作区 `H:/codexworkplace/sofeware/OpenHarness-main`。
+
+## 2026-06-27 CodeGraph Refresh After Worktree Cleanup
+
+- 已在主工作区执行 `codegraph sync .`，CodeGraph 返回 `Already up to date`。
+- 已复查 `codegraph status .`：索引状态为 `[OK] Index is up to date`，当前统计为 1,154 files、30,114 nodes、41,300 edges。
+- 已用 `codegraph query ModelCallStatus --limit 10` 验证新近主链路符号可被查询到，结果包含 `apps/desktop/src/components/ModelCallStatus.tsx`。
+- 已确认 `.worktrees` 目录不存在，`git worktree list` 只剩主工作区；知识图谱已经对齐到旧 worktree 删除后的当前主链路。
