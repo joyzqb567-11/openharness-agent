@@ -1642,3 +1642,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `命令` 页签可见 `后台命令`、`GUI acceptance command`、脱敏后的 `[REDACTED]`、`visible command output line one/two` 和禁用的 `停止` 按钮。
 - 验收中发现 accessibility/window 句柄偶发指向旧 Electron 窗口或刷新不完整；已按 systematic debugging 确认 Vite served code 和 `/v2/gui/commands` endpoint 均来自当前 worktree，最终通过选择当前主窗口并坐标点击 `命令` 页签完成复验。
 - 验收证据已保存到 `learning_agent/test/gui_command_console_task7/visible_gui_acceptance_20260627.md` 和 `command_panel_visible_gui_20260627.jpg`；本轮改动源码已同步复制到 `learning_agent/test/gui_command_console_task7/source_copies/`。
+
+## 2026-06-28 Desktop GUI Toolchain Control Center Task 8
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 8：新增 Acceptance Controller Dashboard，把真实可见 GUI 验收场景、运行历史和启动入口接入右侧检查器。
+- 后端新增 `learning_agent/app/gui_acceptance.py`，复用 `learning_agent/acceptance_controller/controller.ps1`、`learning_agent/acceptance_controller/scenarios/*.json`、既有 run artifact 结构和 `WindowsComputerUseControllerTakeoverDebugSurface.read_acceptance_run()`，没有重写平行验收系统。
+- `learning_agent/app/gui_bridge.py` 已新增 `GET /v2/gui/acceptance/scenarios`、`GET /v2/gui/acceptance/runs`、`POST /v2/gui/acceptance/run`，继续使用既有 GUI token 门禁；`POST` 支持 `dry_run` 合同测试，真实模式会在 Windows 上启动可见 PowerShell 验收控制器。
+- 前端新增 `AcceptancePanel.tsx`，并扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `runtime-panels.css`，真实 GUI 现在有 `验收` 页签，展示 scenario 数量、run 数量、controller ready、visible gate、场景卡片、证据状态和运行按钮。
+- 自动化验证已通过：`python -m py_compile learning_agent\app\gui_acceptance.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_acceptance_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_acceptance_contract -v` 为 3 tests 通过；`npm --prefix apps/desktop run test -- acceptancePanel guiClient` 为 2 files / 22 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `验收` 页签可见 `验收控制器`、`160 scenarios`、`controller ready`、`visible gate`，并显示多条 scenario 卡片和 `运行` 按钮；本轮未点击真实运行按钮，避免启动长时间可见验收流程。
+- 直接 HTTP 验证 `GET /v2/gui/acceptance/scenarios` 返回安全 smoke 场景 `agent_capability_computer_use_mcp_smoke_visible_terminal`，说明 GUI 面板读取的是当前 worktree 的真实 `acceptance_controller` 场景目录。
+- 本轮改动源码已同步复制到 `learning_agent/test/gui_acceptance_dashboard_task8/source_copies/`；CodeGraph 已执行 `codegraph sync` 并同步 9 个变更文件。

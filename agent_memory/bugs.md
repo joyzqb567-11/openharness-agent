@@ -645,3 +645,11 @@
 - Root cause: 不是 Task 7 源码或 bridge 路由错误，而是长任务多次启动 Electron 后残留多个同名窗口/窗口句柄刷新不完整；需要选择包含当前 worktree 项目名和完整右侧页签的主窗口。
 - Fix: 重新 `list_apps()`，选择 `ai.opencode.desktop.dev` 中包含完整主界面的 `OpenHarness Desktop` 窗口，必要时用最新截图坐标点击右侧 `命令` 页签，而不是复用旧 element index。
 - Verification: 最终真实截图显示 `后台命令` 面板、`GUI acceptance command` 卡片、`[REDACTED]` 脱敏命令、tail 输出和禁用的 `停止` 按钮；证据保存于 `learning_agent/test/gui_command_console_task7/command_panel_visible_gui_20260627.jpg`。
+
+## 2026-06-28 Desktop GUI Acceptance Dashboard Task 8 Accessibility Snapshot Note
+
+- Closed risk: Task 8 真实 GUI 验收时，Computer Use 截图已经显示 `验收控制器` 面板，但随后一次 accessibility tree 读取仍返回旧的 `计划协作控制中心` 内容，容易误判为验收页签没有真正渲染。
+- Evidence: 同一窗口的 screenshot 明确显示 `验收控制器`、`160 scenarios`、`controller ready`、`visible gate`、scenario 卡片和 `运行` 按钮；直接 HTTP `GET /v2/gui/acceptance/scenarios` 返回安全 smoke 场景 `agent_capability_computer_use_mcp_smoke_visible_terminal`。
+- Root cause: 这是 Electron/Windows UI Automation 在多次启动和页签切换后出现的 accessibility tree 刷新滞后或旧文档树问题，不是 `AcceptancePanel.tsx` 或 `/v2/gui/acceptance/scenarios` 的代码错误。
+- Fix: 真实 GUI 验收以 computer-use 截图和当前 bridge HTTP endpoint 双证据确认；不把旧 accessibility 文本作为失败依据。若后续需要可访问性级别验收，再单独排查 tab role/aria 更新。
+- Guard: 后续 GUI 验收遇到“截图可见但 accessibility tree 旧”的情况，先重新 `list_apps()`、重新绑定当前窗口、用最新截图和后端 endpoint 双证据判断，再决定是否进入代码级 systematic debugging。

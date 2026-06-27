@@ -353,7 +353,7 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 
 ## 2026-06-27 Desktop GUI Toolchain Control Center Context
 
-- 当前 GUI 工具链控制中心在 `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支开发；已完成 Task 1 工具链清单、Task 2 Harness 控制、Task 3 Computer Use 工作台、Task 4 Browser 自动化工作台、Task 5 MCP 管理面板、Task 6 Planning / Todo / Subagent / Team 面板。
+- 当前 GUI 工具链控制中心在 `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支开发；已完成 Task 1 工具链清单、Task 2 Harness 控制、Task 3 Computer Use 工作台、Task 4 Browser 自动化工作台、Task 5 MCP 管理面板、Task 6 Planning / Todo / Subagent / Team 面板、Task 7 Background Command Console、Task 8 Acceptance Controller Dashboard。
 - Task 1 后端 `gui_toolchain.py` 复用 `learning_agent.tools.catalog.build_builtin_tool_catalog()`，前端通过 `ToolchainPanel` 在右侧 `链路` 页签展示工具分组和复用来源。
 - Task 2 后端 `gui_harness_controls.py` 复用既有 `HarnessStore`、`HarnessRun`、`StatusEventStore` 和 `_harness_store_for_workspace`，前端 `HarnessPanel` 提供 `暂停`、`恢复`、`停止`、`Checkpoint` 控制。
 - Task 3 后端 `gui_computer_use.py` 复用既有 Computer Use mode/session/status 模块，前端 `ComputerUsePanel` 提供 `申请权限`、`观察`、`中止`，真实 GUI 验收确认三个动作均不触发低层桌面事件。
@@ -362,6 +362,10 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - Task 6 后端 `build_gui_planning_payload()` 复用 `TaskRegistry`、`TeamRegistry`、`todo_state.json` 和工具 catalog，前端 `PlanningPanel` 展示 todo、任务、team、peer message、planning tool，并避免泄露 task output path 或 secret 字段。
 - Task 7 后端新增 `learning_agent/app/gui_execution.py`，复用 `TaskRegistry`、`TaskOutputStore` 和 `runtime.background_commands` 的持久记录，提供 `GET /v2/gui/commands`、`GET /v2/gui/commands/{id}/tail`、`POST /v2/gui/commands/{id}/stop`；当前 GUI bridge 没有原 `LearningAgent.background_commands` live process 句柄，所以 stop 端点诚实返回 `unavailable`，前端禁用停止按钮并显示原因，不能伪造停止成功。
 - Task 7 前端新增 `CommandPanel.tsx`，并通过 `guiClient.commands()`、`commandTail()`、`stopCommand()`、`AppShell` 首屏加载/轮询和 `StatusInspector` 的 `命令` 页签展示后台命令 id、脱敏命令文本、状态、cwd、exit code、tail 和 stop 能力边界。
+- Task 8 后端新增 `learning_agent/app/gui_acceptance.py`，复用 `acceptance_controller/controller.ps1`、`acceptance_controller/scenarios/*.json`、既有 `runs/**/result.json/events.jsonl/latest_run_readable.md/final screenshot` 结构和 `WindowsComputerUseControllerTakeoverDebugSurface.read_acceptance_run()`，提供验收场景清单、运行历史和可见终端启动入口。
+- Task 8 前端新增 `AcceptancePanel.tsx`，并通过 `guiClient.acceptanceScenarios()`、`acceptanceRuns()`、`runAcceptanceScenario()`、`AppShell` 首屏加载和 `StatusInspector` 的 `验收` 页签展示 `controller ready`、`visible gate`、场景卡片、证据状态、最近运行和运行按钮；真实启动按钮默认调用非 dry-run，会打开可见 PowerShell 控制器。
+- Task 8 安全边界：后端只返回 workspace 相对路径、短文本 prompt、分类、状态、证据存在性和证据相对路径；运行 payload 只允许从 `scenarios` 目录白名单 id 启动，避免 GUI 传任意脚本路径。
 - Browser 工作台当前是安全 thin adapter：`open` 只记录 URL 打开请求，不绕过 agent/browser 权限策略直接控制网页；后续如果接入真实导航、回放或 CDP 操作，必须复用现有 browser permission/replay/automation 模块，而不是在 GUI 里重写平行浏览器 runtime。
 - 后续 Task 7+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。
 - Task 7 真实 GUI 验收补充：Electron 可能同时残留多个 `OpenHarness Desktop` 窗口；如果 accessibility tree 一度看不到新增页签，应先重新 `list_apps()` 并选择包含当前 worktree 项目名和完整页签的窗口，再判断代码问题。
+- Task 8 真实 GUI 验收补充：accessibility tree 在点击 `验收` 后可能仍返回旧页签内容，但 computer-use 截图已经显示验收面板；此时以截图和直接 HTTP endpoint 双证据为准，不要仅凭旧 accessibility 文本误判为前端未渲染。
