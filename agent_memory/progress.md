@@ -1607,3 +1607,15 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 操作验收已通过：点击 `刷新` 后主消息区出现 `completed` 的刷新状态，面板显示 `refresh-status · refreshed`；点击 `记录打开` 后主消息区出现 `completed` 的记录打开状态，面板显示 `open · recorded`。
 - 验收期间发现旧 bridge 占用 `8776` 会让新 `/v2/gui/browser/*` 路由返回未知路径；已按 systematic debugging 查明根因、重启当前 worktree bridge、直接 HTTP 验证新路由，再重新用真实 GUI 复验通过。
 - 验收证据已保存到 `learning_agent/test/gui_browser_workbench_task4/visible_gui_acceptance_20260627.md`；本轮改动源码已同步复制到 `learning_agent/test/gui_browser_workbench_task4/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 5
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 5：新增 MCP 管理面板，把 GUI 右侧检查器接到真实 MCP registry 的只读清单。
+- 后端新增 `learning_agent/app/gui_mcp_control.py`，复用 `learning_agent.mcp.config.load_mcp_server_configs()` 和 `learning_agent.mcp.runtime.McpToolRegistry`，没有重写平行 MCP runtime。
+- `learning_agent/app/gui_bridge.py` 已新增 `GET /v2/gui/mcp/servers`、`GET /v2/gui/mcp/resources`、`GET /v2/gui/mcp/prompts`，并继续使用既有 GUI token 门禁。
+- 前端新增 `McpPanel.tsx`，并扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `runtime-panels.css`，真实 GUI 现在显示 server/resource/prompt 计数、退化状态、安全错误和空状态。
+- 安全边界已覆盖：后端只返回 server 名称、连接类型、能力计数和安全错误；HTTP/SSE URL 只保留 origin，不返回 header、query、token、Bearer 或 Authorization 原文；前端只渲染白名单字段。
+- 自动化验证已通过：`python -m py_compile learning_agent/app/gui_mcp_control.py learning_agent/app/gui_bridge.py learning_agent/tests/test_gui_mcp_management_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_mcp_management_contract -v` 为 2 tests 通过；`npm --prefix apps/desktop run test -- mcpPanel guiClient` 为 18 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `MCP` 页签可见，面板显示 `0 servers`、`0 resources`、`0 prompts`、`schema 2`、`暂无 MCP server 配置。`、`Resources 暂无数据` 和 `Prompts 暂无数据`。
+- 本轮 worktree 没有 `mcp_servers.json`，所以 `0 servers` 是预期空配置状态，不是加载失败；直接 HTTP 验证三个 `/v2/gui/mcp/*` endpoint 均返回 `ok=true` 与 `reuse_module=learning_agent.mcp.runtime`。
+- 验收证据已保存到 `learning_agent/test/gui_mcp_management_task5/visible_gui_acceptance_20260627.md`；本轮改动源码将同步复制到 `learning_agent/test/gui_mcp_management_task5/source_copies/`。
