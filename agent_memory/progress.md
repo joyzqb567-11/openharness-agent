@@ -1619,3 +1619,15 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `MCP` 页签可见，面板显示 `0 servers`、`0 resources`、`0 prompts`、`schema 2`、`暂无 MCP server 配置。`、`Resources 暂无数据` 和 `Prompts 暂无数据`。
 - 本轮 worktree 没有 `mcp_servers.json`，所以 `0 servers` 是预期空配置状态，不是加载失败；直接 HTTP 验证三个 `/v2/gui/mcp/*` endpoint 均返回 `ok=true` 与 `reuse_module=learning_agent.mcp.runtime`。
 - 验收证据已保存到 `learning_agent/test/gui_mcp_management_task5/visible_gui_acceptance_20260627.md`；本轮改动源码将同步复制到 `learning_agent/test/gui_mcp_management_task5/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 6
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 6：新增 Planning / Todo / Subagent / Team 面板，把计划协作状态接入真实 GUI。
+- 后端在 `learning_agent/app/gui_toolchain.py` 新增 `build_gui_planning_payload()`，复用 `TaskRegistry`、`TeamRegistry`、`todo_state.json` 和 `learning_agent.tools.catalog.build_builtin_tool_catalog()`，没有重写平行计划或团队 runtime。
+- `learning_agent/app/gui_bridge.py` 已新增 `GET /v2/gui/planning`，继续使用既有 GUI token 门禁，并返回 todo、task、team、peer message 和 planning tool 的只读白名单字段。
+- 前端新增 `PlanningPanel.tsx`，并扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `runtime-panels.css`，真实 GUI 现在在右侧 `计划` 页签显示工具数量、todo 数、活跃任务数、peer 数、待处理消息数、空状态和工具清单。
+- 安全边界已覆盖：后端不会返回 task `output_path` 等本地路径原文，只返回 `has_output_file`；peer/message/task/todo 都做字段白名单和短文本裁剪；前端不渲染未知 secret 字段。
+- 自动化验证已通过：`python -m unittest learning_agent.tests.test_gui_planning_panel_contract -v` 为 2 tests 通过；`npm --prefix apps/desktop run test -- planningPanel guiClient` 为 2 files / 20 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `计划` 页签可见 `计划协作`、`18/18 tools`、`0 todos`、`0 active tasks`、`0 peers`、`0 pending messages`，并显示 Todos、Tasks、Teams、Peer Messages 的空状态。
+- 直接 HTTP 验证 `GET /v2/gui/planning` 返回 `ok=true`、`schema_version=2`、`tool_count=18`、`available_tool_count=18`、`status_degraded=false`，说明 GUI 面板读取的是当前 worktree 的真实规划协作状态。
+- 验收证据已保存到 `learning_agent/test/gui_planning_panel_task6/visible_gui_acceptance_20260627.md` 和 `planning_panel_visible_gui_20260627.png`；本轮改动源码已同步复制到 `learning_agent/test/gui_planning_panel_task6/source_copies/`。
