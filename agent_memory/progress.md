@@ -1663,3 +1663,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `诊断` 页签可见 `Trace gui_browser_action`、`Compact not_run · no boundary`、`Resume not_run · no session · 正常`、`Health 正常 · 0 warnings`、`LSP 可用 · lsp_symbols, lsp_d...`、`REPL 可用 · 35 tools · 5 calls`。
 - 直接 HTTP 验证 `/v2/gui/diagnostics` 返回 `trace_summary`、`compact_status`、`resume_report_summary`、`lsp_diagnostics_summary`、`repl_summary`，并确认 JSON 不包含 `"None"` 原文。
 - 本轮修复了 `_safe_short_text(None)` 会把 Python `None` 渲染成用户可见 `"None"` 的问题，并新增回归测试；本轮改动源码已同步复制到 `learning_agent/test/gui_diagnostics_panel_task9/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 10
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 10：新增 Memory / Prompt / Token / Notebook 面板，把长任务防跑偏所需的记忆、进度、风险、上下文预算和 notebook 状态接入真实 GUI。
+- 后端新增 `learning_agent/app/gui_memory.py`，复用 `agent_memory/*` 文件、`learning_agent.prompts.report_tools`、`learning_agent.app.gui_context.gui_context_limits_from_env()`、`learning_agent.tools.notebook_tools` 和 `build_builtin_tool_catalog()`，没有重写平行记忆或 notebook runtime。
+- `learning_agent/app/gui_bridge.py` 已新增 `GET /v2/gui/memory/summary`、`GET /v2/gui/prompt/status`、`GET /v2/gui/notebook/status`，继续使用既有 GUI token 门禁；三个 endpoint 当前均为只读 first pass，不暴露记忆或 notebook 编辑入口。
+- 前端新增 `MemoryPanel.tsx`，并扩展 `guiClient.ts`、`AppShell.tsx` 和 `StatusInspector.tsx`；真实 GUI 现在会有 `记忆` 页签，展示 Context/Progress/Bugs、prompt_surface_report、token_budget_report、max messages/max chars、notebook_read/notebook_edit 和只读优先策略。
+- 安全边界已覆盖：后端只返回脱敏预览和相对路径，不返回绝对 workspace 路径、原始 token 或未知字段；前端只渲染白名单字段，`memoryPanel.test.tsx` 已验证未知 secret 字段不会出现在 markup。
+- 自动化验证已通过：`python -m py_compile learning_agent\app\gui_memory.py learning_agent\app\gui_bridge.py learning_agent\tests\test_gui_memory_panel_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_memory_panel_contract -v` 为 3 tests 通过；`npm --prefix apps/desktop run test -- memoryPanel guiClient` 为 2 files / 23 tests 通过；`npm --prefix apps/desktop run test -- memoryPanel` 通过；`npm --prefix apps/desktop run lint` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `记忆` 页签可见 `记忆与预算`、`Context`、`Progress`、`Bugs`、`24 max messages`、`60000 max chars`、`prompt_surface_report`、`token_budget_report`、`read-only first pass`、`notebook_read` 和 `notebook_edit`，未观察到空白面板、崩溃或明显文字重叠。
+- 直接 HTTP 验证三个只读 endpoint 均使用既有 `X-OpenHarness-Desktop-Token` 门禁，返回 `MemoryFiles = 4`、`PromptTools = 2`、`NotebookTools = 2`、`NotebookDegraded = False`；本轮改动源码已同步复制到 `learning_agent/test/gui_memory_panel_task10/source_copies/`，验收证据保存到 `learning_agent/test/gui_memory_panel_task10/visible_gui_acceptance_20260627.md`。
