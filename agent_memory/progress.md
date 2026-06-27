@@ -1467,3 +1467,13 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已复查 `codegraph status .`：索引状态为 `[OK] Index is up to date`，当前统计为 1,154 files、30,114 nodes、41,300 edges。
 - 已用 `codegraph query ModelCallStatus --limit 10` 验证新近主链路符号可被查询到，结果包含 `apps/desktop/src/components/ModelCallStatus.tsx`。
 - 已确认 `.worktrees` 目录不存在，`git worktree list` 只剩主工作区；知识图谱已经对齐到旧 worktree 删除后的当前主链路。
+
+## 2026-06-27 OpenAI OAuth Default Mock Link Fix
+
+- 已按 systematic debugging 和 TDD 修复“API key/default 启动时点击 OpenAI OAuth 打开本地 mock 链接”的问题。
+- 根因确认：`build_openai_auth_config()` 默认 `OPENHARNESS_OPENAI_AUTH_MODE=mock`，且 `mock_enabled = auth_mode in MOCK_OPENAI_AUTH_MODES or not real_oauth_enabled`，导致未配置真实 OAuth 时仍开启 mock flow。
+- 修复结果：默认认证模式改为 `api_key_only`；mock 只有显式设置 `OPENHARNESS_OPENAI_AUTH_MODE=mock/mock_browser/mock_headless` 才启用；设置页 OpenAI browser/headless OAuth 在无配置时返回 `enabled=false`、`status=oauth_config_required`；auth-attempt start 在无配置时返回 `openai_oauth_not_configured`，不再生成 `127.0.0.1/mock/openai/...`。
+- API key 路径未被关闭：OpenAI `API 密钥` 方法仍为 `enabled=true`，用户可继续在当前 GUI 中手动填 API key。
+- 自动化验证通过：新增红测先失败后转绿；`python -m pytest learning_agent/tests/test_gui_provider_openai_auth_config.py learning_agent/tests/test_gui_provider_settings_contract.py learning_agent/tests/test_gui_provider_auth_attempts_contract.py learning_agent/tests/test_gui_provider_openai_real_oauth_attempts.py -q` 为 17 passed；`python -m py_compile learning_agent/app/gui_provider_openai_auth_config.py learning_agent/app/gui_provider_settings.py learning_agent/app/gui_provider_auth_attempts.py` 通过；`npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed。
+- 已执行 `codegraph sync .`，CodeGraph 返回 `Already up to date`；后续正在运行的旧 GUI/bridge 需要重启后才会加载本次 Python 代码修复。
+- 运行时验证：已停止修复前的 8776/5177/Electron 旧进程，并用当前主链路重启 OpenHarness Desktop；重启后 provider catalog 返回 OpenAI `chatgpt-browser enabled=false status=oauth_config_required`、`chatgpt-headless enabled=false status=oauth_config_required`、`api-key enabled=true status=available`，bridge/renderer/Electron 进程均已运行。

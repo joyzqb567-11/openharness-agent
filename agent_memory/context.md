@@ -317,3 +317,11 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 真实 ChatGPT Codex endpoint 的 content type 规则必须牢记：user/developer/system 消息内容用 `input_text`，assistant 历史消息内容用 `output_text`；如果 assistant 历史误用 `input_text`，官方会返回 HTTP 400。
 - 真实 GUI 验收标准已经固定：右侧事件需要看到 `runtime_path` 中 `runtime=direct_sse`、`transport=https_sse`、`websocket_enabled=false`、`codex_cli_used=false`；无压缩场景需要 `compacted=false`；强制压缩场景需要 `context_budget compacted=true` 和 `compact_completed`，并且模型仍能回忆早期测试代码 `ALPHA_CONTEXT_927`。
 - 上下文压缩事件和学习副本位于 `learning_agent/test/gui_context_compact_v4/`；排查后续“记不住上下文”时，先看 `context_budget` 的 `source/input_message_count/output_message_count/reason/compact_generation`，再判断是 GUI session 丢失、压缩阈值问题，还是 Direct SSE body 协议问题。
+
+## 2026-06-27 OpenAI Auth Mode Default Context
+
+- OpenHarness Desktop 默认 OpenAI 认证模式现在是 `api_key_only`，不是 `mock`。
+- API key/default 启动时，OpenAI `ChatGPT Pro/Plus (browser/headless)` OAuth 方法必须显示为 `enabled=false`、`status=oauth_config_required`，只保留 `API 密钥` 方法可用。
+- 显式 mock 只能通过 `OPENHARNESS_OPENAI_AUTH_MODE=mock`、`mock_browser` 或 `mock_headless` 开启，用于视觉/状态机测试，不能让用户误以为连接了 OpenAI 官方 OAuth。
+- 真实 OpenAI 官方 OAuth 仍必须满足 `OPENHARNESS_OPENAI_AUTH_MODE=real_browser` 或 `real_headless`、`OPENHARNESS_OPENAI_EXPERIMENTAL=1`、`OPENHARNESS_PROVIDER_SECRET_STORE=os_encrypted`、`OPENHARNESS_OPENAI_CLIENT_ID` 后重启 GUI。
+- 如果用户报告“点击 OpenAI OAuth 没打开官网”，先确认当前启动模式：默认/API key only 下这是预期禁用态；只有真实 OAuth 模式下才应该生成 `auth.openai.com/oauth/authorize`。
