@@ -61,11 +61,11 @@
 
 - `docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2.md`
   - Value: historical plan and rationale.
-  - Current decision: can be copied as archived planning documentation after confirming it contains no sensitive runtime details.
+  - Current decision: migrated to mainline `docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2.md` on 2026-06-27 after strict token-shape scan found no real API key, bearer token, OAuth token, callback code, or client secret.
 
 - `docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2-karpathy-review.md`
   - Value: historical review of the latency V2 plan.
-  - Current decision: can be copied as archived planning documentation after review.
+  - Current decision: migrated to mainline `docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2-karpathy-review.md` on 2026-06-27 after strict token-shape scan found no real API key, bearer token, OAuth token, callback code, or client secret.
 
 ## Do Not Migrate Without Explicit User Confirmation
 
@@ -100,11 +100,11 @@
 ## Recommended Next Action
 
 - Do not delete `.worktrees/chatgpt-oauth-real-model-v1` yet.
-- Next safe task: create a small archive candidate branch that copies only the two plan documents after manual review.
+- The two low-risk plan documents have now been migrated to mainline.
 - Next engineering task: if desired, write a new blueprint for "Transport Diagnostics Tab V1" using only the ideas from `gui_model_latency_diagnostics.py`, not the old implementation wholesale.
 - Cleanup can happen only after one of these decisions is made:
   - user confirms old uncommitted code/evidence can be abandoned;
-  - selected source/document files are migrated and verified;
+  - additional selected source/document files are migrated and verified;
   - sensitive/runtime files are explicitly excluded from archival.
 
 ## Stop Condition

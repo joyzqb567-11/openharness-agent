@@ -1445,3 +1445,10 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 可低风险归档候选：两份 `2026-06-26-openharness-desktop-real-model-latency-v2*.md` 计划/评估文档，但仍需人工确认没有敏感运行细节。
 - 明确不迁移：旧 worktree 的 `memory/`、OAuth/provider 本地状态、raw stdout/stderr logs、PID/evidence JSON，除非用户单独要求脱敏归档。
 - 下一步建议：若继续推进，先归档两份计划文档；若要做工程功能，则另起干净蓝图 `Transport Diagnostics Tab V1`，只借鉴旧诊断缓存思想，不复制旧实现。
+
+## 2026-06-27 Old ChatGPT OAuth Worktree Plan Docs Migration
+
+- 已从旧 worktree 迁移两份低风险历史设计资料到主链路：`docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2.md` 和 `docs/superpowers/plans/2026-06-26-openharness-desktop-real-model-latency-v2-karpathy-review.md`。
+- 迁移前已做两层检查：先查找敏感关键词，再用更严格的 token 形态扫描真实 API key、Bearer token、OAuth token、callback code、client secret；未发现真实凭据形态。
+- 本轮没有迁移旧 worktree 的实验代码、`memory/`、raw logs、PID/evidence JSON；这些内容仍按风险内容处理，不能直接提交或复制。
+- 当前清理状态：低风险计划文档已保留；若用户确认放弃旧 worktree 的剩余未提交内容，下一步可以用 `git worktree remove --force .worktrees/chatgpt-oauth-real-model-v1` 做正式清理。
