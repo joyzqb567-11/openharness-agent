@@ -1,0 +1,25 @@
+﻿Reading additional input from stdin...
+2026-06-26T15:00:40.214299Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=C:\Users\<redacted>\.codex\plugins\cache\openai-primary-runtime\template-creator\26.623.12021\.codex-plugin/plugin.json
+2026-06-26T15:00:40.221913Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=C:\Users\<redacted>\.codex\plugins\cache\openai-primary-runtime\template-creator\26.623.12021\.codex-plugin/plugin.json
+2026-06-26T15:00:40.347172Z  WARN codex_core_plugins::loader: failed to load plugin: missing or invalid plugin.json plugin="chrome@openai-bundled" path=C:\Users\<redacted>\.codex\plugins\cache\openai-bundled\chrome\0.1.7
+2026-06-26T15:00:40.557346Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\<redacted>\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-06-26T15:00:40.562734Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\<redacted>\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-06-26T15:00:42.554788Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+2026-06-26T15:00:43.130042Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=C:\Users\<redacted>\.codex\plugins\cache\openai-primary-runtime\template-creator\26.623.12021\.codex-plugin/plugin.json
+2026-06-26T15:00:43.136115Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=C:\Users\<redacted>\.codex\plugins\cache\openai-primary-runtime\template-creator\26.623.12021\.codex-plugin/plugin.json
+2026-06-26T15:00:43.332465Z  WARN codex_core_plugins::loader: failed to load plugin: missing or invalid plugin.json plugin="chrome@openai-bundled" path=C:\Users\<redacted>\.codex\plugins\cache\openai-bundled\chrome\0.1.7
+2026-06-26T15:00:45.437221Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=C:\Users\<redacted>\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime\plugins\template-creator\.codex-plugin/plugin.json
+2026-06-26T15:00:45.482496Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\<redacted>\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-06-26T15:00:45.585639Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.585670Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.588103Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.588126Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.589878Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.589895Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.591764Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.591777Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.593741Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-06-26T15:00:45.593760Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+
+DISCOVERY_TIMEOUT: codex exec exceeded 180 seconds.
+

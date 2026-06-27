@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "provider_source": "codex_cli",
+  "adapter_mode": "real",
+  "event_kinds": [
+    "heartbeat",
+    "heartbeat",
+    "turn_started",
+    "message_delta",
+    "message_completed",
+    "message_completed"
+  ],
+  "fake_text_detected": false,
+  "secret_leak_detected": false
+}

@@ -1,0 +1,11 @@
+﻿{
+    "evidence_dir":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\chatgpt-oauth-real-model-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\computer_use_visible_evidence",
+    "workspace":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\chatgpt-oauth-real-model-v1",
+    "renderer_url":  "http://127.0.0.1:5206",
+    "bridge_port":  8806,
+    "renderer_pid":  14168,
+    "backend_pid":  46608,
+    "renderer_port":  5206,
+    "bridge_url":  "http://127.0.0.1:8806",
+    "electron_pid":  45228
+}

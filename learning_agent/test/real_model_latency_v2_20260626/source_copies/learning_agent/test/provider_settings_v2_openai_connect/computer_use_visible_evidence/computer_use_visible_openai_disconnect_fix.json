@@ -1,0 +1,16 @@
+﻿{
+    "ok":  true,
+    "tested_with":  "computer-use visible OpenHarness Desktop window",
+    "scenario":  "OpenAI provider disconnect after Codex CLI ChatGPT login",
+    "visible_before":  "OpenAI showed 已连接 / Codex ChatGPT login / 断开",
+    "visible_after_disconnect":  "OpenAI showed + 连接 and no 已连接 badge",
+    "visible_after_close_reopen":  "OpenAI still showed + 连接 after closing and reopening Settings",
+    "provider_id":  "openai",
+    "provider_connected_after":  false,
+    "provider_source_after":  "none",
+    "provider_masked_key_after":  "",
+    "persisted_auth_type":  "disabled",
+    "persisted_disabled_source":  "codex_cli",
+    "secret_leak_detected":  false,
+    "created_at":  "2026-06-26T18:49:24.5410926+08:00"
+}

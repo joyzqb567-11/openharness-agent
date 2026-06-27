@@ -1256,3 +1256,66 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 蓝图默认 visual QA 命令因当前已有 `desktop-bridge --port 8776` 用户进程监听而失败；未关闭该用户可见外壳进程，改用备用端口执行最终 visual QA。
 - 最终 release gate visual QA：`powershell -NoProfile -ExecutionPolicy Bypass -File learning_agent/test/provider_settings_v2_openai_connect/scripts/capture_openai_connect_visual_qa.ps1 -BridgePort 9576 -RendererPort 5977 -CdpPort 9975` 退出码 0，结果 JSON 为 `ok=true`、`methodCount=3`、`inputType=password`、`waitingVisible=true`、`rawSecretLeakFound=false`。
 - 最终 `visual_evidence/` 已用 9576/5977/9975 这一轮截图和 JSON 覆盖，并再次复跑 secret scan 通过。
+
+## 2026-06-26 ChatGPT OAuth Real Model Blueprint
+
+- 已按用户要求先读取 `D:\opencode` 的 CodeGraph 和 OpenCode 关键源码，再制定 OpenHarness Desktop 真实 ChatGPT OAuth 模型连接蓝图。
+- OpenCode 重点源码依据包括：`packages/opencode/src/plugin/openai/codex.ts`、`packages/core/src/plugin/provider/openai.ts`、`packages/opencode/src/provider/auth.ts`、`packages/app/src/components/dialog-connect-provider.tsx`。
+- 已确认 OpenCode 的真实链路是 PKCE + `localhost:1455/auth/callback` + token exchange + `https://chatgpt.com/backend-api/codex/responses`，不是普通 OpenAI API key 路径。
+- 已对照 OpenHarness 当前实现：provider UI 已有 OpenAI browser/headless/API key 三方法，但 browser/headless 仍是 mock；主聊天默认仍走 `FakeStreamingGuiAgentAdapter`。
+- 新蓝图已保存到 `docs/superpowers/plans/2026-06-26-openharness-desktop-chatgpt-oauth-real-model-v1.md`，执行重点是把真实 OAuth 状态机、加密 token store、`CodexOAuthChatModel` 和 GUI real adapter 接起来。
+
+## 2026-06-26 ChatGPT OAuth Real Model Karpathy Review
+
+- 已使用 `andrej-karpathy-perspective` 评估 `2026-06-26-openharness-desktop-chatgpt-oauth-real-model-v1.md`。
+- 已额外核对 OpenAI 官方 Codex CLI 文档：`codex login` 支持 ChatGPT account OAuth；这说明官方路径应优先于 OpenCode-style direct OAuth。
+- 评估报告已保存到 `docs/superpowers/plans/2026-06-26-openharness-desktop-chatgpt-oauth-real-model-v1-karpathy-review.md`。
+- 主要结论：蓝图方向正确，但不能把 OpenCode client id、`localhost:1455`、`chatgpt.com/backend-api/codex/responses` 当成稳定产品契约；需要升级为 V1A 官方 Codex login bridge、V1B provider-aware real adapter、V1C experimental direct OAuth 三层路线。
+- 重点风险：任务颗粒度过大、token 生命周期不足、port 1455 冲突未覆盖、adapter streaming/cancel/tool-call 合同过薄、真实 GUI 验收缺证据包。
+
+## 2026-06-26 ChatGPT OAuth Real Model Blueprint Upgrade
+
+- 已按 Karpathy 评估报告升级 `docs/superpowers/plans/2026-06-26-openharness-desktop-chatgpt-oauth-real-model-v1.md`。
+- 蓝图路线已从“直接复刻 OpenCode OAuth”改为三层：V1A 使用官方 `codex login` / `codex login status` 桥接 ChatGPT OAuth 并通过 `CodexCliChatModel` 跑通真实 GUI 回答；V1B 加固 provider-aware real adapter、事件流、取消、错误和证据包；V1C 才把 OpenCode-style PKCE + localhost callback + Codex backend route 作为显式 experimental direct OAuth。
+- 已把 OpenCode client id、`localhost:1455` 和 `chatgpt.com/backend-api/codex/responses` 标为研究参考或 V1C 实验路径，不能作为默认稳定产品契约。
+- 已补充 port 1455 冲突、token lifecycle、streaming/cancel/tool-call tail behavior、secret scan、真实可见 GUI OAuth 验收证据包和失败时必须 systematic debugging 的门禁。
+- 已完成蓝图自检：`rg -n "TBD|TODO|待定|占位|implement later|\\.\\.\\." docs\superpowers\plans\2026-06-26-openharness-desktop-chatgpt-oauth-real-model-v1.md` 无命中。
+- 已按用户补充要求把“验收需要使用肉眼可见的真实 GUI 界面进行验收，发现 bug 时使用 systematic debugging 修复并复测，通过后才继续下一个任务”写入蓝图的安全原则和 Release Gate。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 Blueprint
+
+- 已根据 OpenCode CodeGraph 和源码证据重新确定路线：OpenCode 的主路径是 ChatGPT OAuth token + `https://chatgpt.com/backend-api/codex/responses` + HTTPS/SSE；WebSocket 是实验路径，不应成为 OpenHarness Desktop 默认真实模型调用路径。
+- 已把 OpenHarness Desktop V3 建议落成书面执行蓝图：默认使用 `direct_sse`，绕开 Codex CLI WebSocket 重试慢路径；Codex CLI 只作为显式 fallback。
+- 新蓝图已保存到 `docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 学习副本已保存到 `learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 蓝图包含成功标准、范围边界、停止条件、真实 OAuth 环境契约、12 个实施任务、测试命令、secret redaction gate、computer-use 真实可见 GUI 验收脚本。
+- 已完成蓝图占位符自检：`rg -n "TBD|TODO|待定|占位|implement later|\\.\\.\\.|<[^>]+>|pass$" docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md` 无命中。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 Karpathy Review
+
+- 已按用户要求使用 `andrej-karpathy-perspective` 评估 Direct ChatGPT OAuth SSE V3 蓝图。
+- 评估前已用 UTF-8 读取 skill 指令和蓝图全文，并用 CodeGraph 核对当前关键代码现状：Composer 仍只提交 prompt、OpenAI auth-attempt 仍是 mock、secret store 仍缺 OS 加密实现、`CodexOAuthChatModel` 有直连雏形但需要迁移策略。
+- 评估报告已保存到 `docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3-karpathy-review.md`。
+- 学习副本已保存到 `learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3-karpathy-review.md`。
+- 主要结论：方向正确，但当前蓝图把 OpenCode client id、direct endpoint 和模型列表等研究观察写得过于像产品契约；执行前应升级为实验快速通道、真实 fixture 驱动、可回滚 runtime contract。
+- P0 升级点包括：client id 不应硬编码为默认产品值；补真实 OAuth/SSE golden fixtures；替换会误报的 `rg` secret scan；明确 direct endpoint 是 experimental runtime；模型列表改为 static + probe + last-known-good。
+- P1/P2 升级点包括：补 account discovery、stream cancellation、`CodexOAuthChatModel` 迁移策略、DPAPI 恢复/迁移、GUI 验收宽松文本断言和 composer/bridge payload 兼容迁移。
+- 已完成评估报告占位符自检，正式报告和学习副本 SHA256 一致。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 Blueprint Upgrade
+
+- 已按 Karpathy 评估报告升级 `docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 学习副本已同步升级到 `learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 蓝图路线已从“直接实现 OpenCode-style direct SSE”升级为 V3A-V3F 纵向切片：fake token + fake SSE + real GUI payload、OS 加密存储、真实 browser OAuth、account discovery、model probe、direct_sse probe、真实 streaming、cancel/timeout、诊断、secret scanner、可见 GUI 验收。
+- 已把 OpenCode observed client id `app_EMoamEEZ73f0CkXaXp7hrann` 从默认产品契约降级为本地实验研究参考；正式 runtime 要求 operator 显式设置 `OPENHARNESS_OPENAI_CLIENT_ID`。
+- 已补充 direct endpoint experimental gate：只有 `OPENHARNESS_OPENAI_EXPERIMENTAL=1` 且 `OPENHARNESS_OPENAI_RUNTIME=direct_sse` 时才启用 direct ChatGPT OAuth SSE；失败时必须显示 direct-route 状态，不能静默 fallback 到 Codex CLI。
+- 已补充 sanitized golden SSE/OAuth fixtures、结构化 secret scanner、static + probe + last-known-good 模型注册表、account-required 状态、stream cancellation 合同、timeout 分类、`CodexOAuthChatModel` 迁移策略和宽松真实 GUI 验收断言。
+- 已完成升级蓝图占位符自检：`rg -n "TBD|TODO|待定|占位|implement later|\\.\\.\\.|<[^>]+>|pass$" docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md` 无命中。
+- 正式蓝图和学习副本 SHA256 一致。
+
+## 2026-06-27 Direct ChatGPT OAuth SSE V3 GUI Acceptance Gate Addendum
+
+- 已按用户原文要求，把“验收需要使用肉眼可见的真实GUI界面进行验收，使用computer use技能确认和验证，如果验收时出现bug或发现bug时，请使用systematic debugging技能，修复bug，并重新测试，测试通过后继续执行下一个任务。”加入 V3 蓝图 Task 9 的强制可见 GUI 验收门禁。
+- 正式蓝图路径：`docs/superpowers/plans/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 学习副本路径：`learning_agent/test/20260627_openharness_desktop_direct_chatgpt_oauth_sse_v3/2026-06-27-openharness-desktop-direct-chatgpt-oauth-sse-v3.md`。
+- 已验证正式蓝图与学习副本 SHA256 一致，且占位符扫描无命中。

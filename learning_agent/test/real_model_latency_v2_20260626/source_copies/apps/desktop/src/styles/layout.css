@@ -1,0 +1,1188 @@
+.app-shell { /* 新增代码+DesktopLayout：定义桌面两栏布局；如果没有这段，左侧栏和主线程区会纵向堆叠。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格布局；如果没有这行，固定侧栏和弹性主区难以稳定实现。 */
+  grid-template-columns: clamp(220px, 24vw, 304px) minmax(360px, 1fr) clamp(236px, 25vw, 320px); /* 修改代码+DesktopVisualA11y：让三栏在 1280px 和 1024px 窗口都能保留可读宽度；如果没有这行，紧凑窗口会靠隐藏右栏来苟住而不是保持 Codex 式完整外壳。 */
+  height: 100vh; /* 修改代码+DesktopVisibleSmoke：让应用严格等于窗口高度；如果没有这行，composer 可能被整体页面滚动推到首屏下方。 */
+  overflow: hidden; /* 新增代码+DesktopVisibleSmoke：禁止外层页面滚动；如果没有这行，右侧时间线或长消息可能让整个桌面壳溢出。 */
+} /* 新增代码+DesktopLayout：主布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar { /* 新增代码+DesktopLayout：定义成熟侧栏容器；如果没有这段，导航、项目和设置入口无法形成稳定竖向结构。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格组织侧栏；如果没有这行，底部设置入口无法固定在底部。 */
+  grid-template-rows: auto minmax(0, 1fr) auto; /* 新增代码+DesktopLayout：上方功能、中间项目、底部设置；如果没有这行，最近会话会挤压设置入口。 */
+  gap: 20px; /* 新增代码+DesktopLayout：设置区域间距；如果没有这行，导航组会粘在一起。 */
+  border-right: 1px solid #d8dee8; /* 新增代码+DesktopLayout：给侧栏和主区加分隔线；如果没有这行，两个区域边界不清楚。 */
+  background: #eef2f7; /* 新增代码+DesktopLayout：设置侧栏浅灰背景；如果没有这行，侧栏和主区视觉上混在一起。 */
+  padding: 12px 8px; /* 新增代码+DesktopLayout：给侧栏控件留操作空间；如果没有这行，按钮会贴边。 */
+  min-width: 0; /* 新增代码+DesktopLayout：允许长会话名正确截断；如果没有这行，侧栏文本可能撑破网格。 */
+  min-height: 0; /* 新增代码+DesktopVisibleSmoke：允许侧栏在固定窗口高度内收缩；如果没有这行，历史列表可能撑高整个 app-shell。 */
+  overflow: hidden; /* 新增代码+DesktopVisibleSmoke：让侧栏内部区域自己滚动；如果没有这行，侧栏内容可能制造外层页面滚动。 */
+} /* 新增代码+DesktopLayout：成熟侧栏容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-section { /* 新增代码+DesktopLayout：定义侧栏分组；如果没有这段，按钮之间没有统一节奏。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格排列分组内容；如果没有这行，列表项间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopLayout：让项目从顶部开始排列；如果没有这行，空白区域可能拉散列表。 */
+  gap: 6px; /* 新增代码+DesktopLayout：设置列表项间距；如果没有这行，按钮容易贴得太近。 */
+  min-width: 0; /* 新增代码+DesktopLayout：允许组内文本截断；如果没有这行，长文本可能溢出侧栏。 */
+} /* 新增代码+DesktopLayout：侧栏分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-projects { /* 新增代码+DesktopLayout：定义项目分组滚动行为；如果没有这段，长会话列表会把设置按钮挤出屏幕。 */
+  overflow: auto; /* 新增代码+DesktopLayout：允许项目区独立滚动；如果没有这行，历史会话太多时窗口布局会溢出。 */
+} /* 新增代码+DesktopLayout：项目分组规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-heading { /* 新增代码+DesktopLayout：定义侧栏小标题；如果没有这段，项目和会话分区不清楚。 */
+  padding: 10px 10px 4px; /* 新增代码+DesktopLayout：给小标题留出阅读空间；如果没有这行，小标题会贴住列表项。 */
+  color: #667085; /* 新增代码+DesktopLayout：使用低层级文字色；如果没有这行，小标题会抢正文层级。 */
+  font-size: 12px; /* 新增代码+DesktopLayout：缩小小标题字号；如果没有这行，侧栏会显得拥挤。 */
+  line-height: 1.2; /* 新增代码+DesktopLayout：控制小标题行高；如果没有这行，侧栏垂直密度不稳。 */
+} /* 新增代码+DesktopLayout：侧栏小标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-item { /* 新增代码+DesktopLayout：定义图标按钮式导航项；如果没有这段，侧栏入口会缺少可点击样式。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格对齐图标和文字；如果没有这行，图标和文字容易错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+DesktopLayout：固定图标列并让文字截断；如果没有这行，长文本会挤压图标。 */
+  align-items: center; /* 新增代码+DesktopLayout：垂直居中图标和文字；如果没有这行，按钮会显得歪。 */
+  gap: 8px; /* 新增代码+DesktopLayout：设置图标文字间距；如果没有这行，按钮内容会粘在一起。 */
+  width: 100%; /* 新增代码+DesktopLayout：让按钮占满侧栏宽度；如果没有这行，悬停热区会过窄。 */
+  min-height: 36px; /* 新增代码+DesktopLayout：提供可点击高度；如果没有这行，按钮触达面积太小。 */
+  border: 0; /* 新增代码+DesktopLayout：移除默认按钮边框；如果没有这行，原生边框会破坏桌面风格。 */
+  border-radius: 6px; /* 新增代码+DesktopLayout：使用小圆角；如果没有这行，控件边缘会过硬且不符合蓝图。 */
+  background: transparent; /* 新增代码+DesktopLayout：默认保持透明；如果没有这行，列表会显得过重。 */
+  color: #30363d; /* 新增代码+DesktopLayout：设置按钮文字色；如果没有这行，按钮颜色可能跟浏览器默认不一致。 */
+  padding: 0 10px; /* 新增代码+DesktopLayout：设置按钮内边距；如果没有这行，内容会贴边。 */
+  text-align: left; /* 新增代码+DesktopLayout：保持文字左对齐；如果没有这行，按钮文字可能居中影响扫读。 */
+} /* 新增代码+DesktopLayout：侧栏导航项规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-item span { /* 新增代码+DesktopLayout：定义侧栏按钮文字行为；如果没有这段，中文长标题可能溢出。 */
+  overflow: hidden; /* 新增代码+DesktopLayout：隐藏超长文本；如果没有这行，长会话名会盖住边界。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopLayout：用省略号提示截断；如果没有这行，用户不知道文本被截短。 */
+  white-space: nowrap; /* 新增代码+DesktopLayout：保持侧栏单行显示；如果没有这行，按钮高度会被长标题撑开。 */
+} /* 新增代码+DesktopLayout：侧栏按钮文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-item:hover, /* 新增代码+DesktopLayout：定义导航 hover 状态；如果没有这行，鼠标经过没有反馈。 */
+.sidebar-item-active { /* 新增代码+DesktopLayout：定义当前项目选中态；如果没有这段，用户无法看出当前工作区。 */
+  background: #dfe5ee; /* 新增代码+DesktopLayout：使用浅灰选中背景；如果没有这行，交互状态不可见。 */
+} /* 新增代码+DesktopLayout：导航 hover/active 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-item-muted { /* 新增代码+DesktopGUISessionSearch：定义暂未接入入口样式；如果没有这段，插件和自动化会看起来像可立即执行的主操作。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：降低保留入口文本层级；如果没有这行，未接入功能会抢主要操作层级。 */
+} /* 新增代码+DesktopGUISessionSearch：暂未接入入口样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session { /* 新增代码+DesktopLayout：定义最近会话按钮；如果没有这段，历史会话和主导航无法区分。 */
+  width: 100%; /* 新增代码+DesktopLayout：让会话项填满侧栏；如果没有这行，点击区域太小。 */
+  min-height: 32px; /* 新增代码+DesktopLayout：给会话项稳定高度；如果没有这行，列表视觉节奏不稳。 */
+  border: 0; /* 新增代码+DesktopLayout：移除原生边框；如果没有这行，列表项会像普通表单按钮。 */
+  border-radius: 6px; /* 新增代码+DesktopLayout：保持小圆角；如果没有这行，按钮风格不统一。 */
+  background: transparent; /* 新增代码+DesktopLayout：默认透明；如果没有这行，历史列表会过重。 */
+  color: #475467; /* 新增代码+DesktopLayout：使用次级文字色；如果没有这行，历史会话会抢主要导航层级。 */
+  padding: 0 10px; /* 新增代码+DesktopLayout：设置左右内边距；如果没有这行，文字会贴边。 */
+  text-align: left; /* 新增代码+DesktopLayout：保持左对齐；如果没有这行，历史会话不易扫读。 */
+  display: grid; /* 修改代码+DesktopGUISessions：使用两行网格承载标题和副标题；如果没有这行，最近会话摘要会挤在同一行里。 */
+  align-content: center; /* 修改代码+DesktopGUISessions：让两行文字在按钮内垂直居中；如果没有这行，短标题会贴在按钮顶部。 */
+  gap: 2px; /* 修改代码+DesktopGUISessions：给标题和副标题留一点间距；如果没有这行，两行文字会黏在一起难读。 */
+} /* 新增代码+DesktopLayout：最近会话按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session span { /* 新增代码+DesktopGUISessions：定义会话标题文本行为；如果没有这段，长标题可能撑破侧栏。 */
+  overflow: hidden; /* 新增代码+DesktopGUISessions：隐藏超长标题；如果没有这行，长 session 名会越过侧栏边界。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUISessions：用省略号提示标题被截断；如果没有这行，截断会显得突兀。 */
+  white-space: nowrap; /* 新增代码+DesktopGUISessions：保持标题单行；如果没有这行，按钮高度会随标题换行跳动。 */
+} /* 新增代码+DesktopGUISessions：会话标题文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session small { /* 新增代码+DesktopGUISessions：定义会话副标题文本行为；如果没有这段，状态摘要会继承浏览器默认小字样式。 */
+  color: #667085; /* 新增代码+DesktopGUISessions：使用更浅的说明文字色；如果没有这行，副标题会和标题抢层级。 */
+  font-size: 11px; /* 新增代码+DesktopGUISessions：压低副标题字号；如果没有这行，侧栏会显得拥挤。 */
+  overflow: hidden; /* 新增代码+DesktopGUISessions：隐藏超长副标题；如果没有这行，长状态会溢出侧栏。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUISessions：用省略号提示副标题被截断；如果没有这行，截断不够清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopGUISessions：保持副标题单行；如果没有这行，会话项高度会不稳定。 */
+} /* 新增代码+DesktopGUISessions：会话副标题文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session:hover { /* 新增代码+DesktopLayout：定义会话 hover 状态；如果没有这段，历史会话没有鼠标反馈。 */
+  background: #e5eaf2; /* 新增代码+DesktopLayout：设置浅 hover 背景；如果没有这行，用户不确定当前悬停项。 */
+} /* 新增代码+DesktopLayout：会话 hover 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session-active { /* 新增代码+DesktopGUISessionSearch：定义当前会话选中态；如果没有这段，用户看不出正在查看哪条历史会话。 */
+  background: #d8e0eb; /* 新增代码+DesktopGUISessionSearch：给 active 会话更明确背景；如果没有这行，active 和 hover 难以区分。 */
+  color: #1f2328; /* 新增代码+DesktopGUISessionSearch：提升 active 会话文本对比；如果没有这行，选中项仍像次级文本。 */
+} /* 新增代码+DesktopGUISessionSearch：当前会话选中态结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-session-badge { /* 新增代码+DesktopGUISessionSearch：定义固定会话小标记；如果没有这段，pinned 状态会和副标题混在一起。 */
+  display: inline-flex; /* 新增代码+DesktopGUISessionSearch：让图标和文字同行对齐；如果没有这行，固定图标可能错位。 */
+  align-items: center; /* 新增代码+DesktopGUISessionSearch：垂直居中固定标记；如果没有这行，图标和文字不齐。 */
+  gap: 4px; /* 新增代码+DesktopGUISessionSearch：给图标和文字留间距；如果没有这行，标记会显得粘连。 */
+} /* 新增代码+DesktopGUISessionSearch：固定会话小标记结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-archived { /* 新增代码+DesktopGUISessionSearch：定义归档入口按钮；如果没有这段，归档计数没有稳定显示容器。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：使用网格对齐图标、文字和计数；如果没有这行，三者会随文本长度跳动。 */
+  grid-template-columns: 18px minmax(0, 1fr) auto; /* 新增代码+DesktopGUISessionSearch：固定图标列并让计数靠右；如果没有这行，计数可能挤压标题。 */
+  align-items: center; /* 新增代码+DesktopGUISessionSearch：垂直居中归档入口；如果没有这行，计数和文字会错位。 */
+  gap: 8px; /* 新增代码+DesktopGUISessionSearch：设置图标文字计数间距；如果没有这行，内容会粘在一起。 */
+  width: 100%; /* 新增代码+DesktopGUISessionSearch：让按钮占满侧栏宽度；如果没有这行，可点击区域过窄。 */
+  min-height: 34px; /* 新增代码+DesktopGUISessionSearch：给归档入口稳定点击高度；如果没有这行，按钮触达面积不足。 */
+  border: 0; /* 新增代码+DesktopGUISessionSearch：移除原生按钮边框；如果没有这行，视觉会和侧栏样式冲突。 */
+  border-radius: 6px; /* 新增代码+DesktopGUISessionSearch：保持小圆角；如果没有这行，按钮边缘会显得生硬。 */
+  background: transparent; /* 新增代码+DesktopGUISessionSearch：默认保持透明；如果没有这行，归档入口会过度抢眼。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：使用次级文本色；如果没有这行，归档入口会抢最近会话层级。 */
+  padding: 0 10px; /* 新增代码+DesktopGUISessionSearch：给入口内容留边距；如果没有这行，文字会贴边。 */
+  text-align: left; /* 新增代码+DesktopGUISessionSearch：保持左对齐；如果没有这行，按钮文字可能居中导致难扫读。 */
+} /* 新增代码+DesktopGUISessionSearch：归档入口按钮结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-archived:hover { /* 新增代码+DesktopGUISessionSearch：定义归档入口 hover；如果没有这段，用户不确定归档入口是否可点。 */
+  background: #e5eaf2; /* 新增代码+DesktopGUISessionSearch：显示浅 hover 背景；如果没有这行，交互反馈不明显。 */
+} /* 新增代码+DesktopGUISessionSearch：归档入口 hover 结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-archived strong { /* 新增代码+DesktopGUISessionSearch：定义归档计数样式；如果没有这段，计数会继承正文样式难以识别。 */
+  min-width: 18px; /* 新增代码+DesktopGUISessionSearch：保证个位数也有稳定宽度；如果没有这行，计数变化会造成布局跳动。 */
+  border-radius: 999px; /* 新增代码+DesktopGUISessionSearch：使用圆形计数徽标；如果没有这行，计数和文字不易区分。 */
+  background: #dfe5ee; /* 新增代码+DesktopGUISessionSearch：给计数轻背景；如果没有这行，数字不够醒目。 */
+  color: #475467; /* 新增代码+DesktopGUISessionSearch：设置计数文字色；如果没有这行，对比度可能不稳定。 */
+  font-size: 11px; /* 新增代码+DesktopGUISessionSearch：压低计数字号；如果没有这行，徽标会撑高按钮。 */
+  line-height: 18px; /* 新增代码+DesktopGUISessionSearch：固定徽标高度；如果没有这行，计数徽标会随字体跳动。 */
+  text-align: center; /* 新增代码+DesktopGUISessionSearch：居中数字；如果没有这行，计数会偏左。 */
+} /* 新增代码+DesktopGUISessionSearch：归档计数样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.sidebar-empty { /* 新增代码+DesktopGUISessions：定义最近会话空状态；如果没有这段，首次启动时侧栏会留下没有解释的空白。 */
+  color: #667085; /* 新增代码+DesktopGUISessions：使用次级文字色；如果没有这行，空状态会像普通导航项一样抢眼。 */
+  font-size: 12px; /* 新增代码+DesktopGUISessions：设置紧凑字号；如果没有这行，空状态会占用过多侧栏空间。 */
+  padding: 6px 10px; /* 新增代码+DesktopGUISessions：给空状态留点击项同款边距；如果没有这行，文本会贴边。 */
+} /* 新增代码+DesktopGUISessions：最近会话空状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-panel { /* 新增代码+DesktopLayout：定义主对话面板；如果没有这段，标题、内容、输入区无法固定三段。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格划分对话区域；如果没有这行，composer 会被内容自然流推挤。 */
+  grid-template-rows: 56px minmax(0, 1fr) minmax(128px, 152px); /* 修改代码+ComposerModelToolbar：给 Codex 式双层 composer 固定高度范围；如果没有这行，新增模型工具条会挤压或遮挡消息区。 */
+  background: #ffffff; /* 新增代码+DesktopLayout：设置主工作区背景；如果没有这行，阅读区会和窗口背景混淆。 */
+  min-height: 0; /* 新增代码+DesktopVisibleSmoke：允许主对话面板按 app-shell 高度收缩；如果没有这行，消息内容会把 composer 推出视口。 */
+  height: 100%; /* 新增代码+DesktopVisibleSmoke：让主对话面板吃满可用高度；如果没有这行，三段网格高度可能跟父级不同步。 */
+  overflow: hidden; /* 新增代码+DesktopVisibleSmoke：禁止主面板制造外层滚动；如果没有这行，composer 可能只存在于首屏下方。 */
+} /* 新增代码+DesktopLayout：主对话面板规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-header { /* 新增代码+DesktopLayout：定义线程标题栏；如果没有这段，顶部导航没有稳定高度和分隔。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格排列标题和副标题；如果没有这行，多行标题会难以对齐。 */
+  align-content: center; /* 新增代码+DesktopLayout：让标题组垂直居中；如果没有这行，标题文字会贴顶部。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopLayout：标题栏底部分隔；如果没有这行，标题和消息会粘在一起。 */
+  padding: 0 20px; /* 新增代码+DesktopLayout：标题左右留白；如果没有这行，标题会贴边。 */
+} /* 新增代码+DesktopLayout：线程标题栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-title { /* 新增代码+DesktopLayout：定义主标题；如果没有这段，标题层级不清楚。 */
+  font-size: 14px; /* 新增代码+DesktopLayout：使用工具型标题字号；如果没有这行，标题会过大。 */
+  font-weight: 600; /* 新增代码+DesktopLayout：加强标题权重；如果没有这行，标题和正文不易区分。 */
+} /* 新增代码+DesktopLayout：主标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-subtitle { /* 新增代码+DesktopLayout：定义副标题；如果没有这段，当前壳上下文没有合适层级。 */
+  color: #667085; /* 新增代码+DesktopLayout：使用次级文字色；如果没有这行，副标题会抢主标题层级。 */
+  font-size: 12px; /* 新增代码+DesktopLayout：控制副标题字号；如果没有这行，标题栏会显得拥挤。 */
+} /* 新增代码+DesktopLayout：副标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-content { /* 新增代码+DesktopGUIPermissions：定义权限提示和消息区的包裹层；如果没有这段，banner 会破坏 thread-panel 三段布局。 */
+  display: flex; /* 修改代码+DesktopBridgeOfflineBanner：用纵向 flex 容纳离线和权限多个 banner；如果没有这行，多个提示条会把消息区放进隐式网格行。 */
+  flex-direction: column; /* 新增代码+DesktopBridgeOfflineBanner：让 banner 和消息区上下排列；如果没有这行，flex 默认横排会挤压主线程。 */
+  min-height: 0; /* 新增代码+DesktopGUIPermissions：允许内部消息区收缩滚动；如果没有这行，长消息会撑破主面板。 */
+  overflow: hidden; /* 新增代码+DesktopGUIPermissions：限制内容在主面板内；如果没有这行，弹出的 banner 可能导致外层滚动异常。 */
+} /* 新增代码+DesktopGUIPermissions：权限提示和消息区包裹层规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-body { /* 新增代码+DesktopBridgeOfflineBanner：定义主线程消息滚动区在 flex 容器里吃剩余高度；如果没有这段，多个 banner 出现后消息区可能无法滚动。 */
+  flex: 1 1 auto; /* 新增代码+DesktopBridgeOfflineBanner：让消息区填满 thread-content 剩余空间；如果没有这行，消息列表可能只占内容高度。 */
+  min-height: 0; /* 新增代码+DesktopBridgeOfflineBanner：允许消息区在小窗口中收缩；如果没有这行，长对话会撑破 composer 上方区域。 */
+} /* 新增代码+DesktopBridgeOfflineBanner：主线程消息滚动区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.bridge-offline-banner { /* 新增代码+DesktopBridgeOfflineBanner：定义 bridge 离线顶部提示条；如果没有这段，离线状态没有可见验收面。 */
+  border-bottom: 1px solid #fecaca; /* 新增代码+DesktopBridgeOfflineBanner：给提示条底部边界；如果没有这行，banner 和消息区分隔不清楚。 */
+  background: #fff1f2; /* 新增代码+DesktopBridgeOfflineBanner：使用浅红背景提示连接异常；如果没有这行，离线状态不够醒目。 */
+  color: #9f1239; /* 新增代码+DesktopBridgeOfflineBanner：使用深红文字保证可读；如果没有这行，浅背景上文字层级不足。 */
+  font-size: 12px; /* 新增代码+DesktopBridgeOfflineBanner：保持工具型提示字号；如果没有这行，banner 会抢主对话层级。 */
+  font-weight: 600; /* 新增代码+DesktopBridgeOfflineBanner：增强离线提示权重；如果没有这行，用户可能扫不到连接问题。 */
+  padding: 9px 20px; /* 新增代码+DesktopBridgeOfflineBanner：给提示条留触达空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopBridgeOfflineBanner：bridge 离线提示条规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-banner { /* 新增代码+DesktopGUIPermissions：定义权限等待提示条；如果没有这段，权限请求只会藏在状态标签里。 */
+  display: grid; /* 新增代码+DesktopGUIPermissions：用网格堆叠标题和详情；如果没有这行，长详情会挤压标题。 */
+  gap: 2px; /* 新增代码+DesktopGUIPermissions：设置标题和详情间距；如果没有这行，文字会粘在一起。 */
+  border-bottom: 1px solid #f2d9a6; /* 新增代码+DesktopGUIPermissions：给提示条底部分隔；如果没有这行，banner 和消息区边界不清楚。 */
+  background: #fff7e6; /* 新增代码+DesktopGUIPermissions：使用浅警示背景；如果没有这行，权限等待不够可见。 */
+  color: #533f03; /* 新增代码+DesktopGUIPermissions：设置警示文本色；如果没有这行，浅背景上文字可能不清楚。 */
+  padding: 10px 20px; /* 新增代码+DesktopGUIPermissions：给提示条留空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopGUIPermissions：权限等待提示条规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-banner strong { /* 新增代码+DesktopGUIPermissions：定义权限提示标题；如果没有这段，标题不够醒目。 */
+  font-size: 12px; /* 新增代码+DesktopGUIPermissions：设置紧凑标题字号；如果没有这行，banner 会占太多垂直空间。 */
+} /* 新增代码+DesktopGUIPermissions：权限提示标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-banner span { /* 新增代码+DesktopGUIPermissions：定义权限提示详情；如果没有这段，长详情可能撑破布局。 */
+  font-size: 12px; /* 新增代码+DesktopGUIPermissions：设置详情字号；如果没有这行，banner 视觉密度不稳定。 */
+  overflow: hidden; /* 新增代码+DesktopGUIPermissions：隐藏过长详情；如果没有这行，风险摘要可能横向溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUIPermissions：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopGUIPermissions：保持详情单行；如果没有这行，banner 高度会随文本跳动。 */
+} /* 新增代码+DesktopGUIPermissions：权限提示详情规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-banner em { /* 新增代码+DesktopGUIPermissionsV2：定义权限提交中提示；如果没有这段，用户不知道当前正在等待后端确认。 */
+  color: #7a4d00; /* 新增代码+DesktopGUIPermissionsV2：使用偏深警示色；如果没有这行，提交中状态和普通详情层级不清。 */
+  font-size: 12px; /* 新增代码+DesktopGUIPermissionsV2：设置紧凑字号；如果没有这行，banner 高度会被状态文本撑大。 */
+  font-style: normal; /* 新增代码+DesktopGUIPermissionsV2：去掉 em 默认斜体；如果没有这行，工具型界面会显得不稳。 */
+} /* 新增代码+DesktopGUIPermissionsV2：权限提交中提示规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-backdrop { /* 新增代码+DesktopGUISessionSearch：定义搜索弹层背景；如果没有这段，搜索面板会和主界面混在一起。 */
+  position: fixed; /* 新增代码+DesktopGUISessionSearch：固定覆盖当前窗口；如果没有这行，滚动时弹层可能离开视口。 */
+  inset: 0; /* 新增代码+DesktopGUISessionSearch：让背景覆盖整个窗口；如果没有这行，侧栏或右栏仍可能被误点。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：使用网格定位面板；如果没有这行，居中布局需要手写偏移。 */
+  place-items: start center; /* 新增代码+DesktopGUISessionSearch：把面板放到上方居中；如果没有这行，搜索入口会像普通模态框一样笨重。 */
+  background: rgba(15, 23, 42, 0.18); /* 新增代码+DesktopGUISessionSearch：添加克制遮罩；如果没有这行，弹层层级不明显。 */
+  padding-top: 72px; /* 新增代码+DesktopGUISessionSearch：给面板离顶部留空间；如果没有这行，面板会贴住窗口标题区。 */
+  z-index: 18; /* 新增代码+DesktopGUISessionSearch：确保搜索低于权限确认但高于主界面；如果没有这行，弹层可能被右栏盖住。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索弹层背景结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel { /* 新增代码+DesktopGUISessionSearch：定义搜索面板主体；如果没有这段，搜索内容没有稳定容器。 */
+  width: min(680px, calc(100vw - 48px)); /* 新增代码+DesktopGUISessionSearch：限制面板宽度并适配窄屏；如果没有这行，1024px 窗口下可能横向溢出。 */
+  max-height: min(620px, calc(100vh - 120px)); /* 新增代码+DesktopGUISessionSearch：限制面板高度；如果没有这行，结果过多会把面板撑出视口。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：用网格分顶部和结果区；如果没有这行，结果滚动区无法稳定占位。 */
+  grid-template-rows: auto minmax(0, 1fr); /* 新增代码+DesktopGUISessionSearch：顶部自适应、结果区可滚动；如果没有这行，长列表会挤压输入框。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopGUISessionSearch：给面板轻边框；如果没有这行，白底面板和背景层级不清。 */
+  border-radius: 8px; /* 新增代码+DesktopGUISessionSearch：保持桌面壳小圆角；如果没有这行，弹层边缘会过硬。 */
+  background: #ffffff; /* 新增代码+DesktopGUISessionSearch：设置白色内容底；如果没有这行，遮罩下内容可能透出。 */
+  box-shadow: 0 20px 70px rgba(16, 24, 40, 0.22); /* 新增代码+DesktopGUISessionSearch：添加窗口阴影；如果没有这行，搜索面板层级不明显。 */
+  overflow: hidden; /* 新增代码+DesktopGUISessionSearch：裁剪内部圆角；如果没有这行，滚动内容可能越过圆角。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索面板主体结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-header { /* 新增代码+DesktopGUISessionSearch：定义搜索面板顶部栏；如果没有这段，输入框和关闭按钮无法稳定排布。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：使用网格排列输入和关闭按钮；如果没有这行，关闭按钮会随输入宽度跳动。 */
+  grid-template-columns: minmax(0, 1fr) 36px; /* 新增代码+DesktopGUISessionSearch：输入占满剩余空间，关闭按钮固定；如果没有这行，窄屏下会挤压输入。 */
+  align-items: center; /* 新增代码+DesktopGUISessionSearch：垂直居中顶部栏内容；如果没有这行，图标和输入框会错位。 */
+  gap: 8px; /* 新增代码+DesktopGUISessionSearch：设置输入和关闭按钮间距；如果没有这行，按钮会贴住输入框。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopGUISessionSearch：分隔输入和结果；如果没有这行，结果区边界不清。 */
+  padding: 10px; /* 新增代码+DesktopGUISessionSearch：给顶部栏留操作空间；如果没有这行，控件会贴边。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索面板顶部栏结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-input-wrap { /* 新增代码+DesktopGUISessionSearch：定义输入包裹层；如果没有这段，搜索图标和输入框无法像工具栏一样对齐。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：用网格排列图标和输入；如果没有这行，图标和文字容易错位。 */
+  grid-template-columns: 20px minmax(0, 1fr); /* 新增代码+DesktopGUISessionSearch：固定图标列，输入占剩余；如果没有这行，长 placeholder 会挤压图标。 */
+  align-items: center; /* 新增代码+DesktopGUISessionSearch：垂直居中输入内容；如果没有这行，图标不在文字中线。 */
+  gap: 8px; /* 新增代码+DesktopGUISessionSearch：给图标和输入留间距；如果没有这行，内容会粘连。 */
+  min-height: 38px; /* 新增代码+DesktopGUISessionSearch：稳定输入区域高度；如果没有这行，焦点状态可能让布局跳动。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopGUISessionSearch：给输入区轻边框；如果没有这行，输入区域不明显。 */
+  border-radius: 6px; /* 新增代码+DesktopGUISessionSearch：保持小圆角；如果没有这行，输入框和面板风格不统一。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：设置图标颜色；如果没有这行，图标可能继承过深文本色。 */
+  padding: 0 10px; /* 新增代码+DesktopGUISessionSearch：给输入区留左右边距；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopGUISessionSearch：输入包裹层结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-input-wrap input { /* 新增代码+DesktopGUISessionSearch：定义搜索输入框；如果没有这段，浏览器默认输入框会破坏桌面壳风格。 */
+  width: 100%; /* 新增代码+DesktopGUISessionSearch：让输入框填满可用宽度；如果没有这行，中文 placeholder 可能被截断过早。 */
+  min-width: 0; /* 新增代码+DesktopGUISessionSearch：允许输入在网格内收缩；如果没有这行，窄屏会横向溢出。 */
+  border: 0; /* 新增代码+DesktopGUISessionSearch：移除原生边框；如果没有这行，输入框会出现双边框。 */
+  outline: 0; /* 新增代码+DesktopGUISessionSearch：移除原生 outline；如果没有这行，焦点样式会和外层冲突。 */
+  color: #1f2328; /* 新增代码+DesktopGUISessionSearch：设置输入文字色；如果没有这行，文本对比度可能不稳定。 */
+  font: inherit; /* 新增代码+DesktopGUISessionSearch：继承应用字体；如果没有这行，输入框会使用浏览器默认字体。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索输入框规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-close { /* 新增代码+DesktopGUISessionSearch：定义搜索关闭按钮；如果没有这段，关闭动作没有稳定点击区域。 */
+  width: 36px; /* 新增代码+DesktopGUISessionSearch：固定按钮宽度；如果没有这行，按钮会随图标或字体变化。 */
+  height: 36px; /* 新增代码+DesktopGUISessionSearch：固定按钮高度；如果没有这行，点击区域不稳定。 */
+  border: 0; /* 新增代码+DesktopGUISessionSearch：移除原生边框；如果没有这行，按钮风格会突兀。 */
+  border-radius: 6px; /* 新增代码+DesktopGUISessionSearch：保持小圆角；如果没有这行，按钮边缘不统一。 */
+  background: transparent; /* 新增代码+DesktopGUISessionSearch：默认透明；如果没有这行，关闭按钮会过度抢眼。 */
+  color: #475467; /* 新增代码+DesktopGUISessionSearch：设置关闭图标色；如果没有这行，图标层级可能过重。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索关闭按钮结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-close:hover { /* 新增代码+DesktopGUISessionSearch：定义关闭按钮 hover；如果没有这段，用户不确定按钮可点。 */
+  background: #eef2f7; /* 新增代码+DesktopGUISessionSearch：显示浅 hover 背景；如果没有这行，关闭按钮缺少反馈。 */
+} /* 新增代码+DesktopGUISessionSearch：关闭按钮 hover 结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-body { /* 新增代码+DesktopGUISessionSearch：定义搜索结果区；如果没有这段，长结果列表无法独立滚动。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：用网格垂直排列结果；如果没有这行，结果间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopGUISessionSearch：让结果从顶部开始；如果没有这行，空白会拉散结果。 */
+  gap: 4px; /* 新增代码+DesktopGUISessionSearch：设置结果间距；如果没有这行，结果会粘在一起。 */
+  overflow: auto; /* 新增代码+DesktopGUISessionSearch：允许结果区滚动；如果没有这行，多结果会撑破弹层。 */
+  padding: 8px; /* 新增代码+DesktopGUISessionSearch：给结果区留边距；如果没有这行，结果会贴边。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索结果区结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-empty { /* 新增代码+DesktopGUISessionSearch：定义搜索空状态；如果没有这段，加载和无结果提示没有统一样式。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：使用次级文字色；如果没有这行，空状态会像正文一样抢眼。 */
+  font-size: 13px; /* 新增代码+DesktopGUISessionSearch：设置紧凑字号；如果没有这行，提示会占过多空间。 */
+  padding: 18px 12px; /* 新增代码+DesktopGUISessionSearch：给提示留舒适空间；如果没有这行，空状态会贴边。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索空状态结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-result { /* 新增代码+DesktopGUISessionSearch：定义单条搜索结果；如果没有这段，搜索结果看起来像普通按钮。 */
+  display: grid; /* 新增代码+DesktopGUISessionSearch：用网格排列标题、标记和摘要；如果没有这行，长摘要会挤压标题。 */
+  grid-template-columns: minmax(0, 1fr) auto; /* 新增代码+DesktopGUISessionSearch：标题占剩余、归档标记靠右；如果没有这行，标记会插入标题文本。 */
+  gap: 3px 8px; /* 新增代码+DesktopGUISessionSearch：设置标题和摘要间距；如果没有这行，结果内容会粘连。 */
+  width: 100%; /* 新增代码+DesktopGUISessionSearch：让结果占满面板宽度；如果没有这行，可点击区域过窄。 */
+  min-height: 58px; /* 新增代码+DesktopGUISessionSearch：给结果稳定高度；如果没有这行，不同片段长度会造成跳动。 */
+  border: 0; /* 新增代码+DesktopGUISessionSearch：移除原生按钮边框；如果没有这行，结果项风格会突兀。 */
+  border-radius: 6px; /* 新增代码+DesktopGUISessionSearch：保持小圆角；如果没有这行，结果项边缘不统一。 */
+  background: transparent; /* 新增代码+DesktopGUISessionSearch：默认透明；如果没有这行，结果列表会过重。 */
+  color: #1f2328; /* 新增代码+DesktopGUISessionSearch：设置结果文字色；如果没有这行，对比度可能不稳定。 */
+  padding: 9px 10px; /* 新增代码+DesktopGUISessionSearch：给结果留点击空间；如果没有这行，内容会贴边。 */
+  text-align: left; /* 新增代码+DesktopGUISessionSearch：保持左对齐；如果没有这行，结果很难扫读。 */
+} /* 新增代码+DesktopGUISessionSearch：单条搜索结果结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-result:hover { /* 新增代码+DesktopGUISessionSearch：定义搜索结果 hover；如果没有这段，用户不确定结果可点。 */
+  background: #eef2f7; /* 新增代码+DesktopGUISessionSearch：显示浅 hover 背景；如果没有这行，交互反馈不明显。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索结果 hover 结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-result-title { /* 新增代码+DesktopGUISessionSearch：定义搜索结果标题；如果没有这段，标题和摘要层级不清。 */
+  overflow: hidden; /* 新增代码+DesktopGUISessionSearch：隐藏超长标题；如果没有这行，长标题会撑破弹层。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUISessionSearch：用省略号提示截断；如果没有这行，截断不明显。 */
+  white-space: nowrap; /* 新增代码+DesktopGUISessionSearch：标题单行显示；如果没有这行，结果高度会随标题跳动。 */
+  font-size: 13px; /* 新增代码+DesktopGUISessionSearch：设置结果标题字号；如果没有这行，标题会和正文混淆。 */
+  font-weight: 600; /* 新增代码+DesktopGUISessionSearch：提高标题权重；如果没有这行，标题不够醒目。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索结果标题结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-result-archived { /* 新增代码+DesktopGUISessionSearch：定义归档结果标记；如果没有这段，归档来源会和标题混在一起。 */
+  display: inline-flex; /* 新增代码+DesktopGUISessionSearch：让图标和文字同行；如果没有这行，标记内部会错位。 */
+  align-items: center; /* 新增代码+DesktopGUISessionSearch：垂直居中标记内容；如果没有这行，图标和文字不齐。 */
+  gap: 4px; /* 新增代码+DesktopGUISessionSearch：设置图标文字间距；如果没有这行，标记会粘连。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：使用次级文字色；如果没有这行，归档标记会过度抢眼。 */
+  font-size: 11px; /* 新增代码+DesktopGUISessionSearch：设置标记字号；如果没有这行，标记会撑高结果。 */
+} /* 新增代码+DesktopGUISessionSearch：归档结果标记结束；如果没有这行，CSS 块语法不完整。 */
+
+.search-panel-result small { /* 新增代码+DesktopGUISessionSearch：定义搜索片段文本；如果没有这段，片段会继承浏览器默认 small 样式。 */
+  grid-column: 1 / -1; /* 新增代码+DesktopGUISessionSearch：让片段跨满整行；如果没有这行，片段会被归档标记挤窄。 */
+  color: #667085; /* 新增代码+DesktopGUISessionSearch：使用次级文本色；如果没有这行，片段会和标题抢层级。 */
+  font-size: 12px; /* 新增代码+DesktopGUISessionSearch：设置片段字号；如果没有这行，结果列表密度不稳定。 */
+  overflow: hidden; /* 新增代码+DesktopGUISessionSearch：隐藏超长片段；如果没有这行，长回答会撑破结果项。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUISessionSearch：用省略号提示片段截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopGUISessionSearch：片段单行显示；如果没有这行，结果高度会随内容跳动。 */
+} /* 新增代码+DesktopGUISessionSearch：搜索片段文本结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-backdrop { /* 新增代码+DesktopGUIPermissions：定义权限弹窗遮罩；如果没有这段，权限确认会和主界面混在一起。 */
+  position: fixed; /* 新增代码+DesktopGUIPermissions：固定覆盖整个窗口；如果没有这行，滚动时遮罩可能离开视口。 */
+  inset: 0; /* 新增代码+DesktopGUIPermissions：让遮罩铺满窗口；如果没有这行，背景仍可被点击。 */
+  display: grid; /* 新增代码+DesktopGUIPermissions：用网格居中弹窗；如果没有这行，弹窗定位会依赖手写偏移。 */
+  place-items: center; /* 新增代码+DesktopGUIPermissions：让弹窗水平垂直居中；如果没有这行，弹窗可能贴边。 */
+  background: rgba(15, 23, 42, 0.28); /* 新增代码+DesktopGUIPermissions：添加克制遮罩；如果没有这行，用户不容易注意当前需要确认。 */
+  z-index: 20; /* 新增代码+DesktopGUIPermissions：确保弹窗高于三栏内容；如果没有这行，弹窗可能被状态栏盖住。 */
+} /* 新增代码+DesktopGUIPermissions：权限弹窗遮罩规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog { /* 新增代码+DesktopGUIPermissions：定义权限弹窗主体；如果没有这段，确认内容没有清晰容器。 */
+  width: min(440px, calc(100vw - 32px)); /* 新增代码+DesktopGUIPermissions：限制弹窗宽度并适配小屏；如果没有这行，窄窗口中文本会溢出。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopGUIPermissions：给弹窗加边框；如果没有这行，白色弹窗和背景层级不清楚。 */
+  border-radius: 8px; /* 新增代码+DesktopGUIPermissions：使用小圆角；如果没有这行，弹窗风格和其它控件不统一。 */
+  background: #ffffff; /* 新增代码+DesktopGUIPermissions：设置弹窗白底；如果没有这行，遮罩下内容可能透出影响阅读。 */
+  box-shadow: 0 18px 60px rgba(16, 24, 40, 0.22); /* 新增代码+DesktopGUIPermissions：添加窗口阴影；如果没有这行，弹窗层级不明显。 */
+  color: #1f2328; /* 新增代码+DesktopGUIPermissions：设置主文字色；如果没有这行，文本颜色会继承不稳定。 */
+  padding: 18px; /* 新增代码+DesktopGUIPermissions：给弹窗内容留空间；如果没有这行，文字会贴边框。 */
+} /* 新增代码+DesktopGUIPermissions：权限弹窗主体规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog h2 { /* 新增代码+DesktopGUIPermissions：定义权限弹窗标题；如果没有这段，h2 默认字号会过大。 */
+  margin: 0 0 12px; /* 新增代码+DesktopGUIPermissions：控制标题外边距；如果没有这行，标题和详情间距不稳定。 */
+  font-size: 15px; /* 新增代码+DesktopGUIPermissions：设置工具型弹窗标题字号；如果没有这行，标题会抢过多空间。 */
+} /* 新增代码+DesktopGUIPermissions：权限弹窗标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-details { /* 新增代码+DesktopGUIPermissions：定义权限详情列表；如果没有这段，request/risk 字段会难以扫读。 */
+  display: grid; /* 新增代码+DesktopGUIPermissions：用网格排列键值对；如果没有这行，dt/dd 默认样式会不整齐。 */
+  grid-template-columns: 72px minmax(0, 1fr); /* 新增代码+DesktopGUIPermissions：固定字段名列，详情自适应；如果没有这行，字段名和内容不易对齐。 */
+  gap: 8px 10px; /* 新增代码+DesktopGUIPermissions：设置详情行列间距；如果没有这行，信息会挤在一起。 */
+  margin: 0; /* 新增代码+DesktopGUIPermissions：去掉 dl 默认外边距；如果没有这行，弹窗空间不稳定。 */
+} /* 新增代码+DesktopGUIPermissions：权限详情列表规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-details dt { /* 新增代码+DesktopGUIPermissions：定义权限详情字段名；如果没有这段，字段名和内容层级不清楚。 */
+  color: #667085; /* 新增代码+DesktopGUIPermissions：使用次级颜色；如果没有这行，字段名会抢正文层级。 */
+  font-size: 12px; /* 新增代码+DesktopGUIPermissions：设置字段名字号；如果没有这行，详情区会显得拥挤。 */
+} /* 新增代码+DesktopGUIPermissions：权限详情字段名规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-details dd { /* 新增代码+DesktopGUIPermissions：定义权限详情内容；如果没有这段，dd 默认缩进会破坏布局。 */
+  margin: 0; /* 新增代码+DesktopGUIPermissions：去掉 dd 默认外边距；如果没有这行，内容会错位。 */
+  min-width: 0; /* 新增代码+DesktopGUIPermissions：允许长文本在列内截断；如果没有这行，request_id 可能撑破弹窗。 */
+  overflow-wrap: anywhere; /* 新增代码+DesktopGUIPermissions：允许长 id 换行；如果没有这行，长 request_id 会横向溢出。 */
+  font-size: 12px; /* 新增代码+DesktopGUIPermissions：设置详情字号；如果没有这行，弹窗密度不稳定。 */
+} /* 新增代码+DesktopGUIPermissions：权限详情内容规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-actions { /* 新增代码+DesktopGUIPermissions：定义权限弹窗按钮区；如果没有这段，按钮排列不稳定。 */
+  display: flex; /* 新增代码+DesktopGUIPermissions：横向排列按钮；如果没有这行，按钮会自然换行堆叠。 */
+  justify-content: flex-end; /* 新增代码+DesktopGUIPermissions：按钮靠右对齐；如果没有这行，确认动作不符合桌面习惯。 */
+  gap: 8px; /* 新增代码+DesktopGUIPermissions：设置按钮间距；如果没有这行，按钮会贴在一起。 */
+  margin-top: 16px; /* 新增代码+DesktopGUIPermissions：按钮和详情之间留空；如果没有这行，操作区会挤在正文下。 */
+} /* 新增代码+DesktopGUIPermissions：权限弹窗按钮区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-actions button { /* 新增代码+DesktopGUIPermissions：定义权限弹窗按钮基础样式；如果没有这段，浏览器默认按钮会破坏统一视觉。 */
+  min-width: 72px; /* 新增代码+DesktopGUIPermissions：保证按钮点击区稳定；如果没有这行，中文短按钮点击区域太小。 */
+  height: 34px; /* 新增代码+DesktopGUIPermissions：固定按钮高度；如果没有这行，按钮高度会随字体变化。 */
+  border-radius: 6px; /* 新增代码+DesktopGUIPermissions：使用小圆角；如果没有这行，按钮风格不统一。 */
+  padding: 0 12px; /* 新增代码+DesktopGUIPermissions：给按钮文字留空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopGUIPermissions：权限弹窗按钮基础规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-dialog-actions button:disabled { /* 新增代码+DesktopGUIPermissionsV2：定义权限按钮提交中禁用样式；如果没有这段，按钮禁用后视觉反馈不明显。 */
+  cursor: wait; /* 新增代码+DesktopGUIPermissionsV2：显示等待光标；如果没有这行，用户可能以为按钮仍可继续点击。 */
+  opacity: 0.62; /* 新增代码+DesktopGUIPermissionsV2：降低禁用按钮透明度；如果没有这行，提交中和可点击状态难以区分。 */
+} /* 新增代码+DesktopGUIPermissionsV2：权限按钮禁用规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-deny-button { /* 新增代码+DesktopGUIPermissions：定义拒绝按钮样式；如果没有这段，拒绝动作和允许动作难以区分。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopGUIPermissions：给拒绝按钮轻边框；如果没有这行，按钮边界不清楚。 */
+  background: #ffffff; /* 新增代码+DesktopGUIPermissions：拒绝按钮保持白底；如果没有这行，拒绝会被错误强调。 */
+  color: #30363d; /* 新增代码+DesktopGUIPermissions：设置拒绝按钮文字色；如果没有这行，文字颜色不稳定。 */
+} /* 新增代码+DesktopGUIPermissions：拒绝按钮样式规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.permission-approve-button { /* 新增代码+DesktopGUIPermissions：定义允许按钮强调样式；如果没有这段，主操作不够明确。 */
+  border: 1px solid #1f2328; /* 新增代码+DesktopGUIPermissions：给允许按钮深色边框；如果没有这行，强调按钮边界不清楚。 */
+  background: #1f2328; /* 新增代码+DesktopGUIPermissions：使用深色强调允许按钮；如果没有这行，允许动作不明显。 */
+  color: #ffffff; /* 新增代码+DesktopGUIPermissions：允许按钮文字用白色；如果没有这行，深色背景上文字不可读。 */
+} /* 新增代码+DesktopGUIPermissions：允许按钮强调样式规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.thread-body { /* 新增代码+DesktopLayout：定义消息滚动区；如果没有这段，长对话无法独立滚动。 */
+  display: grid; /* 新增代码+DesktopLayout：使用网格堆叠消息；如果没有这行，消息间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopLayout：让消息从顶部开始；如果没有这行，空白会拉散消息。 */
+  gap: 14px; /* 新增代码+DesktopLayout：设置消息间距；如果没有这行，消息会粘在一起。 */
+  padding: 24px; /* 新增代码+DesktopLayout：给消息内容留出阅读空间；如果没有这行，文字会贴边。 */
+  overflow: auto; /* 新增代码+DesktopLayout：允许消息区滚动；如果没有这行，长内容会把 composer 推出屏幕。 */
+} /* 新增代码+DesktopLayout：消息滚动区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message { /* 新增代码+DesktopLayout：定义消息块基础样式；如果没有这段，消息内容会缺少可读行宽。 */
+  max-width: 760px; /* 新增代码+DesktopLayout：限制消息行宽；如果没有这行，宽屏上阅读会很累。 */
+  line-height: 1.6; /* 新增代码+DesktopLayout：设置正文行高；如果没有这行，中文段落会显得拥挤。 */
+} /* 新增代码+DesktopLayout：消息块基础规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-text { /* 修改代码+DesktopThreadStreaming：定义消息正文容器；如果没有这段，流式文本和代码块会继承浏览器默认间距。 */
+  margin: 4px 0 0; /* 修改代码+DesktopThreadStreaming：控制正文顶部间距；如果没有这行，消息头和正文会粘连或忽远忽近。 */
+  color: #1f2328; /* 新增代码+DesktopThreadStreaming：使用主正文颜色；如果没有这行，拒绝和错误样式可能让正文层级不稳定。 */
+  font-size: 14px; /* 新增代码+DesktopThreadStreaming：固定正文工具型字号；如果没有这行，正文会受局部元素影响跳动。 */
+  line-height: 1.6; /* 新增代码+DesktopThreadStreaming：保持中文段落舒适行高；如果没有这行，流式长回答会显得拥挤。 */
+  white-space: pre-wrap; /* 新增代码+DesktopThreadStreaming：保留模型输出换行；如果没有这行，列表和分段会挤成一行。 */
+  overflow-wrap: anywhere; /* 新增代码+DesktopThreadStreaming：允许超长 token 换行；如果没有这行，长路径或 URL 会撑破消息列。 */
+} /* 修改代码+DesktopThreadStreaming：消息正文容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-label { /* 新增代码+DesktopThreadStreaming：定义消息语义标签基础样式；如果没有这段，拒绝和错误标签会像普通文本。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopThreadStreaming：给语义标签轻边框；如果没有这行，标签边界不清楚。 */
+  border-radius: 999px; /* 新增代码+DesktopThreadStreaming：使用胶囊标签；如果没有这行，语义提示不像稳定状态标记。 */
+  padding: 1px 7px; /* 新增代码+DesktopThreadStreaming：设置标签内边距；如果没有这行，文字会贴到边框上。 */
+  font-size: 11px; /* 新增代码+DesktopThreadStreaming：降低标签字号；如果没有这行，语义标签会抢正文注意力。 */
+  font-weight: 600; /* 新增代码+DesktopThreadStreaming：增强标签可扫读性；如果没有这行，标签不易被看见。 */
+} /* 新增代码+DesktopThreadStreaming：消息语义标签基础规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-label-refusal { /* 新增代码+DesktopThreadStreaming：定义安全拒绝标签样式；如果没有这段，拒绝消息缺少可识别安全语义。 */
+  border-color: #f4c7a1; /* 新增代码+DesktopThreadStreaming：使用柔和暖色边框；如果没有这行，拒绝标签和普通状态难区分。 */
+  color: #9a4b00; /* 新增代码+DesktopThreadStreaming：使用可读暖色文字；如果没有这行，安全提示不够醒目。 */
+  background: #fff6ed; /* 新增代码+DesktopThreadStreaming：使用浅暖色底；如果没有这行，拒绝标签没有视觉承载。 */
+} /* 新增代码+DesktopThreadStreaming：安全拒绝标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-label-error { /* 新增代码+DesktopThreadStreaming：定义错误标签样式；如果没有这段，失败消息缺少可识别错误语义。 */
+  border-color: #f2b8b5; /* 新增代码+DesktopThreadStreaming：使用柔和红色边框；如果没有这行，错误标签和普通状态难区分。 */
+  color: #b42318; /* 新增代码+DesktopThreadStreaming：使用可读红色文字；如果没有这行，错误提示不够醒目。 */
+  background: #fff1f0; /* 新增代码+DesktopThreadStreaming：使用浅红底；如果没有这行，错误标签没有视觉承载。 */
+} /* 新增代码+DesktopThreadStreaming：错误标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-code { /* 新增代码+DesktopThreadStreaming：定义消息代码块；如果没有这段，代码会像普通文本并撑破消息宽度。 */
+  max-width: 100%; /* 新增代码+DesktopThreadStreaming：限制代码块不超过消息宽度；如果没有这行，长代码会横向撑破布局。 */
+  overflow-x: auto; /* 新增代码+DesktopThreadStreaming：允许代码横向滚动；如果没有这行，长命令或代码会覆盖其他内容。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopThreadStreaming：给代码块边界；如果没有这行，代码和正文混在一起。 */
+  border-radius: 6px; /* 新增代码+DesktopThreadStreaming：使用小圆角；如果没有这行，代码块和桌面外壳风格不一致。 */
+  background: #f6f8fa; /* 新增代码+DesktopThreadStreaming：使用浅灰代码背景；如果没有这行，代码片段不易被扫描。 */
+  padding: 10px 12px; /* 新增代码+DesktopThreadStreaming：给代码内容留内边距；如果没有这行，代码会贴边难读。 */
+  margin: 8px 0; /* 新增代码+DesktopThreadStreaming：给代码块上下留节奏；如果没有这行，代码和正文会粘在一起。 */
+  white-space: pre; /* 新增代码+DesktopThreadStreaming：保留代码原始空白；如果没有这行，代码缩进会被破坏。 */
+} /* 新增代码+DesktopThreadStreaming：消息代码块规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-code code { /* 新增代码+DesktopThreadStreaming：定义代码文字；如果没有这段，代码会继承正文比例字体。 */
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace; /* 新增代码+DesktopThreadStreaming：使用等宽字体；如果没有这行，代码列对齐会错乱。 */
+  font-size: 12px; /* 新增代码+DesktopThreadStreaming：控制代码字号；如果没有这行，代码块会占用过多垂直空间。 */
+} /* 新增代码+DesktopThreadStreaming：代码文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-role { /* 新增代码+DesktopLayout：定义消息角色标签；如果没有这段，用户难以分辨消息来源。 */
+  display: inline-flex; /* 新增代码+DesktopLayout：让角色和状态标签横向排列；如果没有这行，状态文本会和角色拥挤在一起。 */
+  align-items: center; /* 新增代码+DesktopLayout：垂直居中角色和状态；如果没有这行，标签基线会不齐。 */
+  gap: 8px; /* 新增代码+DesktopLayout：设置角色和状态间距；如果没有这行，两个标签会粘连。 */
+  color: #667085; /* 新增代码+DesktopLayout：使用次级文字色；如果没有这行，角色标签会抢正文层级。 */
+  font-size: 12px; /* 新增代码+DesktopLayout：缩小角色标签；如果没有这行，消息头会过重。 */
+  font-weight: 600; /* 新增代码+DesktopLayout：给角色标签一点权重；如果没有这行，标签不易扫描。 */
+} /* 新增代码+DesktopLayout：消息角色标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-status { /* 新增代码+DesktopLayout：定义消息状态标签；如果没有这段，queued/running/completed 等状态会像普通文本。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopLayout：给状态标签边框；如果没有这行，状态不够醒目。 */
+  border-radius: 999px; /* 新增代码+DesktopLayout：使用胶囊状态标签；如果没有这行，状态文本不像独立标签。 */
+  padding: 1px 7px; /* 新增代码+DesktopLayout：设置状态标签内边距；如果没有这行，文字会贴边框。 */
+  color: #475467; /* 新增代码+DesktopLayout：设置状态文字色；如果没有这行，状态色会继承得不够清楚。 */
+  font-size: 11px; /* 新增代码+DesktopLayout：缩小状态字号；如果没有这行，状态标签会抢消息内容层级。 */
+} /* 新增代码+DesktopLayout：消息状态标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-action-button { /* 新增代码+DesktopTurnActions：定义消息生命周期图标按钮；如果没有这段，取消和重试按钮会使用浏览器默认样式。 */
+  width: 24px; /* 新增代码+DesktopTurnActions：固定按钮宽度；如果没有这行，图标按钮会因内容变化造成标题行抖动。 */
+  height: 24px; /* 新增代码+DesktopTurnActions：固定按钮高度；如果没有这行，点击区域会不稳定。 */
+  display: inline-flex; /* 新增代码+DesktopTurnActions：让图标居中排列；如果没有这行，SVG 会靠基线下沉。 */
+  align-items: center; /* 新增代码+DesktopTurnActions：垂直居中图标；如果没有这行，按钮视觉会偏下。 */
+  justify-content: center; /* 新增代码+DesktopTurnActions：水平居中图标；如果没有这行，图标会贴边。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopTurnActions：使用轻边框；如果没有这行，按钮在白底上不易识别。 */
+  border-radius: 6px; /* 新增代码+DesktopTurnActions：使用小圆角；如果没有这行，按钮会和整体 6px 风格不一致。 */
+  background: #ffffff; /* 新增代码+DesktopTurnActions：设置白色按钮底；如果没有这行，按钮会继承透明背景而难以点击。 */
+  color: #475467; /* 新增代码+DesktopTurnActions：设置图标颜色；如果没有这行，图标会继承过浅或过深的文字色。 */
+  cursor: pointer; /* 新增代码+DesktopTurnActions：显示可点击光标；如果没有这行，用户不容易知道按钮可操作。 */
+} /* 新增代码+DesktopTurnActions：消息生命周期图标按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.message-action-button:hover { /* 新增代码+DesktopTurnActions：定义按钮悬停态；如果没有这段，用户无法获得可点击反馈。 */
+  border-color: #a9b3c1; /* 新增代码+DesktopTurnActions：悬停时加深边框；如果没有这行，按钮反馈不明显。 */
+  color: #30363d; /* 新增代码+DesktopTurnActions：悬停时加深图标；如果没有这行，图标状态不清楚。 */
+} /* 新增代码+DesktopTurnActions：按钮悬停态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.system-message { /* 新增代码+DesktopLayout：定义系统消息颜色；如果没有这段，状态提示和助手回答无法区分。 */
+  color: #344054; /* 新增代码+DesktopLayout：使用稳重状态文字色；如果没有这行，系统提示层级不清楚。 */
+} /* 新增代码+DesktopLayout：系统消息规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer { /* 修改代码+ComposerModelToolbar：定义底部输入区占位；如果没有这段，输入外壳和工具条没有稳定边界。 */
+  display: flex; /* 修改代码+ComposerModelToolbar：使用 flex 承载居中的 Codex 式输入外壳；如果没有这行，输入区会回到三列旧布局。 */
+  align-items: center; /* 修改代码+ComposerModelToolbar：让输入外壳垂直居中；如果没有这行，工具条会贴到顶部或底部。 */
+  border-top: 1px solid #e5e9f0; /* 修改代码+ComposerModelToolbar：给 composer 顶部分隔线；如果没有这行，输入区和消息区会混在一起。 */
+  min-height: 128px; /* 修改代码+ComposerModelToolbar：锁住双层 composer 最小触达高度；如果没有这行，模型菜单会被压扁。 */
+  max-height: 152px; /* 修改代码+ComposerModelToolbar：限制输入区最大占位；如果没有这行，输入区会吞掉消息阅读空间。 */
+  padding: 14px 20px 16px; /* 修改代码+ComposerModelToolbar：给外壳留出和 Codex 接近的底部呼吸；如果没有这行，控件会贴边。 */
+  overflow: hidden; /* 修改代码+ComposerModelToolbar：把溢出控制在输入区内部；如果没有这行，长输入可能制造外层滚动。 */
+} /* 修改代码+ComposerModelToolbar：输入区占位规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-frame { /* 新增代码+ComposerModelToolbar：定义 Codex 式输入框外壳；如果没有这段，textarea 和下拉按钮会散开。 */
+  display: grid; /* 新增代码+ComposerModelToolbar：用网格分成输入行和工具条行；如果没有这行，输入和控件无法稳定上下排列。 */
+  grid-template-rows: minmax(38px, 1fr) 22px 36px; /* 修改代码+RealModelLatencyV2：为输入、模型状态和工具条分配固定行；如果没有这行，真实调用状态会挤压按钮或撑高 composer。 */
+  gap: 4px; /* 修改代码+RealModelLatencyV2：收紧三行之间的间距；如果没有这行，新增状态条会让底部输入区过高。 */
+  width: min(100%, 736px); /* 新增代码+ComposerModelToolbar：限制输入外壳最大宽度接近 Codex；如果没有这行，超宽窗口输入框会过长。 */
+  min-width: 0; /* 新增代码+ComposerModelToolbar：允许外壳在窄窗口收缩；如果没有这行，右侧按钮可能溢出。 */
+  margin: 0 auto; /* 新增代码+ComposerModelToolbar：让输入外壳居中；如果没有这行，底部区域会贴左不符合 Codex 观感。 */
+  border: 1px solid #d8dee8; /* 新增代码+ComposerModelToolbar：绘制整体输入框边界；如果没有这行，用户看不出输入和工具条属于一组。 */
+  border-radius: 16px; /* 新增代码+ComposerModelToolbar：使用 Codex 式较柔和外壳圆角；如果没有这行，底部外壳会像普通表单。 */
+  background: #ffffff; /* 新增代码+ComposerModelToolbar：设置外壳白底；如果没有这行，控件背景会被父级污染。 */
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08); /* 新增代码+ComposerModelToolbar：添加轻微浮层阴影；如果没有这行，底部输入区缺少桌面外壳层次。 */
+  padding: 10px 12px 8px; /* 新增代码+ComposerModelToolbar：给外壳内控件留边距；如果没有这行，文字和按钮会贴边。 */
+} /* 新增代码+ComposerModelToolbar：输入框外壳规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-input { /* 修改代码+ComposerModelToolbar：定义 prompt 输入框；如果没有这段，textarea 会使用粗糙的浏览器默认样式。 */
+  min-height: 38px; /* 修改代码+RealModelLatencyV2：在新增状态条后保留稳定输入高度；如果没有这行，textarea 会占满状态槽空间。 */
+  max-height: 64px; /* 修改代码+RealModelLatencyV2：让长输入继续内部滚动；如果没有这行，长 prompt 会把模型状态和工具条推出外壳。 */
+  resize: none; /* 修改代码+ComposerModelToolbar：禁止手动拖拽破坏固定验收高度；如果没有这行，用户一拖就会让三栏布局失真。 */
+  border: 0; /* 修改代码+ComposerModelToolbar：去掉 textarea 自己的边框交给外壳承担；如果没有这行，会出现双边框。 */
+  outline: none; /* 修改代码+ComposerModelToolbar：去掉原生粗 outline；如果没有这行，视觉会和整体外壳冲突。 */
+  padding: 6px 2px; /* 修改代码+ComposerModelToolbar：给输入文字留出轻量内边距；如果没有这行，文字会贴边。 */
+  color: #1f2328; /* 修改代码+ComposerModelToolbar：设置输入文字色；如果没有这行，文字颜色依赖浏览器默认值。 */
+  overflow: auto; /* 修改代码+ComposerModelToolbar：让长输入在 textarea 内部滚动；如果没有这行，关闭 resize 后长 prompt 会被截断得不可编辑。 */
+  font: inherit; /* 新增代码+ComposerModelToolbar：继承应用字体；如果没有这行，输入框可能使用浏览器默认字体。 */
+  line-height: 1.45; /* 新增代码+ComposerModelToolbar：设置输入行高；如果没有这行，多行中文会显得拥挤。 */
+} /* 修改代码+ComposerModelToolbar：prompt 输入框规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-model-status-slot { /* 新增代码+RealModelLatencyV2：定义底部模型调用状态槽；如果没有这段，状态文案会让 composer 高度和按钮位置跳动。 */
+  display: flex; /* 新增代码+RealModelLatencyV2：用 flex 垂直居中状态条；如果没有这行，短文案会贴在槽顶部。 */
+  align-items: center; /* 新增代码+RealModelLatencyV2：让状态条在 22px 槽里居中；如果没有这行，视觉会偏上或偏下。 */
+  min-width: 0; /* 新增代码+RealModelLatencyV2：允许状态文本省略；如果没有这行，长错误会撑破输入外壳。 */
+  height: 22px; /* 新增代码+RealModelLatencyV2：固定状态槽高度；如果没有这行，fallback 文案出现时会推挤工具条。 */
+  overflow: hidden; /* 新增代码+RealModelLatencyV2：隐藏超出槽的内容；如果没有这行，长错误会遮住下方按钮。 */
+} /* 新增代码+RealModelLatencyV2：模型调用状态槽规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status { /* 新增代码+RealModelLatencyV2：定义模型调用状态条根样式；如果没有这段，连接/fallback 文案会像普通正文一样难扫描。 */
+  display: inline-flex; /* 新增代码+RealModelLatencyV2：横向排列状态点、文案和耗时；如果没有这行，状态元素会自然换行。 */
+  align-items: center; /* 新增代码+RealModelLatencyV2：垂直居中所有状态元素；如果没有这行，小点和文字会错位。 */
+  gap: 6px; /* 新增代码+RealModelLatencyV2：设置状态元素间距；如果没有这行，文案和耗时会粘在一起。 */
+  min-width: 0; /* 新增代码+RealModelLatencyV2：允许整条状态在窄空间里收缩；如果没有这行，长模型名会溢出。 */
+  max-width: 100%; /* 新增代码+RealModelLatencyV2：限制状态条不超过父容器；如果没有这行，右侧按钮可能被挤压。 */
+  color: #667085; /* 新增代码+RealModelLatencyV2：使用次级文字色；如果没有这行，状态条会抢输入正文层级。 */
+  font-size: 12px; /* 新增代码+RealModelLatencyV2：使用紧凑字号；如果没有这行，状态条会撑高底部输入区。 */
+  line-height: 1.2; /* 新增代码+RealModelLatencyV2：控制状态文字行高；如果没有这行，固定槽内可能垂直溢出。 */
+} /* 新增代码+RealModelLatencyV2：模型调用状态条根样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-dot { /* 新增代码+RealModelLatencyV2：定义状态小点；如果没有这段，阶段状态缺少快速视觉提示。 */
+  width: 6px; /* 新增代码+RealModelLatencyV2：设置小点宽度；如果没有这行，小点尺寸依赖内容不可控。 */
+  height: 6px; /* 新增代码+RealModelLatencyV2：设置小点高度；如果没有这行，小点不会成为正圆。 */
+  flex: 0 0 6px; /* 新增代码+RealModelLatencyV2：固定小点占位；如果没有这行，小点可能被长文案挤扁。 */
+  border-radius: 999px; /* 新增代码+RealModelLatencyV2：把小点做成圆形；如果没有这行，小点会是方块。 */
+  background: #98a2b3; /* 新增代码+RealModelLatencyV2：默认使用中性灰；如果没有这行，普通阶段缺少视觉锚点。 */
+} /* 新增代码+RealModelLatencyV2：状态小点规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-text { /* 新增代码+RealModelLatencyV2：定义状态主文案；如果没有这段，长错误可能撑破 composer 或右栏。 */
+  min-width: 0; /* 新增代码+RealModelLatencyV2：允许文本收缩；如果没有这行，省略号不会生效。 */
+  overflow: hidden; /* 新增代码+RealModelLatencyV2：隐藏溢出文本；如果没有这行，长 provider 错误会遮住按钮。 */
+  text-overflow: ellipsis; /* 新增代码+RealModelLatencyV2：用省略号提示截断；如果没有这行，用户不知道文案被截短。 */
+  white-space: nowrap; /* 新增代码+RealModelLatencyV2：保持单行状态；如果没有这行，状态条会撑高固定槽。 */
+} /* 新增代码+RealModelLatencyV2：状态主文案规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-elapsed { /* 新增代码+RealModelLatencyV2：定义耗时标签；如果没有这段，3.2s 等证据会和正文混在一起。 */
+  flex: 0 0 auto; /* 新增代码+RealModelLatencyV2：固定耗时标签宽度；如果没有这行，耗时可能被截断到不可读。 */
+  color: #8a94a6; /* 新增代码+RealModelLatencyV2：用更弱的颜色显示耗时；如果没有这行，耗时会抢主状态文案。 */
+  font-variant-numeric: tabular-nums; /* 新增代码+RealModelLatencyV2：让数字等宽；如果没有这行，耗时变化时文字会轻微抖动。 */
+} /* 新增代码+RealModelLatencyV2：耗时标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-websocket_timeout .model-call-status-dot, /* 新增代码+RealModelLatencyV2：给 WebSocket 超时状态点设色；如果没有这行，慢路径和普通连接难以区分。 */
+.model-call-status-https_fallback .model-call-status-dot { /* 新增代码+RealModelLatencyV2：给 HTTPS fallback 状态点设色；如果没有这段，fallback 状态没有视觉提醒。 */
+  background: #f79009; /* 新增代码+RealModelLatencyV2：使用克制橙色提示降级；如果没有这行，用户不容易注意到传输 fallback。 */
+} /* 新增代码+RealModelLatencyV2：fallback 状态点规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-first_delta .model-call-status-dot, /* 新增代码+RealModelLatencyV2：给首响应状态点设色；如果没有这行，模型已响应的正反馈不明显。 */
+.model-call-status-completed .model-call-status-dot { /* 新增代码+RealModelLatencyV2：给完成状态点设色；如果没有这段，成功状态和普通状态难以区分。 */
+  background: #12b76a; /* 新增代码+RealModelLatencyV2：使用克制绿色表达已收到响应；如果没有这行，用户看不到连接已恢复。 */
+} /* 新增代码+RealModelLatencyV2：成功状态点规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.model-call-status-failed .model-call-status-dot, /* 新增代码+RealModelLatencyV2：给失败状态点设色；如果没有这行，模型不可用不够醒目。 */
+.model-call-status-cancelled .model-call-status-dot { /* 新增代码+RealModelLatencyV2：给取消状态点设色；如果没有这段，取消终态和普通阶段难以区分。 */
+  background: #d92d20; /* 新增代码+RealModelLatencyV2：使用克制红色表达失败或取消；如果没有这行，错误状态会被弱化。 */
+} /* 新增代码+RealModelLatencyV2：失败/取消状态点规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-toolbar { /* 新增代码+ComposerModelToolbar：定义底部工具条布局；如果没有这段，权限、模型和发送按钮无法分组。 */
+  display: flex; /* 新增代码+ComposerModelToolbar：使用 flex 排列左右工具组；如果没有这行，控件会自然堆叠。 */
+  align-items: center; /* 新增代码+ComposerModelToolbar：让工具条控件垂直对齐；如果没有这行，select 和图标按钮会高低不齐。 */
+  justify-content: space-between; /* 新增代码+ComposerModelToolbar：左右工具组分列；如果没有这行，模型菜单不会靠右。 */
+  gap: 8px; /* 新增代码+ComposerModelToolbar：给左右组保留最小间距；如果没有这行，窄窗口下控件会贴在一起。 */
+  min-width: 0; /* 新增代码+ComposerModelToolbar：允许工具条在窄窗口收缩；如果没有这行，下拉可能溢出外壳。 */
+} /* 新增代码+ComposerModelToolbar：工具条布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-toolbar-left, /* 新增代码+ComposerModelToolbar：定义左侧工具组共享规则；如果没有这行，添加和权限控件无法横排。 */
+.composer-toolbar-right { /* 新增代码+ComposerModelToolbar：定义右侧工具组共享规则；如果没有这段，模型、推理、语音、发送无法横排。 */
+  display: flex; /* 新增代码+ComposerModelToolbar：使用横向 flex；如果没有这行，按钮会竖向堆叠。 */
+  align-items: center; /* 新增代码+ComposerModelToolbar：让工具组内部居中对齐；如果没有这行，图标和文字基线会错位。 */
+  gap: 6px; /* 新增代码+ComposerModelToolbar：设置组内间距；如果没有这行，控件会互相粘连。 */
+  min-width: 0; /* 新增代码+ComposerModelToolbar：允许组内 select 收缩；如果没有这行，小窗口会横向溢出。 */
+} /* 新增代码+ComposerModelToolbar：工具组共享规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-toolbar-right { /* 新增代码+ComposerModelToolbar：定义右侧工具组补充规则；如果没有这段，右侧模型控件可能占满整个工具条。 */
+  justify-content: flex-end; /* 新增代码+ComposerModelToolbar：右侧工具靠右排列；如果没有这行，发送按钮不会贴近右边界。 */
+  flex: 1 1 auto; /* 新增代码+ComposerModelToolbar：右侧工具组吃剩余空间；如果没有这行，模型菜单可能没有足够宽度。 */
+} /* 新增代码+ComposerModelToolbar：右侧工具组补充规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-select-shell { /* 新增代码+ComposerModelToolbar：定义下拉控件外壳；如果没有这段，权限、模型、推理菜单会像浏览器默认控件。 */
+  display: inline-flex; /* 新增代码+ComposerModelToolbar：让图标、select、箭头横向对齐；如果没有这行，下拉图标会错位。 */
+  align-items: center; /* 新增代码+ComposerModelToolbar：垂直居中下拉内容；如果没有这行，文字和箭头会上下错位。 */
+  gap: 4px; /* 新增代码+ComposerModelToolbar：设置图标和文字间距；如果没有这行，控件可读性差。 */
+  height: 30px; /* 新增代码+ComposerModelToolbar：固定下拉控件高度；如果没有这行，不同文字会导致工具条跳动。 */
+  min-width: 0; /* 新增代码+ComposerModelToolbar：允许外壳收缩；如果没有这行，长模型名会撑破布局。 */
+  border: 0; /* 新增代码+ComposerModelToolbar：保持 Codex 式轻量下拉；如果没有这行，多个边框会显得杂乱。 */
+  border-radius: 8px; /* 新增代码+ComposerModelToolbar：设置小圆角 hover 面；如果没有这行，悬停反馈生硬。 */
+  color: #1f2937; /* 新增代码+ComposerModelToolbar：设置菜单文字颜色；如果没有这行，颜色会依赖浏览器默认。 */
+  background: transparent; /* 新增代码+ComposerModelToolbar：默认透明背景；如果没有这行，菜单会像传统表单。 */
+  padding: 0 6px; /* 新增代码+ComposerModelToolbar：保留点击和可读空间；如果没有这行，文字会贴图标。 */
+} /* 新增代码+ComposerModelToolbar：下拉外壳规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-select-shell:hover { /* 新增代码+ComposerModelToolbar：定义下拉悬停反馈；如果没有这段，用户不容易知道这里可点击。 */
+  background: #f3f4f6; /* 新增代码+ComposerModelToolbar：悬停时显示轻灰底；如果没有这行，菜单缺少交互反馈。 */
+} /* 新增代码+ComposerModelToolbar：下拉悬停规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-select-shell select { /* 新增代码+ComposerModelToolbar：定义原生 select 内部样式；如果没有这段，下拉会显示浏览器默认边框。 */
+  appearance: none; /* 新增代码+ComposerModelToolbar：隐藏默认箭头以使用 lucide 箭头；如果没有这行，控件会出现双箭头。 */
+  border: 0; /* 新增代码+ComposerModelToolbar：移除 select 边框；如果没有这行，外壳和 select 会双重边界。 */
+  background: transparent; /* 新增代码+ComposerModelToolbar：让 select 融入工具条；如果没有这行，背景块会割裂。 */
+  color: inherit; /* 新增代码+ComposerModelToolbar：继承外壳文字色；如果没有这行，文字颜色不统一。 */
+  font: inherit; /* 新增代码+ComposerModelToolbar：继承应用字体；如果没有这行，下拉可能使用系统默认字体。 */
+  height: 28px; /* 新增代码+ComposerModelToolbar：固定 select 高度；如果没有这行，工具条会随浏览器默认高度跳动。 */
+  min-width: 0; /* 新增代码+ComposerModelToolbar：允许 select 收缩；如果没有这行，长模型名会撑开外壳。 */
+  outline: none; /* 新增代码+ComposerModelToolbar：去掉内部粗 outline；如果没有这行，焦点样式会和外壳冲突。 */
+  cursor: pointer; /* 新增代码+ComposerModelToolbar：显示可点击光标；如果没有这行，用户可能误以为只是文本。 */
+} /* 新增代码+ComposerModelToolbar：select 内部样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-select-shell select:disabled { /* 新增代码+ComposerModelToolbar：定义模型空态禁用样式；如果没有这段，未连接 provider 时菜单仍像可点。 */
+  color: #8a94a6; /* 新增代码+ComposerModelToolbar：弱化禁用文字；如果没有这行，空状态不明显。 */
+  cursor: not-allowed; /* 新增代码+ComposerModelToolbar：显示不可点击光标；如果没有这行，用户会误以为能选择模型。 */
+} /* 新增代码+ComposerModelToolbar：禁用样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-access-shell { /* 新增代码+ComposerModelToolbar：定义权限菜单宽度；如果没有这段，完全访问文字可能被压缩。 */
+  flex: 0 0 auto; /* 新增代码+ComposerModelToolbar：避免权限菜单被右侧模型挤压；如果没有这行，完全访问文字可能截断。 */
+} /* 新增代码+ComposerModelToolbar：权限菜单宽度规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-model-shell { /* 新增代码+ComposerModelToolbar：定义模型菜单宽度；如果没有这段，模型名和推理菜单会互相挤压。 */
+  max-width: 150px; /* 新增代码+ComposerModelToolbar：限制模型菜单最大宽度；如果没有这行，长模型名会推开发送按钮。 */
+} /* 新增代码+ComposerModelToolbar：模型菜单宽度规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-model-shell select { /* 新增代码+ComposerModelToolbar：定义模型 select 截断；如果没有这段，长模型名会撑破工具条。 */
+  max-width: 112px; /* 新增代码+ComposerModelToolbar：固定模型文字最大宽度；如果没有这行，GPT 长名称会挤压语音按钮。 */
+  text-overflow: ellipsis; /* 新增代码+ComposerModelToolbar：超长模型名用省略号；如果没有这行，文字会溢出。 */
+} /* 新增代码+ComposerModelToolbar：模型 select 截断规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-reasoning-shell { /* 新增代码+ComposerModelToolbar：定义推理菜单宽度；如果没有这段，超高文字可能挤压箭头。 */
+  flex: 0 0 auto; /* 新增代码+ComposerModelToolbar：让推理菜单保持固定宽度；如果没有这行，右侧工具会抖动。 */
+} /* 新增代码+ComposerModelToolbar：推理菜单宽度规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.icon-button, /* 新增代码+DesktopLayout：定义图标按钮共享规则；如果没有这行，附件按钮没有统一尺寸。 */
+.send-button { /* 新增代码+DesktopLayout：定义发送按钮共享规则；如果没有这段，底部按钮尺寸会不一致。 */
+  display: inline-flex; /* 修改代码+ComposerModelToolbar：让图标按钮内部居中；如果没有这行，新增加号和麦克风图标可能偏上或偏左。 */
+  align-items: center; /* 修改代码+ComposerModelToolbar：垂直居中按钮图标；如果没有这行，工具条图标会和文字错位。 */
+  justify-content: center; /* 修改代码+ComposerModelToolbar：水平居中按钮图标；如果没有这行，圆角按钮里的图标不居中。 */
+  width: 40px; /* 新增代码+DesktopLayout：设置按钮宽度；如果没有这行，按钮会随图标尺寸变化。 */
+  height: 40px; /* 新增代码+DesktopLayout：设置按钮高度；如果没有这行，按钮点击区域不稳定。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopLayout：设置按钮边框；如果没有这行，图标按钮边界不清楚。 */
+  border-radius: 8px; /* 新增代码+DesktopLayout：使用小圆角按钮；如果没有这行，控件风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopLayout：设置默认按钮背景；如果没有这行，按钮背景会依赖浏览器默认。 */
+  color: #30363d; /* 新增代码+DesktopLayout：设置按钮图标色；如果没有这行，图标颜色可能不一致。 */
+  cursor: pointer; /* 修改代码+ComposerModelToolbar：显示可点击光标；如果没有这行，底部图标按钮交互性不明显。 */
+} /* 新增代码+DesktopLayout：图标按钮共享规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-frame .icon-button, /* 新增代码+ComposerModelToolbar：定义 composer 内图标按钮尺寸；如果没有这行，旧 40px 图标会撑高底部工具条。 */
+.composer-frame .send-button { /* 新增代码+ComposerModelToolbar：定义 composer 内发送按钮尺寸；如果没有这段，发送按钮会和新工具条高度不匹配。 */
+  width: 34px; /* 新增代码+ComposerModelToolbar：设置紧凑按钮宽度；如果没有这行，底部工具条会显得拥挤。 */
+  height: 34px; /* 新增代码+ComposerModelToolbar：设置紧凑按钮高度；如果没有这行，按钮会突破 36px 工具条。 */
+  flex: 0 0 34px; /* 新增代码+ComposerModelToolbar：固定按钮宽高占位；如果没有这行，按钮可能被 select 挤压变形。 */
+} /* 新增代码+ComposerModelToolbar：composer 内按钮尺寸规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-plus-button, /* 新增代码+ComposerModelToolbar：定义左侧添加按钮轻量风格；如果没有这行，加号按钮会显得过重。 */
+.composer-mic-button { /* 新增代码+ComposerModelToolbar：定义麦克风按钮轻量风格；如果没有这段，语音入口会抢过发送按钮主次。 */
+  border-color: transparent; /* 新增代码+ComposerModelToolbar：去掉次级图标按钮边框；如果没有这行，底部按钮边界过多会显乱。 */
+  background: transparent; /* 新增代码+ComposerModelToolbar：让次级图标按钮融入工具条；如果没有这行，麦克风入口会像主按钮。 */
+} /* 新增代码+ComposerModelToolbar：次级按钮轻量风格结束；如果没有这行，CSS 块语法不完整。 */
+
+.composer-plus-button:hover, /* 新增代码+ComposerModelToolbar：定义添加按钮 hover；如果没有这行，用户不容易知道按钮可点。 */
+.composer-mic-button:hover { /* 新增代码+ComposerModelToolbar：定义语音按钮 hover；如果没有这段，语音入口缺少反馈。 */
+  background: #f3f4f6; /* 新增代码+ComposerModelToolbar：hover 时使用浅灰反馈；如果没有这行，鼠标经过没有变化。 */
+} /* 新增代码+ComposerModelToolbar：次级按钮 hover 结束；如果没有这行，CSS 块语法不完整。 */
+
+.send-button { /* 新增代码+DesktopLayout：定义发送按钮强调态；如果没有这段，发送动作不够突出。 */
+  background: #30363d; /* 新增代码+DesktopLayout：使用深色强调发送按钮；如果没有这行，主操作不明显。 */
+  color: #ffffff; /* 新增代码+DesktopLayout：设置发送图标为白色；如果没有这行，深色背景上图标不清楚。 */
+} /* 新增代码+DesktopLayout：发送按钮强调规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.send-button:disabled { /* 新增代码+DesktopLayout：定义发送按钮禁用态；如果没有这段，空输入或运行中看起来仍可点击。 */
+  background: #98a2b3; /* 新增代码+DesktopLayout：使用弱化背景；如果没有这行，禁用态不明显。 */
+  cursor: not-allowed; /* 新增代码+DesktopLayout：显示不可点击光标；如果没有这行，用户可能误以为按钮可用。 */
+} /* 新增代码+DesktopLayout：发送按钮禁用态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.cancel-button { /* 新增代码+DesktopComposerCancel：定义运行中取消按钮颜色；如果没有这段代码，取消按钮会和发送按钮长得一样，用户难以区分中断动作。 */
+  background: #d92d20; /* 新增代码+DesktopComposerCancel：使用克制红色表达中断；如果没有这行代码，取消动作的风险级别不够清楚。 */
+  border-color: #d92d20; /* 新增代码+DesktopComposerCancel：让按钮边框跟随取消色；如果没有这行代码，按钮会出现深色背景配浅灰边框的杂乱感。 */
+  color: #ffffff; /* 新增代码+DesktopComposerCancel：保证取消图标在红色背景上清楚可见；如果没有这行代码，图标对比度可能不足。 */
+} /* 新增代码+DesktopComposerCancel：取消按钮规则结束；如果没有这行代码，CSS 块语法不完整。 */
+
+.cancel-button:hover { /* 新增代码+DesktopComposerCancel：定义取消按钮悬停态；如果没有这段代码，鼠标经过时缺少可点击反馈。 */
+  background: #b42318; /* 新增代码+DesktopComposerCancel：悬停时加深红色；如果没有这行代码，用户不容易确认按钮已被悬停。 */
+  border-color: #b42318; /* 新增代码+DesktopComposerCancel：悬停时同步边框颜色；如果没有这行代码，按钮视觉会不统一。 */
+} /* 新增代码+DesktopComposerCancel：取消按钮悬停规则结束；如果没有这行代码，CSS 块语法不完整。 */
+
+.status-inspector { /* 修改代码+DesktopTraceInspector：定义右侧多页签检查器容器；如果没有这段，状态、工具、浏览器和诊断信息没有独立视觉区域。 */
+  display: grid; /* 修改代码+DesktopTraceInspector：用网格拆分页签栏和当前面板；如果没有这行，右侧栏内容会自然堆叠到不可控高度。 */
+  grid-template-rows: auto minmax(0, 1fr); /* 修改代码+DesktopTraceInspector：固定页签栏并让面板吃满剩余高度；如果没有这行，工具轨迹列表会挤压或溢出窗口。 */
+  border-left: 1px solid #e5e9f0; /* 新增代码+DesktopToolTimeline：给状态栏和主对话加分隔线；如果没有这行，右侧栏边界不清楚。 */
+  background: #f7f9fc; /* 新增代码+DesktopToolTimeline：设置浅灰背景；如果没有这行，状态栏会和主对话混在一起。 */
+  min-width: 0; /* 新增代码+DesktopToolTimeline：允许长事件文本正确截断；如果没有这行，右侧栏可能撑破三栏网格。 */
+  min-height: 0; /* 新增代码+DesktopVisibleSmoke：允许右栏按窗口高度收缩；如果没有这行，长事件列表可能撑高整页。 */
+  height: 100%; /* 新增代码+DesktopVisibleSmoke：让右栏吃满 app-shell 高度；如果没有这行，事件区高度可能与窗口不同步。 */
+  overflow: hidden; /* 新增代码+DesktopVisibleSmoke：禁止右栏制造 document 滚动；如果没有这行，composer 可能被推到首屏外。 */
+} /* 新增代码+DesktopToolTimeline：右侧状态检查器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-tabs { /* 新增代码+DesktopTraceInspector：定义右侧检查器页签栏；如果没有这段，五个面板没有稳定切换区域。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格平均排列页签按钮；如果没有这行，按钮宽度会随着文字跳动。 */
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* 新增代码+DesktopTraceInspector：固定五等分页签；如果没有这行，长中文标签会挤压相邻按钮。 */
+  gap: 4px; /* 新增代码+DesktopTraceInspector：给页签之间留细缝；如果没有这行，按钮边界不清楚。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopTraceInspector：分隔页签栏和内容区；如果没有这行，面板起点不清晰。 */
+  padding: 8px; /* 新增代码+DesktopTraceInspector：给页签栏留操作空间；如果没有这行，按钮会贴边显得拥挤。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许页签在窄右栏内收缩；如果没有这行，右侧栏可能横向溢出。 */
+} /* 新增代码+DesktopTraceInspector：右侧检查器页签栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-tab { /* 新增代码+DesktopTraceInspector：定义单个页签按钮；如果没有这段，页签会使用浏览器默认按钮样式。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格垂直排列图标和文字；如果没有这行，小按钮内容不易对齐。 */
+  justify-items: center; /* 新增代码+DesktopTraceInspector：让图标和文字居中；如果没有这行，页签内容会偏左。 */
+  align-content: center; /* 新增代码+DesktopTraceInspector：让页签内容在按钮内垂直居中；如果没有这行，按钮看起来不稳。 */
+  gap: 2px; /* 新增代码+DesktopTraceInspector：控制图标和文字间距；如果没有这行，图标会贴住文字。 */
+  min-height: 42px; /* 新增代码+DesktopTraceInspector：保证页签可点击高度；如果没有这行，按钮触达面积太小。 */
+  border: 1px solid transparent; /* 新增代码+DesktopTraceInspector：预留 active 边框空间；如果没有这行，选中时布局可能抖动。 */
+  border-radius: 6px; /* 新增代码+DesktopTraceInspector：使用不超过 8px 的小圆角；如果没有这行，页签和项目按钮风格不统一。 */
+  background: transparent; /* 新增代码+DesktopTraceInspector：默认保持轻量背景；如果没有这行，页签栏会显得过重。 */
+  color: #667085; /* 新增代码+DesktopTraceInspector：默认使用次级文字色；如果没有这行，未选中页签会抢内容层级。 */
+  font-size: 11px; /* 新增代码+DesktopTraceInspector：使用紧凑字号；如果没有这行，五个中文页签会过挤。 */
+  line-height: 1.1; /* 新增代码+DesktopTraceInspector：控制页签文字行高；如果没有这行，按钮高度会不稳定。 */
+  cursor: pointer; /* 新增代码+DesktopTraceInspector：显示可点击光标；如果没有这行，用户不确定页签可操作。 */
+} /* 新增代码+DesktopTraceInspector：单个页签按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-tab span { /* 新增代码+DesktopVisualA11y：限制页签文字在按钮内部显示；如果没有这段，长中文标签会挤压相邻页签。 */
+  max-width: 100%; /* 新增代码+DesktopVisualA11y：让文字宽度不超过按钮；如果没有这行，省略号规则无法稳定生效。 */
+  overflow: hidden; /* 新增代码+DesktopVisualA11y：隐藏超出按钮的文字；如果没有这行，紧凑窗口会出现文本重叠。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopVisualA11y：用省略号提示文字被截断；如果没有这行，截断看起来像渲染错误。 */
+  white-space: nowrap; /* 新增代码+DesktopVisualA11y：让页签文字保持单行；如果没有这行，页签按钮高度会随文字换行跳动。 */
+} /* 新增代码+DesktopVisualA11y：页签文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-tab:hover { /* 新增代码+DesktopTraceInspector：定义页签悬停状态；如果没有这段，鼠标经过没有反馈。 */
+  background: #edf2f7; /* 新增代码+DesktopTraceInspector：用浅灰提示可点；如果没有这行，hover 状态不可见。 */
+  color: #344054; /* 新增代码+DesktopTraceInspector：悬停时提高文字对比；如果没有这行，hover 反馈太弱。 */
+} /* 新增代码+DesktopTraceInspector：页签悬停状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-tab-active { /* 新增代码+DesktopTraceInspector：定义当前页签状态；如果没有这段，用户不知道正在看哪个面板。 */
+  border-color: #cfd7e3; /* 新增代码+DesktopTraceInspector：给选中页签清晰边界；如果没有这行，active 状态不明显。 */
+  background: #ffffff; /* 新增代码+DesktopTraceInspector：选中页签使用白底；如果没有这行，当前页签不会从灰底里浮出来。 */
+  color: #24292f; /* 新增代码+DesktopTraceInspector：选中页签使用主文字色；如果没有这行，当前页签层级不够。 */
+} /* 新增代码+DesktopTraceInspector：当前页签状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-panel { /* 新增代码+DesktopTraceInspector：定义右侧当前面板容器；如果没有这段，工具和诊断面板无法独立控制高度。 */
+  min-height: 0; /* 新增代码+DesktopTraceInspector：允许面板在固定窗口内收缩；如果没有这行，长列表会撑破右栏。 */
+  overflow: hidden; /* 新增代码+DesktopTraceInspector：把滚动交给面板内部列表；如果没有这行，右侧栏可能出现双滚动条。 */
+} /* 新增代码+DesktopTraceInspector：右侧当前面板容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-tab-panel, /* 新增代码+DesktopTraceInspector：定义状态页签共享面板布局；如果没有这行，状态面板无法复用网格滚动规则。 */
+.trace-panel, /* 新增代码+DesktopTraceInspector：定义工具页签共享面板布局；如果没有这行，工具面板无法复用网格滚动规则。 */
+.diagnostics-panel, /* 修改代码+DesktopVisualA11y：把诊断面板继续纳入固定标题加滚动内容的共享布局；如果没有这行，诊断页会在右栏里自然撑高。 */
+.settings-panel { /* 修改代码+DesktopVisualA11y：把设置页纳入同一套右栏高度规则；如果没有这段，设置页在紧凑窗口可能把 tabs 挤出视口。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格拆分标题和内容；如果没有这行，标题和列表会自然堆叠不稳。 */
+  grid-template-rows: 48px minmax(0, 1fr); /* 新增代码+DesktopTraceInspector：固定标题行并让内容滚动；如果没有这行，长 trace 会挤压标题。 */
+  min-height: 0; /* 新增代码+DesktopTraceInspector：允许面板按右栏高度收缩；如果没有这行，内容可能撑开 app-shell。 */
+  height: 100%; /* 新增代码+DesktopTraceInspector：让面板吃满当前页签区域；如果没有这行，空白区域不可预测。 */
+} /* 新增代码+DesktopTraceInspector：共享面板布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-tab-panel { /* 新增代码+RealModelLatencyV2：单独调整状态页为标题、模型摘要、事件列表三行；如果没有这段，模型调用摘要会挤占事件列表滚动区。 */
+  grid-template-rows: 48px auto minmax(0, 1fr); /* 新增代码+RealModelLatencyV2：固定标题、按需摘要、剩余给事件列表；如果没有这行，状态页会按旧两行布局错位。 */
+} /* 新增代码+RealModelLatencyV2：状态页三行布局规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-model-call-summary { /* 新增代码+RealModelLatencyV2：定义右侧模型调用摘要区；如果没有这段，慢调用状态会和事件卡片混在一起。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+RealModelLatencyV2：给摘要和事件列表加分隔；如果没有这行，摘要层级不清楚。 */
+  padding: 8px 12px; /* 新增代码+RealModelLatencyV2：给摘要留紧凑空间；如果没有这行，状态文案会贴边。 */
+  min-height: 34px; /* 新增代码+RealModelLatencyV2：即使暂无状态也保持稳定摘要高度；如果没有这行，首个状态出现时列表会跳动。 */
+  display: flex; /* 新增代码+RealModelLatencyV2：用 flex 放置状态条；如果没有这行，状态条不能垂直居中。 */
+  align-items: center; /* 新增代码+RealModelLatencyV2：让状态条居中；如果没有这行，摘要文案会贴上边。 */
+  min-width: 0; /* 新增代码+RealModelLatencyV2：允许长错误截断；如果没有这行，右栏可能横向溢出。 */
+} /* 新增代码+RealModelLatencyV2：右侧模型调用摘要区规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器状态面板容器；如果没有这段，provider 状态会和事件时间线混在一起。 */
+  display: grid; /* 新增代码+DesktopGUIBrowserPanel：用网格排列标题、列表和摘要；如果没有这行，内容间距不稳定。 */
+  gap: 10px; /* 新增代码+DesktopGUIBrowserPanel：设置浏览器面板内部间距；如果没有这行，provider 条目会贴在一起。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopGUIBrowserPanel：分隔浏览器状态和事件标题；如果没有这行，右栏层级不清楚。 */
+  padding: 12px; /* 新增代码+DesktopGUIBrowserPanel：给浏览器状态留阅读空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器状态面板容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器面板标题行；如果没有这段，标题和 tab 数量无法稳定对齐。 */
+  display: flex; /* 新增代码+DesktopGUIBrowserPanel：横向排列标题和计数；如果没有这行，标题和计数会分成多行。 */
+  align-items: center; /* 新增代码+DesktopGUIBrowserPanel：垂直居中标题行；如果没有这行，计数会显得偏移。 */
+  justify-content: space-between; /* 新增代码+DesktopGUIBrowserPanel：让标题和 tab 数量分居两端；如果没有这行，摘要不易扫读。 */
+  min-width: 0; /* 新增代码+DesktopGUIBrowserPanel：允许标题区域在窄栏内收缩；如果没有这行，长文本可能撑破右栏。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器面板标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header h2 { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器面板标题文字；如果没有这段，h2 会使用浏览器默认大字号。 */
+  margin: 0; /* 新增代码+DesktopGUIBrowserPanel：去掉 h2 默认外边距；如果没有这行，浏览器面板顶部会被撑高。 */
+  font-size: 13px; /* 新增代码+DesktopGUIBrowserPanel：使用工具型标题字号；如果没有这行，浏览器面板会抢主内容层级。 */
+  font-weight: 600; /* 新增代码+DesktopGUIBrowserPanel：给标题适当权重；如果没有这行，右栏标题不易扫描。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器面板标题文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-panel-header span, /* 新增代码+DesktopGUIBrowserPanel：定义浏览器计数字段共享规则；如果没有这行，tab 数量层级不稳定。 */
+.browser-provider-summary span { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器摘要字段共享规则；如果没有这段，摘要容易过重。 */
+  color: #667085; /* 新增代码+DesktopGUIBrowserPanel：使用次级文字色；如果没有这行，摘要会抢标题层级。 */
+  font-size: 11px; /* 新增代码+DesktopGUIBrowserPanel：设置紧凑字号；如果没有这行，右栏密度会下降。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器摘要共享规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-list { /* 新增代码+DesktopGUIBrowserPanel：定义 provider 列表容器；如果没有这段，多条浏览器轨道会堆叠得不稳定。 */
+  display: grid; /* 新增代码+DesktopGUIBrowserPanel：按行排列 provider；如果没有这行，provider 条目之间间距不可控。 */
+  gap: 6px; /* 新增代码+DesktopGUIBrowserPanel：设置 provider 条目间距；如果没有这行，状态行会粘在一起。 */
+} /* 新增代码+DesktopGUIBrowserPanel：provider 列表容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider { /* 新增代码+DesktopGUIBrowserPanel：定义单个 provider 条目；如果没有这段，provider 状态没有可扫描结构。 */
+  display: grid; /* 新增代码+DesktopGUIBrowserPanel：用网格放名称、状态和原因；如果没有这行，长 reason 容易错位。 */
+  grid-template-columns: minmax(0, 1fr) auto; /* 新增代码+DesktopGUIBrowserPanel：左侧名称自适应，右侧状态贴边；如果没有这行，状态标签会混在正文里。 */
+  gap: 2px 8px; /* 新增代码+DesktopGUIBrowserPanel：设置 provider 字段间距；如果没有这行，字段会挤在一起。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopGUIBrowserPanel：给 provider 条目加轻边框；如果没有这行，轨道之间边界不清楚。 */
+  border-radius: 6px; /* 新增代码+DesktopGUIBrowserPanel：使用小圆角；如果没有这行，右栏条目风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopGUIBrowserPanel：使用白底提升可读性；如果没有这行，provider 会埋在灰底里。 */
+  padding: 8px; /* 新增代码+DesktopGUIBrowserPanel：给 provider 内容留内边距；如果没有这行，文字会贴边框。 */
+  min-width: 0; /* 新增代码+DesktopGUIBrowserPanel：允许长 provider 名称截断；如果没有这行，右栏可能横向溢出。 */
+} /* 新增代码+DesktopGUIBrowserPanel：单个 provider 条目规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider span, /* 新增代码+DesktopGUIBrowserPanel：定义 provider 名称共享文本规则；如果没有这行，长名称会溢出。 */
+.browser-provider small { /* 新增代码+DesktopGUIBrowserPanel：定义 provider reason 共享文本规则；如果没有这段，长原因会撑破右栏。 */
+  overflow: hidden; /* 新增代码+DesktopGUIBrowserPanel：隐藏超长文本；如果没有这行，provider 状态会横向溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopGUIBrowserPanel：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopGUIBrowserPanel：保持单行显示；如果没有这行，provider 条目高度会跳动。 */
+} /* 新增代码+DesktopGUIBrowserPanel：provider 文本截断规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider small { /* 新增代码+DesktopGUIBrowserPanel：定义 provider reason 位置和颜色；如果没有这段，原因文本会和名称层级混淆。 */
+  grid-column: 1 / -1; /* 新增代码+DesktopGUIBrowserPanel：让 reason 横跨整行；如果没有这行，长原因会挤压状态标签。 */
+  color: #667085; /* 新增代码+DesktopGUIBrowserPanel：使用次级文字色；如果没有这行，原因会抢 provider 名称层级。 */
+  font-size: 11px; /* 新增代码+DesktopGUIBrowserPanel：设置 reason 字号；如果没有这行，provider 条目会过高。 */
+} /* 新增代码+DesktopGUIBrowserPanel：provider reason 规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider strong { /* 新增代码+DesktopGUIBrowserPanel：定义 provider 状态标签；如果没有这段，可用/未连接状态不醒目。 */
+  color: #667085; /* 新增代码+DesktopGUIBrowserPanel：默认用次级颜色显示状态；如果没有这行，未连接状态会过于突出。 */
+  font-size: 11px; /* 新增代码+DesktopGUIBrowserPanel：设置状态标签字号；如果没有这行，状态标签会撑高行高。 */
+  font-weight: 600; /* 新增代码+DesktopGUIBrowserPanel：给状态标签适当权重；如果没有这行，状态不易扫到。 */
+} /* 新增代码+DesktopGUIBrowserPanel：provider 状态标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-ready strong { /* 新增代码+DesktopGUIBrowserPanel：定义可用 provider 的状态颜色；如果没有这段，可用轨道和未连接轨道难以区分。 */
+  color: #067647; /* 新增代码+DesktopGUIBrowserPanel：用克制绿色表示可用；如果没有这行，用户看不出哪条轨道已就绪。 */
+} /* 新增代码+DesktopGUIBrowserPanel：可用 provider 状态颜色规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-provider-summary { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器摘要行；如果没有这段，扩展连接和队列状态没有固定布局。 */
+  display: grid; /* 新增代码+DesktopGUIBrowserPanel：按行排列摘要；如果没有这行，两个摘要可能拥挤在一行。 */
+  gap: 2px; /* 新增代码+DesktopGUIBrowserPanel：设置摘要行间距；如果没有这行，摘要会粘在一起。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器摘要行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.browser-empty { /* 新增代码+DesktopGUIBrowserPanel：定义浏览器 provider 空状态；如果没有这段，空状态会像普通段落一样松散。 */
+  color: #667085; /* 新增代码+DesktopGUIBrowserPanel：使用次级文字色；如果没有这行，空状态会过重。 */
+  font-size: 12px; /* 新增代码+DesktopGUIBrowserPanel：设置空状态字号；如果没有这行，右栏空态会显得突兀。 */
+  margin: 0; /* 新增代码+DesktopGUIBrowserPanel：去掉默认段落外边距；如果没有这行，空状态位置不稳定。 */
+} /* 新增代码+DesktopGUIBrowserPanel：浏览器 provider 空状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-header { /* 新增代码+DesktopToolTimeline：定义右侧面板标题栏；如果没有这段，事件数量和标题没有稳定布局。 */
+  display: flex; /* 新增代码+DesktopToolTimeline：横向排列标题和计数；如果没有这行，标题与计数会分散成两行。 */
+  align-items: center; /* 新增代码+DesktopToolTimeline：垂直居中标题内容；如果没有这行，标题栏会显得歪。 */
+  justify-content: space-between; /* 新增代码+DesktopToolTimeline：让标题和计数分居两侧；如果没有这行，右侧计数不易扫描。 */
+  border-bottom: 1px solid #e5e9f0; /* 新增代码+DesktopToolTimeline：标题栏底部分隔；如果没有这行，列表起点不清楚。 */
+  padding: 0 16px; /* 新增代码+DesktopToolTimeline：给标题栏留左右空白；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopToolTimeline：右侧面板标题栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-header h2 { /* 新增代码+DesktopToolTimeline：定义右侧面板标题文字；如果没有这段，h2 会使用浏览器默认大字号。 */
+  margin: 0; /* 新增代码+DesktopToolTimeline：去掉 h2 默认外边距；如果没有这行，标题栏高度会被撑开。 */
+  font-size: 13px; /* 新增代码+DesktopToolTimeline：使用工具型标题字号；如果没有这行，右栏标题会抢主内容层级。 */
+  font-weight: 600; /* 新增代码+DesktopToolTimeline：给标题适当权重；如果没有这行，标题不易扫描。 */
+} /* 新增代码+DesktopToolTimeline：右侧面板标题文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.inspector-header span { /* 新增代码+DesktopToolTimeline：定义事件计数样式；如果没有这段，计数会像普通正文一样不醒目。 */
+  color: #667085; /* 新增代码+DesktopToolTimeline：使用次级文字色；如果没有这行，计数会抢标题层级。 */
+  font-size: 12px; /* 新增代码+DesktopToolTimeline：设置紧凑计数字号；如果没有这行，右侧标题栏会显得拥挤。 */
+} /* 新增代码+DesktopToolTimeline：事件计数规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-event-list { /* 新增代码+DesktopToolTimeline：定义事件列表容器；如果没有这段，长时间线无法独立滚动。 */
+  display: grid; /* 新增代码+DesktopToolTimeline：按行排列事件项；如果没有这行，事件之间间距不稳定。 */
+  align-content: start; /* 新增代码+DesktopToolTimeline：让事件从顶部开始；如果没有这行，空白会拉散列表。 */
+  gap: 8px; /* 新增代码+DesktopToolTimeline：设置事件项间距；如果没有这行，事件行会粘在一起。 */
+  overflow: auto; /* 新增代码+DesktopToolTimeline：允许时间线独立滚动；如果没有这行，长任务会撑破窗口。 */
+  padding: 12px; /* 新增代码+DesktopToolTimeline：给事件列表留阅读空白；如果没有这行，事件卡会贴边。 */
+} /* 新增代码+DesktopToolTimeline：事件列表容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-event { /* 新增代码+DesktopToolTimeline：定义单条事件行；如果没有这段，事件细节没有可扫描结构。 */
+  display: grid; /* 新增代码+DesktopToolTimeline：用网格组织序号、类型和归属；如果没有这行，长文本容易错位。 */
+  gap: 4px; /* 新增代码+DesktopToolTimeline：设置事件字段间距；如果没有这行，三行文字会挤在一起。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopToolTimeline：给事件行加轻边框；如果没有这行，事件之间边界不明显。 */
+  border-radius: 6px; /* 新增代码+DesktopToolTimeline：使用小圆角；如果没有这行，右侧事件块会显得生硬。 */
+  background: #ffffff; /* 新增代码+DesktopToolTimeline：用白底提升可读性；如果没有这行，事件文字会埋在灰底里。 */
+  padding: 10px; /* 新增代码+DesktopToolTimeline：给事件内容留内边距；如果没有这行，文字会贴边框。 */
+  min-width: 0; /* 新增代码+DesktopToolTimeline：允许长 id 截断；如果没有这行，run/turn id 可能撑破右栏。 */
+} /* 新增代码+DesktopToolTimeline：单条事件行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-event span, /* 新增代码+DesktopToolTimeline：定义事件序号共享文本规则；如果没有这行，序号层级不稳定。 */
+.status-event small { /* 新增代码+DesktopToolTimeline：定义事件归属共享文本规则；如果没有这段，长 id 容易溢出。 */
+  color: #667085; /* 新增代码+DesktopToolTimeline：使用次级文字色；如果没有这行，元信息会抢主事件类型层级。 */
+  font-size: 11px; /* 新增代码+DesktopToolTimeline：设置元信息字号；如果没有这行，事件行会变高。 */
+  overflow: hidden; /* 新增代码+DesktopToolTimeline：隐藏超长 id；如果没有这行，右栏会横向溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopToolTimeline：用省略号提示截断；如果没有这行，用户不知道文本被截短。 */
+  white-space: nowrap; /* 新增代码+DesktopToolTimeline：保持元信息单行；如果没有这行，长 id 会撑高事件卡。 */
+} /* 新增代码+DesktopToolTimeline：事件元信息规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.status-event strong { /* 新增代码+DesktopToolTimeline：定义事件类型样式；如果没有这段，事件类型不够醒目。 */
+  color: #30363d; /* 新增代码+DesktopToolTimeline：使用主文字色；如果没有这行，事件类型层级会变弱。 */
+  font-size: 12px; /* 新增代码+DesktopToolTimeline：设置事件类型字号；如果没有这行，右栏密度不稳定。 */
+  overflow: hidden; /* 新增代码+DesktopToolTimeline：隐藏超长事件类型；如果没有这行，异常事件名可能溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopToolTimeline：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopToolTimeline：保持事件类型单行；如果没有这行，事件卡高度会跳动。 */
+} /* 新增代码+DesktopToolTimeline：事件类型规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.empty-inspector { /* 新增代码+DesktopToolTimeline：定义右侧空状态文字；如果没有这段，空状态会像普通段落一样松散。 */
+  color: #667085; /* 新增代码+DesktopToolTimeline：使用次级文字色；如果没有这行，空状态会过重。 */
+  font-size: 12px; /* 新增代码+DesktopToolTimeline：设置空状态字号；如果没有这行，右栏空态会显得突兀。 */
+  margin: 0; /* 新增代码+DesktopToolTimeline：去掉默认段落外边距；如果没有这行，空状态位置不稳定。 */
+} /* 新增代码+DesktopToolTimeline：右侧空状态文字规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-list { /* 新增代码+DesktopTraceInspector：定义工具轨迹列表容器；如果没有这段，多条工具调用无法独立滚动。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：按行排列工具轨迹；如果没有这行，工具行间距会不稳定。 */
+  align-content: start; /* 新增代码+DesktopTraceInspector：让工具行从顶部开始；如果没有这行，空白会拉散列表。 */
+  gap: 8px; /* 新增代码+DesktopTraceInspector：设置工具行间距；如果没有这行，工具轨迹会粘在一起。 */
+  overflow: auto; /* 新增代码+DesktopTraceInspector：允许工具轨迹独立滚动；如果没有这行，长任务会撑破右栏。 */
+  padding: 12px; /* 新增代码+DesktopTraceInspector：给工具轨迹留阅读空白；如果没有这行，工具卡会贴边。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许长参数在右栏内收缩；如果没有这行，参数预览可能横向撑破布局。 */
+} /* 新增代码+DesktopTraceInspector：工具轨迹列表容器规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row { /* 新增代码+DesktopTraceInspector：定义单条工具轨迹卡片；如果没有这段，工具名、参数和结果没有可扫描容器。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格排列标题、元信息、参数和结果；如果没有这行，字段会散乱堆叠。 */
+  gap: 8px; /* 新增代码+DesktopTraceInspector：设置工具字段间距；如果没有这行，参数和结果会贴在一起。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopTraceInspector：给工具轨迹加轻边框；如果没有这行，轨迹之间边界不清楚。 */
+  border-left: 3px solid #98a2b3; /* 新增代码+DesktopTraceInspector：用左侧色条提示状态；如果没有这行，运行和失败状态不易扫到。 */
+  border-radius: 6px; /* 新增代码+DesktopTraceInspector：使用小圆角；如果没有这行，右侧卡片风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopTraceInspector：使用白底提升可读性；如果没有这行，工具轨迹会埋在灰底里。 */
+  padding: 10px; /* 新增代码+DesktopTraceInspector：给工具轨迹留内边距；如果没有这行，文字会贴边框。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许长工具参数截断；如果没有这行，右栏可能横向溢出。 */
+} /* 新增代码+DesktopTraceInspector：单条工具轨迹卡片规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-running { /* 新增代码+DesktopTraceInspector：定义运行中工具轨迹状态；如果没有这段，运行中工具不易区分。 */
+  border-left-color: #2e90fa; /* 新增代码+DesktopTraceInspector：用蓝色标记运行中；如果没有这行，用户难以扫到正在执行的工具。 */
+} /* 新增代码+DesktopTraceInspector：运行中工具轨迹状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-completed { /* 新增代码+DesktopTraceInspector：定义完成工具轨迹状态；如果没有这段，完成工具没有状态语义。 */
+  border-left-color: #12b76a; /* 新增代码+DesktopTraceInspector：用绿色标记完成；如果没有这行，成功工具和普通卡片难以区分。 */
+} /* 新增代码+DesktopTraceInspector：完成工具轨迹状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-failed { /* 新增代码+DesktopTraceInspector：定义失败工具轨迹状态；如果没有这段，失败工具无法快速定位。 */
+  border-left-color: #d92d20; /* 新增代码+DesktopTraceInspector：用红色标记失败；如果没有这行，错误工具容易被淹没。 */
+  background: #fffafa; /* 新增代码+DesktopTraceInspector：给失败工具轻微红底；如果没有这行，失败状态反馈太弱。 */
+} /* 新增代码+DesktopTraceInspector：失败工具轨迹状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-title { /* 新增代码+DesktopTraceInspector：定义工具轨迹标题行；如果没有这段，工具名、状态和复制按钮无法稳定对齐。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格排列工具名、状态和按钮；如果没有这行，长工具名会挤压按钮。 */
+  grid-template-columns: minmax(0, 1fr) auto 28px; /* 新增代码+DesktopTraceInspector：工具名自适应，状态和按钮固定；如果没有这行，复制按钮位置会跳动。 */
+  align-items: center; /* 新增代码+DesktopTraceInspector：垂直居中标题行内容；如果没有这行，状态标签会显得歪。 */
+  gap: 6px; /* 新增代码+DesktopTraceInspector：设置标题字段间距；如果没有这行，状态会贴住工具名。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许工具名截断；如果没有这行，长工具名会撑破右栏。 */
+} /* 新增代码+DesktopTraceInspector：工具轨迹标题行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-title strong { /* 新增代码+DesktopTraceInspector：定义工具名文本；如果没有这段，工具名层级不清楚。 */
+  color: #24292f; /* 新增代码+DesktopTraceInspector：使用主文字色；如果没有这行，工具名不够清晰。 */
+  font-size: 12px; /* 新增代码+DesktopTraceInspector：使用紧凑字号；如果没有这行，右侧栏密度会下降。 */
+  overflow: hidden; /* 新增代码+DesktopTraceInspector：隐藏超长工具名；如果没有这行，工具名会横向溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopTraceInspector：用省略号提示截断；如果没有这行，用户不知道工具名被截短。 */
+  white-space: nowrap; /* 新增代码+DesktopTraceInspector：保持工具名单行；如果没有这行，标题行高度会跳动。 */
+} /* 新增代码+DesktopTraceInspector：工具名文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-title span { /* 新增代码+DesktopTraceInspector：定义工具状态标签；如果没有这段，状态文字没有层级。 */
+  color: #667085; /* 新增代码+DesktopTraceInspector：使用次级文字色；如果没有这行，状态会抢工具名层级。 */
+  font-size: 11px; /* 新增代码+DesktopTraceInspector：设置状态标签字号；如果没有这行，标题行会变高。 */
+  white-space: nowrap; /* 新增代码+DesktopTraceInspector：保持状态单行；如果没有这行，短标签也可能换行。 */
+} /* 新增代码+DesktopTraceInspector：工具状态标签规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-copy-button { /* 新增代码+DesktopTraceInspector：定义复制诊断按钮；如果没有这段，按钮会继承原生笨重样式。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格居中图标；如果没有这行，复制图标不会稳定居中。 */
+  place-items: center; /* 新增代码+DesktopTraceInspector：同时居中水平和垂直方向；如果没有这行，图标可能偏移。 */
+  width: 26px; /* 新增代码+DesktopTraceInspector：固定按钮宽度；如果没有这行，按钮会跟随内容变化。 */
+  height: 26px; /* 新增代码+DesktopTraceInspector：固定按钮高度；如果没有这行，标题行高度会不稳定。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopTraceInspector：给复制按钮清晰边界；如果没有这行，按钮不够像可点控件。 */
+  border-radius: 6px; /* 新增代码+DesktopTraceInspector：保持小圆角按钮；如果没有这行，按钮风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopTraceInspector：使用白底；如果没有这行，按钮会融进卡片。 */
+  color: #667085; /* 新增代码+DesktopTraceInspector：使用次级图标色；如果没有这行，复制图标会过重。 */
+  cursor: pointer; /* 新增代码+DesktopTraceInspector：显示可点击光标；如果没有这行，用户不确定按钮可操作。 */
+} /* 新增代码+DesktopTraceInspector：复制诊断按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-copy-button:hover { /* 新增代码+DesktopTraceInspector：定义复制按钮悬停状态；如果没有这段，按钮 hover 没有反馈。 */
+  background: #f2f4f7; /* 新增代码+DesktopTraceInspector：悬停时使用浅灰底；如果没有这行，用户不确定点击目标。 */
+  color: #344054; /* 新增代码+DesktopTraceInspector：悬停时提高图标对比；如果没有这行，反馈不明显。 */
+} /* 新增代码+DesktopTraceInspector：复制按钮悬停状态规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-meta { /* 新增代码+DesktopTraceInspector：定义工具 run/turn/duration 元信息行；如果没有这段，归属信息会混在正文里。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格均分元信息；如果没有这行，长 id 会挤压耗时。 */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 新增代码+DesktopTraceInspector：三列展示 run、turn 和耗时；如果没有这行，元信息排序不稳定。 */
+  gap: 6px; /* 新增代码+DesktopTraceInspector：设置元信息间距；如果没有这行，三列会贴在一起。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许长 id 截断；如果没有这行，右栏会横向溢出。 */
+} /* 新增代码+DesktopTraceInspector：工具元信息行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row-meta span { /* 新增代码+DesktopTraceInspector：定义工具元信息文本；如果没有这段，run/turn id 可读性差。 */
+  color: #667085; /* 新增代码+DesktopTraceInspector：使用次级文字色；如果没有这行，元信息会抢正文层级。 */
+  font-size: 10px; /* 新增代码+DesktopTraceInspector：使用很小字号；如果没有这行，id 会占太多空间。 */
+  overflow: hidden; /* 新增代码+DesktopTraceInspector：隐藏超长 id；如果没有这行，run/turn 会撑破卡片。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopTraceInspector：用省略号提示截断；如果没有这行，截断不明确。 */
+  white-space: nowrap; /* 新增代码+DesktopTraceInspector：保持单行显示；如果没有这行，卡片高度会跳动。 */
+} /* 新增代码+DesktopTraceInspector：工具元信息文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-args { /* 新增代码+DesktopTraceInspector：定义工具参数预览块；如果没有这段，JSON 参数会像普通文本一样难读。 */
+  margin: 0; /* 新增代码+DesktopTraceInspector：去掉 pre 默认外边距；如果没有这行，卡片内部间距不可控。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopTraceInspector：给参数块加边界；如果没有这行，参数和结果会混在一起。 */
+  border-radius: 6px; /* 新增代码+DesktopTraceInspector：保持小圆角；如果没有这行，参数块风格不统一。 */
+  background: #f8fafc; /* 新增代码+DesktopTraceInspector：使用浅底突出代码数据；如果没有这行，参数不易识别。 */
+  color: #344054; /* 新增代码+DesktopTraceInspector：使用正文色；如果没有这行，参数可读性不稳定。 */
+  font-size: 11px; /* 新增代码+DesktopTraceInspector：设置紧凑代码字号；如果没有这行，参数块会过高。 */
+  line-height: 1.4; /* 新增代码+DesktopTraceInspector：设置代码行高；如果没有这行，多行参数会太挤。 */
+  padding: 8px; /* 新增代码+DesktopTraceInspector：给参数文字留内边距；如果没有这行，JSON 会贴边。 */
+  overflow: auto; /* 新增代码+DesktopTraceInspector：允许长参数横向滚动；如果没有这行，参数会撑破右栏。 */
+  white-space: pre-wrap; /* 新增代码+DesktopTraceInspector：允许长参数换行；如果没有这行，简单参数仍可能横向溢出。 */
+  overflow-wrap: anywhere; /* 新增代码+DesktopTraceInspector：允许长 token 强制断行；如果没有这行，极长字符串可能撑破布局。 */
+} /* 新增代码+DesktopTraceInspector：工具参数预览块规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-row p { /* 新增代码+DesktopTraceInspector：定义工具结果摘要文本；如果没有这段，段落默认间距会撑高卡片。 */
+  color: #344054; /* 新增代码+DesktopTraceInspector：使用正文颜色；如果没有这行，结果摘要层级不稳定。 */
+  font-size: 12px; /* 新增代码+DesktopTraceInspector：设置结果摘要字号；如果没有这行，摘要会抢主对话层级。 */
+  margin: 0; /* 新增代码+DesktopTraceInspector：去掉段落默认外边距；如果没有这行，卡片间距会过大。 */
+  overflow-wrap: anywhere; /* 新增代码+DesktopTraceInspector：允许长摘要断行；如果没有这行，错误消息可能横向溢出。 */
+} /* 新增代码+DesktopTraceInspector：工具结果摘要文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.trace-error-code { /* 新增代码+DesktopTraceInspector：定义工具错误码文本；如果没有这段，失败原因缺少机器可读标识。 */
+  color: #b42318; /* 新增代码+DesktopTraceInspector：用红色显示错误码；如果没有这行，失败线索不明显。 */
+  font-size: 11px; /* 新增代码+DesktopTraceInspector：设置错误码字号；如果没有这行，错误码会过于抢眼。 */
+  font-weight: 600; /* 新增代码+DesktopTraceInspector：增强错误码权重；如果没有这行，错误码不易被扫到。 */
+} /* 新增代码+DesktopTraceInspector：工具错误码文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostic-list { /* 新增代码+DesktopTraceInspector：定义设置和诊断列表；如果没有这段，诊断指标没有统一排版。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：按行排列诊断项；如果没有这行，指标会自然堆叠无节奏。 */
+  align-content: start; /* 新增代码+DesktopTraceInspector：让诊断项从顶部开始；如果没有这行，空白会拉散列表。 */
+  gap: 8px; /* 新增代码+DesktopTraceInspector：设置诊断项间距；如果没有这行，指标会粘在一起。 */
+  overflow: auto; /* 新增代码+DesktopTraceInspector：允许诊断列表独立滚动；如果没有这行，后续诊断项会撑破右栏。 */
+  padding: 12px; /* 新增代码+DesktopTraceInspector：给诊断列表留阅读空白；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopTraceInspector：设置和诊断列表规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostic-row { /* 新增代码+DesktopTraceInspector：定义单条诊断行；如果没有这段，设置和诊断字段缺少可扫描结构。 */
+  display: grid; /* 新增代码+DesktopTraceInspector：用网格排列名称和值；如果没有这行，长值会错位。 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); /* 新增代码+DesktopTraceInspector：左侧名称右侧值；如果没有这行，诊断值无法对齐。 */
+  gap: 8px; /* 新增代码+DesktopTraceInspector：设置诊断字段间距；如果没有这行，名称和值会贴在一起。 */
+  border: 1px solid #e5e9f0; /* 新增代码+DesktopTraceInspector：给诊断行加轻边框；如果没有这行，指标之间边界不清楚。 */
+  border-radius: 6px; /* 新增代码+DesktopTraceInspector：保持小圆角；如果没有这行，诊断行风格不统一。 */
+  background: #ffffff; /* 新增代码+DesktopTraceInspector：使用白底；如果没有这行，诊断行会埋在灰底里。 */
+  padding: 10px; /* 新增代码+DesktopTraceInspector：给诊断内容留内边距；如果没有这行，文字会贴边。 */
+  min-width: 0; /* 新增代码+DesktopTraceInspector：允许长诊断值截断；如果没有这行，右栏可能横向溢出。 */
+} /* 新增代码+DesktopTraceInspector：单条诊断行规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostic-row strong, /* 新增代码+DesktopTraceInspector：定义诊断名称共享文本规则；如果没有这行，名称层级不稳定。 */
+.diagnostic-row span { /* 新增代码+DesktopTraceInspector：定义诊断值共享文本规则；如果没有这段，长值会溢出。 */
+  overflow: hidden; /* 新增代码+DesktopTraceInspector：隐藏超长诊断文本；如果没有这行，右栏会横向溢出。 */
+  text-overflow: ellipsis; /* 新增代码+DesktopTraceInspector：用省略号提示截断；如果没有这行，截断不清楚。 */
+  white-space: nowrap; /* 新增代码+DesktopTraceInspector：保持诊断文本单行；如果没有这行，行高会跳动。 */
+} /* 新增代码+DesktopTraceInspector：诊断共享文本规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostic-row strong { /* 新增代码+DesktopTraceInspector：定义诊断名称样式；如果没有这段，名称和值层级混在一起。 */
+  color: #344054; /* 新增代码+DesktopTraceInspector：使用主文字色；如果没有这行，诊断名称不够清晰。 */
+  font-size: 12px; /* 新增代码+DesktopTraceInspector：设置诊断名称字号；如果没有这行，行高不稳定。 */
+} /* 新增代码+DesktopTraceInspector：诊断名称样式规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostic-row span { /* 新增代码+DesktopTraceInspector：定义诊断值样式；如果没有这段，诊断值可能抢名称层级。 */
+  color: #667085; /* 新增代码+DesktopTraceInspector：使用次级文字色；如果没有这行，值会过重。 */
+  font-size: 12px; /* 新增代码+DesktopTraceInspector：设置诊断值字号；如果没有这行，值与名称不协调。 */
+} /* 新增代码+DesktopTraceInspector：诊断值样式规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-copy-button { /* 新增代码+DesktopUnknownRouteProbe：定义诊断页按钮基础样式；如果没有这段，复制和 unknown route 按钮会继承原生浏览器样式。 */
+  display: inline-flex; /* 新增代码+DesktopUnknownRouteProbe：让图标和文字稳定横向排列；如果没有这行，按钮内容可能错位。 */
+  align-items: center; /* 新增代码+DesktopUnknownRouteProbe：垂直居中按钮内容；如果没有这行，图标和文字基线不齐。 */
+  justify-content: center; /* 新增代码+DesktopUnknownRouteProbe：居中按钮内容；如果没有这行，按钮文字会偏左。 */
+  gap: 6px; /* 新增代码+DesktopUnknownRouteProbe：设置图标和文字间距；如果没有这行，图标会贴住文字。 */
+  margin: 0 12px 10px; /* 新增代码+DesktopUnknownRouteProbe：让按钮与诊断列表保持距离；如果没有这行，按钮会贴到边缘。 */
+  border: 1px solid #d0d5dd; /* 新增代码+DesktopUnknownRouteProbe：使用轻边框统一按钮；如果没有这行，按钮轮廓不清楚。 */
+  border-radius: 6px; /* 新增代码+DesktopUnknownRouteProbe：使用小圆角符合工具界面；如果没有这行，按钮风格不一致。 */
+  background: #ffffff; /* 新增代码+DesktopUnknownRouteProbe：使用白底按钮；如果没有这行，按钮会混入灰底。 */
+  color: #344054; /* 新增代码+DesktopUnknownRouteProbe：使用主文字色；如果没有这行，按钮文本可能层级过弱。 */
+  cursor: pointer; /* 新增代码+DesktopUnknownRouteProbe：显示可点击光标；如果没有这行，用户不确定按钮能否点击。 */
+  font-size: 12px; /* 新增代码+DesktopUnknownRouteProbe：设置紧凑按钮字号；如果没有这行，右栏按钮会过高。 */
+  min-height: 30px; /* 新增代码+DesktopUnknownRouteProbe：固定按钮触达高度；如果没有这行，按钮高度会随文本跳动。 */
+} /* 新增代码+DesktopUnknownRouteProbe：诊断页按钮基础样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-copy-button:hover { /* 新增代码+DesktopUnknownRouteProbe：定义诊断页按钮悬停样式；如果没有这段，用户点击前没有反馈。 */
+  background: #f8fafc; /* 新增代码+DesktopUnknownRouteProbe：悬停时轻微变亮；如果没有这行，按钮交互感不足。 */
+} /* 新增代码+DesktopUnknownRouteProbe：诊断页按钮悬停样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.diagnostics-secondary-button { /* 新增代码+DesktopUnknownRouteProbe：定义 unknown route 探针按钮的轻警示色；如果没有这段，它和复制诊断按钮难以区分。 */
+  color: #7a4d00; /* 新增代码+DesktopUnknownRouteProbe：使用棕黄色文字提示这是测试动作；如果没有这行，探针按钮风险语义不明显。 */
+} /* 新增代码+DesktopUnknownRouteProbe：unknown route 探针按钮样式结束；如果没有这行，CSS 块语法不完整。 */
+
+.tool-card { /* 新增代码+DesktopToolTimeline：定义主线程工具卡片；如果没有这段，工具事件会缺少独立视觉块。 */
+  max-width: 680px; /* 新增代码+DesktopToolTimeline：限制工具卡片行宽；如果没有这行，宽屏上摘要难读。 */
+  border: 1px solid #d8dee8; /* 新增代码+DesktopToolTimeline：给工具卡片加边框；如果没有这行，工具事件和普通消息边界不清楚。 */
+  border-left: 3px solid #667085; /* 新增代码+DesktopToolTimeline：给工具卡片加左侧强调线；如果没有这行，工具卡片不易扫描。 */
+  border-radius: 6px; /* 新增代码+DesktopToolTimeline：使用小圆角；如果没有这行，卡片和桌面壳风格不一致。 */
+  background: #fbfcfe; /* 新增代码+DesktopToolTimeline：设置轻背景；如果没有这行，工具卡片和页面背景混在一起。 */
+  padding: 12px; /* 新增代码+DesktopToolTimeline：给卡片内容留空间；如果没有这行，文字会贴边。 */
+} /* 新增代码+DesktopToolTimeline：主线程工具卡片规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.tool-card-title { /* 新增代码+DesktopToolTimeline：定义工具卡片标题；如果没有这段，工具名不够醒目。 */
+  color: #30363d; /* 新增代码+DesktopToolTimeline：使用主文字色；如果没有这行，工具名层级不清楚。 */
+  font-size: 13px; /* 新增代码+DesktopToolTimeline：设置紧凑标题字号；如果没有这行，工具卡片会抢主回答层级。 */
+  font-weight: 600; /* 新增代码+DesktopToolTimeline：加粗工具名；如果没有这行，用户不易扫到工具名称。 */
+} /* 新增代码+DesktopToolTimeline：工具卡片标题规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.tool-card-meta { /* 新增代码+DesktopToolTimeline：定义工具卡片元信息；如果没有这段，事件类型会和摘要混在一起。 */
+  color: #667085; /* 新增代码+DesktopToolTimeline：使用次级文字色；如果没有这行，事件类型会抢标题层级。 */
+  font-size: 11px; /* 新增代码+DesktopToolTimeline：设置小字号；如果没有这行，工具卡片高度会偏大。 */
+  margin-top: 2px; /* 新增代码+DesktopToolTimeline：给标题和元信息留一点间距；如果没有这行，两行文字会粘住。 */
+} /* 新增代码+DesktopToolTimeline：工具卡片元信息规则结束；如果没有这行，CSS 块语法不完整。 */
+
+.tool-card p { /* 新增代码+DesktopToolTimeline：定义工具卡片正文段落；如果没有这段，浏览器默认段落间距会破坏节奏。 */
+  color: #344054; /* 新增代码+DesktopToolTimeline：使用稳重正文色；如果没有这行，摘要层级会不稳定。 */
+  font-size: 13px; /* 新增代码+DesktopToolTimeline：设置摘要字号；如果没有这行，工具摘要可能过大。 */
+  margin: 8px 0 0; /* 新增代码+DesktopToolTimeline：控制摘要上间距；如果没有这行，卡片内部节奏不稳定。 */
+} /* 新增代码+DesktopToolTimeline：工具卡片正文段落规则结束；如果没有这行，CSS 块语法不完整。 */
+
+@media (max-width: 1100px) { /* 新增代码+DesktopToolTimeline：定义窄屏适配规则；如果没有这段，小窗口三栏会互相挤压。 */
+  .app-shell { /* 新增代码+DesktopToolTimeline：在窄屏调整主网格；如果没有这行，状态栏会压缩主对话。 */
+    grid-template-columns: 216px minmax(0, 1fr) 232px; /* 修改代码+DesktopVisualA11y：1024px 宽度下仍保留左栏、对话区、右侧检查器；如果没有这行，右侧页签只能被隐藏，验收会失去关键面板。 */
+  } /* 新增代码+DesktopToolTimeline：窄屏主网格规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .sidebar { /* 新增代码+DesktopVisualA11y：紧凑窗口下压缩侧栏留白；如果没有这段，1024px 宽度会把主对话区挤得过窄。 */
+    gap: 12px; /* 新增代码+DesktopVisualA11y：缩小侧栏分组间距；如果没有这行，项目列表会浪费垂直空间。 */
+    padding: 10px 6px; /* 新增代码+DesktopVisualA11y：减少侧栏左右留白；如果没有这行，左栏内容会压缩主区。 */
+  } /* 新增代码+DesktopVisualA11y：紧凑侧栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .status-inspector { /* 修改代码+DesktopVisualA11y：紧凑窗口仍显示右侧检查器；如果没有这段，用户无法验收浏览器、工具、设置和诊断页签。 */
+    display: grid; /* 修改代码+DesktopVisualA11y：保持右栏网格布局；如果没有这行，媒体查询会继承错误显示状态。 */
+  } /* 修改代码+DesktopVisualA11y：紧凑右栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .inspector-tabs { /* 新增代码+DesktopVisualA11y：紧凑窗口下收紧页签栏；如果没有这段，五个页签会互相挤压。 */
+    gap: 3px; /* 新增代码+DesktopVisualA11y：减小页签间隔；如果没有这行，232px 右栏里可用文字宽度不足。 */
+    padding: 6px; /* 新增代码+DesktopVisualA11y：减少页签栏内边距；如果没有这行，页签会占掉过多右栏宽度。 */
+  } /* 新增代码+DesktopVisualA11y：紧凑页签栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .inspector-tab { /* 新增代码+DesktopVisualA11y：紧凑窗口下压缩单个页签；如果没有这段，右栏 tabs 容易换行过高。 */
+    min-height: 38px; /* 新增代码+DesktopVisualA11y：保留可点击高度但降低占位；如果没有这行，页签栏会挤压内容区。 */
+    font-size: 10px; /* 新增代码+DesktopVisualA11y：让中文页签在窄栏中仍可读；如果没有这行，文字更容易被截断。 */
+  } /* 新增代码+DesktopVisualA11y：紧凑页签按钮规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .diagnostic-row { /* 新增代码+DesktopVisualA11y：紧凑右栏下改为单列键值行；如果没有这段，长值会挤压字段名。 */
+    grid-template-columns: 1fr; /* 新增代码+DesktopVisualA11y：字段名和值上下排列；如果没有这行，232px 右栏内文字会横向重叠。 */
+    gap: 4px; /* 新增代码+DesktopVisualA11y：给上下字段留一点呼吸空间；如果没有这行，键和值会贴在一起。 */
+  } /* 新增代码+DesktopVisualA11y：紧凑诊断行规则结束；如果没有这行，CSS 块语法不完整。 */
+} /* 新增代码+DesktopToolTimeline：窄屏适配规则结束；如果没有这行，CSS 媒体查询不完整。 */
+
+@media (max-width: 760px) { /* 新增代码+ProviderSettingsVisualQA：定义真实窄窗口主壳布局；如果没有这段，背景三栏网格会把 document 撑到 980px。 */
+  .app-shell { /* 新增代码+ProviderSettingsVisualQA：窄窗口下重写主壳网格；如果没有这行，后续列规则没有目标。 */
+    grid-template-columns: minmax(0, 1fr); /* 新增代码+ProviderSettingsVisualQA：把三栏收成单栏；如果没有这行，左栏和右栏会在 390px 下制造横向溢出。 */
+  } /* 新增代码+ProviderSettingsVisualQA：窄窗口主壳网格规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .sidebar { /* 新增代码+ProviderSettingsVisualQA：窄窗口下处理左侧栏；如果没有这段，左侧栏会占掉设置弹窗背后的宽度。 */
+    display: none; /* 新增代码+ProviderSettingsVisualQA：隐藏桌面侧栏；如果没有这行，390px 下背景导航会撑宽 document 并干扰验收。 */
+  } /* 新增代码+ProviderSettingsVisualQA：窄窗口侧栏规则结束；如果没有这行，CSS 块语法不完整。 */
+
+  .status-inspector { /* 新增代码+ProviderSettingsVisualQA：窄窗口下处理右侧检查器；如果没有这段，右侧检查器会继续占用 232px 列。 */
+    display: none; /* 新增代码+ProviderSettingsVisualQA：隐藏桌面检查器；如果没有这行，390px 下背景右栏会撑宽 document。 */
+  } /* 新增代码+ProviderSettingsVisualQA：窄窗口检查器规则结束；如果没有这行，CSS 块语法不完整。 */
+} /* 新增代码+ProviderSettingsVisualQA：真实窄窗口主壳布局结束；如果没有这行，媒体查询语法不完整。 */

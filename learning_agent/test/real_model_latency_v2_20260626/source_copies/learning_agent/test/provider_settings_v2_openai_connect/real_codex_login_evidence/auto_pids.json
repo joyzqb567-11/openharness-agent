@@ -1,0 +1,10 @@
+﻿{
+    "backend":  30340,
+    "renderer":  11724,
+    "electron":  48948,
+    "bridge_port":  8786,
+    "renderer_port":  5187,
+    "cdp_port":  9226,
+    "token":  "openharness-desktop-dev-token",
+    "evidence":  "H:\\codexworkplace\\sofeware\\OpenHarness-main\\.worktrees\\chatgpt-oauth-real-model-v1\\learning_agent\\test\\provider_settings_v2_openai_connect\\real_codex_login_evidence"
+}

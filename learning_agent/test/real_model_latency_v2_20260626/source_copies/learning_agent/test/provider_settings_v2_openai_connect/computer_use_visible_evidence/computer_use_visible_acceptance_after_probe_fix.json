@@ -1,0 +1,24 @@
+﻿{
+    "ok":  true,
+    "tested_with":  "computer-use visible OpenHarness Desktop window",
+    "provider_id":  "openai",
+    "provider_connected":  true,
+    "provider_source":  "codex_cli",
+    "provider_masked_key":  "Codex ChatGPT login",
+    "probe_status":  "ok",
+    "probe_ok":  true,
+    "event_kinds":  [
+                        "heartbeat",
+                        "heartbeat",
+                        "turn_started",
+                        "message_delta",
+                        "message_completed",
+                        "message_completed"
+                    ],
+    "real_adapter_seen":  true,
+    "message_delta_seen":  true,
+    "message_completed_seen":  true,
+    "gui_turn_completed_seen":  false,
+    "fake_streaming_detected":  false,
+    "secret_leak_detected":  false
+}
