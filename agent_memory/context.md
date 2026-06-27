@@ -353,8 +353,10 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 
 ## 2026-06-27 Desktop GUI Toolchain Control Center Context
 
-- 当前 GUI 工具链控制中心在 `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支开发；已完成 Task 1 工具链清单、Task 2 Harness 控制、Task 3 Computer Use 工作台。
+- 当前 GUI 工具链控制中心在 `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支开发；已完成 Task 1 工具链清单、Task 2 Harness 控制、Task 3 Computer Use 工作台、Task 4 Browser 自动化工作台。
 - Task 1 后端 `gui_toolchain.py` 复用 `learning_agent.tools.catalog.build_builtin_tool_catalog()`，前端通过 `ToolchainPanel` 在右侧 `链路` 页签展示工具分组和复用来源。
 - Task 2 后端 `gui_harness_controls.py` 复用既有 `HarnessStore`、`HarnessRun`、`StatusEventStore` 和 `_harness_store_for_workspace`，前端 `HarnessPanel` 提供 `暂停`、`恢复`、`停止`、`Checkpoint` 控制。
 - Task 3 后端 `gui_computer_use.py` 复用既有 Computer Use mode/session/status 模块，前端 `ComputerUsePanel` 提供 `申请权限`、`观察`、`中止`，真实 GUI 验收确认三个动作均不触发低层桌面事件。
-- 后续 Task 4+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。
+- Task 4 后端 `gui_browser_control.py` 复用 `build_status_snapshot`、`StatusEventStore` 和已有 browser status/debug 字段，前端 `BrowserPanel` 提供 provider 状态、活跃目标、URL 记录、刷新、Console、Network、Downloads、Replay 和最近动作结果。
+- Browser 工作台当前是安全 thin adapter：`open` 只记录 URL 打开请求，不绕过 agent/browser 权限策略直接控制网页；后续如果接入真实导航、回放或 CDP 操作，必须复用现有 browser permission/replay/automation 模块，而不是在 GUI 里重写平行浏览器 runtime。
+- 后续 Task 5+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。

@@ -181,3 +181,9 @@ Computer Use complex GUI tasks must not rely on primitive tool-loop convergence.
 - 经验：当代码和单元测试都通过，但真实 OpenHarness Desktop GUI 看不到新页签、新按钮，或点击后返回 `未知 GUI bridge POST 路径`，第一怀疑对象不是新代码，而是固定端口 `8776/5177` 上残留了旧 bridge 或旧 renderer。
 - 做法：每个 GUI 任务验收前先查 `Get-NetTCPConnection -LocalPort 8776,5177`，再查 PID 命令行是否包含当前 `.worktrees/gui-toolchain-control-center`；必要时直接请求新增 `/v2/gui/*` endpoint 验证当前 bridge 已加载新路由。
 - 门禁：只有确认真实窗口连接的是当前 worktree 的 bridge/renderer 后，computer-use 的肉眼验收结果才可作为功能结论；否则只能算环境诊断，不能据此判断代码实现失败。
+
+## 2026-06-27 Desktop GUI 路由新增经验：重启 bridge 后先直连验证 endpoint
+
+- 经验：新增 `/v2/gui/*` 路由后，即使端口 owner 的命令行指向当前 worktree，也不代表运行中 Python 进程已经加载了新路由；如果该进程启动时间早于代码改动，真实 GUI 仍会返回 `未知 GUI bridge POST 路径`。
+- 做法：每次新增 GUI bridge 路由后，真实 GUI 验收前先重启当前 worktree 的 bridge，再用 `Invoke-RestMethod` 直接请求新 endpoint，确认返回结构化 `ok=true` 或预期的安全错误。
+- 门禁：直连 endpoint 通过以后，再用 `computer-use` 点击真实 GUI 按钮；如果直连失败，优先检查 PID、启动时间、端口占用和 token header，不要先改前端按钮或 thin adapter 代码。

@@ -628,3 +628,12 @@
 - Fix: 停止旧 `8776` bridge PID `27712`，从当前 worktree 重新启动 `apps/desktop/scripts/start-backend.ps1`，随后直接 POST `/v2/gui/computer-use/observe` 返回 `ok=true`、`action=observe`、`low_level_event_count=0`。
 - Verification: 重新用 computer-use 点击真实 GUI 中的 `观察`、`申请权限`、`中止` 后均显示成功结果；面板模式按预期变为 `observe` 和 `stopped`，并且三个动作都显示 `低层事件：0`。
 - Guard: 后续每个新增 `/v2/gui/*` 路由在真实 GUI 验收前，先用 `Invoke-RestMethod` 或浏览器端实际请求确认当前 `8776` bridge 已加载该路由；若返回 404/未知路径，优先检查端口 owner 和进程启动时间，再判断代码 bug。
+
+## 2026-06-27 Desktop GUI Browser Workbench Task 4 Stale Bridge Route
+
+- Closed risk: Task 4 真实 GUI 验收时，点击 Browser `刷新` 按钮后，GUI 显示 `Browser 刷新状态请求失败：GuiClientError: 未知 GUI bridge POST 路径。`
+- Evidence: `Get-NetTCPConnection -LocalPort 8776 -State Listen` 显示端口 owner 为旧 Python bridge PID `21488`；该进程启动时间早于 Task 4 新增 `/v2/gui/browser/refresh-status` 和 `/v2/gui/browser/open`，所以运行中路由表没有新接口。
+- Root cause: 前端 bundle 和后端源码已经包含新路由，但真实 Electron 窗口仍连接旧 bridge 进程；这是本地固定端口上的运行进程残留，不是 `BrowserPanel.tsx` 或 `gui_browser_control.py` 的实现错误。
+- Fix: 停止旧 `8776` bridge PID `21488`，从当前 worktree 重新启动 `apps/desktop/scripts/start-backend.ps1`，并直接 POST `/v2/gui/browser/refresh-status` 验证新 bridge 返回 `ok=true`、`status=refreshed`。
+- Verification: 重新用 computer-use 点击真实 GUI 中的 `刷新` 后，主消息区出现 `completed` 刷新状态，右侧面板显示 `refresh-status · refreshed`；点击 `记录打开` 后，主消息区出现 `completed` 记录打开状态，右侧面板显示 `open · recorded`。
+- Guard: 后续新增 Browser/MCP/Shell 等任何 `/v2/gui/*` endpoint 后，真实 GUI 验收前必须先确认 `8776` 的当前 PID 是路由新增之后启动的进程，并用实际 HTTP 请求验证新路由已加载。

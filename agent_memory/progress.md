@@ -1595,3 +1595,15 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 操作验收已通过：点击 `观察` 后面板进入 `observe`，点击 `申请权限` 后显示只读观察权限申请成功，点击 `中止` 后模式进入 `stopped`；三个动作均显示 `低层事件：0`，说明没有触发鼠标、键盘或窗口控制。
 - 验收期间发现旧 bridge 占用 `8776` 会让新按钮命中旧路由表；已按 systematic debugging 查明根因并重启当前 worktree bridge，重新验收通过。
 - 验收证据已保存到 `learning_agent/test/gui_computer_use_workbench_task3/visible_gui_acceptance_20260627.md`；本轮改动源码已同步复制到 `learning_agent/test/gui_computer_use_workbench_task3/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 4
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 4：把 `BrowserPanel` 从 provider 摘要升级为浏览器自动化工作台。
+- 后端新增 `learning_agent/app/gui_browser_control.py`，复用 `build_status_snapshot`、`StatusEventStore` 和既有 browser 状态字段，提供 `open`、`refresh-status`、`tabs`、`console`、`network` 的 GUI thin adapter。
+- `learning_agent/app/gui_bridge.py` 已新增 `/v2/gui/browser/open`、`/refresh-status`、`/tabs`、`/console`、`/network`，并让 runtime panels 的 `browser` 区块直接返回工作台 payload。
+- 前端已扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `BrowserPanel.tsx`，真实 GUI 现在显示 provider 状态、活跃目标、URL 输入、`刷新`、`记录打开`、Console、Network、Downloads、Replay 和最近动作结果。
+- 自动化验证已通过：`python -m py_compile learning_agent/app/gui_browser_control.py learning_agent/tests/test_gui_browser_workbench_contract.py learning_agent/app/gui_bridge.py` 通过；`python -m unittest learning_agent.tests.test_gui_browser_workbench_contract learning_agent.tests.test_gui_browser_computer_panel_contract -v` 为 6 tests 通过；`npm --prefix apps/desktop run test -- browserPanel guiClient` 为 2 files / 17 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed；`git diff --check` 只有 CRLF 警告。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `浏览器` 页签可见 `visible chromium`、`real chrome cdp`、`chrome extension`，其中 `chrome extension` 未连接时显示 `chrome_extension_bridge_not_connected`，GUI 没有崩溃。
+- 真实 GUI 操作验收已通过：点击 `刷新` 后主消息区出现 `completed` 的刷新状态，面板显示 `refresh-status · refreshed`；点击 `记录打开` 后主消息区出现 `completed` 的记录打开状态，面板显示 `open · recorded`。
+- 验收期间发现旧 bridge 占用 `8776` 会让新 `/v2/gui/browser/*` 路由返回未知路径；已按 systematic debugging 查明根因、重启当前 worktree bridge、直接 HTTP 验证新路由，再重新用真实 GUI 复验通过。
+- 验收证据已保存到 `learning_agent/test/gui_browser_workbench_task4/visible_gui_acceptance_20260627.md`；本轮改动源码已同步复制到 `learning_agent/test/gui_browser_workbench_task4/source_copies/`。
