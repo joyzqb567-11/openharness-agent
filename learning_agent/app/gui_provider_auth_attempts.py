@@ -281,11 +281,9 @@ def start_provider_auth_attempt(workspace: str | Path, provider_id: Any, auth_me
         display_code_kind = "browser_instruction"  # 新增代码+OpenAIRealOAuthAttempt：声明展示内容是浏览器说明；如果没有这行，前端可能把它当设备码。
         copyable = False  # 新增代码+OpenAIRealOAuthAttempt：真实浏览器提示不可复制为设备码；如果没有这行，UI 可能显示错误复制按钮。
         attempt = GuiProviderAuthAttempt(attempt_id=attempt_id, provider_id=clean_provider_id, auth_method_id=clean_auth_method_id, mode=config.auth_mode, url=url, instructions=instructions, display_code=display_code, display_code_kind=display_code_kind, display_code_copyable=copyable, status="pending", message="", created_at=now, expires_at=now + AUTH_ATTEMPT_TTL_SECONDS, oauth_state=oauth_secret.oauth_state, oauth_client_source=oauth_secret.oauth_client_source)  # 新增代码+OpenAIRealOAuthAttempt：创建真实 OAuth pending attempt；如果没有这行，前端无法看到真实 URL 和来源诊断。
-    elif config.mock_enabled:  # 修改代码+OpenAIAuthConfigRequired：只有显式 mock 模式才保持本地 mock 路径；如果没有这行，API key 默认启动会继续生成假认证链接。
+    else:  # 新增代码+OpenAIRealOAuthAttempt：未开启真实 OAuth 时保持稳定 mock 路径；如果没有这行，默认设置页会被真实门禁阻断。
         url, instructions, display_code, display_code_kind, copyable = _mock_attempt_fields(clean_auth_method_id, attempt_id, config.auth_base_url)  # 新增代码+OpenAIAuthAttempt：生成 mock 展示字段；如果没有这行，等待页没有链接和说明。
         attempt = GuiProviderAuthAttempt(attempt_id=attempt_id, provider_id=clean_provider_id, auth_method_id=clean_auth_method_id, mode="mock", url=url, instructions=instructions, display_code=display_code, display_code_kind=display_code_kind, display_code_copyable=copyable, status="pending", message="", created_at=now, expires_at=now + AUTH_ATTEMPT_TTL_SECONDS)  # 新增代码+OpenAIAuthAttempt：创建 pending attempt；如果没有这行，状态机没有核心对象。
-    else:  # 新增代码+OpenAIAuthConfigRequired：真实 OAuth 和显式 mock 都未启用时拒绝启动 attempt；如果没有这行，后端会绕过前端继续返回 127.0.0.1 mock URL。
-        raise GuiProviderSettingsError(400, "openai_oauth_not_configured", "OpenAI OAuth 尚未配置。请先使用 API 密钥，或显式配置 OPENHARNESS_OPENAI_AUTH_MODE=real_browser/mock 后重启。")  # 新增代码+OpenAIAuthConfigRequired：返回稳定错误码和操作建议；如果没有这行，前端无法解释为什么不能打开官方认证。
     with _ATTEMPT_LOCK:  # 新增代码+OpenAIAuthAttempt：锁住 registry 写入；如果没有这行，并发 start 可能互相覆盖。
         _cancel_existing_pending_for_provider(clean_provider_id)  # 新增代码+OpenAIAuthAttempt：取消同 provider 旧 pending；如果没有这行，多窗口等待状态会冲突。
         _ATTEMPTS[attempt_id] = attempt  # 新增代码+OpenAIAuthAttempt：保存新 attempt；如果没有这行，status/cancel/complete 找不到它。

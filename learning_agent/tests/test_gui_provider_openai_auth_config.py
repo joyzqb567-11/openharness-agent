@@ -2,15 +2,15 @@ import unittest  # 新增代码+OpenAIAuthConfigTest：使用项目现有 unitte
 
 
 class GuiProviderOpenAIAuthConfigTests(unittest.TestCase):  # 新增代码+OpenAIAuthConfigTest：测试类段开始，锁定 OpenAI OAuth 安全门禁；如果没有这个类，真实 OAuth 可能在不安全配置下误开启。
-    def test_default_config_uses_api_key_only_and_blocks_oauth_attempts(self) -> None:  # 修改代码+OpenAIAuthConfigRequiredTest：测试段开始，验证默认配置只允许 API key 路径；如果没有这段，GUI 会继续把本地 mock 伪装成可点击 OAuth。
+    def test_default_config_uses_mock_mode_and_blocks_real_oauth(self) -> None:  # 新增代码+OpenAIAuthConfigTest：测试段开始，验证默认配置只允许 mock；如果没有这段，开发环境可能误保存真实 OAuth token。
         from learning_agent.app.gui_provider_openai_auth_config import build_openai_auth_config  # 新增代码+OpenAIAuthConfigTest：导入待测配置 helper；如果没有这行代码，测试没有被测目标。
 
         config = build_openai_auth_config(env={})  # 新增代码+OpenAIAuthConfigTest：用空环境构造配置；如果没有这行代码，默认值不会被测试。
 
-        self.assertEqual(config.auth_mode, "api_key_only")  # 修改代码+OpenAIAuthConfigRequiredTest：确认默认是 API key only；如果没有这行代码，默认启动仍可能误进 mock OAuth。
-        self.assertFalse(config.mock_enabled)  # 修改代码+OpenAIAuthConfigRequiredTest：确认默认不允许 mock flow；如果没有这行代码，用户会继续打开 127.0.0.1 假认证。
+        self.assertEqual(config.auth_mode, "mock")  # 新增代码+OpenAIAuthConfigTest：确认默认是 mock；如果没有这行代码，稳定 V1 可能默认走真实 OAuth。
+        self.assertTrue(config.mock_enabled)  # 新增代码+OpenAIAuthConfigTest：确认 mock flow 可用于稳定 V1 视觉验收；如果没有这行代码，browser/headless UI 没有安全后端。
         self.assertFalse(config.real_oauth_enabled)  # 新增代码+OpenAIAuthConfigTest：确认默认不允许真实 OAuth；如果没有这行代码，refresh token 保存风险会漏过。
-    # 修改代码+OpenAIAuthConfigRequiredTest：测试段结束，默认配置门禁到此结束；如果没有边界说明，初学者不易看出默认只允许 API key。
+    # 新增代码+OpenAIAuthConfigTest：测试段结束，默认配置门禁到此结束；如果没有边界说明，初学者不易看出覆盖范围。
 
     def test_real_mode_requires_encrypted_store_experimental_flag_and_client_id(self) -> None:  # 新增代码+OpenAIAuthConfigTest：测试段开始，验证真实 OAuth 三重门禁；如果没有这段，缺任一条件也可能开启真实登录。
         from learning_agent.app.gui_provider_openai_auth_config import build_openai_auth_config  # 新增代码+OpenAIAuthConfigTest：导入待测配置 helper；如果没有这行代码，测试没有被测目标。

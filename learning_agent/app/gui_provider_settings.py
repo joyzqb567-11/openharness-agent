@@ -12,7 +12,6 @@ from dataclasses import asdict, dataclass  # 新增代码+ProviderSettings：定
 from pathlib import Path  # 新增代码+ProviderSettings：规范化 workspace 和 memory 路径；如果没有这行，Windows 路径容易出错。
 from typing import Any  # 新增代码+ProviderSettings：标注未知 JSON 对象；如果没有这行，payload 清洗边界不清楚。
 
-from learning_agent.app.gui_provider_openai_auth_config import build_openai_auth_config  # 新增代码+OpenAIAuthConfigRequired：读取 OpenAI OAuth/mock 显式门禁；如果没有这行，设置页会继续把未配置 OAuth 渲染成可点击。
 from learning_agent.app.gui_provider_openai_models import build_openai_model_catalog_rows  # 新增代码+OpenAIModelRegistry：复用三层 OpenAI 模型注册表；如果没有这行，设置页会继续使用硬编码模型。
 from learning_agent.app.gui_provider_secret_store import GuiProviderSecretStore, make_provider_secret_store, safe_secret_ref  # 修改代码+SecretStoreFactory：复用 secret store 抽象、factory 和引用格式；如果没有这行，主配置会继续强绑 dev_json。
 
@@ -123,29 +122,15 @@ def _unsupported_auth_method(method_id: str, label: str, help_text: str) -> dict
 # 新增代码+ProviderSettings：函数段结束，_unsupported_auth_method 到此结束；如果没有边界说明，初学者不易看出它只负责 unsupported 元数据。
 
 
-def _openai_oauth_method_state() -> tuple[bool, str, str]:  # 新增代码+OpenAIAuthConfigRequired：函数段开始，计算 OpenAI OAuth 方法在设置页的可用状态；如果没有这段，默认启动会继续暴露本地 mock 认证入口。
-    config = build_openai_auth_config()  # 新增代码+OpenAIAuthConfigRequired：读取当前真实/模拟 OAuth 配置；如果没有这行，catalog 无法区分 API key only、显式 mock 和真实 OAuth。
-    if config.real_oauth_enabled:  # 新增代码+OpenAIAuthConfigRequired：真实 OAuth 三重门禁通过时开放官方认证入口；如果没有这行，已正确配置的用户仍看不到 OpenAI 登录。
-        return True, "available", "使用 OpenAI 官方 OAuth 登录 ChatGPT Pro/Plus，授权成功后 token 会保存到 OS 加密存储。"  # 新增代码+OpenAIAuthConfigRequired：返回真实 OAuth 可用说明；如果没有这行，前端无法显示官方认证语义。
-    if config.mock_enabled:  # 新增代码+OpenAIAuthConfigRequired：显式 mock 模式下才开放本地视觉验收入口；如果没有这行，开发测试无法继续覆盖 mock 状态机。
-        return True, "mock_available", "当前是显式 mock 模式，只用于验证连接界面和状态机，不会连接 OpenAI 官方服务。"  # 新增代码+OpenAIAuthConfigRequired：返回 mock 可用说明；如果没有这行，用户可能误把 mock 当真实登录。
-    if config.blocked_reasons:  # 新增代码+OpenAIAuthConfigRequired：真实 OAuth 模式缺安全条件时给出缺失原因；如果没有这行，用户不知道为什么不能点击。
-        missing = ", ".join(config.blocked_reasons)  # 新增代码+OpenAIAuthConfigRequired：整理缺失门禁条件；如果没有这行，帮助文案只能给模糊失败。
-        return False, "oauth_config_required", f"真实 OpenAI OAuth 尚未通过门禁：{missing}。请先使用 API 密钥，或补齐配置后重启。"  # 新增代码+OpenAIAuthConfigRequired：返回真实 OAuth 阻断说明；如果没有这行，设置页会缺少可操作提示。
-    return False, "oauth_config_required", "未配置真实 OpenAI OAuth。请先使用 API 密钥，或显式配置 OPENHARNESS_OPENAI_AUTH_MODE=real_browser/mock 后重启。"  # 新增代码+OpenAIAuthConfigRequired：返回默认禁用说明；如果没有这行，API key only 启动时用户不知道为何 OAuth 不可点。
-# 新增代码+OpenAIAuthConfigRequired：函数段结束，_openai_oauth_method_state 到此结束；如果没有边界说明，初学者不易看出它只计算方法状态。
-
-
-def _openai_oauth_auth_method(method_id: str, label: str, help_text: str, enabled: bool, status: str) -> dict[str, Any]:  # 修改代码+OpenAIAuthConfigRequired：函数段开始，生成带门禁结果的 OpenAI ChatGPT OAuth 方法；如果没有这段，browser/headless 会继续固定为 mock_available。
-    return asdict(GuiAuthMethodInfo(id=method_id, label=label, enabled=enabled, status=status, type="oauth", mode="auto", fields=[], help_text=help_text, experimental=True))  # 修改代码+OpenAIAuthConfigRequired：返回 OAuth 方法元数据并尊重后端门禁；如果没有这行，前端会继续允许未配置 OAuth 的点击。
+def _openai_oauth_auth_method(method_id: str, label: str, help_text: str) -> dict[str, Any]:  # 新增代码+OpenAIConnectCatalog：函数段开始，生成 OpenAI ChatGPT OAuth 方法；如果没有这段，browser/headless 会和 API key 混成同一种表单。
+    return asdict(GuiAuthMethodInfo(id=method_id, label=label, enabled=True, status="mock_available", type="oauth", mode="auto", fields=[], help_text=help_text, experimental=True))  # 新增代码+OpenAIConnectCatalog：返回可进入 mock auth-attempt 的 OAuth 方法；如果没有这行，前端无法展示等待授权页。
 # 新增代码+OpenAIConnectCatalog：函数段结束，_openai_oauth_auth_method 到此结束；如果没有边界说明，初学者不易看出它只负责 OpenAI OAuth 元数据。
 
 
 def _openai_auth_methods() -> list[dict[str, Any]]:  # 新增代码+OpenAIConnectCatalog：函数段开始，集中声明 OpenAI 三种连接方式；如果没有这段，OpenAI catalog 顺序会在多处重复维护。
-    oauth_enabled, oauth_status, oauth_help = _openai_oauth_method_state()  # 新增代码+OpenAIAuthConfigRequired：读取 OAuth 当前可用性和说明；如果没有这行，两个 ChatGPT 方法会继续使用硬编码 mock 状态。
     return [  # 新增代码+OpenAIConnectCatalog：开始返回 OpenCode 风格方法列表；如果没有这行，Python 无法组成有序 auth_methods。
-        _openai_oauth_auth_method("chatgpt-browser", "ChatGPT Pro/Plus (browser)", f"使用浏览器登录 ChatGPT Pro/Plus；{oauth_help}", oauth_enabled, oauth_status),  # 修改代码+OpenAIAuthConfigRequired：声明 browser 登录方法并尊重 OAuth 门禁；如果没有这行，默认 GUI 会继续打开本地 mock 链接。
-        _openai_oauth_auth_method("chatgpt-headless", "ChatGPT Pro/Plus (headless)", f"使用设备码登录 ChatGPT Pro/Plus；{oauth_help}", oauth_enabled, oauth_status),  # 修改代码+OpenAIAuthConfigRequired：声明 headless 登录方法并尊重 OAuth 门禁；如果没有这行，设备码 mock 会继续误导用户。
+        _openai_oauth_auth_method("chatgpt-browser", "ChatGPT Pro/Plus (browser)", "使用浏览器登录 ChatGPT Pro/Plus；稳定 V1 使用 mock auth-attempt 验证界面和状态机。"),  # 新增代码+OpenAIConnectCatalog：声明 browser 登录方法；如果没有这行，用户看不到 OpenCode 同款浏览器登录入口。
+        _openai_oauth_auth_method("chatgpt-headless", "ChatGPT Pro/Plus (headless)", "使用设备码登录 ChatGPT Pro/Plus；稳定 V1 使用 mock auth-attempt 验证界面和状态机。"),  # 新增代码+OpenAIConnectCatalog：声明 headless 登录方法；如果没有这行，用户看不到 OpenCode 同款设备码入口。
         _api_key_auth_method(),  # 新增代码+OpenAIConnectCatalog：保留稳定 API key 真实路径；如果没有这行，用户无法通过 OpenAI API key 真实连接后端。
     ]  # 新增代码+OpenAIConnectCatalog：结束 OpenAI 方法列表；如果没有这行，Python 列表语法不完整。
 # 新增代码+OpenAIConnectCatalog：函数段结束，_openai_auth_methods 到此结束；如果没有边界说明，初学者不易看出它只负责 OpenAI 方法排序。

@@ -61,14 +61,14 @@ def _blocked_reasons(auth_mode: str, secret_store_kind: str, experimental_enable
 
 def build_openai_auth_config(env: Mapping[str, str] | None = None) -> OpenAIAuthConfig:  # 新增代码+OpenAIAuthConfig：函数段开始，构造 OpenAI Auth 配置摘要；如果没有这段，auth-attempt 无法统一读取安全门禁。
     source_env = os.environ if env is None else env  # 新增代码+OpenAIAuthConfig：允许测试注入 env，真实运行读取 os.environ；如果没有这行，测试会污染本机环境。
-    auth_mode = _env_value(source_env, "OPENHARNESS_OPENAI_AUTH_MODE", "api_key_only").lower()  # 修改代码+OpenAIAuthConfigRequired：读取认证模式并默认只开放 API key；如果没有这行，未配置真实 OAuth 时会继续误开本地 mock 链接。
+    auth_mode = _env_value(source_env, "OPENHARNESS_OPENAI_AUTH_MODE", "mock").lower()  # 新增代码+OpenAIAuthConfig：读取认证模式并默认 mock；如果没有这行，稳定 V1 可能没有安全默认值。
     secret_store_kind = _env_value(source_env, "OPENHARNESS_PROVIDER_SECRET_STORE", "dev_json")  # 新增代码+OpenAIAuthConfig：读取 provider secret store 类型；如果没有这行，真实 OAuth 无法判断落盘安全性。
     experimental_enabled = _flag_enabled(_env_value(source_env, "OPENHARNESS_OPENAI_EXPERIMENTAL", ""))  # 新增代码+OpenAIAuthConfig：读取实验开关；如果没有这行，真实 OAuth 不会有显式 opt-in。
     client_id = _env_value(source_env, "OPENHARNESS_OPENAI_CLIENT_ID", "")  # 新增代码+OpenAIAuthConfig：读取 OpenAI OAuth client id；如果没有这行，真实 OAuth URL 无法构造。
     auth_base_url = _env_value(source_env, "OPENHARNESS_OPENAI_AUTH_BASE_URL", DEFAULT_OPENAI_AUTH_BASE_URL)  # 新增代码+OpenAIAuthConfig：读取授权服务 base URL；如果没有这行，mock server 和真实授权服务不能配置。
     reasons = _blocked_reasons(auth_mode, secret_store_kind, experimental_enabled, client_id)  # 新增代码+OpenAIAuthConfig：计算真实 OAuth 阻断原因；如果没有这行，real_oauth_enabled 没有安全依据。
     real_oauth_enabled = auth_mode in REAL_OPENAI_AUTH_MODES and len(reasons) == 0  # 新增代码+OpenAIAuthConfig：只有真实模式且无阻断原因才允许真实 OAuth；如果没有这行，token 保存路径可能误开启。
-    mock_enabled = auth_mode in MOCK_OPENAI_AUTH_MODES  # 修改代码+OpenAIAuthConfigRequired：只有显式 mock 模式才允许 mock flow；如果没有这行，真实 GUI 会把开发 mock 误当 OpenAI 官方认证。
+    mock_enabled = auth_mode in MOCK_OPENAI_AUTH_MODES or not real_oauth_enabled  # 新增代码+OpenAIAuthConfig：默认和阻断情况下都允许 mock flow；如果没有这行，稳定 V1 视觉验收会因真实门禁阻断而不可用。
     return OpenAIAuthConfig(auth_mode=auth_mode, secret_store_kind=secret_store_kind, experimental_enabled=experimental_enabled, client_id=client_id, auth_base_url=auth_base_url, mock_enabled=mock_enabled, real_oauth_enabled=real_oauth_enabled, blocked_reason=reasons[0] if reasons else "", blocked_reasons=reasons)  # 新增代码+OpenAIAuthConfig：返回完整配置摘要；如果没有这行，调用方拿不到门禁结果。
 # 新增代码+OpenAIAuthConfig：函数段结束，build_openai_auth_config 到此结束；如果没有边界说明，初学者不易看出它不执行 OAuth。
 

@@ -1,14 +1,11 @@
 import json  # 新增代码+OpenAIAuthAttemptTest：解析 bridge JSON 响应；如果没有这行代码，HTTP 合同只能比较原始字节。
-import os  # 新增代码+OpenAIAuthConfigRequiredTest：隔离 OPENHARNESS_OPENAI_AUTH_MODE；如果没有这行代码，默认/显式 mock 测试会互相污染。
 import tempfile  # 新增代码+OpenAIAuthAttemptTest：创建隔离临时工作区；如果没有这行代码，测试会污染真实项目。
 import threading  # 新增代码+OpenAIAuthAttemptTest：后台运行 GUI bridge server；如果没有这行代码，HTTP 测试会被 serve_forever 阻塞。
 import time  # 新增代码+OpenAIAuthAttemptTailTest：构造过期 attempt 时间；如果没有这行代码，过期尾部行为只能靠慢等待。
 import unittest  # 新增代码+OpenAIAuthAttemptTest：使用项目现有 unittest 风格；如果没有这行代码，测试类不会被标准 runner 发现。
-import urllib.error  # 新增代码+OpenAIAuthConfigRequiredTest：读取预期 400 错误响应；如果没有这行代码，默认阻断测试只能看到异常。
 import urllib.parse  # 新增代码+OpenAIAuthAttemptTest：构造 status query string；如果没有这行代码，attempt_id 里的特殊字符可能让 URL 错误。
 import urllib.request  # 新增代码+OpenAIAuthAttemptTest：使用标准库请求本地 bridge；如果没有这行代码，测试需要额外依赖。
 from pathlib import Path  # 新增代码+OpenAIAuthAttemptTest：用 Path 管理临时 workspace；如果没有这行代码，Windows 路径拼接容易出错。
-from unittest.mock import patch  # 新增代码+OpenAIAuthConfigRequiredTest：临时切换 mock/api_key_only 环境；如果没有这行代码，测试无法稳定覆盖两种模式。
 
 
 class GuiProviderAuthAttemptsContractTests(unittest.TestCase):  # 新增代码+OpenAIAuthAttemptTest：测试类段开始，锁定 OpenAI mock auth-attempt 状态机；如果没有这个类，browser/headless 连接流程可能只有静态 UI。
@@ -39,32 +36,6 @@ class GuiProviderAuthAttemptsContractTests(unittest.TestCase):  # 新增代码+O
             return json.loads(response.read().decode("utf-8"))  # 新增代码+OpenAIAuthAttemptTest：解析 JSON 响应；如果没有这行代码，断言无法读取 mutation 结果。
     # 新增代码+OpenAIAuthAttemptTest：helper 段结束，_post_json 到此结束；如果没有边界说明，初学者不易看出它只负责 POST。
 
-    def _post_json_error(self, server, path: str, payload: dict[str, object]) -> dict[str, object]:  # 新增代码+OpenAIAuthConfigRequiredTest：helper 段开始，发送预期失败的 JSON POST；如果没有这段，OAuth 未配置测试无法读取结构化错误。
-        raw_body = json.dumps(payload).encode("utf-8")  # 新增代码+OpenAIAuthConfigRequiredTest：把错误场景 payload 编码成 JSON；如果没有这行代码，bridge 无法解析请求体。
-        request = urllib.request.Request(self._url(server, path), data=raw_body, method="POST", headers={"Content-Type": "application/json", "X-OpenHarness-Desktop-Token": "test-token"})  # 新增代码+OpenAIAuthConfigRequiredTest：构造认证 POST 请求；如果没有这行代码，测试会因未授权而不是 OAuth 门禁失败。
-        try:  # 新增代码+OpenAIAuthConfigRequiredTest：捕获预期 HTTPError；如果没有这行代码，400 响应会直接中断测试。
-            urllib.request.urlopen(request, timeout=5)  # 新增代码+OpenAIAuthConfigRequiredTest：发出预期失败请求；如果没有这行代码，后端阻断逻辑不会被真实路由触发。
-        except urllib.error.HTTPError as error:  # 新增代码+OpenAIAuthConfigRequiredTest：读取 bridge 返回的结构化错误；如果没有这行代码，无法断言错误码。
-            return json.loads(error.read().decode("utf-8"))  # 新增代码+OpenAIAuthConfigRequiredTest：返回错误 JSON；如果没有这行代码，调用方只能看到 HTTP 状态码。
-        self.fail("Expected provider auth attempt mutation to fail.")  # 新增代码+OpenAIAuthConfigRequiredTest：如果请求意外成功则失败；如果没有这行代码，本地 mock 链接回归会误过。
-    # 新增代码+OpenAIAuthConfigRequiredTest：helper 段结束，_post_json_error 到此结束；如果没有边界说明，初学者不易看出它只负责错误 POST。
-
-    def test_auth_attempt_start_rejects_unconfigured_openai_oauth(self) -> None:  # 新增代码+OpenAIAuthConfigRequiredTest：测试段开始，锁定默认环境不允许启动 mock OAuth attempt；如果没有这段，后端仍会生成 127.0.0.1 mock 链接。
-        with tempfile.TemporaryDirectory() as directory:  # 新增代码+OpenAIAuthConfigRequiredTest：创建临时 workspace；如果没有这行代码，测试会污染真实 GUI 配置。
-            with patch.dict(os.environ, {}, clear=True):  # 新增代码+OpenAIAuthConfigRequiredTest：清空 OpenAI OAuth 环境变量；如果没有这行代码，本机真实配置会掩盖默认阻断行为。
-                server, thread = self._start_server(Path(directory))  # 新增代码+OpenAIAuthConfigRequiredTest：启动真实 bridge 路由；如果没有这行代码，无法验证 HTTP handler 也会阻断。
-                try:  # 新增代码+OpenAIAuthConfigRequiredTest：确保 server 最终关闭；如果没有这行代码，失败时端口会泄漏。
-                    error_payload = self._post_json_error(server, "/v2/gui/provider-settings/auth-attempt/start", {"provider_id": "openai", "auth_method_id": "chatgpt-browser"})  # 新增代码+OpenAIAuthConfigRequiredTest：请求默认 OAuth start；如果没有这行代码，bug 没有复现入口。
-                finally:  # 新增代码+OpenAIAuthConfigRequiredTest：清理 server；如果没有这行代码，后台线程和 socket 可能残留。
-                    server.shutdown()  # 新增代码+OpenAIAuthConfigRequiredTest：停止 serve_forever；如果没有这行代码，测试进程可能挂住。
-                    server.server_close()  # 新增代码+OpenAIAuthConfigRequiredTest：释放 socket；如果没有这行代码，Windows 端口可能短时间占用。
-                    thread.join(timeout=5)  # 新增代码+OpenAIAuthConfigRequiredTest：等待后台线程退出；如果没有这行代码，测试结束时可能仍有线程。
-
-        self.assertEqual(error_payload["code"], "openai_oauth_not_configured")  # 新增代码+OpenAIAuthConfigRequiredTest：确认错误码说明需要显式配置 OAuth；如果没有这行代码，前端无法显示准确修复路径。
-        self.assertNotIn("mock/openai", json.dumps(error_payload, ensure_ascii=False))  # 新增代码+OpenAIAuthConfigRequiredTest：确认错误响应不携带 mock URL；如果没有这行代码，用户仍可能点到本地假认证。
-    # 新增代码+OpenAIAuthConfigRequiredTest：测试段结束，默认 auth-attempt 阻断合同到此结束；如果没有边界说明，初学者不易看出它只管无配置默认态。
-
-    @patch.dict(os.environ, {"OPENHARNESS_OPENAI_AUTH_MODE": "mock"}, clear=False)  # 修改代码+OpenAIAuthConfigRequiredTest：显式声明本测试覆盖 mock 模式；如果没有这行代码，默认禁用 OAuth 后旧 mock 生命周期测试会失去输入。
     def test_mock_auth_attempt_lifecycle_completes_without_real_secret(self) -> None:  # 新增代码+OpenAIAuthAttemptTest：测试段开始，验证 mock attempt 生命周期和安全落盘；如果没有这段，mock complete 可能写入真实 token 字段。
         from learning_agent.app.gui_provider_auth_attempts import complete_provider_auth_attempt, get_provider_auth_attempt_status, start_provider_auth_attempt  # 新增代码+OpenAIAuthAttemptTest：导入待测状态机函数；如果没有这行代码，测试没有被测目标。
         from learning_agent.app.gui_provider_settings import build_provider_settings_payload, provider_settings_file  # 新增代码+OpenAIAuthAttemptTest：导入 provider catalog 和设置文件路径；如果没有这行代码，无法验证 complete 后 catalog 和落盘内容。
@@ -95,7 +66,6 @@ class GuiProviderAuthAttemptsContractTests(unittest.TestCase):  # 新增代码+O
         self.assertNotIn("secret_ref", settings_text)  # 新增代码+OpenAIAuthAttemptTest：确认 mock auth 不写 secret_ref；如果没有这行代码，mock 连接可能伪装成真实 secret。
     # 新增代码+OpenAIAuthAttemptTest：测试段结束，mock 生命周期安全合同到此结束；如果没有边界说明，初学者不易看出覆盖范围。
 
-    @patch.dict(os.environ, {"OPENHARNESS_OPENAI_AUTH_MODE": "mock"}, clear=False)  # 修改代码+OpenAIAuthConfigRequiredTest：显式声明本测试覆盖 mock bridge 路由；如果没有这行代码，默认禁用 OAuth 后 start 路由会按预期拒绝。
     def test_bridge_auth_attempt_start_status_and_cancel_routes(self) -> None:  # 新增代码+OpenAIAuthAttemptTest：测试段开始，验证 bridge auth-attempt 路由；如果没有这段，前端只能调用不存在的端点。
         with tempfile.TemporaryDirectory() as directory:  # 新增代码+OpenAIAuthAttemptTest：创建临时 workspace；如果没有这行代码，HTTP 测试会污染真实项目。
             server, thread = self._start_server(Path(directory))  # 新增代码+OpenAIAuthAttemptTest：启动真实 GUI bridge；如果没有这行代码，测试没有目标服务。
@@ -117,7 +87,6 @@ class GuiProviderAuthAttemptsContractTests(unittest.TestCase):  # 新增代码+O
         self.assertEqual(cancelled["attempt"]["message"], "cancelled_by_user")  # 新增代码+OpenAIAuthAttemptTest：确认取消原因稳定；如果没有这行代码，前端无法显示明确取消状态。
     # 新增代码+OpenAIAuthAttemptTest：测试段结束，bridge auth-attempt 路由合同到此结束；如果没有边界说明，初学者不易看出覆盖范围。
 
-    @patch.dict(os.environ, {"OPENHARNESS_OPENAI_AUTH_MODE": "mock"}, clear=False)  # 修改代码+OpenAIAuthConfigRequiredTest：显式声明本测试覆盖 mock 尾部状态；如果没有这行代码，默认禁用 OAuth 会让尾部状态无法启动。
     def test_tail_behaviors_keep_auth_attempts_idempotent_and_non_secret(self) -> None:  # 新增代码+OpenAIAuthAttemptTailTest：测试段开始，覆盖重复 start、重复 cancel、未知 status、过期和重复 complete；如果没有这段，边缘状态可能在真实 GUI 中卡住。
         from learning_agent.app.gui_provider_auth_attempts import _ATTEMPTS, _ATTEMPT_LOCK, cancel_provider_auth_attempt, complete_provider_auth_attempt, get_provider_auth_attempt_status, start_provider_auth_attempt  # 新增代码+OpenAIAuthAttemptTailTest：导入状态机和受控测试入口；如果没有这行代码，测试无法精确制造尾部状态。
         from learning_agent.app.gui_provider_settings import provider_settings_file  # 新增代码+OpenAIAuthAttemptTailTest：导入 provider settings 文件路径；如果没有这行代码，重复 complete 是否二次写入无法验证。

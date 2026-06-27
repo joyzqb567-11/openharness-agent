@@ -1,13 +1,11 @@
 import json  # 新增代码+ProviderSettingsContractTest：解析 GUI bridge JSON 响应；如果没有这行代码，HTTP 合同只能比较原始字节。
 import http.server  # 新增代码+ProviderSettingsContractTest：启动本地假 OpenAI-compatible /models 服务；如果没有这行代码，连接探针测试只能 mock 而不能真实 HTTP。
-import os  # 新增代码+OpenAIAuthConfigRequiredTest：隔离 OpenAI OAuth 相关环境变量；如果没有这行代码，测试会受真实桌面启动环境影响。
 import tempfile  # 新增代码+ProviderSettingsContractTest：创建隔离临时工作区；如果没有这行代码，测试会污染真实项目目录。
 import threading  # 新增代码+ProviderSettingsContractTest：后台运行 HTTP server；如果没有这行代码，测试请求会被 serve_forever 阻塞。
 import unittest  # 新增代码+ProviderSettingsContractTest：使用项目现有 unittest 风格；如果没有这行代码，测试类不会被标准 runner 发现。
 import urllib.error  # 新增代码+ProviderSettingsContractTest：读取结构化 HTTP 错误响应；如果没有这行代码，非法 provider 测试无法断言错误码。
 import urllib.request  # 新增代码+ProviderSettingsContractTest：使用标准库请求本地 bridge；如果没有这行代码，测试需要额外依赖。
 from pathlib import Path  # 新增代码+ProviderSettingsContractTest：用 Path 管理临时 workspace；如果没有这行代码，Windows 路径拼接容易出错。
-from unittest.mock import patch  # 新增代码+OpenAIAuthConfigRequiredTest：临时清空/设置认证环境变量；如果没有这行代码，默认行为测试会被外部环境污染。
 
 
 class _FakeModelsHandler(http.server.BaseHTTPRequestHandler):  # 新增代码+ProviderSettingsContractTest：类段开始，提供本地 /v1/models 测试服务；如果没有这个类，test-connection 无法做真实 HTTP 探针。
@@ -120,22 +118,6 @@ class GuiProviderSettingsContractTests(unittest.TestCase):  # 新增代码+Provi
         self.assertNotIn("bearer", serialized.lower())  # 新增代码+ProviderSettingsContractTest：确认响应不暴露 bearer token；如果没有这行代码，诊断和截图可能泄露凭据。
         self.assertNotIn("secret_ref", serialized.lower())  # 新增代码+OpenAIConnectCatalogTest：确认 catalog 不把后端 secret 引用发给 renderer；如果没有这行代码，前端可能间接泄露密钥定位信息。
     # 新增代码+ProviderSettingsContractTest：测试段结束，Provider catalog HTTP 合同到此结束；如果没有边界说明，初学者不易看出覆盖范围。
-
-    def test_openai_oauth_methods_require_explicit_real_or_mock_configuration(self) -> None:  # 新增代码+OpenAIAuthConfigRequiredTest：测试段开始，锁定默认启动不再暴露可点击 mock OAuth；如果没有这段，API key 模式会继续误导用户去点本地 mock 链接。
-        from learning_agent.app.gui_provider_settings import build_provider_settings_payload  # 新增代码+OpenAIAuthConfigRequiredTest：导入 catalog 构造入口；如果没有这行代码，测试无法验证设置页真实 payload。
-
-        with tempfile.TemporaryDirectory() as directory:  # 新增代码+OpenAIAuthConfigRequiredTest：创建隔离 workspace；如果没有这行代码，测试会读取或写入真实 provider 设置。
-            with patch.dict(os.environ, {}, clear=True):  # 新增代码+OpenAIAuthConfigRequiredTest：清空 OpenAI OAuth 环境变量；如果没有这行代码，本机真实配置可能让默认门禁测试误过。
-                payload = build_provider_settings_payload(Path(directory))  # 新增代码+OpenAIAuthConfigRequiredTest：构造无 OAuth 配置时的 provider catalog；如果没有这行代码，下面没有可断言的 OpenAI 方法。
-
-        openai = next(provider for provider in payload["providers"] if provider["id"] == "openai")  # 新增代码+OpenAIAuthConfigRequiredTest：定位 OpenAI provider；如果没有这行代码，测试只能笼统检查列表。
-        methods = {method["id"]: method for method in openai["auth_methods"]}  # 新增代码+OpenAIAuthConfigRequiredTest：按认证方法 id 建索引；如果没有这行代码，断言会依赖脆弱数组位置。
-        self.assertFalse(methods["chatgpt-browser"]["enabled"])  # 新增代码+OpenAIAuthConfigRequiredTest：确认默认 browser OAuth 不可点击；如果没有这行代码，本地 mock 链接会再次混入真实 GUI。
-        self.assertFalse(methods["chatgpt-headless"]["enabled"])  # 新增代码+OpenAIAuthConfigRequiredTest：确认默认 headless OAuth 不可点击；如果没有这行代码，设备码 mock 链接会继续误导用户。
-        self.assertEqual(methods["chatgpt-browser"]["status"], "oauth_config_required")  # 新增代码+OpenAIAuthConfigRequiredTest：确认禁用原因稳定可读；如果没有这行代码，前端无法给出准确提示。
-        self.assertEqual(methods["chatgpt-headless"]["status"], "oauth_config_required")  # 新增代码+OpenAIAuthConfigRequiredTest：确认 headless 禁用原因同样稳定；如果没有这行代码，两个入口会出现不一致。
-        self.assertTrue(methods["api-key"]["enabled"])  # 新增代码+OpenAIAuthConfigRequiredTest：确认 API key 真实路径仍可用；如果没有这行代码，修复 OAuth 误导时可能误伤手动 API key 连接。
-    # 新增代码+OpenAIAuthConfigRequiredTest：测试段结束，默认 OAuth 门禁 catalog 合同到此结束；如果没有边界说明，初学者不易看出它只管无配置默认态。
 
     def test_provider_settings_mutations_persist_redacted_state(self) -> None:  # 新增代码+ProviderSettingsContractTest：测试段开始，验证 auth/disconnect/custom/model visibility 写入合同；如果没有这段测试，设置页按钮可能只有前端假状态。
         with tempfile.TemporaryDirectory() as directory:  # 新增代码+ProviderSettingsContractTest：创建临时 workspace；如果没有这行代码，mutation 会污染真实项目。
