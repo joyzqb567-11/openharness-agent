@@ -1436,3 +1436,12 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 风险文件包括本地运行状态与敏感状态路径，例如 `memory/gui_provider_settings/secrets.dev.json`；本轮没有 stash、提交或复制这些内容，避免把本地 secret/令牌状态写入 Git 历史。
 - 旧 worktree 未发现真实运行进程占用，查询到的匹配进程只是本轮审计命令本身；因此当前阻塞不是进程占用，而是未审阅的工作区内容。
 - 当前停止条件：需要用户或后续任务明确选择“迁移剩余独有文件”“脱敏归档证据文件”或“确认放弃旧工作区未提交内容”之一；在此之前不删除 `.worktrees/chatgpt-oauth-real-model-v1`，也不删除 `codex/chatgpt-oauth-real-model-v1` 分支。
+
+## 2026-06-27 Old ChatGPT OAuth Worktree Migration Inventory
+
+- 已生成迁移/放弃清单：`agent_memory/old_chatgpt_oauth_worktree_migration_inventory_20260627.md`。
+- 清单结论：旧 worktree 不可整体合并，不可直接删除；主链路已经覆盖 ModelCallStatus、Direct SSE/OAuth 生产路径和真实模型观测事件。
+- 可参考但不直接迁移：`gui_model_latency_diagnostics.py`、`test_gui_model_latency_diagnostics.py`、`models/streaming.py`、`models/codex_cli_stream.py`、`realModelLatencyEvents.test.ts`。
+- 可低风险归档候选：两份 `2026-06-26-openharness-desktop-real-model-latency-v2*.md` 计划/评估文档，但仍需人工确认没有敏感运行细节。
+- 明确不迁移：旧 worktree 的 `memory/`、OAuth/provider 本地状态、raw stdout/stderr logs、PID/evidence JSON，除非用户单独要求脱敏归档。
+- 下一步建议：若继续推进，先归档两份计划文档；若要做工程功能，则另起干净蓝图 `Transport Diagnostics Tab V1`，只借鉴旧诊断缓存思想，不复制旧实现。
