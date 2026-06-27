@@ -1428,3 +1428,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 主链路自动化验证已通过：`npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；Direct SSE/GUI protocol 相关 pytest 为 17 passed；`python learning_agent\scripts\assert_no_real_provider_secret_leaks.py` 输出 `Provider secret leak scan passed.`；`npm --prefix apps/desktop run lint`、`npm --prefix apps/desktop run build`、`python -m py_compile learning_agent\app\gui_protocol.py learning_agent\app\gui_agent_adapter.py` 均通过。
 - 主链路真实可见 GUI smoke 已通过：使用 `bridge=http://127.0.0.1:8891` 和 `renderer=http://127.0.0.1:5177` 启动 OpenHarness Desktop，底部 composer 布局正常，设置 -> 提供商页面成功加载 OpenAI/GitHub Copilot/Google/OpenRouter/Vercel AI Gateway/自定义提供商列表，没有出现“提供商加载失败”。
 - 验收清理已完成：主链路 smoke 后已关闭 Electron、停止 bridge，并确认 `8891` 与 `5177` 没有 listener；旧 `.worktrees/chatgpt-oauth-real-model-v1` 仍保留，建议下一步单独审计后再决定是否删除。
+
+## 2026-06-27 Old ChatGPT OAuth Worktree Audit
+
+- 已审计旧 worktree `H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\chatgpt-oauth-real-model-v1`：分支提交 `026d2ba0` 已经是主链路 `codex/publish-main` 的祖先，因此已提交历史本身不再阻止清理。
+- 不能直接删除该 worktree：工作区仍有 34 个 tracked 文件未提交修改、87 个 untracked 文件；其中 83 个 untracked 文件在主链路不存在，4 个同路径文件存在但内容不同。
+- 风险文件包括本地运行状态与敏感状态路径，例如 `memory/gui_provider_settings/secrets.dev.json`；本轮没有 stash、提交或复制这些内容，避免把本地 secret/令牌状态写入 Git 历史。
+- 旧 worktree 未发现真实运行进程占用，查询到的匹配进程只是本轮审计命令本身；因此当前阻塞不是进程占用，而是未审阅的工作区内容。
+- 当前停止条件：需要用户或后续任务明确选择“迁移剩余独有文件”“脱敏归档证据文件”或“确认放弃旧工作区未提交内容”之一；在此之前不删除 `.worktrees/chatgpt-oauth-real-model-v1`，也不删除 `codex/chatgpt-oauth-real-model-v1` 分支。
