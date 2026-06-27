@@ -1420,4 +1420,11 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已保存学习副本到 `learning_agent/test/real_model_observability_v1/`，包含本轮新增/修改的前端组件、样式、测试、后端协议和 Direct SSE adapter 文件。
 - 自动化验证已通过：`npm --prefix apps/desktop test -- --run tests/modelCallStatus.test.tsx` 为 3 passed；`python -m pytest learning_agent\tests\test_gui_protocol_contract.py learning_agent\tests\test_gui_direct_oauth_sse_adapter.py::test_direct_sse_adapter_emits_runtime_path_and_streaming_events -q` 为 6 passed；桌面完整 `npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；相关后端 pytest 为 17 passed；`npm --prefix apps/desktop run lint`、`python -m py_compile learning_agent\app\gui_protocol.py learning_agent\app\gui_agent_adapter.py`、`npm --prefix apps/desktop run build` 均通过。
 - 真实可见 GUI smoke 已通过：使用隔离端口启动 `bridge=http://127.0.0.1:8891` 和 `renderer=http://127.0.0.1:5177` 的 OpenHarness Desktop；窗口可见、底部 composer 没有被新增状态槽挤坏，设置 -> 提供商页面可正常加载 OpenAI/GitHub Copilot/Google/OpenRouter/Vercel AI Gateway/自定义提供商列表，没有出现“提供商加载失败”；验收后已关闭 Electron、停止测试 bridge，并清理残留 renderer dev server。
-- 当前尚未合并入主链路：该 worktree 改动已收束且可进入下一步人工 diff review / staged merge；旧 `.worktrees/chatgpt-oauth-real-model-v1` 仍未删除，建议等本分支合并后再清理。
+- 当时尚未合并入主链路：该 worktree 改动已收束且进入人工 diff review / staged merge；实际合并结果见下一节，旧 `.worktrees/chatgpt-oauth-real-model-v1` 仍未删除，建议单独审计后再清理。
+
+## 2026-06-27 Real Model Observability V1 Mainline Merge
+
+- `codex/real-model-observability-v1` 已通过快进合并进入主链路 `codex/publish-main`，合并提交为 `4023652b Add real model observability status`；如果没有这条记录，后续排查会误以为该能力仍停留在隔离 worktree。
+- 主链路自动化验证已通过：`npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；Direct SSE/GUI protocol 相关 pytest 为 17 passed；`python learning_agent\scripts\assert_no_real_provider_secret_leaks.py` 输出 `Provider secret leak scan passed.`；`npm --prefix apps/desktop run lint`、`npm --prefix apps/desktop run build`、`python -m py_compile learning_agent\app\gui_protocol.py learning_agent\app\gui_agent_adapter.py` 均通过。
+- 主链路真实可见 GUI smoke 已通过：使用 `bridge=http://127.0.0.1:8891` 和 `renderer=http://127.0.0.1:5177` 启动 OpenHarness Desktop，底部 composer 布局正常，设置 -> 提供商页面成功加载 OpenAI/GitHub Copilot/Google/OpenRouter/Vercel AI Gateway/自定义提供商列表，没有出现“提供商加载失败”。
+- 验收清理已完成：主链路 smoke 后已关闭 Electron、停止 bridge，并确认 `8891` 与 `5177` 没有 listener；旧 `.worktrees/chatgpt-oauth-real-model-v1` 仍保留，建议下一步单独审计后再决定是否删除。
