@@ -1550,3 +1550,16 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 修复后自动化验证通过：一键启动脚本合同测试 `5 passed`；real harness 后端相关 pytest `19 passed`；`git diff --check` 通过；PowerShell parser 检查通过。
 - 修复后重新启动真实 GUI 并用 `computer-use` 肉眼验收：主消息区能看到旧失败和新完成记录，新记录状态为 `completed`；右侧事件流可见 `run_completed`、`message_completed`、`gui_turn_completed`，事件 payload 中 `runtime_path runtime=agent_harness`。
 - 已补 `.gitignore` 忽略根目录运行期 `debug_logs/`、`memory/gui_bridge/`、`memory/gui_provider_settings/`、`memory/harness/`、`memory/runtime/`，避免真实 GUI 验收生成的本地日志、会话状态和 provider 密钥缓存误入提交范围。
+
+## 2026-06-27 GUI Toolchain Reuse Fast Path
+
+- 按用户要求重新检查 CodeGraph 后确认：原代码已经有 GUI 权限请求、取消、active turn、重启恢复、`allowed_tool_names`、MCP registry、tool_search、bash、Computer Use 等门禁和工具模块，不需要重写。
+- 已按 TDD 增加红灯合同：`None` 必须表示复用 `LearningAgent` 原有全量工具策略；`workspace_write` 必须开放写文件/记忆工具；`full_access` 必须挂载 workspace `mcp_servers.json` 生成的 MCP registry；一键 Desktop 必须默认 Agent Mode。
+- 已修改 `DefaultHarnessGuiAgentAdapter` 与 `RealHarnessGuiAgentAdapter`：保留 `allowed_tool_names=None` 语义，并把可选 `mcp_tool_registry` 透传给 `LearningAgent`。
+- 已修改 `GuiRunManager._adapter_for_turn()`：`read_only` 映射为 `read_file/list_dir`；`workspace_write` 映射为 `read_file/list_dir/write_file/append_memory/read/write/edit/tool_search`；`full_access` 不加白名单并复用原有 shell/tool_search/MCP/Computer Use 策略。
+- 已修改一键启动脚本设置 `OPENHARNESS_GUI_AGENT_DEFAULT_MODE=agent`，普通 GUI prompt 默认进入真实 `agent_harness`，不再依赖 `__real_harness__` 隐藏标记。
+- 红绿验证已完成：新增合同先失败，再通过；当前 `test_gui_real_harness_adapter.py` 为 `8 passed`，一键启动脚本合同为 `5 passed`。
+- 真实 GUI 验收时发现并修复 HTTP 字段兼容 bug：脚本发送 `permission_mode=read_only` 曾被 `/v1/gui/messages` 回退成 `full_access`，根因为入口只读取前端 camelCase `permissionMode`；已新增 snake_case 合同测试并兼容 `provider_id/model_id/reasoning_effort/permission_mode`。
+- 已修正 `runtime_path.tools_enabled` 诊断口径：默认省略白名单仍显示无工具，显式 `allowed_tool_names=None` 的 `full_access` 会显示工具已启用，避免把“复用 core 原工具策略”误报成无工具。
+- 当前回归通过：real harness / lifecycle / event mapper / permission / cancellation / Computer Use guard 共 `26 passed`；一键 OAuth 启动脚本 `5 passed`；关键 Python 文件 `py_compile` 通过。
+- 真实可见 GUI + computer-use 验收已通过：一键启动后普通 `READ_ONLY_TOOL_TRACE` 请求在 `read_only` 模式下进入 `agent_harness`，事件证据为 `runtime_path permission_mode=read_only tools_enabled=true`，工具证据为 `read_file tool_started/tool_finished`，最终 GUI 可见 `READ_ONLY_TOOL_TRACE_OK` 与新 turn `turn_36a27ca74d3d45ea`。
