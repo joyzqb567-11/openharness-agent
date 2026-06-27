@@ -637,3 +637,11 @@
 - Fix: 停止旧 `8776` bridge PID `21488`，从当前 worktree 重新启动 `apps/desktop/scripts/start-backend.ps1`，并直接 POST `/v2/gui/browser/refresh-status` 验证新 bridge 返回 `ok=true`、`status=refreshed`。
 - Verification: 重新用 computer-use 点击真实 GUI 中的 `刷新` 后，主消息区出现 `completed` 刷新状态，右侧面板显示 `refresh-status · refreshed`；点击 `记录打开` 后，主消息区出现 `completed` 记录打开状态，右侧面板显示 `open · recorded`。
 - Guard: 后续新增 Browser/MCP/Shell 等任何 `/v2/gui/*` endpoint 后，真实 GUI 验收前必须先确认 `8776` 的当前 PID 是路由新增之后启动的进程，并用实际 HTTP 请求验证新路由已加载。
+
+## 2026-06-27 Desktop GUI Command Console Task 7 Window Selection Note
+
+- Closed risk: Task 7 真实 GUI 验收时，最初 accessibility tree 偶尔看不到 `命令` 页签，容易误判为前端没有渲染 CommandPanel。
+- Evidence: 直接请求 `http://127.0.0.1:5177/src/components/StatusInspector.tsx` 显示 served code 已包含 `commands` tab 和 `CommandPanel`；直接请求 `http://127.0.0.1:8776/v2/gui/commands` 返回 `ok=true`、`schema_version=2`；Computer Use `list_apps()` 同时看到多个 `OpenHarness Desktop` 窗口。
+- Root cause: 不是 Task 7 源码或 bridge 路由错误，而是长任务多次启动 Electron 后残留多个同名窗口/窗口句柄刷新不完整；需要选择包含当前 worktree 项目名和完整右侧页签的主窗口。
+- Fix: 重新 `list_apps()`，选择 `ai.opencode.desktop.dev` 中包含完整主界面的 `OpenHarness Desktop` 窗口，必要时用最新截图坐标点击右侧 `命令` 页签，而不是复用旧 element index。
+- Verification: 最终真实截图显示 `后台命令` 面板、`GUI acceptance command` 卡片、`[REDACTED]` 脱敏命令、tail 输出和禁用的 `停止` 按钮；证据保存于 `learning_agent/test/gui_command_console_task7/command_panel_visible_gui_20260627.jpg`。

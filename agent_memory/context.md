@@ -360,5 +360,8 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - Task 4 后端 `gui_browser_control.py` 复用 `build_status_snapshot`、`StatusEventStore` 和已有 browser status/debug 字段，前端 `BrowserPanel` 提供 provider 状态、活跃目标、URL 记录、刷新、Console、Network、Downloads、Replay 和最近动作结果。
 - Task 5 后端 `gui_mcp_control.py` 复用 `learning_agent.mcp.config.load_mcp_server_configs()` 和 `learning_agent.mcp.runtime.McpToolRegistry`，前端 `McpPanel` 展示 server/resource/prompt 只读清单和安全退化状态。
 - Task 6 后端 `build_gui_planning_payload()` 复用 `TaskRegistry`、`TeamRegistry`、`todo_state.json` 和工具 catalog，前端 `PlanningPanel` 展示 todo、任务、team、peer message、planning tool，并避免泄露 task output path 或 secret 字段。
+- Task 7 后端新增 `learning_agent/app/gui_execution.py`，复用 `TaskRegistry`、`TaskOutputStore` 和 `runtime.background_commands` 的持久记录，提供 `GET /v2/gui/commands`、`GET /v2/gui/commands/{id}/tail`、`POST /v2/gui/commands/{id}/stop`；当前 GUI bridge 没有原 `LearningAgent.background_commands` live process 句柄，所以 stop 端点诚实返回 `unavailable`，前端禁用停止按钮并显示原因，不能伪造停止成功。
+- Task 7 前端新增 `CommandPanel.tsx`，并通过 `guiClient.commands()`、`commandTail()`、`stopCommand()`、`AppShell` 首屏加载/轮询和 `StatusInspector` 的 `命令` 页签展示后台命令 id、脱敏命令文本、状态、cwd、exit code、tail 和 stop 能力边界。
 - Browser 工作台当前是安全 thin adapter：`open` 只记录 URL 打开请求，不绕过 agent/browser 权限策略直接控制网页；后续如果接入真实导航、回放或 CDP 操作，必须复用现有 browser permission/replay/automation 模块，而不是在 GUI 里重写平行浏览器 runtime。
 - 后续 Task 7+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。
+- Task 7 真实 GUI 验收补充：Electron 可能同时残留多个 `OpenHarness Desktop` 窗口；如果 accessibility tree 一度看不到新增页签，应先重新 `list_apps()` 并选择包含当前 worktree 项目名和完整页签的窗口，再判断代码问题。

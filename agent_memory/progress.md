@@ -1631,3 +1631,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `计划` 页签可见 `计划协作`、`18/18 tools`、`0 todos`、`0 active tasks`、`0 peers`、`0 pending messages`，并显示 Todos、Tasks、Teams、Peer Messages 的空状态。
 - 直接 HTTP 验证 `GET /v2/gui/planning` 返回 `ok=true`、`schema_version=2`、`tool_count=18`、`available_tool_count=18`、`status_degraded=false`，说明 GUI 面板读取的是当前 worktree 的真实规划协作状态。
 - 验收证据已保存到 `learning_agent/test/gui_planning_panel_task6/visible_gui_acceptance_20260627.md` 和 `planning_panel_visible_gui_20260627.png`；本轮改动源码已同步复制到 `learning_agent/test/gui_planning_panel_task6/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 7
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 7：新增 Background Command Console，把 GUI 右侧检查器接入后台命令持久状态。
+- 后端新增 `learning_agent/app/gui_execution.py`，复用 `TaskRegistry`、`TaskOutputStore` 和 `runtime.background_commands` 的持久记录，不重写平行 shell runtime；`gui_bridge.py` 新增 `GET /v2/gui/commands`、`GET /v2/gui/commands/{id}/tail`、`POST /v2/gui/commands/{id}/stop`。
+- 安全边界已覆盖：命令文本和 tail 输出会脱敏 `Authorization/Bearer/openai_api_key/api_key/--api-key/token=`；payload 不暴露 `output_path` 绝对路径，cwd 只显示 workspace 相对路径或 `[outside-workspace]`；stop 当前因缺少 live process 句柄而返回 `unavailable`。
+- 前端新增 `CommandPanel.tsx`，并扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `runtime-panels.css`，真实 GUI 现在有 `命令` 页签，展示命令数量、运行中数量、可停止数量、命令卡片、tail 和禁用 stop 原因。
+- 自动化验证已通过：`python -m py_compile learning_agent/app/gui_execution.py learning_agent/app/gui_bridge.py learning_agent/tests/test_gui_command_console_contract.py` 通过；`python -m unittest learning_agent.tests.test_gui_command_console_contract -v` 为 3 tests 通过；`npm --prefix apps/desktop run test -- commandPanel guiClient` 为 2 files / 21 tests 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `命令` 页签可见 `后台命令`、`GUI acceptance command`、脱敏后的 `[REDACTED]`、`visible command output line one/two` 和禁用的 `停止` 按钮。
+- 验收中发现 accessibility/window 句柄偶发指向旧 Electron 窗口或刷新不完整；已按 systematic debugging 确认 Vite served code 和 `/v2/gui/commands` endpoint 均来自当前 worktree，最终通过选择当前主窗口并坐标点击 `命令` 页签完成复验。
+- 验收证据已保存到 `learning_agent/test/gui_command_console_task7/visible_gui_acceptance_20260627.md` 和 `command_panel_visible_gui_20260627.jpg`；本轮改动源码已同步复制到 `learning_agent/test/gui_command_console_task7/source_copies/`。
