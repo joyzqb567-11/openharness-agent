@@ -182,6 +182,8 @@ $env:OPENHARNESS_GUI_BRIDGE_TOKEN = $BridgeToken
 $env:OPENHARNESS_OPENAI_AUTH_MODE = "real_browser"
 # 新增代码+DesktopOAuthOneClickLaunch：开启 Direct SSE 模型调用路径；如果没有这一行，消息窗口可能走慢路径或假回复。
 $env:OPENHARNESS_OPENAI_RUNTIME = "direct_sse"
+# 新增代码+RealHarnessOneClickLaunch：开启真实 GUI agent harness adapter；如果没有这一行，带 `__real_harness__` 的 GUI 验收会进入 adapter_unavailable 失败。
+$env:OPENHARNESS_GUI_AGENT_RUNTIME = "real"
 # 新增代码+DesktopOAuthOneClickLaunch：强制真实 OAuth token 使用 OS 加密存储；如果没有这一行，真实 token 保存会被安全门禁阻断。
 $env:OPENHARNESS_PROVIDER_SECRET_STORE = "os_encrypted"
 # 新增代码+DesktopOAuthOneClickLaunch：显式同意真实 OAuth 实验路径；如果没有这一行，后端会拒绝真实 OAuth。

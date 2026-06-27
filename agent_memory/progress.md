@@ -1539,3 +1539,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 已把规则十七升级为“真实终端和真实 GUI 场景验收强制门禁”：终端能力必须走用户可见终端入口，GUI 能力必须用 `computer-use` 观察和操作真实 OpenHarness Desktop 窗口。
 - 已修正技能名为 `systematic-debugging`，并明确验收发现 bug 或异常时必须先查根因、修复、重新执行真实可见验收。
 - 已补回规则二十二：简单 bug 直接修复，复杂 bug 必须给治本方案，不允许只给治标补丁。
+
+## 2026-06-27 Mainline Real GUI Harness Validation Fix
+
+- 按“先真实 GUI 验收再提交”的下一步执行：通过 `apps/desktop/scripts/start-openharness-desktop-oauth.ps1` 启动真实 OpenHarness Desktop，bridge 为 `http://127.0.0.1:8776`，Electron 窗口标题为 `OpenHarness Desktop`。
+- 首轮真实 GUI smoke 发现主链路 bug：发送 `__real_harness__ AGENT_HARNESS_SMOKE` 后，GUI 显示 `adapter_unavailable`，错误为 `Default harness GUI adapter is not enabled in V2-Core.`。
+- 已按 `systematic-debugging` 查清根因：`learning_agent/app/gui_bridge.py` 已支持 `OPENHARNESS_GUI_AGENT_RUNTIME=real` 打开真实 harness adapter，但一键 Desktop OAuth 启动脚本只设置了 `OPENHARNESS_OPENAI_RUNTIME=direct_sse`，没有打开 GUI agent runtime。
+- 已按 TDD 给 `learning_agent/tests/test_openharness_desktop_oauth_one_click_launch_scripts.py` 增加红灯断言，确认一键启动脚本必须包含 `OPENHARNESS_GUI_AGENT_RUNTIME` 和 `real`。
+- 已修复 `apps/desktop/scripts/start-openharness-desktop-oauth.ps1`：启动真实 OAuth/Direct SSE Desktop 时同步设置 `$env:OPENHARNESS_GUI_AGENT_RUNTIME = "real"`，并把学习副本同步到 `learning_agent/test/openharness_desktop_oauth_one_click_launch_20260627/source_copies/`。
+- 修复后自动化验证通过：一键启动脚本合同测试 `5 passed`；real harness 后端相关 pytest `19 passed`；`git diff --check` 通过；PowerShell parser 检查通过。
+- 修复后重新启动真实 GUI 并用 `computer-use` 肉眼验收：主消息区能看到旧失败和新完成记录，新记录状态为 `completed`；右侧事件流可见 `run_completed`、`message_completed`、`gui_turn_completed`，事件 payload 中 `runtime_path runtime=agent_harness`。
+- 已补 `.gitignore` 忽略根目录运行期 `debug_logs/`、`memory/gui_bridge/`、`memory/gui_provider_settings/`、`memory/harness/`、`memory/runtime/`，避免真实 GUI 验收生成的本地日志、会话状态和 provider 密钥缓存误入提交范围。
