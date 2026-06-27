@@ -1410,3 +1410,14 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 验收期间按 systematic debugging 发现并修复真实协议 bug：assistant 历史消息不能以 `input_text` 发送到 ChatGPT Codex endpoint，必须使用 `output_text`；修复后最小真实 HTTP SSE 诊断从 HTTP 400 变为 HTTP 200，并在真实 GUI 中复测通过。
 - 学习副本已保存到 `learning_agent/test/gui_context_compact_v4/` 根目录和 `learning_agent/test/gui_context_compact_v4/source_copies/`，包含 `gui_context.py`、`gui_agent_adapter.py`、`gui_bridge.py`、`gui_protocol.py`、`chatgpt_codex_sse.py` 和相关测试文件。
 - 最终 release gate 已通过：上下文/Direct SSE 相关 `pytest` 为 25 passed；provider/model runtime 相关 `pytest` 为 13 passed；`py_compile` 通过；`assert_no_real_provider_secret_leaks.py` 输出 `Provider secret leak scan passed.`；`npm --prefix apps/desktop test -- --run` 为 18 files / 79 tests passed；`npm --prefix apps/desktop run lint` 通过；`npm --prefix apps/desktop run build` 成功生成 production renderer。
+
+## 2026-06-27 Real Model Observability V1 Safe Worktree Progress
+
+- 已按“只迁移安全可并入主链路的真实模型状态观测能力”创建隔离 worktree：`H:\codexworkplace\sofeware\OpenHarness-main\.worktrees\real-model-observability-v1`，分支为 `codex/real-model-observability-v1`，基线为 `codex/publish-main`。
+- 已先写红灯测试并确认失败原因符合预期：前端 `modelCallStatus.test.tsx` 最初因缺少 `ModelCallStatus` 失败；后端协议测试最初因 `model_call_started` 未进 GUI V2 白名单失败；Direct SSE adapter 测试最初因缺少 `model_call_started/model_first_delta/model_call_completed` 失败。
+- 已新增 `ModelCallStatus` 组件，把 `model_call_started`、`model_call_status`、`model_first_delta`、`model_call_completed`、`model_call_failed` 渲染为底部 composer 小状态条和右侧状态面板摘要，状态只展示模型名、阶段和耗时，不暴露 OAuth token 或请求体。
+- 已把上述事件加入 GUI V2 协议白名单，并让 Direct SSE 真实路径在开始、首字、完成和失败时发出模型调用状态事件；原有 `runtime_path`、`message_delta`、`direct_sse_completed`、`message_completed` 事件继续保留。
+- 已保存学习副本到 `learning_agent/test/real_model_observability_v1/`，包含本轮新增/修改的前端组件、样式、测试、后端协议和 Direct SSE adapter 文件。
+- 自动化验证已通过：`npm --prefix apps/desktop test -- --run tests/modelCallStatus.test.tsx` 为 3 passed；`python -m pytest learning_agent\tests\test_gui_protocol_contract.py learning_agent\tests\test_gui_direct_oauth_sse_adapter.py::test_direct_sse_adapter_emits_runtime_path_and_streaming_events -q` 为 6 passed；桌面完整 `npm --prefix apps/desktop test -- --run` 为 19 files / 82 tests passed；相关后端 pytest 为 17 passed；`npm --prefix apps/desktop run lint`、`python -m py_compile learning_agent\app\gui_protocol.py learning_agent\app\gui_agent_adapter.py`、`npm --prefix apps/desktop run build` 均通过。
+- 真实可见 GUI smoke 已通过：使用隔离端口启动 `bridge=http://127.0.0.1:8891` 和 `renderer=http://127.0.0.1:5177` 的 OpenHarness Desktop；窗口可见、底部 composer 没有被新增状态槽挤坏，设置 -> 提供商页面可正常加载 OpenAI/GitHub Copilot/Google/OpenRouter/Vercel AI Gateway/自定义提供商列表，没有出现“提供商加载失败”；验收后已关闭 Electron、停止测试 bridge，并清理残留 renderer dev server。
+- 当前尚未合并入主链路：该 worktree 改动已收束且可进入下一步人工 diff review / staged merge；旧 `.worktrees/chatgpt-oauth-real-model-v1` 仍未删除，建议等本分支合并后再清理。
