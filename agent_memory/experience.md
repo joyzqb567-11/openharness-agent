@@ -175,3 +175,9 @@ Computer Use complex GUI tasks must not rely on primitive tool-loop convergence.
 - 经验：`.bat` 文件即使第一眼看起来只是 `REM 中文注释`，在 Windows 默认代码页下也可能把 UTF-8 中文字节误解析成命令分隔符，导致双击入口还没进入 PowerShell 就失败。
 - 做法：需要保留中文注释的 bat，第一条可执行命令必须是 ASCII 的 `@echo off`，第二条必须是 ASCII 的 `chcp 65001 >nul`，中文注释和中文 echo 只能放在这之后。
 - 门禁：后续一键启动 bat 必须有测试检查 `chcp 65001 >nul` 出现在任何非 ASCII 文本之前；不能只靠 PowerShell 脚本测试，因为 bug 发生在进入 PowerShell 之前。
+
+## 2026-06-27 Desktop GUI 验收经验：先确认固定端口属于当前 worktree
+
+- 经验：当代码和单元测试都通过，但真实 OpenHarness Desktop GUI 看不到新页签、新按钮，或点击后返回 `未知 GUI bridge POST 路径`，第一怀疑对象不是新代码，而是固定端口 `8776/5177` 上残留了旧 bridge 或旧 renderer。
+- 做法：每个 GUI 任务验收前先查 `Get-NetTCPConnection -LocalPort 8776,5177`，再查 PID 命令行是否包含当前 `.worktrees/gui-toolchain-control-center`；必要时直接请求新增 `/v2/gui/*` endpoint 验证当前 bridge 已加载新路由。
+- 门禁：只有确认真实窗口连接的是当前 worktree 的 bridge/renderer 后，computer-use 的肉眼验收结果才可作为功能结论；否则只能算环境诊断，不能据此判断代码实现失败。

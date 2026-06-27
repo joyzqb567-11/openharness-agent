@@ -350,3 +350,11 @@ Task 14 已建立 V2 release gate 边界：`apps/desktop/scripts/release-gate.ps
 - 只读工具轨迹当前只开放安全白名单：`OPENHARNESS_GUI_AGENT_READ_ONLY_TOOLS=enabled` 时允许 `read_file/list_dir` 级别工具；写工具、shell、MCP、Computer Use 默认不暴露。
 - Computer Use Phase 6 当前选择安全默认：GUI 面板可见锁、急停、权限模式和 provider 状态，但 real harness 默认不暴露 `mcp__computer-use__*` 工具；模型伪造桌面点击工具调用会被 allowed_tools 拒绝，并留下可见工具拒绝轨迹。
 - 真实可见 GUI 验收已用 `computer-use` 完成并保存证据：`learning_agent/test/real_agent_harness_adapter_v2/visible_gui_acceptance_20260627.json` 与 `learning_agent/test/gui_agent_harness_computer_use/computer_use_visible_gui_evidence_20260627.json`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Context
+
+- 当前 GUI 工具链控制中心在 `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支开发；已完成 Task 1 工具链清单、Task 2 Harness 控制、Task 3 Computer Use 工作台。
+- Task 1 后端 `gui_toolchain.py` 复用 `learning_agent.tools.catalog.build_builtin_tool_catalog()`，前端通过 `ToolchainPanel` 在右侧 `链路` 页签展示工具分组和复用来源。
+- Task 2 后端 `gui_harness_controls.py` 复用既有 `HarnessStore`、`HarnessRun`、`StatusEventStore` 和 `_harness_store_for_workspace`，前端 `HarnessPanel` 提供 `暂停`、`恢复`、`停止`、`Checkpoint` 控制。
+- Task 3 后端 `gui_computer_use.py` 复用既有 Computer Use mode/session/status 模块，前端 `ComputerUsePanel` 提供 `申请权限`、`观察`、`中止`，真实 GUI 验收确认三个动作均不触发低层桌面事件。
+- 后续 Task 4+ 验收前必须先确认 `8776` bridge 和 `5177` renderer 来自当前 worktree；如果新增路由在 GUI 中返回未知路径，优先重启当前 worktree bridge，再做代码级排查。

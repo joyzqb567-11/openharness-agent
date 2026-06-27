@@ -1583,3 +1583,15 @@ Task 7 文档与项目记忆更新已完成。Task 8 自动化验证已通过：
 - 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `任务` 页签可见 `Visible GUI acceptance for real Harness controls`，面板展示当前目标、队列、Checkpoints，以及 `暂停`、`恢复`、`停止`、`Checkpoint` 按钮。
 - 真实 GUI 操作验收已通过：点击 `Checkpoint` 后，GUI 显示 `checkpointed · 手动 checkpoint 已写入。`，当前目标和 Checkpoints 列表同步追加 `Desktop GUI checkpoint 2026-06-27T14:57:46Z`。
 - 验收证据已保存到 `learning_agent/test/gui_harness_controls_task2/visible_gui_acceptance_20260627.md`；本轮改动源码将同步复制到 `learning_agent/test/gui_harness_controls_task2/source_copies/`。
+
+## 2026-06-27 Desktop GUI Toolchain Control Center Task 3
+
+- 已在隔离 worktree `.worktrees/gui-toolchain-control-center` 的 `codex/gui-toolchain-control-center` 分支执行蓝图 Task 3：把 `ComputerUsePanel` 从状态摘要升级为可见、可授权、可观察、可中止的 Computer Use 工作台。
+- 后端新增 `learning_agent/app/gui_computer_use.py`，复用既有 `ComputerUseModeSessionStore`、`request_computer_use_access`、`ComputerUseSessionContextStore`、`StatusEventStore` 和 `build_status_snapshot`，没有重写平行 Computer Use runtime。
+- `learning_agent/app/gui_bridge.py` 已把 `/v2/gui/computer-use/request-access`、`/observe`、`/abort` 接到真实 thin adapter，并让 runtime panels 的 `computer_use` 区块直接返回工作台 payload。
+- 前端已扩展 `guiClient.ts`、`AppShell.tsx`、`StatusInspector.tsx` 和 `ComputerUsePanel.tsx`，真实 GUI 现在显示 `申请权限`、`观察`、`中止`、目标状态、锁状态、急停状态、允许动作、最近观察和最近动作。
+- 自动化验证已通过：`python -m py_compile learning_agent/app/gui_computer_use.py learning_agent/app/gui_bridge.py` 通过；`python -m unittest learning_agent.tests.test_gui_computer_use_workbench_contract -v` 通过；`python -m unittest learning_agent.tests.test_gui_browser_computer_panel_contract -v` 通过；`npm --prefix apps/desktop run test -- computerUsePanel guiClient` 通过；`npm --prefix apps/desktop run lint` passed；`npm --prefix apps/desktop run build` passed。
+- 真实 GUI 验收已用 computer-use 完成：OpenHarness Desktop 右侧 `浏览器` 页签可见 Computer Use 工作台，`申请权限`、`观察`、`中止` 三个按钮均可见，点击后主消息区出现对应系统结果。
+- 真实 GUI 操作验收已通过：点击 `观察` 后面板进入 `observe`，点击 `申请权限` 后显示只读观察权限申请成功，点击 `中止` 后模式进入 `stopped`；三个动作均显示 `低层事件：0`，说明没有触发鼠标、键盘或窗口控制。
+- 验收期间发现旧 bridge 占用 `8776` 会让新按钮命中旧路由表；已按 systematic debugging 查明根因并重启当前 worktree bridge，重新验收通过。
+- 验收证据已保存到 `learning_agent/test/gui_computer_use_workbench_task3/visible_gui_acceptance_20260627.md`；本轮改动源码已同步复制到 `learning_agent/test/gui_computer_use_workbench_task3/source_copies/`。

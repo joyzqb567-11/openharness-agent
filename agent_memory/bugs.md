@@ -619,3 +619,12 @@
 - Evidence: 本轮在可见 GUI 验收前先确认并停止旧 `5177` renderer PID `29776`，随后从当前 worktree 重启 `8776` bridge 与 Electron renderer；computer-use 才能在 `任务` 页签看到 `暂停`、`恢复`、`停止`、`Checkpoint`。
 - Root cause: 这是长任务多次重启 GUI 时的本地运行环境残留，不是 Task 2 源码 bug；固定端口 `8776/5177` 被旧进程占用时，新窗口可能仍显示旧 bundle 或连旧 bridge。
 - Guard: 后续每个 GUI 任务验收前，先确认 `8776`、`5177` 的 owner 来自当前 `.worktrees/gui-toolchain-control-center`，再判断真实 GUI 现象；如果端口 owner 不一致，先重启当前 worktree bridge/renderer，再做代码级 systematic debugging。
+
+## 2026-06-27 Desktop GUI Computer Use Workbench Task 3 Stale Bridge Route
+
+- Closed risk: Task 3 真实 GUI 验收时，点击 Computer Use `观察` 按钮后，GUI 显示 `Computer Use 观察请求失败：GuiClientError: 未知 GUI bridge POST 路径。`
+- Evidence: `Get-NetTCPConnection -LocalPort 8776 -State Listen` 显示端口 owner 为旧 Python bridge PID `27712`；该进程命令行虽然指向当前 worktree，但启动时间早于 Task 3 路由新增，所以内存中的 `GuiBridgeHandler` 路由表没有 `/v2/gui/computer-use/observe`。
+- Root cause: `visible-gui-smoke.ps1 -Launch` 在固定端口已被占用时无法替换旧 bridge，真实 Electron 窗口仍连到旧后端；这是本地运行进程残留，不是前端按钮或 `gui_computer_use.py` contract 代码错误。
+- Fix: 停止旧 `8776` bridge PID `27712`，从当前 worktree 重新启动 `apps/desktop/scripts/start-backend.ps1`，随后直接 POST `/v2/gui/computer-use/observe` 返回 `ok=true`、`action=observe`、`low_level_event_count=0`。
+- Verification: 重新用 computer-use 点击真实 GUI 中的 `观察`、`申请权限`、`中止` 后均显示成功结果；面板模式按预期变为 `observe` 和 `stopped`，并且三个动作都显示 `低层事件：0`。
+- Guard: 后续每个新增 `/v2/gui/*` 路由在真实 GUI 验收前，先用 `Invoke-RestMethod` 或浏览器端实际请求确认当前 `8776` bridge 已加载该路由；若返回 404/未知路径，优先检查端口 owner 和进程启动时间，再判断代码 bug。
